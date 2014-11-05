@@ -2,6 +2,7 @@ package com.zik.faro.api.profile;
 
 
 import com.zik.faro.commons.Constants;
+import com.zik.faro.commons.ParamValidation;
 import com.zik.faro.data.user.Address;
 import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.data.user.FaroUserName;
@@ -14,6 +15,7 @@ public class ProfileHandler {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public FaroUser getProfile(@QueryParam(Constants.SIGNATURE_QUERY_PARAM) final String signature){
+        ParamValidation.validateSignature(signature);
         return new FaroUser("rwaters@gmail.com",
                 new FaroUserName("Roger","wAters"),
                 "rwaters@splitwise.com",
@@ -23,7 +25,8 @@ public class ProfileHandler {
 
     @PUT
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public String getProfileJson(FaroUser faroUser){
+    public String getProfileJson(FaroUser faroUser, @QueryParam(Constants.SIGNATURE_QUERY_PARAM) final String signature){
+        ParamValidation.validateSignature(signature);
         return faroUser.userName.firstName;
     }
 }
