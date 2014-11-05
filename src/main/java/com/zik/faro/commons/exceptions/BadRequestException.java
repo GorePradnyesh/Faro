@@ -1,4 +1,4 @@
-package com.zik.faro.api.exceptions;
+package com.zik.faro.commons.exceptions;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
