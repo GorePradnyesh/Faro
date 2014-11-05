@@ -23,4 +23,8 @@ public class FaroUserName {
         this(firstName, "", lastName, "", "");
     }
 
+    private FaroUserName(){
+        this(null, null, null, null, null);
+    }
+
 }

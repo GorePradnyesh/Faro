@@ -14,4 +14,8 @@ public class Address {
         State = state;
         this.zip = zip;
     }
+
+    private Address(){
+        this(0, null, null, null, 0);
+    }
 }
