@@ -5,15 +5,28 @@ package com.zik.faro.commons;
  */
 public final class Constants {
 
-    public static final String HTTP_OK = "OK";
+    public static final String HTTP_OK                                          = "OK";
 
-    public static final String SIGNATURE_QUERY_PARAM = "Signature";
-    public static final String FARO_USER_ID_PARAM = "userId";
+    //----- Query String parameters ----- //
+    public static final String SIGNATURE_QUERY_PARAM                            = "Signature";
+    public static final String FARO_USER_ID_PARAM                               = "userId";
 
-    public static final String EVENT_ID = "eventID";
+
+    //----- Path Parameters ----//
+    public static final String EVENT_ID_PATH_PARAM                              = "eventId";
+    public static final String EVENT_ID_PATH_PARAM_STRING                       = "{" + EVENT_ID_PATH_PARAM +"}";
 
 
-    private static String getPathParamString(final String paramName){
+    //---- Path Constants ---- //
+    public static final String EXPENSE_ID_PATH_CONST                            = "expenseIds";
+    public static final String CREATE_EXPENSE_GROUP_PATH_CONST                  = "createExpenseGroup";
+    public static final String FRIENDS_PATH_CONST                               = "friends";
+    public static final String INVITE_PATH_CONST                                = "invite";
+    public static final String REMOVE_PATH_CONST                                = "remove";
+    public static final String PROFILE_PATH_CONST                               = "profile";
+    public static final String EVENT_ID_PATH_CONST                              = "event";
+
+    public static String getPathParamString(final String paramName){
         return String.format("{%s}", paramName);
     }
 

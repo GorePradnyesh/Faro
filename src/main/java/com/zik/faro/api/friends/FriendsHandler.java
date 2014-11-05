@@ -13,16 +13,16 @@ import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
 import java.util.List;
 
-@Path("friends")
+@Path(Constants.FRIENDS_PATH_CONST)
 public class FriendsHandler {
 
-    @Path("invite")
+    @Path(Constants.INVITE_PATH_CONST)
     @POST
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN, MediaType.TEXT_HTML})
     public JResponse<String> inviteFriends(@QueryParam(Constants.SIGNATURE_QUERY_PARAM) final String signature,
                               @QueryParam(Constants.FARO_USER_ID_PARAM) final String userId){
         ParamValidation.validateSignature(signature);
-        ParamValidation.genericQueryParamValidations(userId, "userId");
+        ParamValidation.genericParamValidations(userId, "userId");
         return JResponse.ok(Constants.HTTP_OK).build();
     }
 
@@ -39,13 +39,13 @@ public class FriendsHandler {
         return JResponse.ok(friendList).build();
     }
 
-    @Path("remove")
+    @Path(Constants.REMOVE_PATH_CONST)
     @POST
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN, MediaType.TEXT_HTML})
     public JResponse<String> removeUser(@QueryParam(Constants.SIGNATURE_QUERY_PARAM) final String signature,
                            @QueryParam(Constants.FARO_USER_ID_PARAM) final String userId){
         ParamValidation.validateSignature(signature);
-        ParamValidation.genericQueryParamValidations(userId, "userId");
+        ParamValidation.genericParamValidations(userId, "userId");
         return JResponse.ok(Constants.HTTP_OK).build();
     }
 

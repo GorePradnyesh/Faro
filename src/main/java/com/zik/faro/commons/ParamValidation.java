@@ -11,9 +11,15 @@ public class ParamValidation {
         }
     }
 
-    public static void genericQueryParamValidations(final String queryParam, final String queryParamName){
-        if(queryParam == null || queryParam.isEmpty()){
-            throw new BadRequestException(String.format("non-empty Query param %s needed", queryParamName));
+    public static void genericParamValidations(final String param, final String queryParamName){
+        if(param == null || param.isEmpty()){
+            throw new BadRequestException(String.format("required : non-empty param:%s", queryParamName));
+        }
+    }
+
+    public static void genericParamValidations(final Object param, final String queryParamName){
+        if(param == null){
+            throw new BadRequestException(String.format("required : non-empty param:%s", queryParamName));
         }
     }
 
