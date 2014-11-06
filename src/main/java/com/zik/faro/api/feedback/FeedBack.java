@@ -4,12 +4,9 @@ import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.ParamValidation;
 import com.zik.faro.commons.exceptions.BadRequestException;
 
-
-import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
 
 @Path(Constants.FEEDBACK_PATH_CONST)
 public class FeedBack {
