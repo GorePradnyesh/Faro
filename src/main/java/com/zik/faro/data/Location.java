@@ -6,11 +6,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class Location {
     public final String locationName;
-    public final Location location;
+    public final GeoPosition position;
 
-    public Location(String locationName, Location location) {
+    public Location(String locationName, GeoPosition position) {
         this.locationName = locationName;
-        this.location = location;
+        this.position = position;
     }
 
     public Location() {

@@ -5,9 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class GeoPosition {
     public final double latitude;
-    // TODO: What about N/S
     public final double longitude;
-    // TODO: What about E/W
 
     // TODO: double accuracy?
     // TODO: altitude; ?
