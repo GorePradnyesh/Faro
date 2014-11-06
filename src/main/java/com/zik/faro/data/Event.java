@@ -13,7 +13,7 @@ public class Event {
     private boolean controlFlag;
     private ExpenseGroup expenseGroup;
     private Location location;
-
+    private ItemStatus status;
 
     public Event(final String eventName, final DateOffset startDate, final DateOffset endDate,
                  final boolean controlFlag, final ExpenseGroup expenseGroup, final Location location) {
@@ -24,11 +24,13 @@ public class Event {
         this.controlFlag = controlFlag;
         this.expenseGroup = expenseGroup;
         this.location = location;
+        this.status = ItemStatus.OPEN;
     }
 
     public Event(final String eventName){
         this.eventId = UUID.randomUUID().toString();
         this.eventName = eventName;
+        this.status = ItemStatus.OPEN;
     }
 
     private Event(){
@@ -78,5 +80,9 @@ public class Event {
 
     public void setLocation(Location location) {
         this.location = location;
+    }
+
+    public void markEventClosed(){
+        this.status = ItemStatus.CLOSE;
     }
 }

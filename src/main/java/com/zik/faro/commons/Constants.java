@@ -28,6 +28,10 @@ public final class Constants {
     public static final String EVENT_ID_PATH_CONST                              = "/event";
     public static final String FEEDBACK_PATH_CONST                              = "/feedback";
     public static final String EVENT_DETAILS_PATH_CONST                         = "/details";
+    public static final String EVENT_INVITEES_PATH_CONST                        = "/invitees";
+    public static final String EVENT_DISABLE_CONTROL_PATH_CONST                 = "/disableControl";
+    public static final String EVENT_REMOVE_ATTENDEE_PATH_CONST                 = "/removeAttendee";
+    public static final String EVENT_CREATE_PATH_CONST                          = "/create";
 
 
     public static String getPathParamString(final String paramName){

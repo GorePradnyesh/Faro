@@ -2,13 +2,16 @@ package com.zik.faro.api.event;
 
 import com.sun.jersey.api.JResponse;
 import com.zik.faro.api.responder.MinUser;
-import com.zik.faro.commons.Constants;
+import static com.zik.faro.commons.Constants.*;
+
+import com.zik.faro.api.responder.MinUserStatus;
 import com.zik.faro.commons.ParamValidation;
 import com.zik.faro.data.DateOffset;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.Location;
 import com.zik.faro.data.expense.ExpenseGroup;
 import com.zik.faro.data.user.FaroUserName;
+import com.zik.faro.data.user.InviteStatus;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -16,17 +19,17 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM;
 
-@Path(Constants.EVENT_ID_PATH_CONST + "/" + Constants.EVENT_ID_PATH_PARAM_STRING)
+@Path(EVENT_ID_PATH_CONST + "/" + EVENT_ID_PATH_PARAM_STRING)
 public class EventHandler {
 
-    @Path(Constants.EVENT_DETAILS_PATH_CONST)
+    @Path(EVENT_DETAILS_PATH_CONST)
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Event getEventDetails(@QueryParam(Constants.SIGNATURE_QUERY_PARAM) final String signature,
+    public Event getEventDetails(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
                                  @PathParam(EVENT_ID_PATH_PARAM) final String eventId){
         ParamValidation.validateSignature(signature);
+        //TODO: validate eventIDs
 
         //TODO: replace the dummy static code below with the actual calls
         Event dummyEvent = new Event("Lake Shasta "+ eventId,
@@ -37,5 +40,50 @@ public class EventHandler {
                 new Location("Lake Shasta"));
         return dummyEvent;
     }
+
+    @Path(EVENT_INVITEES_PATH_CONST)
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public MinUserStatus getEventInvitees(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
+                                            @PathParam(EVENT_ID_PATH_PARAM) final String eventId){
+        ParamValidation.validateSignature(signature);
+        //TODO: validate eventIDs
+
+        //TODO: replace the dummy static code below with the actual calls
+        MinUserStatus userStatus = new MinUserStatus(eventId);
+        userStatus.addUserStatus(new MinUser(new FaroUserName("David", "Gilmour"), "dg@gmail.com"), InviteStatus.ACCEPTED);
+        userStatus.addUserStatus(new MinUser(new FaroUserName("Roger", "Waters"), "rw@gmail.com"), InviteStatus.INVITED);
+        return userStatus;
+    }
+
+    @Path(EVENT_DISABLE_CONTROL_PATH_CONST)
+    @POST
+    public String disableEventControl(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
+                                      @PathParam(EVENT_ID_PATH_PARAM) final String eventId){
+        ParamValidation.validateSignature(signature);
+        //TODO: validate eventIDs
+
+        //TODO: replace the dummy static code below with the actual calls
+        return HTTP_OK;
+    }
+
+    @Path(EVENT_REMOVE_ATTENDEE_PATH_CONST)
+    @POST
+    public String removeAttendee(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
+                                 @QueryParam(FARO_USER_ID_PARAM) final String userId){
+        ParamValidation.validateSignature(signature);
+        ParamValidation.genericParamValidations(userId, "userId");
+        //TODO: replace the dummy static code below with the actual calls
+        return HTTP_OK;
+    }
+
+    @Path(EVENT_CREATE_PATH_CONST)
+    @PUT
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public String createEvent(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature){
+        return null;//TODO: partial APIs
+    }
+
+
 
 }
