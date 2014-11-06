@@ -13,7 +13,17 @@ public class Location {
         this.position = position;
     }
 
-    public Location() {
-        this(null, null);
+    public Location(String locationName){
+        this.locationName = locationName;
+        this.position = null;
+    }
+
+    public Location(GeoPosition position){
+        this.position = position;
+        this.locationName = null;
+    }
+
+    private Location() {
+        this(null, null); // to satisfy JAXB
     }
 }

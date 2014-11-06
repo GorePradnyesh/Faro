@@ -12,14 +12,14 @@ import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
 import java.util.List;
 
-@Path(Constants.EVENT_ID_PATH_CONST)
+@Path(Constants.EVENT_ID_PATH_CONST + "/" + Constants.EVENT_ID_PATH_PARAM_STRING)
 public class ExpenseHandler {
-    @Path(Constants.EVENT_ID_PATH_PARAM_STRING + "/" + Constants.EXPENSE_ID_PATH_CONST)
+    @Path(Constants.EXPENSE_ID_PATH_CONST)
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public JResponse<List<MinUser>> getExpenseIds(
-                            @QueryParam(Constants.SIGNATURE_QUERY_PARAM) final String signature,
-                            @PathParam(Constants.EVENT_ID_PATH_PARAM) final String eventId)
+            @QueryParam(Constants.SIGNATURE_QUERY_PARAM) final String signature,
+            @PathParam(Constants.EVENT_ID_PATH_PARAM) final String eventId)
     {
         ParamValidation.validateSignature(signature);
         // TODO: ensure that eventId is valid
@@ -27,8 +27,8 @@ public class ExpenseHandler {
         final List<MinUser> friendList = new ArrayList<>();
 
         //TODO: Replace below dummy static response with actual code
-        friendList.add(new MinUser(new FaroUserName("David","Gilmour"),"dg@dgdg.com", "dg@splitwise.com"));
-        friendList.add(new MinUser(new FaroUserName("Roger","Waters"),"rw@dgdg.com", "rw@splitwise.com"));
+        friendList.add(new MinUser(new FaroUserName("David","Gilmour"+eventId),"dg@dgdg.com", "dg@splitwise.com"));
+        friendList.add(new MinUser(new FaroUserName("Roger","Waters"+eventId),"rw@dgdg.com", "rw@splitwise.com"));
 
         return JResponse.ok(friendList).build();
     }
@@ -44,7 +44,7 @@ public class ExpenseHandler {
     </expenseGroup>
     */
 
-    @Path(Constants.EVENT_ID_PATH_PARAM_STRING + "/" + Constants.CREATE_EXPENSE_GROUP_PATH_CONST)
+    @Path(Constants.CREATE_EXPENSE_GROUP_PATH_CONST)
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
