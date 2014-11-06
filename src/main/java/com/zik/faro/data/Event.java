@@ -31,6 +31,10 @@ public class Event {
         this.eventName = eventName;
     }
 
+    private Event(){
+        this(null); // To satisfy JAXB
+    }
+
 
     public String getEventName() {
         return eventName;

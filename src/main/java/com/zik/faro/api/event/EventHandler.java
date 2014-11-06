@@ -16,23 +16,26 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-//@Path(Constants.EVENT_ID_PATH_CONST)
+import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM;
+
+@Path(Constants.EVENT_ID_PATH_CONST + "/" + Constants.EVENT_ID_PATH_PARAM_STRING)
 public class EventHandler {
 
-    /*@Path(Constants.EVENT_ID_PATH_PARAM_STRING + "/" + Constants.EVENT_DETAILS_PATH_CONST)
+    @Path(Constants.EVENT_DETAILS_PATH_CONST)
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Event getEventDetails(@QueryParam(Constants.SIGNATURE_QUERY_PARAM) final String signature){
+    public Event getEventDetails(@QueryParam(Constants.SIGNATURE_QUERY_PARAM) final String signature,
+                                 @PathParam(EVENT_ID_PATH_PARAM) final String eventId){
         ParamValidation.validateSignature(signature);
 
         //TODO: replace the dummy static code below with the actual calls
-        Event dummyEvent = new Event("Lake Shasta",
+        Event dummyEvent = new Event("Lake Shasta "+ eventId,
                 new DateOffset(new Date(), 60 * 1000),
                 new DateOffset(new Date(), 2 * 60* 1000),
                 false,
                 new ExpenseGroup("Lake Shasta", "shasta123"),
                 new Location("Lake Shasta"));
         return dummyEvent;
-    }*/
+    }
 
 }
