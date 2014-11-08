@@ -25,7 +25,7 @@ public final class Constants {
     public static final String INVITE_PATH_CONST                                = "/invite";
     public static final String REMOVE_PATH_CONST                                = "/remove";
     public static final String PROFILE_PATH_CONST                               = "/profile";
-    public static final String EVENT_ID_PATH_CONST                              = "/event";
+    public static final String EVENT_PATH_CONST                                 = "/event";
     public static final String FEEDBACK_PATH_CONST                              = "/feedback";
     public static final String EVENT_DETAILS_PATH_CONST                         = "/details";
     public static final String EVENT_INVITEES_PATH_CONST                        = "/invitees";

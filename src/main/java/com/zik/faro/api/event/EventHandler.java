@@ -1,6 +1,5 @@
 package com.zik.faro.api.event;
 
-import com.sun.jersey.api.JResponse;
 import com.zik.faro.api.responder.MinUser;
 import static com.zik.faro.commons.Constants.*;
 
@@ -15,12 +14,10 @@ import com.zik.faro.data.user.InviteStatus;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 
-@Path(EVENT_ID_PATH_CONST + "/" + EVENT_ID_PATH_PARAM_STRING)
+@Path(EVENT_PATH_CONST + "/" + EVENT_ID_PATH_PARAM_STRING)
 public class EventHandler {
 
     @Path(EVENT_DETAILS_PATH_CONST)
