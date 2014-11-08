@@ -1,9 +1,9 @@
 package com.zik.faro.api.event;
 
+import com.zik.faro.api.responder.InviteeList;
 import com.zik.faro.api.responder.MinUser;
 import static com.zik.faro.commons.Constants.*;
 
-import com.zik.faro.api.responder.MinUserStatus;
 import com.zik.faro.commons.ParamValidation;
 import com.zik.faro.data.DateOffset;
 import com.zik.faro.data.Event;
@@ -41,13 +41,13 @@ public class EventHandler {
     @Path(EVENT_INVITEES_PATH_CONST)
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public MinUserStatus getEventInvitees(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
+    public InviteeList getEventInvitees(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
                                             @PathParam(EVENT_ID_PATH_PARAM) final String eventId){
         ParamValidation.validateSignature(signature);
         //TODO: validate eventIDs
 
         //TODO: replace the dummy static code below with the actual calls
-        MinUserStatus userStatus = new MinUserStatus(eventId);
+        InviteeList userStatus = new InviteeList(eventId);
         userStatus.addUserStatus(new MinUser(new FaroUserName("David", "Gilmour"), "dg@gmail.com"), InviteStatus.ACCEPTED);
         userStatus.addUserStatus(new MinUser(new FaroUserName("Roger", "Waters"), "rw@gmail.com"), InviteStatus.INVITED);
         return userStatus;

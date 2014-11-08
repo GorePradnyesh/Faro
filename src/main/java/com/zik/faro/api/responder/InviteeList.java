@@ -7,15 +7,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 @XmlRootElement
-public class MinUserStatus {
+public class InviteeList {
     public final String eventID;
     public final Map<MinUser, InviteStatus> userStatusMap = new HashMap<>();
 
-    public MinUserStatus(final String eventID){
+    public InviteeList(final String eventID){
         this.eventID = eventID;
     }
 
-    private MinUserStatus(){
+    private InviteeList(){
         this(null);
     }
 
