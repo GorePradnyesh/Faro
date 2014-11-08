@@ -1,6 +1,9 @@
 package com.zik.faro.data;
 
 import com.zik.faro.data.expense.ExpenseGroup;
+
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.UUID;
 
@@ -37,7 +40,7 @@ public class Event {
         this(null); // To satisfy JAXB
     }
 
-
+    @XmlElement
     public String getEventName() {
         return eventName;
     }
@@ -84,5 +87,18 @@ public class Event {
 
     public void markEventClosed(){
         this.status = ItemStatus.CLOSE;
+    }
+
+    @XmlElement
+    public String getEventId() {
+        return eventId;
+    }
+
+    public ItemStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ItemStatus status) {
+        this.status = status;
     }
 }
