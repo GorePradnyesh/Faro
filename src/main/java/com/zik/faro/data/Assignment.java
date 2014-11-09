@@ -16,5 +16,11 @@ public class Assignment {
         this.status = ActionStatus.INCOMPLETE;
     }
 
+    public List<Item> getItems(){
+        return this.items;     //TODO: change this to not return the items in the class . clone ?
+    }
 
+    public void addItem(Item item){
+        items.add(item);
+    }
 }

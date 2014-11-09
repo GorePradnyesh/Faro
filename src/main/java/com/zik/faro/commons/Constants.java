@@ -19,6 +19,9 @@ public final class Constants {
     public static final String ACTIVITY_ID_PATH_PARAM                           = "activityId";
     public static final String ACTIVITY_ID_PATH_PARAM_STRING                    = "/{" + ACTIVITY_ID_PATH_PARAM +"}";
 
+    public static final String ASSIGNMENT_ID_PATH_PARAM                           = "assignmentId";
+    public static final String ASSIGNMENT_ID_PATH_PARAM_STRING                    = "/{" + ASSIGNMENT_ID_PATH_PARAM +"}";
+
 
     //---- Path Constants ---- //
     public static final String EXPENSE_ID_PATH_CONST                            = "/expenseIds";
@@ -44,6 +47,11 @@ public final class Constants {
     public static final String ACTIVITIES_PATH_CONST                            = "/activities";
     public static final String ACTIVITY_UPDATE_PATH_CONST                       = "/update";
     public static final String ACTIVITY_CREATE_PATH_CONST                       = "/create";
+
+    public static final String ASSIGNMENT_PATH_CONST                            = "/assignment";
+    public static final String ASSIGNMENT_UPDATE_PATH_CONST                     = "/updateItems";
+    public static final String ASSIGNMENT_PENDING_COUNT_PATH_CONST              = "/pending/count";
+
 
 
     public static String getPathParamString(final String paramName){
