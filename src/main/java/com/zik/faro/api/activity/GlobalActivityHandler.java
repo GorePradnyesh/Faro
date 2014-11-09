@@ -28,6 +28,7 @@ public class GlobalActivityHandler {
         activityList.add(new Activity(eventId, "walking"));
 
         return JResponse.ok(activityList).build();
+        
     }
 
 
