@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import static com.zik.faro.commons.Constants.*;
 
-@Path(EXPENSE_PATH_CONST + "/" + EVENT_ID_PATH_PARAM_STRING)
+@Path(EXPENSE_PATH_CONST + EVENT_ID_PATH_PARAM_STRING)
 public class ExpenseHandler {
     @Path(EXPENSE_ID_PATH_CONST)
     @GET

@@ -17,10 +17,9 @@ import javax.ws.rs.core.MediaType;
 import java.util.Date;
 
 
-@Path(EVENT_PATH_CONST + "/" + EVENT_ID_PATH_PARAM_STRING)
+@Path(EVENT_PATH_CONST + EVENT_ID_PATH_PARAM_STRING)
 public class EventHandler {
 
-    @Path(EVENT_DETAILS_PATH_CONST)
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Event getEventDetails(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
@@ -38,6 +37,7 @@ public class EventHandler {
         return dummyEvent;
     }
 
+    //TODO: Add maxCount query string param;
     @Path(EVENT_INVITEES_PATH_CONST)
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})

@@ -12,8 +12,13 @@ import java.util.UUID;
 
 import static com.zik.faro.commons.Constants.*;
 
+
+
 @Path(EVENT_PATH_CONST + EVENT_CREATE_PATH_CONST)
 public class GlobalEvent {
+    //TODO: Get events for a particular USER !!!
+
+
     /*
     Accepts something like
     <eventCreateData>
