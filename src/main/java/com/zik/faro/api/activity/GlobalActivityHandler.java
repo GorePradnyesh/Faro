@@ -27,7 +27,7 @@ public class GlobalActivityHandler {
         activityList.add(new Activity(eventId, "swimming"));
         activityList.add(new Activity(eventId, "walking"));
 
-        return JResponse.ok(activityList).build();ßß
+        return JResponse.ok(activityList).build();
     }
 
 
