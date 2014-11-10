@@ -21,6 +21,7 @@ public class Identifier {
         return new Identifier(idString);
     }
 
+    @XmlElement
     public String getIdString(){
         return this.idString;
     }

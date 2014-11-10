@@ -53,8 +53,10 @@ public final class Constants {
 
     // ---- Assignment path constants ---- //
     public static final String ASSIGNMENT_PATH_CONST                            = "/assignment";
+    public static final String ASSIGNMENTS_PATH_CONST                           = "/assignments";
     public static final String ASSIGNMENT_UPDATE_PATH_CONST                     = "/updateItems";
     public static final String ASSIGNMENT_PENDING_COUNT_PATH_CONST              = "/pending/count";
+    public static final String ASSIGNMENT_DELETE_PATH_CONST                     = "/pending/count";
 
     // ---- poll path constants ---- //
     public static final String POLL_PATH_CONST                                  = "/poll";

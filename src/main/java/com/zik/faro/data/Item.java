@@ -5,24 +5,28 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class Item {
-    private final String id;     //TODO: change to type Id;
+    private final Identifier id;
     private String name;
     private String assigneeId; //TODO: change to type Id;
     private int count;
     private Unit unit;
     private ActionStatus status;
 
-    public Item(String id, String name, String assigneeId, int count, Unit unit, ActionStatus status) {
-        this.id = id;
+    private Item(){ // To satisfy JAXB
+        this.id = null;
+    }
+
+    public Item(String name, String assigneeId, int count, Unit unit) {
+        this.id = new Identifier();
         this.name = name;
         this.assigneeId = assigneeId;
         this.count = count;
         this.unit = unit;
-        this.status = status;
+        this.status = ActionStatus.INCOMPLETE;
     }
 
     @XmlElement
-    public String getId() {
+    public Identifier getId() {
         return id;
     }
 
