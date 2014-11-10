@@ -51,10 +51,12 @@ public final class Constants {
     public static final String ACTIVITY_UPDATE_PATH_CONST                       = "/update";
     public static final String ACTIVITY_CREATE_PATH_CONST                       = "/create";
 
+    // ---- Assignment path constants ---- //
     public static final String ASSIGNMENT_PATH_CONST                            = "/assignment";
     public static final String ASSIGNMENT_UPDATE_PATH_CONST                     = "/updateItems";
     public static final String ASSIGNMENT_PENDING_COUNT_PATH_CONST              = "/pending/count";
 
+    // ---- poll path constants ---- //
     public static final String POLL_PATH_CONST                                  = "/poll";
     public static final String POLLS_PATH_CONST                                 = "/polls";
     public static final String POLL_UNVOTED_COUNT_CONST                         = "/unvoted/count";
