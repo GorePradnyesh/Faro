@@ -2,6 +2,9 @@ package com.zik.faro.commons;
 
 import com.zik.faro.commons.exceptions.BadRequestException;
 
+/**
+ * Util class for parameter validation
+ */
 public class ParamValidation {
 
     public static void validateSignature(final String signature){
