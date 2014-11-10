@@ -84,7 +84,37 @@ public class PollHandler {
         ParamValidation.validateSignature(signature);
         ParamValidation.genericParamValidations(eventId, "eventId");
         ParamValidation.genericParamValidations(pollId, "pollId");
-        ParamValidation.genericParamValidations(identifier, "voteId");      // TODO: change to type Id;
+        ParamValidation.genericParamValidations(identifier, "voteId");
+
+        //TODO: Validate the pollId, eventID, userID ACLs
+        //TODO: Validate pollOption has only the particular fields set.
+        //TODO: Validate existence of poll option specified
+        return HTTP_OK;
+    }
+
+    @Path(POLL_ID_PATH_PARAM_STRING + POLL_CLOSE_PATH_CONST)
+    @POST
+    public String closePoll(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
+                           @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+                           @PathParam(POLL_ID_PATH_PARAM) final String pollId){
+        ParamValidation.validateSignature(signature);
+        ParamValidation.genericParamValidations(eventId, "eventId");
+        ParamValidation.genericParamValidations(pollId, "pollId");
+
+        //TODO: Validate the pollId, eventID, userID ACLs
+        //TODO: Validate pollOption has only the particular fields set.
+        //TODO: Validate existence of poll option specified
+        return HTTP_OK;
+    }
+
+    @Path(POLL_ID_PATH_PARAM_STRING)
+    @DELETE
+    public String deletePoll(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
+                            @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+                            @PathParam(POLL_ID_PATH_PARAM) final String pollId){
+        ParamValidation.validateSignature(signature);
+        ParamValidation.genericParamValidations(eventId, "eventId");
+        ParamValidation.genericParamValidations(pollId, "pollId");
 
         //TODO: Validate the pollId, eventID, userID ACLs
         //TODO: Validate pollOption has only the particular fields set.

@@ -56,6 +56,7 @@ public final class Constants {
     public static final String ASSIGNMENT_PENDING_COUNT_PATH_CONST              = "/pending/count";
 
     public static final String POLL_PATH_CONST                                  = "/poll";
+    public static final String POLLS_PATH_CONST                                 = "/polls";
     public static final String POLL_UNVOTED_COUNT_CONST                         = "/unvoted/count";
     public static final String POLL_CREATE_PATH_CONST                           = "/create";
     public static final String POLL_VOTE_PATH_CONST                             = "/vote";
