@@ -2,7 +2,6 @@ package com.zik.faro.data;
 
 import com.zik.faro.data.expense.ExpenseGroup;
 
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.UUID;
@@ -16,7 +15,7 @@ public class Event {
     private boolean controlFlag;
     private ExpenseGroup expenseGroup;
     private Location location;
-    private ItemStatus status;
+    private ObjectStatus status;
 
     public Event(final String eventName, final DateOffset startDate, final DateOffset endDate,
                  final boolean controlFlag, final ExpenseGroup expenseGroup, final Location location) {
@@ -27,13 +26,13 @@ public class Event {
         this.controlFlag = controlFlag;
         this.expenseGroup = expenseGroup;
         this.location = location;
-        this.status = ItemStatus.OPEN;
+        this.status = ObjectStatus.OPEN;
     }
 
     public Event(final String eventName){
         this.eventId = UUID.randomUUID().toString();
         this.eventName = eventName;
-        this.status = ItemStatus.OPEN;
+        this.status = ObjectStatus.OPEN;
     }
 
     private Event(){
@@ -86,7 +85,7 @@ public class Event {
     }
 
     public void markEventClosed(){
-        this.status = ItemStatus.CLOSE;
+        this.status = ObjectStatus.CLOSED;
     }
 
     @XmlElement
@@ -94,11 +93,11 @@ public class Event {
         return eventId;
     }
 
-    public ItemStatus getStatus() {
+    public ObjectStatus getStatus() {
         return status;
     }
 
-    public void setStatus(ItemStatus status) {
+    public void setStatus(ObjectStatus status) {
         this.status = status;
     }
 }

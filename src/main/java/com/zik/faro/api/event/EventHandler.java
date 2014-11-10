@@ -37,7 +37,7 @@ public class EventHandler {
         return dummyEvent;
     }
 
-    //TODO: Add maxCount query string param;
+    //TODO: Add maxCount query idString param;
     @Path(EVENT_INVITEES_PATH_CONST)
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})

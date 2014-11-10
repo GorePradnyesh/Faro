@@ -19,8 +19,11 @@ public final class Constants {
     public static final String ACTIVITY_ID_PATH_PARAM                           = "activityId";
     public static final String ACTIVITY_ID_PATH_PARAM_STRING                    = "/{" + ACTIVITY_ID_PATH_PARAM +"}";
 
-    public static final String ASSIGNMENT_ID_PATH_PARAM                           = "assignmentId";
-    public static final String ASSIGNMENT_ID_PATH_PARAM_STRING                    = "/{" + ASSIGNMENT_ID_PATH_PARAM +"}";
+    public static final String ASSIGNMENT_ID_PATH_PARAM                         = "assignmentId";
+    public static final String ASSIGNMENT_ID_PATH_PARAM_STRING                  = "/{" + ASSIGNMENT_ID_PATH_PARAM +"}";
+
+    public static final String POLL_ID_PATH_PARAM                               = "pollId";
+    public static final String POLL_ID_PATH_PARAM_STRING                        = "/{" + POLL_ID_PATH_PARAM +"}";
 
 
     //---- Path Constants ---- //
@@ -52,11 +55,11 @@ public final class Constants {
     public static final String ASSIGNMENT_UPDATE_PATH_CONST                     = "/updateItems";
     public static final String ASSIGNMENT_PENDING_COUNT_PATH_CONST              = "/pending/count";
 
-
-
-    public static String getPathParamString(final String paramName){
-        return String.format("{%s}", paramName);
-    }
-
+    public static final String POLL_PATH_CONST                                  = "/poll";
+    public static final String POLL_UNVOTED_COUNT_CONST                         = "/unvoted/count";
+    public static final String POLL_CREATE_PATH_CONST                           = "/create";
+    public static final String POLL_VOTE_PATH_CONST                             = "/vote";
+    public static final String POLL_ADD_OPTION_PATH_CONST                       = "/addOption";
+    public static final String POLL_CLOSE_PATH_CONST                            = "/close";
 
 }
