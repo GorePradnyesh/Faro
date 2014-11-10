@@ -79,11 +79,12 @@ public class PollHandler {
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public String castVote(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
                           @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
-                          @PathParam(POLL_ID_PATH_PARAM) final String pollId){
+                          @PathParam(POLL_ID_PATH_PARAM) final String pollId,
+                          Identifier identifier){
         ParamValidation.validateSignature(signature);
         ParamValidation.genericParamValidations(eventId, "eventId");
         ParamValidation.genericParamValidations(pollId, "pollId");
-        //ParamValidation.genericParamValidations(identifier, "voteId");      // TODO: change to type Id;
+        ParamValidation.genericParamValidations(identifier, "voteId");      // TODO: change to type Id;
 
         //TODO: Validate the pollId, eventID, userID ACLs
         //TODO: Validate pollOption has only the particular fields set.
