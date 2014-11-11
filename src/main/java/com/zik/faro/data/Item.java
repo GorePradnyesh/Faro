@@ -5,7 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class Item {
-    private final Identifier id;
+    private final String id;
     private String name;
     private String assigneeId; //TODO: change to type Id;
     private int count;
@@ -17,7 +17,7 @@ public class Item {
     }
 
     public Item(String name, String assigneeId, int count, Unit unit) {
-        this.id = new Identifier();
+        this.id = Identifier.createUniqueIdentifierString();
         this.name = name;
         this.assigneeId = assigneeId;
         this.count = count;
@@ -26,7 +26,7 @@ public class Item {
     }
 
     @XmlElement
-    public Identifier getId() {
+    public String getId() {
         return id;
     }
 

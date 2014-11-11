@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @XmlRootElement
 public class Assignment {
-    public final Identifier id;
+    public final String id;
     public final String eventId;            //TODO: change to type Id;
     public final String activityId;         //TODO: change to type Id; // Owner is activity or event.
 
@@ -27,14 +27,14 @@ public class Assignment {
     public Assignment(String eventId){
         this.eventId = eventId;
         this.activityId = NA;
-        this.id = new Identifier();
+        this.id = Identifier.createUniqueIdentifierString();
         this.status = ActionStatus.INCOMPLETE;
     }
 
     public Assignment(String eventId, String activityId){
         this.eventId = eventId;
         this.activityId = activityId;
-        this.id = new Identifier();
+        this.id = Identifier.createUniqueIdentifierString();
         this.status = ActionStatus.INCOMPLETE;
     }
 

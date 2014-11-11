@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Path(EVENT_PATH_CONST + EVENT_ID_PATH_PARAM_STRING + ASSIGNMENT_PATH_CONST)
 public class AssignmentHandler {
 
-    //TODO: add Update Assignment API
+    //TODO: add Update/create Assignment API
 
     @Path(ASSIGNMENT_ID_PATH_PARAM_STRING)
     @GET

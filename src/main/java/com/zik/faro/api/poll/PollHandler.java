@@ -80,15 +80,17 @@ public class PollHandler {
     public String castVote(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
                           @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                           @PathParam(POLL_ID_PATH_PARAM) final String pollId,
-                          Identifier identifier){
+                          Identifier voteId){
         ParamValidation.validateSignature(signature);
         ParamValidation.genericParamValidations(eventId, "eventId");
         ParamValidation.genericParamValidations(pollId, "pollId");
-        ParamValidation.genericParamValidations(identifier, "voteId");
+        ParamValidation.genericParamValidations(voteId, "voteId");
 
         //TODO: Validate the pollId, eventID, userID ACLs
         //TODO: Validate pollOption has only the particular fields set.
         //TODO: Validate existence of poll option specified
+
+        //TODO: Extract the voteId string from the Identifier and then use it.
         return HTTP_OK;
     }
 
@@ -121,7 +123,6 @@ public class PollHandler {
         //TODO: Validate existence of poll option specified
         return HTTP_OK;
     }
-
 
     @XmlRootElement
     private static class VoteCount{
