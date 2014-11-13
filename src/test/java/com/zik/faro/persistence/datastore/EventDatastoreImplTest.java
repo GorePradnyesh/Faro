@@ -1,17 +1,22 @@
 package com.zik.faro.persistence.datastore;
 
+import java.util.Date;
+import java.util.UUID;
+
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.googlecode.objectify.Key;
 import com.googlecode.objectify.ObjectifyService;
 import com.zik.faro.data.DateOffset;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.Location;
 import com.zik.faro.data.expense.ExpenseGroup;
-
-import org.junit.*;
-
-import java.util.Date;
-import java.util.UUID;
 
 public class EventDatastoreImplTest {
 
@@ -47,8 +52,8 @@ public class EventDatastoreImplTest {
                 new ExpenseGroup("Lake Shasta", "shasta123"),
                 new Location("Lake Shasta"));
 
-        EventDatastoreImpl.storeEvent(testEvent);
-        Event loadedEvent = EventDatastoreImpl.loadEvent(eventId);
+        Key<Event> key = EventDatastoreImpl.storeEvent(testEvent);
+        Event loadedEvent = EventDatastoreImpl.loadEvent(key);
         Assert.assertNotNull(loadedEvent);
         Assert.assertEquals(loadedEvent.getEventName(), testEvent.getEventName());
     }
