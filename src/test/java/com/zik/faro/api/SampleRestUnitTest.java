@@ -32,7 +32,6 @@ public class SampleRestUnitTest extends JerseyTest {
         super("com.zik.faro.api");
     }
 
-    @Ignore
     @Test
     public void sampleTest() throws JAXBException, IOException {
         WebResource webResource = resource();
