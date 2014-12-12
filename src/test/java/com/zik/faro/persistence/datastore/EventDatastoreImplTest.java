@@ -18,6 +18,8 @@ import com.zik.faro.data.Event;
 import com.zik.faro.data.Location;
 import com.zik.faro.data.expense.ExpenseGroup;
 
+import static com.googlecode.objectify.ObjectifyService.ofy;
+
 public class EventDatastoreImplTest {
 
     private static final LocalServiceTestHelper helper =
@@ -44,16 +46,16 @@ public class EventDatastoreImplTest {
 
     @Test
     public void testSimpleStoreLoad(){
-        String eventId = UUID.randomUUID().toString();
-        Event testEvent = new Event("Lake Shasta "+ eventId,
+        String eventNameSuffix = UUID.randomUUID().toString();
+        Event testEvent = new Event("Lake Shasta "+ eventNameSuffix,
                 new DateOffset(new Date(), 60 * 1000),
                 new DateOffset(new Date(), 2 * 60* 1000),
                 false,
                 new ExpenseGroup("Lake Shasta", "shasta123"),
                 new Location("Lake Shasta"));
 
-        Key<Event> key = EventDatastoreImpl.storeEvent(testEvent);
-        Event loadedEvent = EventDatastoreImpl.loadEvent(key);
+        EventDatastoreImpl.storeEvent(testEvent);
+        Event loadedEvent = EventDatastoreImpl.loadEvent(testEvent.getEventId());
         Assert.assertNotNull(loadedEvent);
         Assert.assertEquals(loadedEvent.getEventName(), testEvent.getEventName());
     }

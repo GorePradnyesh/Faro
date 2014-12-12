@@ -11,14 +11,12 @@ public class EventDatastoreImpl {       //TODO: Have this implement a EventStore
 
     //TODO: Add exception handling for the operations
 
-    public static Key<Event> storeEvent(final Event event){
-        Key<Event> key = ofy().save().entity(event).now();
-        System.out.println("Stored");
-        return key;
+    public static void storeEvent(final Event event){
+        DatastoreObjectifyDAL.storeObject(event);
     }
 
-    public static Event loadEvent(final Key<Event> key){
-        Event event = ofy().load().key(key).now();
+    public static Event loadEvent(final String eventId){
+        Event event = DatastoreObjectifyDAL.loadObject(eventId, Event.class);
         return event;
     }
 }
