@@ -1,12 +1,12 @@
 package com.zik.faro.persistence.datastore;
 
-import com.google.appengine.api.datastore.Entity;
 import com.googlecode.objectify.Key;
-
-import java.lang.annotation.Annotation;
 
 import static com.googlecode.objectify.ObjectifyService.ofy;
 
+/**
+ * This the lowermost layer which abstracts the fundamental load store operations.
+ */
 public class DatastoreObjectifyDAL {
     private static boolean enableReflectionCheck = true;
 
