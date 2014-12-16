@@ -6,13 +6,13 @@ import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
-import com.zik.faro.data.user.Address;
-import com.zik.faro.data.user.FaroUser;
 import org.junit.*;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class DatastoreObjectifyDALTest {
@@ -21,7 +21,6 @@ public class DatastoreObjectifyDALTest {
             new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 
     static{
-        ObjectifyService.register(FaroUser.class);
         ObjectifyService.register(TestClass.class);
     }
 
@@ -34,6 +33,11 @@ public class DatastoreObjectifyDALTest {
         public String firstName;
 
         TestClass(String name){
+            this.firstName = name;
+        }
+
+        TestClass(String id, String name){
+            this.id = id;
             this.firstName = name;
         }
     }
@@ -55,11 +59,12 @@ public class DatastoreObjectifyDALTest {
 
     @Test
     public void testLoadObjectById() {
-        FaroUser faroUser = new FaroUser("dg@gmail.com", "David", null, "Gilmour", "dg@splitwise.com",
-                "2323", new Address(123, "Palm Avenue", "Stanford", "CA", 94332));
-        DatastoreObjectifyDAL.storeObject(faroUser);
-        FaroUser user = DatastoreObjectifyDAL.loadObjectById("dg@gmail.com", FaroUser.class);
-        Assert.assertNotNull(user);
+        final String testID = UUID.randomUUID().toString();
+        TestClass testObject = new TestClass(testID, "indexedField1");
+        DatastoreObjectifyDAL.storeObject(testObject);
+        TestClass obj = DatastoreObjectifyDAL.loadObjectById(testID, TestClass.class);
+        Assert.assertNotNull(obj);
+        Assert.assertEquals(testID, obj.id);
     }
 
     @Test
@@ -85,6 +90,39 @@ public class DatastoreObjectifyDALTest {
         List<TestClass> objectList =
                 DatastoreObjectifyDAL.loadObjectsByIndexedFieldEQ("firstName", "sammy", TestClass.class);
         Assert.assertEquals(2, objectList.size());
+    }
+
+    @Test
+    public void testLoadWithFilterChain(){
+        final String testId = "object1";
+        final String testIndexField = "name1s";
+        TestClass object1 = new TestClass(testId, testIndexField);
+        TestClass object2 = new TestClass("objectId2", "name2");
+
+        DatastoreObjectifyDAL.storeObject(object1);
+        DatastoreObjectifyDAL.storeObject(object2);
+
+        /*Create Key filter*/
+        Map<DatastoreOperator, String> keyFilter1 = new HashMap<>();
+        keyFilter1.put(DatastoreOperator.EQ, testId);
+
+        List<TestClass> retrievedObjects =
+                DatastoreObjectifyDAL.loadObjectsByFilters(keyFilter1, new HashMap<String, String>(), TestClass.class);
+        Assert.assertEquals(1, retrievedObjects.size());
+
+        /*Create additional filter on indexed fields*/
+        Map<String, String> filter1 = new HashMap<>();
+        filter1.put("firstName", testIndexField);
+        retrievedObjects = DatastoreObjectifyDAL.loadObjectsByFilters(keyFilter1, filter1, TestClass.class);
+        Assert.assertEquals(1, retrievedObjects.size());
+
+
+        /*Create a filter with a index field value which is not present in conjunction with the key filter*/
+        Map<String, String> wrongFilter = new HashMap<>();
+        wrongFilter.put("firstName", "name2");
+        retrievedObjects = DatastoreObjectifyDAL.loadObjectsByFilters(keyFilter1, wrongFilter, TestClass.class);
+        Assert.assertEquals(0, retrievedObjects.size());
+
     }
 
 }

@@ -8,7 +8,7 @@ public class UserDatastoreImpl {
 
     private static final String FIRST_NAME_FIELD_NAME = "firstName";
 
-    public static void storeFaroUser(final FaroUser user){
+    public static void storeUser(final FaroUser user){
         DatastoreObjectifyDAL.storeObject(user);
     }
 

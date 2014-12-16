@@ -11,7 +11,7 @@ public class EventDatastoreImpl {       //TODO: Have this implement a EventStore
         DatastoreObjectifyDAL.storeObject(event);
     }
 
-    public static Event loadEvent(final String eventId){
+    public static Event loadEventByID(final String eventId){
         Event event = DatastoreObjectifyDAL.loadObjectById(eventId, Event.class);
         return event;
     }

@@ -1,8 +1,10 @@
 package com.zik.faro.persistence.datastore;
 
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.cmd.Query;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.googlecode.objectify.ObjectifyService.ofy;
 
@@ -37,5 +39,24 @@ public class DatastoreObjectifyDAL {
     public static <T> T loadFirstObjectByIndexedFieldEQ(final String fieldName, final String fieldValue, Class<T> clazz) {
         T object = ofy().load().type(clazz).filter(fieldName, fieldValue).first().now();
         return object;
+    }
+
+
+    //TODO: Use a cleaner way to use Operators with the filters provided ( DatastoreOperator Enum etc ) currently the operators are expected in the incoming string
+    public static <T> List<T> loadObjectsByFilters(Map<DatastoreOperator, String> keyFilterMap, Map<String, String> filterMap, Class<T> clazz){
+        Query<T> query = ofy().load().type(clazz);
+        for(Map.Entry<DatastoreOperator, String> filterKey: keyFilterMap.entrySet()){
+            Key<T> objectKey = Key.create(clazz, filterKey.getValue());
+            if(filterKey.getKey() != null) {
+                query = query.filterKey(filterKey.getKey().toString(), objectKey);
+            }else{
+                query = query.filterKey(DatastoreOperator.EQ.toString(), objectKey);
+            }
+        }
+        for(Map.Entry<String, String> filter: filterMap.entrySet()){
+            query = query.filter(filter.getKey(), filter.getValue());
+        }
+        List<T> resultSet = query.list();
+        return resultSet;
     }
 }

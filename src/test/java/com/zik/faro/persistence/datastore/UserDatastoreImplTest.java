@@ -2,16 +2,13 @@ package com.zik.faro.persistence.datastore;
 
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
-import com.googlecode.objectify.Key;
 import com.googlecode.objectify.ObjectifyService;
-import com.zik.faro.data.Event;
 import com.zik.faro.data.user.Address;
 import com.zik.faro.data.user.FaroUser;
 import org.junit.*;
 
 import java.util.List;
 
-import static com.googlecode.objectify.ObjectifyService.ofy;
 
 public class UserDatastoreImplTest {
 
@@ -43,7 +40,7 @@ public class UserDatastoreImplTest {
         final String firstName = "David";
         FaroUser faroUser = new FaroUser(email, firstName, null, "Gilmour", "dg@splitwise.com",
                 "2323", new Address(123, "Palm Avenue", "Stanford", "CA", 94332));
-        DatastoreObjectifyDAL.storeObject(faroUser);
+        UserDatastoreImpl.storeUser(faroUser);
 
         /*Test Load User by ID*/
         FaroUser retrievedUser = UserDatastoreImpl.loadFaroUserById(email);
@@ -56,7 +53,7 @@ public class UserDatastoreImplTest {
         /*Store another user with the same fist name*/
         FaroUser faroUser2 = new FaroUser("dguetta@gmail.com", firstName, null, "Gilmour", "dguetta@splitwise.com",
                 "1323", new Address(456, "Venice Beach", "Los Angeles", "CA", 93411));
-        DatastoreObjectifyDAL.storeObject(faroUser2);
+        UserDatastoreImpl.storeUser(faroUser2);
 
 
         /*Load the users by first name and make sure that the list now includes the new user*/

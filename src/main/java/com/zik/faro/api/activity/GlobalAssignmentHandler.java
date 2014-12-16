@@ -25,11 +25,11 @@ public class GlobalAssignmentHandler {
         //TODO: Validate the eventID, userId permissions
 
         List<Assignment> assignments = new ArrayList<>();
-        Assignment tempAssignment = new Assignment(eventId, "dummyActivityId");
+        Assignment tempAssignment = new Assignment();
         tempAssignment.addItem(new Item("blankets", "David", 4, Unit.COUNT));
         tempAssignment.addItem(new Item("rice", "Roger", 10, Unit.LB));
 
-        Assignment assignment2 = new Assignment(eventId, "hikingAssignment");
+        Assignment assignment2 = new Assignment();
         assignment2.addItem(new Item("rope", "David", 10, Unit.METER));
 
         assignments.add(tempAssignment);

@@ -52,7 +52,7 @@ public class EventDatastoreImplTest {
                 new Location("Lake Shasta"));
 
         EventDatastoreImpl.storeEvent(testEvent);
-        Event loadedEvent = EventDatastoreImpl.loadEvent(testEvent.getEventId());
+        Event loadedEvent = EventDatastoreImpl.loadEventByID(testEvent.getEventId());
         Assert.assertNotNull(loadedEvent);
         Assert.assertEquals(loadedEvent.getEventName(), testEvent.getEventName());
     }
