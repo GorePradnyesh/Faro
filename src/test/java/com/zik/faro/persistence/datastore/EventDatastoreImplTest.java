@@ -11,14 +11,11 @@ import org.junit.Test;
 
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
-import com.googlecode.objectify.Key;
 import com.googlecode.objectify.ObjectifyService;
 import com.zik.faro.data.DateOffset;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.Location;
 import com.zik.faro.data.expense.ExpenseGroup;
-
-import static com.googlecode.objectify.ObjectifyService.ofy;
 
 public class EventDatastoreImplTest {
 

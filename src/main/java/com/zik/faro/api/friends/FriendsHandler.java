@@ -4,7 +4,6 @@ import com.sun.jersey.api.JResponse;
 import com.zik.faro.api.responder.MinUser;
 import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.ParamValidation;
-import com.zik.faro.data.user.FaroUserName;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -33,8 +32,8 @@ public class FriendsHandler {
         final List<MinUser> friendList = new ArrayList<>();
 
         //TODO: Replace below static response with actual code
-        friendList.add(new MinUser(new FaroUserName("David","Gilmour"),"dg@dgdg.com"));
-        friendList.add(new MinUser(new FaroUserName("Roger","Waters"),"rw@dgdg.com"));
+        friendList.add(new MinUser("David","Gilmour","dg@dgdg.com"));
+        friendList.add(new MinUser("Roger","Waters","rw@dgdg.com"));
 
         return JResponse.ok(friendList).build();
     }

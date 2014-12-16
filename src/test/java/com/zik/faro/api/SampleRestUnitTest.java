@@ -19,13 +19,13 @@ public class SampleRestUnitTest extends JerseyTest {
     NOTE: Because the Grizzly framework does not launch the application as war, the web.xml does not get read.
     This is why the servlet mapping that is present in the web.xml will not be applied.
     <servlet-mapping>
-        <servlet-name>Jersey Web Application</servlet-name>
+        <servlet-firstName>Jersey Web Application</servlet-firstName>
         <url-pattern>/v1/*</url-pattern>
     </servlet-mapping>
 
     Therefor currently the /v1/ path is omitted from the unit tests. Please bear this inconsistency in mind while
     writing actual production client code against the service
-    TODO: Add a cleaner workaround for this problem.
+    TODO: Add a cleaner workaround for this problem. GIT ISSUE #3
      */
 
     public SampleRestUnitTest(){

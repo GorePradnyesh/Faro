@@ -2,6 +2,8 @@ package com.zik.faro.persistence.datastore;
 
 import com.googlecode.objectify.Key;
 
+import java.util.List;
+
 import static com.googlecode.objectify.ObjectifyService.ofy;
 
 /**
@@ -9,6 +11,7 @@ import static com.googlecode.objectify.ObjectifyService.ofy;
  */
 public class DatastoreObjectifyDAL {
     private static boolean enableReflectionCheck = true;
+
 
     public static <T> Key<T> storeObject(final T object){
         if(enableReflectionCheck){
@@ -19,9 +22,20 @@ public class DatastoreObjectifyDAL {
         return key;
     }
 
-    public static <T> T loadObject(final String objectId, Class<T> clazz){
+    public static <T> T loadObjectById(final String objectId, Class<T> clazz){
         Key<T> objectKey = Key.create(clazz, objectId);
         T object = ofy().load().key(objectKey).now();
+        return object;
+    }
+
+    public static <T> List<T> loadObjectsByIndexedFieldEQ(final String fieldName, final String fieldValue, Class<T> clazz){
+        //TODO: do reflection validation to ensure that fieldName provided is Annotated with @Index
+        List<T> objectList = ofy().load().type(clazz).filter(fieldName, fieldValue).list();
+        return objectList;
+    }
+
+    public static <T> T loadFirstObjectByIndexedFieldEQ(final String fieldName, final String fieldValue, Class<T> clazz) {
+        T object = ofy().load().type(clazz).filter(fieldName, fieldValue).first().now();
         return object;
     }
 }

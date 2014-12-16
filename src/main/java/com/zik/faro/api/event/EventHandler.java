@@ -9,7 +9,6 @@ import com.zik.faro.data.DateOffset;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.Location;
 import com.zik.faro.data.expense.ExpenseGroup;
-import com.zik.faro.data.user.FaroUserName;
 import com.zik.faro.data.user.InviteStatus;
 
 import javax.ws.rs.*;
@@ -48,8 +47,8 @@ public class EventHandler {
 
         //TODO: replace the dummy static code below with the actual calls
         InviteeList userStatus = new InviteeList(eventId);
-        userStatus.addUserStatus(new MinUser(new FaroUserName("David", "Gilmour"), "dg@gmail.com"), InviteStatus.ACCEPTED);
-        userStatus.addUserStatus(new MinUser(new FaroUserName("Roger", "Waters"), "rw@gmail.com"), InviteStatus.INVITED);
+        userStatus.addUserStatus(new MinUser("David", "Gilmour", "dg@gmail.com"), InviteStatus.ACCEPTED);
+        userStatus.addUserStatus(new MinUser("Roger", "Waters", "rw@gmail.com"), InviteStatus.INVITED);
         return userStatus;
     }
 
