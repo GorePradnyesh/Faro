@@ -17,10 +17,10 @@ public class UserDatastoreImpl {
         return user;
     }
 
+    /* Currently searches only by FirstName, for an exact match */
     public static List<FaroUser> loadFaroUsersByName(final String firstName){
         List<FaroUser> faroUsers = DatastoreObjectifyDAL.loadObjectsByIndexedFieldEQ(FIRST_NAME_FIELD_NAME, firstName, FaroUser.class);
         return faroUsers;
     }
 
-    //TODO: Implement search user by name.
 }

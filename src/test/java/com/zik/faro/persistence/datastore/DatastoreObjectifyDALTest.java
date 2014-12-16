@@ -111,9 +111,9 @@ public class DatastoreObjectifyDALTest {
         Assert.assertEquals(1, retrievedObjects.size());
 
         /*Create additional filter on indexed fields*/
-        Map<String, String> filter1 = new HashMap<>();
-        filter1.put("firstName", testIndexField);
-        retrievedObjects = DatastoreObjectifyDAL.loadObjectsByFilters(keyFilter1, filter1, TestClass.class);
+        Map<String, String> filterForTestIndexField = new HashMap<>();
+        filterForTestIndexField.put("firstName", testIndexField);
+        retrievedObjects = DatastoreObjectifyDAL.loadObjectsByFilters(keyFilter1, filterForTestIndexField, TestClass.class);
         Assert.assertEquals(1, retrievedObjects.size());
 
 
@@ -123,6 +123,15 @@ public class DatastoreObjectifyDALTest {
         retrievedObjects = DatastoreObjectifyDAL.loadObjectsByFilters(keyFilter1, wrongFilter, TestClass.class);
         Assert.assertEquals(0, retrievedObjects.size());
 
+        /*Create and store and object with a duplicate value for the indexed field*/
+        TestClass object3 = new TestClass("object3", testIndexField);
+        DatastoreObjectifyDAL.storeObject(object3);
+
+        /*Retrieved only by index field and verify that 2 instances are now returned*/
+        retrievedObjects = DatastoreObjectifyDAL.loadObjectsByFilters(new HashMap<DatastoreOperator, String>(),
+                        filterForTestIndexField,
+                        TestClass.class);
+        Assert.assertEquals(2, retrievedObjects.size());
     }
 
 }

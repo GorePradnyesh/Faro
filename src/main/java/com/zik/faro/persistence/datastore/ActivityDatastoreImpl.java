@@ -26,7 +26,7 @@ public class ActivityDatastoreImpl {
             throw new RuntimeException("Unexpected condition !! Got multiple Activities for single activity ID");
         }
         if(activityList.size() == 0 ){
-            return null; //TODO: better response
+            return null; //TODO: better response ?
         }
         return activityList.get(0);
     }
@@ -34,14 +34,19 @@ public class ActivityDatastoreImpl {
 
     //NOTE: Since the activities contain the INDEXED event id this function is placed in the ActivityDatastoreImpl
     public static List<Activity> loadActivitiesByEventId(final String eventId){
-        return null;
+        Map<DatastoreOperator, String> filterKeyMap = new HashMap<>();          //Empty filter map
+
+        Map<String, String> filterMap = new HashMap<>();                        //Valid filter map
+        filterMap.put(EVENTID_FIELD_NAME, eventId);
+
+        List<Activity> activityList =
+                DatastoreObjectifyDAL.loadObjectsByFilters(filterKeyMap, filterMap, Activity.class);
+        return activityList;
     }
 
 
     /*
     // Ideally this should not be needed as the assignment is contained within the ID and
     // when an Activity is loaded, the assignment should implicitly get loaded with it .
-    public Assignment loadAssignmentByActivityId(final String activityId){
-
-    }*/
+    public Assignment loadAssignmentByActivityId(final String activityId){;}*/
 }
