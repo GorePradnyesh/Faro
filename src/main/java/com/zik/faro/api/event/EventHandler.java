@@ -73,13 +73,4 @@ public class EventHandler {
         return HTTP_OK;
     }
 
-    @Path(EVENT_CREATE_PATH_CONST)
-    @PUT
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public String createEvent(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature){
-        return null;//TODO: partial APIs
-    }
-
-
-
 }

@@ -59,4 +59,6 @@ public class DatastoreObjectifyDAL {
         List<T> resultSet = query.list();
         return resultSet;
     }
+
+    //TODO: ADD CURSOR COUNTERPARTS / ARGUMENTS FOR THE THE FUNCTIONS ABOVE
 }
