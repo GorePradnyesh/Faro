@@ -10,37 +10,21 @@ public class ActivityDatastoreImpl {
     private static final String EVENTID_FIELD_NAME = "eventId";
 
     public static void storeActivity(final Activity activity){
+        //TODO: Should we ensure that eventId exists before storing the Activity for that EventID
         DatastoreObjectifyDAL.storeObject(activity);
     }
 
     public static Activity loadActivityById(final String activityId, final String eventId){
-        Map<DatastoreOperator, String> filterKeyMap = new HashMap<>();
-        filterKeyMap.put(DatastoreOperator.EQ, activityId);
-
-        Map<String, String> filterMap = new HashMap<>();
-        filterMap.put(EVENTID_FIELD_NAME, eventId);
-
-        List<Activity> activityList =
-                DatastoreObjectifyDAL.loadObjectsByFilters(filterKeyMap, filterMap, Activity.class);
-        if(activityList.size() > 1){
-            throw new RuntimeException("Unexpected condition !! Got multiple Activities for single activity ID");
-        }
-        if(activityList.size() == 0 ){
-            return null; //TODO: better response ?
-        }
-        return activityList.get(0);
+        Activity activity =
+                ObjectifyHelper.loadObjectByIdAndEventIdField(activityId, EVENTID_FIELD_NAME, eventId, Activity.class);
+        return activity;
     }
 
 
     //NOTE: Since the activities contain the INDEXED event id this function is placed in the ActivityDatastoreImpl
     public static List<Activity> loadActivitiesByEventId(final String eventId){
-        Map<DatastoreOperator, String> filterKeyMap = new HashMap<>();          //Empty filter map
-
-        Map<String, String> filterMap = new HashMap<>();                        //Valid filter map
-        filterMap.put(EVENTID_FIELD_NAME, eventId);
-
         List<Activity> activityList =
-                DatastoreObjectifyDAL.loadObjectsByFilters(filterKeyMap, filterMap, Activity.class);
+                ObjectifyHelper.loadObjectsForEventId(EVENTID_FIELD_NAME, eventId, Activity.class);
         return activityList;
     }
 
