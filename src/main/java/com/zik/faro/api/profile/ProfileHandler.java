@@ -5,7 +5,6 @@ import static com.zik.faro.commons.Constants.*;
 import com.zik.faro.commons.ParamValidation;
 import com.zik.faro.data.user.Address;
 import com.zik.faro.data.user.FaroUser;
-import com.zik.faro.data.user.FaroUserName;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -18,7 +17,7 @@ public class ProfileHandler {
         ParamValidation.validateSignature(signature);
         // TODO: Wrap user within profile object, used for responder
         return new FaroUser("rwaters@gmail.com",
-                new FaroUserName("Roger","wAters"),
+                "Roger", null, "waters",
                 "rwaters@splitwise.com",
                 "4085393212",
                 new Address(44, "Abby Road","SouthEnd London","UK", 566645));
@@ -29,6 +28,6 @@ public class ProfileHandler {
     public String getProfileJson(FaroUser faroUser, @QueryParam(SIGNATURE_QUERY_PARAM) final String signature){
         // TODO:  Add param validation
         ParamValidation.validateSignature(signature);
-        return faroUser.userName.firstName;
+        return faroUser.getFirstName();
     }
 }

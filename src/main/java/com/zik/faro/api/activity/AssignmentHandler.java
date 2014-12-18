@@ -27,7 +27,7 @@ public class AssignmentHandler {
         ParamValidation.genericParamValidations(assignmentId, "assignmentId");
         //TODO: Validate the eventID, userId permissions
 
-        Assignment tempAssignment = new Assignment(eventId, "dummyActivityId");
+        Assignment tempAssignment = new Assignment();
         tempAssignment.addItem(new Item("blankets", "David", 4, Unit.COUNT));
         tempAssignment.addItem(new Item("rice", "Roger", 10, Unit.LB));
         return tempAssignment;

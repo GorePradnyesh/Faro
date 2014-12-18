@@ -1,23 +1,32 @@
 package com.zik.faro.data;
 
+import com.googlecode.objectify.annotation.Entity;
+import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Index;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Entity
 @XmlRootElement
 public class Poll {
-    private final String id;                //TODO: Change type to Id
-    private final String eventId;           //TODO: Change type to Id
-    private final String creator;           //TODO: Change type to Id/MinUser ?
+    @Id
+    private final String id;
+
+    //eventId need not be a Ref<?> or a Parent relation. A user is expected to always have the eventId while reading/writing the Poll
+    @Index
+    private final String eventId;
+    private final String creator;
 
     private List<PollOption> pollOptions = new ArrayList<>();
-    private String winnerId;                  //TODO: Change type to Id
-    private String owner;                   //TODO: Change type to Id/MinUser ?
+    private String winnerId;
+    private String owner;
     private String description;
     private ObjectStatus status;
-    private DateOffset deadline;            // Will not be used in V1.
+    private DateOffset deadline;                // Will not be used in V1.
 
     private Poll(){ //to satisfy jaxb;
         this.id=null;

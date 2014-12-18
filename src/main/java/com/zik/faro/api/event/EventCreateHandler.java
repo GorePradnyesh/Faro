@@ -3,6 +3,9 @@ package com.zik.faro.api.event;
 
 import com.zik.faro.api.responder.EventCreateData;
 import com.zik.faro.commons.ParamValidation;
+import com.zik.faro.data.Event;
+import com.zik.faro.persistence.datastore.DatastoreObjectifyDAL;
+import com.zik.faro.persistence.datastore.EventDatastoreImpl;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -15,7 +18,7 @@ import static com.zik.faro.commons.Constants.*;
 
 
 @Path(EVENT_PATH_CONST + EVENT_CREATE_PATH_CONST)
-public class GlobalEvent {
+public class EventCreateHandler {
     //TODO: Get events for a particular USER !!!
 
 
@@ -40,12 +43,17 @@ public class GlobalEvent {
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public MinEvent getStringTemp(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-                                  EventCreateData eventCreateData){
+    public MinEvent createEvent(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
+                                EventCreateData eventCreateData){
         ParamValidation.validateSignature(signature);
         ParamValidation.genericParamValidations(eventCreateData,"eventCreateData");
-        //TODO: replace the dummy static code below with the actual calls
-        return new MinEvent(UUID.randomUUID().toString(), eventCreateData.eventName);
+
+        /*Create a new event with the provided data, with the FALSE control flag.*/
+        Event newEvent = new Event(eventCreateData.eventName, eventCreateData.startDate,
+                eventCreateData.endDate, false, eventCreateData.expenseGroup, eventCreateData.location);
+        EventDatastoreImpl.storeEvent(newEvent);
+
+        return new MinEvent(newEvent.getEventId(), newEvent.getEventName());
     }
 
     @XmlRootElement
