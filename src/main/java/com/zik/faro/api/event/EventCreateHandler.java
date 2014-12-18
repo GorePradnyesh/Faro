@@ -3,6 +3,9 @@ package com.zik.faro.api.event;
 
 import com.zik.faro.api.responder.EventCreateData;
 import com.zik.faro.commons.ParamValidation;
+import com.zik.faro.data.Event;
+import com.zik.faro.persistence.datastore.DatastoreObjectifyDAL;
+import com.zik.faro.persistence.datastore.EventDatastoreImpl;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -44,8 +47,13 @@ public class EventCreateHandler {
                                 EventCreateData eventCreateData){
         ParamValidation.validateSignature(signature);
         ParamValidation.genericParamValidations(eventCreateData,"eventCreateData");
-        //TODO: replace the dummy static code below with the actual calls
-        return new MinEvent(UUID.randomUUID().toString(), eventCreateData.eventName);
+
+        /*Create a new event with the provided data, with the FALSE control flag.*/
+        Event newEvent = new Event(eventCreateData.eventName, eventCreateData.startDate,
+                eventCreateData.endDate, false, eventCreateData.expenseGroup, eventCreateData.location);
+        EventDatastoreImpl.storeEvent(newEvent);
+
+        return new MinEvent(newEvent.getEventId(), newEvent.getEventName());
     }
 
     @XmlRootElement
