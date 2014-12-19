@@ -72,7 +72,7 @@ public class DatastoreObjectifyDALTest {
         TestClass testClass = new TestClass("sammy");
         testClass.id = "possible1";
         DatastoreObjectifyDAL.storeObject(testClass);
-        TestClass retrievedTestClass = DatastoreObjectifyDAL.loadFirstObjectByIndexedFieldEQ("firstName", "sammy", TestClass.class);
+        TestClass retrievedTestClass = DatastoreObjectifyDAL.loadFirstObjectByIndexedStringFieldEQ("firstName", "sammy", TestClass.class);
         Assert.assertEquals(testClass.firstName, retrievedTestClass.firstName);
     }
 
@@ -88,7 +88,7 @@ public class DatastoreObjectifyDALTest {
         DatastoreObjectifyDAL.storeObject(secondObject);
 
         List<TestClass> objectList =
-                DatastoreObjectifyDAL.loadObjectsByIndexedFieldEQ("firstName", "sammy", TestClass.class);
+                DatastoreObjectifyDAL.loadObjectsByIndexedStringFieldEQ("firstName", "sammy", TestClass.class);
         Assert.assertEquals(2, objectList.size());
     }
 
@@ -107,20 +107,20 @@ public class DatastoreObjectifyDALTest {
         keyFilter1.put(DatastoreOperator.EQ, testId);
 
         List<TestClass> retrievedObjects =
-                DatastoreObjectifyDAL.loadObjectsByFilters(keyFilter1, new HashMap<String, String>(), TestClass.class);
+                DatastoreObjectifyDAL.loadObjectsByStringFilters(keyFilter1, new HashMap<String, String>(), TestClass.class);
         Assert.assertEquals(1, retrievedObjects.size());
 
         /*Create additional filter on indexed fields*/
         Map<String, String> filterForTestIndexField = new HashMap<>();
         filterForTestIndexField.put("firstName", testIndexField);
-        retrievedObjects = DatastoreObjectifyDAL.loadObjectsByFilters(keyFilter1, filterForTestIndexField, TestClass.class);
+        retrievedObjects = DatastoreObjectifyDAL.loadObjectsByStringFilters(keyFilter1, filterForTestIndexField, TestClass.class);
         Assert.assertEquals(1, retrievedObjects.size());
 
 
         /*Create a filter with a index field value which is not present in conjunction with the key filter*/
         Map<String, String> wrongFilter = new HashMap<>();
         wrongFilter.put("firstName", "name2");
-        retrievedObjects = DatastoreObjectifyDAL.loadObjectsByFilters(keyFilter1, wrongFilter, TestClass.class);
+        retrievedObjects = DatastoreObjectifyDAL.loadObjectsByStringFilters(keyFilter1, wrongFilter, TestClass.class);
         Assert.assertEquals(0, retrievedObjects.size());
 
         /*Create and store and object with a duplicate value for the indexed field*/
@@ -128,9 +128,9 @@ public class DatastoreObjectifyDALTest {
         DatastoreObjectifyDAL.storeObject(object3);
 
         /*Retrieved only by index field and verify that 2 instances are now returned*/
-        retrievedObjects = DatastoreObjectifyDAL.loadObjectsByFilters(new HashMap<DatastoreOperator, String>(),
-                        filterForTestIndexField,
-                        TestClass.class);
+        retrievedObjects = DatastoreObjectifyDAL.loadObjectsByStringFilters(new HashMap<DatastoreOperator, String>(),
+                filterForTestIndexField,
+                TestClass.class);
         Assert.assertEquals(2, retrievedObjects.size());
     }
 

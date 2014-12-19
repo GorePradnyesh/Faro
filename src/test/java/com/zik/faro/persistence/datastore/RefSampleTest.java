@@ -7,8 +7,9 @@ import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
-import com.zik.faro.data.Event;
 import org.junit.*;
+
+import java.util.List;
 
 
 public class RefSampleTest {
@@ -74,6 +75,7 @@ public class RefSampleTest {
         private String id;
         @Index
         private String vin;
+        @Index
         private Ref<Person> owner;
 
         Car(String id, String vin, Ref<Person> owner) {
@@ -109,6 +111,13 @@ public class RefSampleTest {
         Car car2 = new Car("car2", "vin2", Ref.create(nonExistent));
         Car lCar2 = DatastoreObjectifyDAL.loadObjectById(car2.id, Car.class);
         Assert.assertNull(lCar2);       // <-----------
+
+
+        Car retCar = DatastoreObjectifyDAL.loadObjectByIndexedRefFieldEQ("owner", Person.class, "person1", Car.class);
+        Assert.assertNotNull(retCar);
+
+        List<Car> carList = DatastoreObjectifyDAL.loadObjectsByIndexedRefFieldEQ("owner", Person.class, "person1", Car.class);
+        Assert.assertEquals(1, carList.size());
     }
 
 
