@@ -34,4 +34,23 @@ public class EventUserDatastoreImpl {
         }
         return eventUserList.get(0);
     }
+
+    public static List<EventUser> loadEventUserByEvent(final String eventId){
+        List<EventUser> eventUserList =
+                DatastoreObjectifyDAL.loadObjectsByIndexedRefFieldEQ(EVENT_REF_FIELD_NAME,
+                        Event.class,
+                        eventId,
+                        EventUser.class);
+        return eventUserList;
+    }
+
+
+    public static List<EventUser> loadEventUserByFaroUser(final String faroUserId){
+        List<EventUser> eventUserList =
+                DatastoreObjectifyDAL.loadObjectsByIndexedRefFieldEQ(FARO_USER_REF_FIELD_NAME,
+                        FaroUser.class,
+                        faroUserId,
+                        EventUser.class);
+        return eventUserList;
+    }
 }
