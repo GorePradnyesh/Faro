@@ -1,23 +1,15 @@
 package com.zik.faro.api.unit;
 
-import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
-import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
-import com.googlecode.objectify.ObjectifyService;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.test.framework.JerseyTest;
 
-import com.zik.faro.api.responder.EventCreateData;
-import com.zik.faro.data.DateOffset;
 import com.zik.faro.data.Event;
-import com.zik.faro.data.Location;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.*;
 
-import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
-import java.util.Date;
 
 
 @Ignore

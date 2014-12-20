@@ -4,14 +4,11 @@ package com.zik.faro.api.event;
 import com.zik.faro.api.responder.EventCreateData;
 import com.zik.faro.commons.ParamValidation;
 import com.zik.faro.data.Event;
-import com.zik.faro.persistence.datastore.DatastoreObjectifyDAL;
 import com.zik.faro.persistence.datastore.EventDatastoreImpl;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import java.util.UUID;
 
 import static com.zik.faro.commons.Constants.*;
 

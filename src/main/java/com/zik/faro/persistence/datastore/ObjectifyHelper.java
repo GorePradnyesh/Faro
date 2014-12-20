@@ -29,7 +29,7 @@ public class ObjectifyHelper {
         filterMap.put(eventIdFieldName, eventId);
 
         List<T> activityList =
-                DatastoreObjectifyDAL.loadObjectsByFilters(filterKeyMap, filterMap, clazz);
+                DatastoreObjectifyDAL.loadObjectsByStringFilters(filterKeyMap, filterMap, clazz);
         if(activityList.size() > 1){
             throw new RuntimeException("Unexpected condition !! Got multiple "+ clazz.getCanonicalName() +" objects for single Id");
         }
@@ -55,7 +55,7 @@ public class ObjectifyHelper {
         filterMap.put(eventIdFieldName, eventId);
 
         List<T> objectList =
-                DatastoreObjectifyDAL.loadObjectsByFilters(filterKeyMap, filterMap, clazz);
+                DatastoreObjectifyDAL.loadObjectsByStringFilters(filterKeyMap, filterMap, clazz);
         return objectList;
     }
 
