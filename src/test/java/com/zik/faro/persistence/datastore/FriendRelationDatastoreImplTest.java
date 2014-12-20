@@ -50,8 +50,8 @@ public class FriendRelationDatastoreImplTest {
         Assert.assertEquals(user2.getEmail(), relation.getToId());
 
         FriendRelation invertedRelation = new FriendRelation(user2.getEmail(), user1.getEmail());
-        Assert.assertEquals(user1.getEmail(), invertedRelation.getFromId());
-        Assert.assertEquals(user2.getEmail(), invertedRelation.getToId());
+        Assert.assertEquals(user2.getEmail(), invertedRelation.getFromId());
+        Assert.assertEquals(user1.getEmail(), invertedRelation.getToId());
     }
 
     @Test(expected = IllegalDataOperation.class)

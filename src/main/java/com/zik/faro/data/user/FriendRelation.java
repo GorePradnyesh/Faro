@@ -34,7 +34,7 @@ public class FriendRelation {
     }
 
     public String getToId(){
-        return this.getToId();
+        return this.toId;
     }
 
 }
