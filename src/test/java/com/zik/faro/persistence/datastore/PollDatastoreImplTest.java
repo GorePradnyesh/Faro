@@ -53,6 +53,7 @@ public class PollDatastoreImplTest {
         PollDatastoreImpl.storePoll(dummyPoll);
         Poll retPoll = PollDatastoreImpl.loadPollById(dummyPoll.getId(), eventId);
         Assert.assertNotNull(retPoll);
+        Assert.assertEquals(retPoll.getEventId(), eventId);
     }
 
     @Test

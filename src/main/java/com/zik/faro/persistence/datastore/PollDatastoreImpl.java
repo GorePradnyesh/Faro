@@ -1,5 +1,6 @@
 package com.zik.faro.persistence.datastore;
 
+import com.zik.faro.data.Event;
 import com.zik.faro.data.Poll;
 import java.util.List;
 
@@ -12,12 +13,12 @@ public class PollDatastoreImpl {
     }
 
     public static Poll loadPollById(final String pollId, final String eventId){
-        Poll poll = ObjectifyHelper.loadObjectByIdAndEventIdField(pollId, EVENTID_FIELD_NAME, eventId, Poll.class);
+        Poll poll = DatastoreObjectifyDAL.loadObjectWithParentId(Event.class, eventId, Poll.class, pollId);
         return poll;
     }
 
     public static List<Poll> loadPollsByEventId(final String eventId){
-        List<Poll> polls = ObjectifyHelper.loadObjectsForEventId(EVENTID_FIELD_NAME, eventId, Poll.class);
-        return polls;
+        List<Poll> pollList = DatastoreObjectifyDAL.loadObjectsByAncestorRef(Event.class, eventId, Poll.class);
+        return pollList;
     }
 }

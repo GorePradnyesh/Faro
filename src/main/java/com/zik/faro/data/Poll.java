@@ -1,8 +1,10 @@
 package com.zik.faro.data;
 
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
-import com.googlecode.objectify.annotation.Index;
+import com.googlecode.objectify.annotation.Parent;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -15,9 +17,8 @@ import java.util.UUID;
 public class Poll {
     @Id
     private String id;
-    //eventId need not be a Ref<?> or a Parent relation. A user is expected to always have the eventId while reading/writing the Poll
-    @Index
-    private String eventId;
+    @Parent
+    private Ref<Event> eventId;
     private String creator;
 
     private List<PollOption> pollOptions = new ArrayList<>();
@@ -35,7 +36,7 @@ public class Poll {
 
     public Poll(String eventId, String creator, List<PollOption> pollOptions, String owner, String description) {
         this.id = UUID.randomUUID().toString();
-        this.eventId = eventId;
+        this.eventId = Ref.create(Key.create(Event.class, eventId));
         this.creator = creator;
         this.pollOptions = pollOptions;
         this.owner = owner;
@@ -75,7 +76,7 @@ public class Poll {
 
     @XmlElement
     public String getEventId() {
-        return eventId;
+        return eventId.getKey().getName();
     }
 
     @XmlElement
