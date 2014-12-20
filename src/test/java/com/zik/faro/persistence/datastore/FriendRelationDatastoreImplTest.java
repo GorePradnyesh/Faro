@@ -102,6 +102,14 @@ public class FriendRelationDatastoreImplTest {
         List<FriendRelation> relationUser4 = FriendRelationDatastoreImpl.loadFriendsForUserId(user4.getEmail());
         Assert.assertEquals(3, relationUser4.size());
 
+        FriendRelation relation12 = FriendRelationDatastoreImpl.loadFriendRelation(user1.getEmail(), user2.getEmail());
+        Assert.assertNotNull(relation12);
+        FriendRelation relation21 = FriendRelationDatastoreImpl.loadFriendRelation(user2.getEmail(), user1.getEmail());
+        Assert.assertNotNull(relation21);
+
+        FriendRelation relation23 = FriendRelationDatastoreImpl.loadFriendRelation(user2.getEmail(), user3.getEmail());
+        Assert.assertNull(relation23);
+
     }
 
     @Test

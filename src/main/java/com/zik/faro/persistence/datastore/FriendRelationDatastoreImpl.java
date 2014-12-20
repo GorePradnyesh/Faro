@@ -14,7 +14,11 @@ public class FriendRelationDatastoreImpl {
         /*NOTE : There are two write operations for establishing the symmetrical nature of the relationship
         The operations are **IDEMPOTENT.** because the identifier of the relationship is the combination of
         both Ids. Creating and strong a relation between two uses can be repeated any number of times without
-        creating new Entities.*/
+        creating new Entities.
+
+        We do two writes, for the symmetrical relation to save on an extra read during the load operation. Reading
+        friend relations will be a lot more frequent than creating friend relations.
+        */
         FriendRelation friendRelation = new FriendRelation(faroUser1, faroUser2);
         DatastoreObjectifyDAL.storeObject(friendRelation);
 
@@ -26,5 +30,16 @@ public class FriendRelationDatastoreImpl {
         List<FriendRelation> friendRelationList =
                 DatastoreObjectifyDAL.loadObjectsByAncestorRef(FaroUser.class, faroUserId, FriendRelation.class);
         return friendRelationList;
+    }
+
+    public static FriendRelation loadFriendRelation(final String faroUserId1, final String faroUserId2){
+        /* Because of the symmetrical nature of the relation, one could very well switch the faroUserId1,2 args to
+        get the same result.*/
+        FriendRelation relation =
+                DatastoreObjectifyDAL.loadObjectWithParentId(FaroUser.class,
+                                                                faroUserId1,
+                                                                FriendRelation.class,
+                                                                faroUserId2);
+        return relation;
     }
 }
