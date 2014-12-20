@@ -14,12 +14,11 @@ import java.util.UUID;
 @XmlRootElement
 public class Poll {
     @Id
-    private final String id;
-
+    private String id;
     //eventId need not be a Ref<?> or a Parent relation. A user is expected to always have the eventId while reading/writing the Poll
     @Index
-    private final String eventId;
-    private final String creator;
+    private String eventId;
+    private String creator;
 
     private List<PollOption> pollOptions = new ArrayList<>();
     private String winnerId;
