@@ -32,6 +32,25 @@ public class DatastoreObjectifyDAL {
         return object;
     }
 
+
+    public static <T,V> T loadObjectWithParentId(final Class<V> parentClazz,
+                                                 final String parentIdValue,
+                                                 final Class<T> clazz,
+                                                 final String objectId){
+        Key<T> objectKey = Key.create(Key.create(parentClazz, parentIdValue), clazz, objectId);
+        T object = ofy().load().key(objectKey).now();
+        return object;
+    }
+
+    public static <T,V> List<T> loadObjectsByAncestorRef(final Class<V> parentClazz,
+                                                      final String parentIdValue,
+                                                      final Class<T> clazz){
+        Ref<V> parentKey = Ref.create(Key.create(parentClazz, parentIdValue));
+        List<T> objectList = ofy().load().type(clazz).ancestor(parentKey).list();
+        return objectList;
+    }
+
+
     public static <T> List<T> loadObjectsByIndexedStringFieldEQ(final String fieldName, final String fieldValue, Class<T> clazz){
         //TODO: do reflection validation to ensure that fieldName provided is Annotated with @Index
         List<T> objectList = ofy().load().type(clazz).filter(fieldName, fieldValue).list();
