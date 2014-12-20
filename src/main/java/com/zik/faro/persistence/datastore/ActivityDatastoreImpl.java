@@ -1,6 +1,7 @@
 package com.zik.faro.persistence.datastore;
 
 import com.zik.faro.data.Activity;
+import com.zik.faro.data.Event;
 
 import java.util.HashMap;
 import java.util.List;
@@ -15,8 +16,8 @@ public class ActivityDatastoreImpl {
     }
 
     public static Activity loadActivityById(final String activityId, final String eventId){
-        Activity activity =
-                ObjectifyHelper.loadObjectByIdAndEventIdField(activityId, EVENTID_FIELD_NAME, eventId, Activity.class);
+        Activity activity
+                = DatastoreObjectifyDAL.loadObjectWithParentId(Event.class, eventId, Activity.class, activityId);
         return activity;
     }
 
@@ -24,7 +25,7 @@ public class ActivityDatastoreImpl {
     //NOTE: Since the activities contain the INDEXED event id this function is placed in the ActivityDatastoreImpl
     public static List<Activity> loadActivitiesByEventId(final String eventId){
         List<Activity> activityList =
-                ObjectifyHelper.loadObjectsForEventId(EVENTID_FIELD_NAME, eventId, Activity.class);
+                DatastoreObjectifyDAL.loadObjectsByAncestorRef(Event.class, eventId, Activity.class);
         return activityList;
     }
 

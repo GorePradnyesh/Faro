@@ -1,9 +1,10 @@
 package com.zik.faro.data;
 
+import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
-import com.googlecode.objectify.annotation.Index;
+import com.googlecode.objectify.annotation.Parent;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.UUID;
@@ -14,8 +15,8 @@ import java.util.UUID;
 public class Activity {
     @Id
     private String id;
-    @Index
-    private String eventId;        //TODO: Does this need to be a Parent ?? Currently there is no requirement ( transactional or otherwise that would require a parent reln here )
+    @Parent
+    private Ref<Event> eventId;
     private Assignment assignment;
     private String name;
 
@@ -33,7 +34,7 @@ public class Activity {
 
     public Activity(String eventId, String name, String description, Location location, DateOffset date) {
         this.id = UUID.randomUUID().toString();
-        this.eventId = eventId;
+        this.eventId = Ref.create(Key.create(Event.class, eventId));
         this.name = name;
         this.description = description;
         this.location = location;
@@ -47,7 +48,7 @@ public class Activity {
     }
 
     public String getEventId() {
-        return eventId;
+        return eventId.getKey().getName();
     }
 
     public String getName() {
