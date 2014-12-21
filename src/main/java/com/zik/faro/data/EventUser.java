@@ -33,11 +33,18 @@ public class EventUser {
     }
 
     public EventUser(final String eventId, final String faroUserId){
-        this.id = UUID.randomUUID().toString();
+        this.id = generateEventUserId(eventId, faroUserId);
         this.eventRef = Ref.create(Key.create(Event.class, eventId));
         this.faroUserRef = Ref.create(Key.create(FaroUser.class, faroUserId));
         this.inviteStatus = InviteStatus.INVITED;
     }
+
+    private String generateEventUserId(final String eventId, final String faroUserId){
+        // NOTE: Since eventId and faroUserId are unique by themselves, the EventUserId will also be unique.
+        // this ensures that repeated calls with the same argument are idempotent.
+        return eventId + "/" + faroUserId;
+    }
+
 
     public String getId() {
         return id;
