@@ -19,7 +19,8 @@ import java.util.UUID;
 
 public class EventApiTest {
     private static final LocalServiceTestHelper helper =
-            new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+            new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig()
+                    .setDefaultHighRepJobPolicyUnappliedJobPercentage(50));
 
     static{
         ObjectifyService.register(Event.class);
@@ -77,12 +78,12 @@ public class EventApiTest {
         Event event = eventHandler.getEventDetails(signature, eventId);
         Assert.assertEquals(false, event.isControlFlag());
 
-        /*// Disable control flag
+        // Disable control flag
         String response = eventHandler.disableEventControl(signature, eventId);
         Assert.assertEquals(Constants.HTTP_OK, response);
 
         //Retrieve event again, verify control flag
         event = eventHandler.getEventDetails(signature, eventId);
-        Assert.assertEquals(true, event.isControlFlag());*/
+        Assert.assertEquals(true, event.isControlFlag());
     }
 }
