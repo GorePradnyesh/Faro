@@ -13,10 +13,7 @@ import org.junit.*;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static com.googlecode.objectify.ObjectifyService.ofy;
 
@@ -211,6 +208,34 @@ public class DatastoreObjectifyDALTest {
         List<B> childrenOfa1 = DatastoreObjectifyDAL.loadObjectsByAncestorRef(A.class, "a1", B.class);
         Assert.assertEquals(2, childrenOfa1.size());
     }
+
+
+    @Test
+    public void testMultiGet(){
+        List<String> keys = new ArrayList<>();
+
+        A a1 = new A("a1", "a1");
+        DatastoreObjectifyDAL.storeObject(a1);
+        keys.add(a1.id);
+
+        A a2 = new A("a2", "a2");
+        DatastoreObjectifyDAL.storeObject(a2);
+        keys.add(a2.id);
+
+        A a3 = new A("a3", "a3");
+        DatastoreObjectifyDAL.storeObject(a3);
+        keys.add(a3.id);
+
+        Map<String, A> objects = DatastoreObjectifyDAL.loadMultipleObjectsByIdSync(keys, A.class);
+        Assert.assertEquals(3, objects.size());
+
+        List<String> badKeys = new ArrayList<>();
+        badKeys.add("badKey1");
+        badKeys.add("badKey2");
+        objects = DatastoreObjectifyDAL.loadMultipleObjectsByIdSync(badKeys, A.class);
+        Assert.assertTrue(objects.isEmpty());
+    }
+
 
 
 

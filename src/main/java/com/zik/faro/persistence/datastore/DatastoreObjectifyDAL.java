@@ -4,8 +4,7 @@ import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.cmd.Query;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.googlecode.objectify.ObjectifyService.ofy;
 
@@ -32,6 +31,22 @@ public class DatastoreObjectifyDAL {
         return object;
     }
 
+    public static <T> Map<String, T> loadMultipleObjectsByIdSync(List<String> objectIds, Class<T> clazz){
+        List<Key<T>> keys = new ArrayList<>();
+        Map<String, T> objectMap = new HashMap<>();
+        for(String objectId: objectIds){
+            keys.add(Key.create(clazz, objectId));
+        }
+        Map<Key<T>, T> keyObjectMap = ofy().load().keys(keys);
+        if(keyObjectMap !=null && !keyObjectMap.isEmpty()){
+            for (Map.Entry<Key<T>, T> entry : keyObjectMap.entrySet()) {
+                Key<T> key = entry.getKey();
+                T value = entry.getValue();
+                objectMap.put(key.getName(), value);
+            }
+        }
+        return objectMap;
+    }
 
     public static <T,V> T loadObjectWithParentId(final Class<V> parentClazz,
                                                  final String parentIdValue,

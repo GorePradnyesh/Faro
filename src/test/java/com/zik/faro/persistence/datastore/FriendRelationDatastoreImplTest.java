@@ -4,6 +4,7 @@ package com.zik.faro.persistence.datastore;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
+import com.zik.faro.api.responder.MinUser;
 import com.zik.faro.commons.exceptions.IllegalDataOperation;
 import com.zik.faro.data.user.Address;
 import com.zik.faro.data.user.FaroUser;
@@ -45,11 +46,11 @@ public class FriendRelationDatastoreImplTest {
         FaroUser user2 = new FaroUser("user2@gmail.com",
                 "user", null, "2","user2@splitwise.com",
                 "00000002", new Address(44, "Abby Road","SouthEnd London","UK", 566645));
-        FriendRelation relation = new FriendRelation(user1.getEmail(), user2.getEmail());
+        FriendRelation relation = new FriendRelation(user1.getEmail(), user2.getEmail(), user1.getFirstName(), user1.getLastName(), user1.getExternalExpenseID());
         Assert.assertEquals(user1.getEmail(), relation.getFromId());
         Assert.assertEquals(user2.getEmail(), relation.getToId());
 
-        FriendRelation invertedRelation = new FriendRelation(user2.getEmail(), user1.getEmail());
+        FriendRelation invertedRelation = new FriendRelation(user2.getEmail(), user1.getEmail(), user2.getFirstName(), user2.getLastName(), user2.getExternalExpenseID());
         Assert.assertEquals(user2.getEmail(), invertedRelation.getFromId());
         Assert.assertEquals(user1.getEmail(), invertedRelation.getToId());
     }
@@ -62,7 +63,7 @@ public class FriendRelationDatastoreImplTest {
         FaroUser user2 = new FaroUser("user1@gmail.com",
                 "user", null, "1","user1@splitwise.com",
                 "00000001", new Address(44, "Abby Road","SouthEnd London","UK", 566645));
-        new FriendRelation(user1.getEmail(), user2.getEmail());
+        new FriendRelation(user1.getEmail(), user2.getEmail(), user1.getFirstName(), user1.getLastName(), user1.getExternalExpenseID());
     }
 
     @Test
@@ -87,11 +88,21 @@ public class FriendRelationDatastoreImplTest {
         2<-->4
         3<-->4
         */
-        FriendRelationDatastoreImpl.storeFriendRelation(user1.getEmail(), user2.getEmail());
-        FriendRelationDatastoreImpl.storeFriendRelation(user1.getEmail(), user3.getEmail());
-        FriendRelationDatastoreImpl.storeFriendRelation(user1.getEmail(), user4.getEmail());
-        FriendRelationDatastoreImpl.storeFriendRelation(user2.getEmail(), user4.getEmail());
-        FriendRelationDatastoreImpl.storeFriendRelation(user3.getEmail(), user4.getEmail());
+        FriendRelationDatastoreImpl.storeFriendRelation(
+                new MinUser(user1.getFirstName(), user1.getLastName(), user1.getEmail(), user1.getExternalExpenseID()),
+                new MinUser(user2.getFirstName(), user2.getLastName(), user2.getEmail(), user2.getExternalExpenseID()));
+        FriendRelationDatastoreImpl.storeFriendRelation(
+                new MinUser(user1.getFirstName(), user1.getLastName(), user1.getEmail(), user1.getExternalExpenseID()),
+                new MinUser(user3.getFirstName(), user3.getLastName(), user3.getEmail(), user3.getExternalExpenseID()));
+        FriendRelationDatastoreImpl.storeFriendRelation(
+                new MinUser(user1.getFirstName(), user1.getLastName(), user1.getEmail(), user1.getExternalExpenseID()),
+                new MinUser(user4.getFirstName(), user4.getLastName(), user4.getEmail(), user4.getExternalExpenseID()));
+        FriendRelationDatastoreImpl.storeFriendRelation(
+                new MinUser(user2.getFirstName(), user2.getLastName(), user2.getEmail(), user2.getExternalExpenseID()),
+                new MinUser(user4.getFirstName(), user4.getLastName(), user4.getEmail(), user4.getExternalExpenseID()));
+        FriendRelationDatastoreImpl.storeFriendRelation(
+                new MinUser(user3.getFirstName(), user3.getLastName(), user3.getEmail(), user3.getExternalExpenseID()),
+                new MinUser(user4.getFirstName(), user4.getLastName(), user4.getEmail(), user4.getExternalExpenseID()));
 
         List<FriendRelation> relationUser1 = FriendRelationDatastoreImpl.loadFriendsForUserId(user1.getEmail());
         Assert.assertEquals(3, relationUser1.size());
@@ -122,9 +133,15 @@ public class FriendRelationDatastoreImplTest {
                 "00000002", new Address(44, "Abby Road","SouthEnd London","UK", 566645));
 
         /* Repeat 'n' times */
-        FriendRelationDatastoreImpl.storeFriendRelation(user1.getEmail(), user2.getEmail());
-        FriendRelationDatastoreImpl.storeFriendRelation(user1.getEmail(), user2.getEmail());
-        FriendRelationDatastoreImpl.storeFriendRelation(user1.getEmail(), user2.getEmail());
+        FriendRelationDatastoreImpl.storeFriendRelation(
+                new MinUser(user1.getFirstName(), user1.getLastName(), user1.getEmail(), user1.getExternalExpenseID()),
+                new MinUser(user2.getFirstName(), user2.getLastName(), user2.getEmail(), user2.getExternalExpenseID()));
+        FriendRelationDatastoreImpl.storeFriendRelation(
+                new MinUser(user1.getFirstName(), user1.getLastName(), user1.getEmail(), user1.getExternalExpenseID()),
+                new MinUser(user2.getFirstName(), user2.getLastName(), user2.getEmail(), user2.getExternalExpenseID()));
+        FriendRelationDatastoreImpl.storeFriendRelation(
+                new MinUser(user1.getFirstName(), user1.getLastName(), user1.getEmail(), user1.getExternalExpenseID()),
+                new MinUser(user2.getFirstName(), user2.getLastName(), user2.getEmail(), user2.getExternalExpenseID()));
 
         List<FriendRelation> relationUser1 = FriendRelationDatastoreImpl.loadFriendsForUserId(user1.getEmail());
         Assert.assertEquals(1, relationUser1.size());

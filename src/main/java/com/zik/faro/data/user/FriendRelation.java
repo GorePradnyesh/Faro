@@ -15,14 +15,24 @@ public class FriendRelation {
     @Parent @Index
     private Ref<FaroUser> fromRef;
 
-    public int tempVal;
+    // NOTE : This is in a de-normalized form to reduce the queries needed to fetch friends information for a particular user
+    private String toFName;
+    private String toLName;
+    private String toExternalExpenseId;
 
-    public FriendRelation(final String fromId, final String toId) throws IllegalDataOperation {
+    public FriendRelation(final String fromId,
+                          final String toId,
+                          final String toFName,
+                          final String toLName,
+                          final String toExternalExpenseId) throws IllegalDataOperation {
         if(fromId.equals(toId)){
             throw new IllegalDataOperation("Cannot establish a friend relation to self : " + this.toId);
         }
         this.toId = toId;
         this.fromRef = Ref.create(Key.create(FaroUser.class, fromId));
+        this.toExternalExpenseId = toExternalExpenseId;
+        this.toFName = toFName;
+        this.toLName = toLName;
     }
 
     public String getFromId(){
@@ -36,5 +46,18 @@ public class FriendRelation {
     public String getToId(){
         return this.toId;
     }
+
+    public String getToFName() {
+        return toFName;
+    }
+
+    public String getToLName() {
+        return toLName;
+    }
+
+    public String getToExternalExpenseId() {
+        return toExternalExpenseId;
+    }
+
 
 }
