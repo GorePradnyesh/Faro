@@ -11,6 +11,7 @@ import com.zik.faro.data.Event;
 import com.zik.faro.data.Location;
 import com.zik.faro.data.expense.ExpenseGroup;
 import com.zik.faro.data.user.InviteStatus;
+import com.zik.faro.persistence.datastore.EventDatastoreImpl;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -27,14 +28,6 @@ public class EventHandler {
         ParamValidation.validateSignature(signature);
         //TODO: validate eventIDs
 
-        /*//TODO: replace the dummy static code below with the actual calls
-        Event dummyEvent = new Event("Lake Shasta "+ eventId,
-                new DateOffset(new Date(), 60 * 1000),
-                new DateOffset(new Date(), 2 * 60* 1000),
-                false,
-                new ExpenseGroup("Lake Shasta", "shasta123"),
-                new Location("Lake Shasta"));
-        return dummyEvent;*/
         String userId = "userIdExtractedFromSignature";
         Event retrievedEvent = EventManagement.getEventDetails(userId, eventId);
         return retrievedEvent;
@@ -63,7 +56,8 @@ public class EventHandler {
         ParamValidation.validateSignature(signature);
         //TODO: validate eventIDs
 
-        //TODO: replace the dummy static code below with the actual calls
+        String userId = "userIdExtractedFromSignature";
+        EventManagement.disableEventControls(userId, eventId);
         return HTTP_OK;
     }
 

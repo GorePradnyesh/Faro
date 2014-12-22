@@ -18,7 +18,7 @@ public class Event {
     private DateOffset startDate;           // TODO: Move this to a junction table ?
     private DateOffset endDate;
     @Index
-    private boolean controlFlag;
+    private boolean controlFlag;      // TODO: Move this to Objectstatus
     private ExpenseGroup expenseGroup;
     private Location location;
     private ObjectStatus status;

@@ -27,6 +27,11 @@ public class EventManagement {
         return event;
     }
 
+    public static void disableEventControls(final String userId, final String eventId){
+        //TODO: Validate that the user has permissions to modify event, from the EventUser table
+        EventDatastoreImpl.disableEventControlFlag(eventId);
+    }
+
     @XmlRootElement
     public static class MinEvent{
         public String id;
