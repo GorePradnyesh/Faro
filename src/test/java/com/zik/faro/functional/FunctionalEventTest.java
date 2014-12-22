@@ -1,8 +1,8 @@
-package com.zik.faro.api.functional;
+package com.zik.faro.functional;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
-import com.zik.faro.api.TestHelper;
+import com.zik.faro.TestHelper;
 import com.zik.faro.api.responder.EventCreateData;
 import com.zik.faro.data.DateOffset;
 import com.zik.faro.data.Location;
@@ -22,7 +22,7 @@ import java.util.Date;
 
 
 @Ignore
-public class EventApiTest {
+public class FunctionalEventTest {
 
     private static URL endpoint;
 
@@ -58,6 +58,7 @@ public class EventApiTest {
                 .queryParam("Signature", "dummySignature")
                 .header("Content-Type", mediaType)
                 .post(String.class, body);
+        System.out.println(response);
         Assert.assertNotNull(response);
         Assert.assertTrue(!response.isEmpty());
     }

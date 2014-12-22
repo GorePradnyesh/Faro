@@ -3,11 +3,7 @@ package com.zik.faro.persistence.datastore;
 import java.util.Date;
 import java.util.UUID;
 
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
@@ -36,8 +32,8 @@ public class EventDatastoreImplTest {
         helper.setUp();
     }
 
-    @AfterClass
-    public static void tearDown() {
+    @After
+    public void tearDown() {
         helper.tearDown();
     }
 

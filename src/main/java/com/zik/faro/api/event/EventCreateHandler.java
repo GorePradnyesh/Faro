@@ -49,7 +49,7 @@ public class EventCreateHandler {
         //TODO: Extract userID from Signature
         final String userId = "dummyUser";
 
-        EventManagement.MinEvent minEvent = EventManagement.createEvent(eventCreateData, userId);
+        EventManagement.MinEvent minEvent = EventManagement.createEvent(userId, eventCreateData);
         return minEvent;
     }
 
