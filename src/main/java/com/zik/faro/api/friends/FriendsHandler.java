@@ -52,11 +52,11 @@ public class FriendsHandler {
     //TODO: response return List<MinUser> instead of List<FriendRelation>
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public JResponse<List<FriendRelation>> getFriends(@QueryParam(Constants.SIGNATURE_QUERY_PARAM) final String signature){
+    public JResponse<List<MinUser>> getFriends(@QueryParam(Constants.SIGNATURE_QUERY_PARAM) final String signature){
         ParamValidation.validateSignature(signature);
         //TODO: extract the actual user id from the signature. A valid signature means a valid user
         String userId = signature;
-        List<FriendRelation> friends = FriendManagement.getFriendList(userId);
+        List<MinUser> friends = FriendManagement.getFriendList(userId);
 
         return JResponse.ok(friends).build();
     }

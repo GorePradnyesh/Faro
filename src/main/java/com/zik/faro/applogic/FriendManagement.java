@@ -35,10 +35,17 @@ public class FriendManagement {
         return;
     }
 
-    public static List<FriendRelation> getFriendList(final String faroUserId){
+    public static List<MinUser> getFriendList(final String faroUserId){
         // A valid signature implies that the faroUserId is a valid existing user. Hence no need to validate faroUserId
         List<FriendRelation> friendRelations = FriendRelationDatastoreImpl.loadFriendsForUserId(faroUserId);
-        return friendRelations;
+        List<MinUser> friendList = new ArrayList<>();
+        for(FriendRelation friendRelation : friendRelations){
+            MinUser friend = new MinUser(friendRelation.getToFName(), friendRelation.getToLName(),
+                    friendRelation.getToId(), friendRelation.getToExternalExpenseId());
+            friendList.add(friend);
+        }
+        // an empty list implies a lonely user with no friends
+        return friendList;
     }
 
 }
