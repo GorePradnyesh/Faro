@@ -1,5 +1,6 @@
 package com.zik.faro.persistence.datastore;
 
+import com.zik.faro.api.responder.MinUser;
 import com.zik.faro.commons.exceptions.IllegalDataOperation;
 import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.data.user.FriendRelation;
@@ -10,7 +11,8 @@ public class FriendRelationDatastoreImpl {
 
     private static final String FROM_USER_FIELD_NAME = "fromId";
 
-    public static void storeFriendRelation(final String faroUser1, final String faroUser2) throws IllegalDataOperation {
+    public static void storeFriendRelation(MinUser bob, MinUser alice) throws IllegalDataOperation {
+        /* Using Bob and Alice for more readability than user1/user2 or fromUser/toUser */
         /*NOTE : There are two write operations for establishing the symmetrical nature of the relationship
         The operations are **IDEMPOTENT.** because the identifier of the relationship is the combination of
         both Ids. Creating and strong a relation between two uses can be repeated any number of times without
@@ -18,11 +20,15 @@ public class FriendRelationDatastoreImpl {
 
         We do two writes, for the symmetrical relation to save on an extra read during the load operation. Reading
         friend relations will be a lot more frequent than creating friend relations.
+
+        Also data is de-normalized and duplicated to reduce the queries needed to load entities in the future.
         */
-        FriendRelation friendRelation = new FriendRelation(faroUser1, faroUser2);
+        FriendRelation friendRelation = new FriendRelation(bob.email, alice.email,
+                                                alice.firstName, alice.lastName, alice.expenseUserId);
         DatastoreObjectifyDAL.storeObject(friendRelation);
 
-        friendRelation = new FriendRelation(faroUser2, faroUser1);
+        friendRelation = new FriendRelation(alice.email, bob.email,
+                                                bob.firstName, bob.lastName, bob.expenseUserId);
         DatastoreObjectifyDAL.storeObject(friendRelation);
     }
 
