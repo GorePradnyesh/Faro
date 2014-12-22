@@ -5,7 +5,7 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
 import com.zik.faro.api.profile.ProfileHandler;
-import com.zik.faro.data.Event;
+
 import com.zik.faro.data.user.Address;
 import com.zik.faro.data.user.FaroUser;
 import org.junit.*;
