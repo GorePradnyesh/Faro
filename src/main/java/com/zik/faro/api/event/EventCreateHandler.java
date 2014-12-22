@@ -2,6 +2,7 @@ package com.zik.faro.api.event;
 
 
 import com.zik.faro.api.responder.EventCreateData;
+import com.zik.faro.applogic.EventManagement;
 import com.zik.faro.commons.ParamValidation;
 import com.zik.faro.data.Event;
 import com.zik.faro.persistence.datastore.EventDatastoreImpl;
@@ -40,29 +41,16 @@ public class EventCreateHandler {
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public MinEvent createEvent(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
+    public EventManagement.MinEvent createEvent(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
                                 EventCreateData eventCreateData){
         ParamValidation.validateSignature(signature);
         ParamValidation.genericParamValidations(eventCreateData,"eventCreateData");
 
-        /*Create a new event with the provided data, with the FALSE control flag.*/
-        Event newEvent = new Event(eventCreateData.eventName, eventCreateData.startDate,
-                eventCreateData.endDate, false, eventCreateData.expenseGroup, eventCreateData.location);
-        EventDatastoreImpl.storeEvent(newEvent);
+        //TODO: Extract userID from Signature
+        final String userId = "dummyUser";
 
-        return new MinEvent(newEvent.getEventId(), newEvent.getEventName());
+        EventManagement.MinEvent minEvent = EventManagement.createEvent(userId, eventCreateData);
+        return minEvent;
     }
 
-    @XmlRootElement
-    private static class MinEvent{
-        public String id;
-        public String name;
-
-        MinEvent(String id, String name){
-            this.id = id;
-            this.name = name;
-        }
-
-        private MinEvent(){};
-    }
 }

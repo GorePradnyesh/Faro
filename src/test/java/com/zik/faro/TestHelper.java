@@ -1,4 +1,4 @@
-package com.zik.faro.api;
+package com.zik.faro;
 
 import org.codehaus.jackson.map.ObjectMapper;
 

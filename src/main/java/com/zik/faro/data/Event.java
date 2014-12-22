@@ -13,12 +13,11 @@ import java.util.UUID;
 @XmlRootElement
 public class Event {
     @Id @Index
-    private final String eventId;           // TODO: make this of type ID
-    private final String eventName;         // TODO: Indexing this wont help. We need to add this to "Full Text Search"
-    private DateOffset startDate;           // TODO: Move this to a junction table ?
+    private String eventId;           // TODO: make this of type ID
+    private String eventName;         // TODO: Indexing this wont help. We need to add this to "Full Text Search"
+    private DateOffset startDate;     // TODO: Move this to a junction table ?
     private DateOffset endDate;
-    @Index
-    private boolean controlFlag;
+    private boolean controlFlag;      // TODO: Move this to Objectstatus
     private ExpenseGroup expenseGroup;
     private Location location;
     private ObjectStatus status;
