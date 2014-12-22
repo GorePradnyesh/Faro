@@ -14,6 +14,8 @@ import com.zik.faro.data.Event;
 import com.zik.faro.data.Location;
 import org.junit.*;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import java.util.Date;
 import java.util.UUID;
 
@@ -85,5 +87,22 @@ public class EventApiTest {
         //Retrieve event again, verify control flag
         event = eventHandler.getEventDetails(signature, eventId);
         Assert.assertEquals(true, event.isControlFlag());
+    }
+
+    @Test
+    public void testEventControlFlagBadEventId(){
+        String signature = "dummySignature";
+        String eventName = UUID.randomUUID().toString();
+
+        EventHandler eventHandler = new EventHandler();
+        boolean correctExceptionTriggered = false;
+        // Disable control flag
+        try {
+            String response = eventHandler.disableEventControl(signature, "BADEVENTID");
+        }catch(WebApplicationException ex){
+            Assert.assertEquals(Response.Status.NOT_FOUND.getStatusCode(), ex.getResponse().getStatus());
+            correctExceptionTriggered = true;
+        }
+        Assert.assertTrue(correctExceptionTriggered);
     }
 }

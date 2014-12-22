@@ -6,6 +6,7 @@ import static com.zik.faro.commons.Constants.*;
 
 import com.zik.faro.applogic.EventManagement;
 import com.zik.faro.commons.ParamValidation;
+import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.data.DateOffset;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.Location;
@@ -15,6 +16,7 @@ import com.zik.faro.persistence.datastore.EventDatastoreImpl;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.Date;
 
 
@@ -57,7 +59,14 @@ public class EventHandler {
         //TODO: validate eventIDs
 
         String userId = "userIdExtractedFromSignature";
-        EventManagement.disableEventControls(userId, eventId);
+        try {
+            EventManagement.disableEventControls(userId, eventId);
+        } catch (DataNotFoundException e) {
+            Response response = Response.status(Response.Status.NOT_FOUND)
+                    .entity(e.getMessage())
+                    .build();
+            throw new WebApplicationException(response);
+        }
         return HTTP_OK;
     }
 

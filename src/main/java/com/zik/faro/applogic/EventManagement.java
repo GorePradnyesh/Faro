@@ -1,6 +1,7 @@
 package com.zik.faro.applogic;
 
 import com.zik.faro.api.responder.EventCreateData;
+import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.data.Event;
 import com.zik.faro.persistence.datastore.EventDatastoreImpl;
 
@@ -27,7 +28,7 @@ public class EventManagement {
         return event;
     }
 
-    public static void disableEventControls(final String userId, final String eventId){
+    public static void disableEventControls(final String userId, final String eventId) throws DataNotFoundException {
         //TODO: Validate that the user has permissions to modify event, from the EventUser table
         EventDatastoreImpl.disableEventControlFlag(eventId);
     }
