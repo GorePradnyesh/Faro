@@ -52,6 +52,8 @@ public class FaroUser {
 
     /*Getters*/
 
+    public String getId() { return this.email; }
+
     public String getEmail() {
         return email;
     }
