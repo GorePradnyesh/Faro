@@ -124,6 +124,27 @@ public class FriendRelationDatastoreImplTest {
     }
 
     @Test
+    public void testDeleteFriendRelation() throws IllegalDataOperation {
+        FaroUser user1 = new FaroUser("user1@gmail.com",
+                "user", null, "1", "user1@splitwise.com",
+                "00000001", new Address(44, "Abby Road", "SouthEnd London", "UK", 566645));
+        FaroUser user2 = new FaroUser("user2@gmail.com",
+                "user", null, "2", "user2@splitwise.com",
+                "00000002", new Address(44, "Abby Road", "SouthEnd London", "UK", 566645));
+
+        FriendRelationDatastoreImpl.storeFriendRelation(
+                new MinUser(user1.getFirstName(), user1.getLastName(), user1.getEmail(), user1.getExternalExpenseID()),
+                new MinUser(user2.getFirstName(), user2.getLastName(), user2.getEmail(), user2.getExternalExpenseID()));
+
+        List<FriendRelation> relationUser1 = FriendRelationDatastoreImpl.loadFriendsForUserId(user1.getEmail());
+        Assert.assertEquals(1, relationUser1.size());
+
+        FriendRelationDatastoreImpl.deleteFriendRelation(user1.getId(), user2.getId());
+        List<FriendRelation> deletedRelations = FriendRelationDatastoreImpl.loadFriendsForUserId(user1.getEmail());
+        Assert.assertEquals(0, deletedRelations.size());
+    }
+
+    @Test
     public void testFriendRelationIdempotentStroate() throws IllegalDataOperation {
         FaroUser user1 = new FaroUser("user1@gmail.com",
                 "user", null, "1","user1@splitwise.com",

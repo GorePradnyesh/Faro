@@ -68,6 +68,12 @@ public class FriendsHandler {
                                       @QueryParam(Constants.FARO_USER_ID_PARAM) final String userId){
         ParamValidation.validateSignature(signature);
         ParamValidation.genericParamValidations(userId, "userId");
+
+        //TODO: extract the actual user id from the signature. A valid signature means a valid user
+        String fromUser = signature;
+        String toUser = userId;
+        FriendManagement.deleteFriendRelationship(fromUser, toUser);
+
         //TODO: Replace below static response with actual code
         return JResponse.ok(Constants.HTTP_OK).build();
     }

@@ -75,4 +75,31 @@ public class FriendApiTest {
         List<MinUser> minUsers2 = relationList.getEntity();
         Assert.assertEquals(1, minUsers2.size());
     }
+
+    @Test
+    public void testDeleteFriendRelation(){
+        int userCount = 3;
+        for(int i=0; i< userCount; i++) {
+            FaroUser user = new FaroUser("user"+i+"@gmail.com",
+                    "user"+i, null, "user"+i+"lname",
+                    "user"+i+"@splitwise.com",
+                    "0000000"+i,
+                    new Address(44, "Abby Road", "SouthEnd London", "UK", 566645));
+            UserDatastoreImpl.storeUser(user);
+        }
+        FriendsHandler friendsHandler = new FriendsHandler();
+        friendsHandler.inviteFriend("user0@gmail.com", "user1@gmail.com");
+        friendsHandler.inviteFriend("user0@gmail.com", "user2@gmail.com");
+
+        JResponse<List<MinUser>> relationList =
+                friendsHandler.getFriends("user0@gmail.com");
+        List<MinUser> minUsers1 = relationList.getEntity();
+        Assert.assertEquals(2, minUsers1.size());
+
+        friendsHandler.unFriend("user0@gmail.com", "user1@gmail.com");
+        JResponse<List<MinUser>> deletedRelationList =
+                friendsHandler.getFriends("user0@gmail.com");
+        Assert.assertEquals(1, deletedRelationList.getEntity().size());
+
+    }
 }

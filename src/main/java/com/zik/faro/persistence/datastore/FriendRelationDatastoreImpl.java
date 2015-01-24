@@ -38,6 +38,9 @@ public class FriendRelationDatastoreImpl {
         return friendRelationList;
     }
 
+
+    //TODO: toUser - fromUser asymmmetric Nature of the FriendRelation should be taken. The to part of the relation
+    // has more info. So refactor the function accordingly.
     public static FriendRelation loadFriendRelation(final String faroUserId1, final String faroUserId2){
         /* Because of the symmetrical nature of the relation, one could very well switch the faroUserId1,2 args to
         get the same result.*/
@@ -48,4 +51,11 @@ public class FriendRelationDatastoreImpl {
                                                                 faroUserId2);
         return relation;
     }
+
+    public static void deleteFriendRelation(final String faroUserId1, final String faroUserId2){
+        DatastoreObjectifyDAL.deleteObjectWithParentId(FaroUser.class, faroUserId2, FriendRelation.class, faroUserId1);
+        DatastoreObjectifyDAL.deleteObjectWithParentId(FaroUser.class, faroUserId1, FriendRelation.class, faroUserId2);
+    }
+
+
 }

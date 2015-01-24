@@ -209,6 +209,19 @@ public class DatastoreObjectifyDALTest {
         Assert.assertEquals(2, childrenOfa1.size());
     }
 
+    @Test
+    public void deleteObjectUsingParentId(){
+        B b3 = new B("b1", "a2", 6);
+        DatastoreObjectifyDAL.storeObject(b3);
+        // Verify the latest b3 objects stored with id b1, parent a2
+        B rb3 = DatastoreObjectifyDAL.loadObjectWithParentId(A.class, "a2", B.class, "b1");
+        Assert.assertEquals(b3.val, rb3.val);
+
+        DatastoreObjectifyDAL.deleteObjectWithParentId(A.class, "a2", B.class, "b1");
+        B deletedObject = DatastoreObjectifyDAL.loadObjectWithParentId(A.class, "a2", B.class, "b1");
+        Assert.assertNull(deletedObject);
+    }
+
 
     @Test
     public void testMultiGet(){

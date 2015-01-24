@@ -57,6 +57,15 @@ public class DatastoreObjectifyDAL {
         return object;
     }
 
+    public static <T,V> void deleteObjectWithParentId(final Class<V> parentClazz,
+                                                      final String parentIdValue,
+                                                      final Class<T> clazz,
+                                                      final String objectId){
+        Key<T> objectKey = Key.create(Key.create(parentClazz, parentIdValue), clazz, objectId);
+        ofy().delete().key(objectKey).now();
+    }
+
+
     public static <T,V> List<T> loadObjectsByAncestorRef(final Class<V> parentClazz,
                                                       final String parentIdValue,
                                                       final Class<T> clazz){
@@ -115,6 +124,7 @@ public class DatastoreObjectifyDAL {
         List<T> objectList = ofy().load().type(clazz).filter(filterFieldName, filterRef).list();
         return objectList;
     }
+
 
     //===================== HELPER FUNCTIONS =====================
 

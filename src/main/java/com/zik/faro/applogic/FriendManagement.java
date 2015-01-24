@@ -48,4 +48,8 @@ public class FriendManagement {
         return friendList;
     }
 
+    public static void deleteFriendRelationship(final String fromUserId, final String toUserId){
+        FriendRelationDatastoreImpl.deleteFriendRelation(fromUserId, toUserId);
+    }
+
 }
