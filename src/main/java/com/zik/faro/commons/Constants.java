@@ -36,6 +36,7 @@ public final class Constants {
     public static final String REMOVE_PATH_CONST                                = "/remove";
 
     public static final String PROFILE_PATH_CONST                               = "/profile";
+    public static final String PROFILE_CREATE_PATH_CONST                        = "/create";
 
     public static final String FEEDBACK_PATH_CONST                              = "/feedback";
 

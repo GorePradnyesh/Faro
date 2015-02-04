@@ -4,7 +4,6 @@ import com.sun.jersey.api.JResponse;
 import com.zik.faro.api.responder.MinUser;
 import com.zik.faro.commons.ParamValidation;
 import com.zik.faro.data.expense.ExpenseGroup;
-import com.zik.faro.data.user.FaroUserName;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -27,8 +26,8 @@ public class ExpenseHandler {
         final List<MinUser> friendList = new ArrayList<>();
 
         //TODO: Replace below dummy static response with actual code
-        friendList.add(new MinUser(new FaroUserName("David","Gilmour"+eventId),"dg@dgdg.com", "dg@splitwise.com"));
-        friendList.add(new MinUser(new FaroUserName("Roger","Waters"+eventId),"rw@dgdg.com", "rw@splitwise.com"));
+        friendList.add(new MinUser("David","Gilmour"+eventId,"dg@dgdg.com", "dg@splitwise.com"));
+        friendList.add(new MinUser("Roger","Waters"+eventId,"rw@dgdg.com", "rw@splitwise.com"));
 
         return JResponse.ok(friendList).build();
     }

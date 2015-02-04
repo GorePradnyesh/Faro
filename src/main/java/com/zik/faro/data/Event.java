@@ -1,18 +1,23 @@
 package com.zik.faro.data;
 
+import com.googlecode.objectify.annotation.Entity;
+import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Index;
 import com.zik.faro.data.expense.ExpenseGroup;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.UUID;
 
+@Entity
 @XmlRootElement
 public class Event {
-    private final String eventId; // TODO: make this of type ID
-    private final String eventName;
-    private DateOffset startDate;
+    @Id @Index
+    private String eventId;           // TODO: make this of type ID
+    private String eventName;         // TODO: Indexing this wont help. We need to add this to "Full Text Search"
+    private DateOffset startDate;     // TODO: Move this to a junction table ?
     private DateOffset endDate;
-    private boolean controlFlag;
+    private boolean controlFlag;      // TODO: Move this to Objectstatus
     private ExpenseGroup expenseGroup;
     private Location location;
     private ObjectStatus status;

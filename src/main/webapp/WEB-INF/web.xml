@@ -25,7 +25,11 @@
         <servlet-name>Jersey Web Application</servlet-name>
         <url-pattern>/v1/*</url-pattern>
     </servlet-mapping>
-    <!--
+    <!-- USED FOR THE WARM-UP SCRIPTS THAT NEED TO RUN BEFORE THE SERVICE CAN BE USED-->
+    <listener>
+        <listener-class>com.zik.faro.api.base.DefaultServletContextListener</listener-class>
+    </listener>
+    <!-- ENABLE THE OBJECTIFY FILTER FOR ALL THE REQUESTS /* PATTERN -->
     <filter>
         <filter-name>ObjectifyFilter</filter-name>
         <filter-class>com.googlecode.objectify.ObjectifyFilter</filter-class>
@@ -34,5 +38,5 @@
         <filter-name>ObjectifyFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-    -->
+
 </web-app>

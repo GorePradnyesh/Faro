@@ -2,13 +2,15 @@ package com.zik.faro.api.profile;
 
 
 import static com.zik.faro.commons.Constants.*;
+
+import com.zik.faro.applogic.UserManagement;
 import com.zik.faro.commons.ParamValidation;
 import com.zik.faro.data.user.Address;
 import com.zik.faro.data.user.FaroUser;
-import com.zik.faro.data.user.FaroUserName;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 @Path(PROFILE_PATH_CONST)
 public class ProfileHandler {
@@ -16,19 +18,27 @@ public class ProfileHandler {
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public FaroUser getProfile(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature){
         ParamValidation.validateSignature(signature);
-        // TODO: Wrap user within profile object, used for responder
-        return new FaroUser("rwaters@gmail.com",
-                new FaroUserName("Roger","wAters"),
-                "rwaters@splitwise.com",
-                "4085393212",
-                new Address(44, "Abby Road","SouthEnd London","UK", 566645));
+
+        String userId = signature;      //TODO: Extract userId from signature !!
+        FaroUser user = UserManagement.loadFaroUser(userId);
+        if(user == null){
+            Response response = Response.status(404).entity("User not found " + userId).build();
+            throw new WebApplicationException(response);
+        }
+        return user;
     }
 
+    @Path(PROFILE_CREATE_PATH_CONST)
     @PUT
-    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public String getProfileJson(FaroUser faroUser, @QueryParam(SIGNATURE_QUERY_PARAM) final String signature){
-        // TODO:  Add param validation
+    public String createProfile(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature, final FaroUser faroUser){
         ParamValidation.validateSignature(signature);
-        return faroUser.userName.firstName;
+        //TODO: Verify that username in Signature and the faroUser.id is the same
+        UserManagement.storeFaroUser(faroUser.getId(), faroUser);
+        return HTTP_OK;
     }
+
+
+
+
+
 }

@@ -4,16 +4,19 @@ import com.zik.faro.api.responder.InviteeList;
 import com.zik.faro.api.responder.MinUser;
 import static com.zik.faro.commons.Constants.*;
 
+import com.zik.faro.applogic.EventManagement;
 import com.zik.faro.commons.ParamValidation;
+import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.data.DateOffset;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.Location;
 import com.zik.faro.data.expense.ExpenseGroup;
-import com.zik.faro.data.user.FaroUserName;
 import com.zik.faro.data.user.InviteStatus;
+import com.zik.faro.persistence.datastore.EventDatastoreImpl;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.Date;
 
 
@@ -27,14 +30,9 @@ public class EventHandler {
         ParamValidation.validateSignature(signature);
         //TODO: validate eventIDs
 
-        //TODO: replace the dummy static code below with the actual calls
-        Event dummyEvent = new Event("Lake Shasta "+ eventId,
-                new DateOffset(new Date(), 60 * 1000),
-                new DateOffset(new Date(), 2 * 60* 1000),
-                false,
-                new ExpenseGroup("Lake Shasta", "shasta123"),
-                new Location("Lake Shasta"));
-        return dummyEvent;
+        String userId = "userIdExtractedFromSignature";
+        Event retrievedEvent = EventManagement.getEventDetails(userId, eventId);
+        return retrievedEvent;
     }
 
     //TODO: Add maxCount query idString param;
@@ -48,8 +46,8 @@ public class EventHandler {
 
         //TODO: replace the dummy static code below with the actual calls
         InviteeList userStatus = new InviteeList(eventId);
-        userStatus.addUserStatus(new MinUser(new FaroUserName("David", "Gilmour"), "dg@gmail.com"), InviteStatus.ACCEPTED);
-        userStatus.addUserStatus(new MinUser(new FaroUserName("Roger", "Waters"), "rw@gmail.com"), InviteStatus.INVITED);
+        userStatus.addUserStatus(new MinUser("David", "Gilmour", "dg@gmail.com"), InviteStatus.ACCEPTED);
+        userStatus.addUserStatus(new MinUser("Roger", "Waters", "rw@gmail.com"), InviteStatus.INVITED);
         return userStatus;
     }
 
@@ -60,7 +58,15 @@ public class EventHandler {
         ParamValidation.validateSignature(signature);
         //TODO: validate eventIDs
 
-        //TODO: replace the dummy static code below with the actual calls
+        String userId = "userIdExtractedFromSignature";
+        try {
+            EventManagement.disableEventControls(userId, eventId);
+        } catch (DataNotFoundException e) {
+            Response response = Response.status(Response.Status.NOT_FOUND)
+                    .entity(e.getMessage())
+                    .build();
+            throw new WebApplicationException(response);
+        }
         return HTTP_OK;
     }
 
@@ -73,14 +79,5 @@ public class EventHandler {
         //TODO: replace the dummy static code below with the actual calls
         return HTTP_OK;
     }
-
-    @Path(EVENT_CREATE_PATH_CONST)
-    @PUT
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public String createEvent(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature){
-        return null;//TODO: partial APIs
-    }
-
-
 
 }
