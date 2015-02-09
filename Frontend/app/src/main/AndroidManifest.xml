@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.nakulshah.listviewyoutube" >
+
+    <application
+        android:allowBackup="true"
+        android:label="Faro"
+        android:theme="@style/AppTheme" >
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+        <activity
+            android:name=".MainActivity"
+            android:label="Faro" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".CreateNewEvent"
+            android:label="@string/title_activity_create_new_event" >
+            <intent-filter>
+                <action android:name="android.intent.action.CREATENEWEVENT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".EventLandingPage"
+            android:label="@string/title_activity_event_landing_page" >
+            <intent-filter>
+                <action android:name="android.intent.action.EVENTLANDINGPAGE" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".AppLandingPage"
+            android:label="@string/title_activity_app_landing_page" >
+            <intent-filter>
+                <action android:name="android.intent.action.APPLANDINGPAGE" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".CalendarView"
+            android:label="@string/title_activity_calendar_view" >
+        </activity>
+        <activity
+            android:name=".EventCalendarView"
+            android:label="@string/title_activity_event_calendar_view" >
+        </activity>
+        <activity
+            android:name=".PollLandingPage"
+            android:label="@string/title_activity_poll_landing_page" >
+        </activity>
+        <activity
+            android:name=".CreateNewPoll"
+            android:label="@string/title_activity_create_new_poll" >
+        </activity>
+    </application>
+
+</manifest>
