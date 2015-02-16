@@ -63,7 +63,7 @@ public class FunctionalEventTest {
         Assert.assertTrue(!response.isEmpty());
     }
 
-    @Test
+    //@Test
     public void getEventDetailsTest() throws URISyntaxException {
         Client c = Client.create();
         WebResource webResource = c.resource(endpoint.toURI());
