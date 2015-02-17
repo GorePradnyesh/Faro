@@ -22,7 +22,6 @@
         android:id="@+id/eventNameTextEdit"
         android:layout_below="@+id/textView"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:layout_marginTop="40dp"
         android:autoText="false"
         android:editable="true"
@@ -37,7 +36,6 @@
         android:layout_marginTop="15dp"
         android:layout_below="@+id/eventNameTextEdit"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:editable="true"
         android:hint="Event Status"
         android:enabled="false" />
@@ -51,7 +49,6 @@
         android:enabled="false"
         android:layout_alignParentBottom="true"
         android:layout_alignLeft="@+id/textView"
-        android:layout_alignStart="@+id/textView"
         android:layout_marginBottom="36dp" />
 
     <Button
@@ -61,8 +58,7 @@
         android:text="Cancel"
         android:id="@+id/createNewEventCancel"
         android:layout_alignTop="@+id/createNewEventOK"
-        android:layout_alignRight="@+id/textView"
-        android:layout_alignEnd="@+id/textView" />
+        android:layout_alignRight="@+id/textView" />
 
 
 

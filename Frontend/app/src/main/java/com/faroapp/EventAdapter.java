@@ -1,4 +1,4 @@
-package com.example.nakulshah.listviewyoutube;
+package com.faroapp;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,7 +8,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
+import com.faroapp.R;
 
 import java.text.DateFormat;
 import java.util.ArrayList;

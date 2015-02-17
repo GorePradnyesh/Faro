@@ -1,11 +1,7 @@
-package com.example.nakulshah.listviewyoutube;
-
-import android.os.Parcel;
-import android.os.Parcelable;
+package com.faroapp;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Random;
 
 /**
  * Created by nakulshah on 1/8/15.

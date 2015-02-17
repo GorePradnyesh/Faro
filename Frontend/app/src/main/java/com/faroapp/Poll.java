@@ -1,4 +1,4 @@
-package com.example.nakulshah.listviewyoutube;
+package com.faroapp;
 
 import java.util.ArrayList;
 
@@ -7,7 +7,7 @@ import java.util.ArrayList;
  */
 public class Poll {
     private String _pollQuestion = null;
-    ArrayList <String> _pollOptions = new ArrayList<>();
+    ArrayList <String> _pollOptions = new ArrayList<String>();
     private boolean _multiChoice = false;
 
     public String get_pollQuestion() {

@@ -20,7 +20,6 @@
         android:id="@+id/eventStatusText"
         android:layout_below="@+id/eventNameText"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:layout_marginTop="20dp" />
 
     <ImageButton
@@ -43,7 +42,6 @@
         android:id="@+id/from"
         android:layout_below="@+id/eventStatusText"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:layout_marginTop="10dp" />
 
     <TextView
@@ -53,7 +51,6 @@
         android:id="@+id/startDateDisplay"
         android:layout_below="@+id/from"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="false"
         android:layout_marginTop="5dp" />
 
     <TextView
@@ -62,8 +59,7 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:id="@+id/startTimeDisplay"
         android:layout_alignTop="@+id/startDateDisplay"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentRight="true" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -73,8 +69,7 @@
         android:id="@+id/to"
         android:layout_marginTop="10dp"
         android:layout_below="@+id/startDateDisplay"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentLeft="true" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -83,7 +78,6 @@
         android:id="@+id/endDateDisplay"
         android:layout_below="@+id/to"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="false"
         android:layout_marginTop="5dp" />
 
     <TextView
@@ -92,8 +86,7 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:id="@+id/endTimeDisplay"
         android:layout_alignTop="@+id/endDateDisplay"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentRight="true" />
 
     <ImageButton
         android:layout_width="wrap_content"

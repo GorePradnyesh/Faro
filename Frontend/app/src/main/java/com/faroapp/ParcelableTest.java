@@ -1,4 +1,4 @@
-package com.example.nakulshah.listviewyoutube;
+package com.faroapp;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -48,7 +48,7 @@ public class ParcelableTest implements Parcelable {
         dest.writeInt(status);
     }
 
-    public static final Parcelable.Creator<ParcelableTest> CREATOR = new Parcelable.Creator<ParcelableTest>() {
+    public static final Creator<ParcelableTest> CREATOR = new Creator<ParcelableTest>() {
         public ParcelableTest createFromParcel(Parcel in) {
             return new ParcelableTest(in);
         }

@@ -1,10 +1,10 @@
-package com.example.nakulshah.listviewyoutube;
+package com.faroapp;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Menu;
@@ -13,13 +13,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.TimePicker;
 
+import com.faroapp.R;
+
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.text.DateFormat;
-import java.util.Locale;
 
 /*
  * On this page an Event can be created with certain basic requirements like the Event Name, Start

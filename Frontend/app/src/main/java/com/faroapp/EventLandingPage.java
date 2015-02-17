@@ -1,21 +1,15 @@
-package com.example.nakulshah.listviewyoutube;
+package com.faroapp;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.view.View;
 
-import android.widget.Toast;
-import android.os.Parcelable;
-import android.support.v7.app.ActionBarActivity;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
+import com.faroapp.R;
 
 
 public class EventLandingPage extends Activity {
@@ -42,8 +36,8 @@ public class EventLandingPage extends Activity {
         ImageButton pollButton = (ImageButton)findViewById(R.id.pollImageButton);
         pollButton.setImageResource(R.drawable.poll_icon);
 
-        AppLandingPage = new Intent(EventLandingPage.this, AppLandingPage.class);
-        final Intent PollLandingPage = new Intent(EventLandingPage.this, PollLandingPage.class);
+        AppLandingPage = new Intent(EventLandingPage.this, com.faroapp.AppLandingPage.class);
+        final Intent PollLandingPage = new Intent(EventLandingPage.this, com.faroapp.PollLandingPage.class);
 
 
         Bundle extras = getIntent().getExtras();

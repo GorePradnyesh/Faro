@@ -1,7 +1,8 @@
-package com.example.nakulshah.listviewyoutube;
+package com.faroapp;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -9,8 +10,9 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TabHost;
-import android.graphics.Color;
 import android.widget.TextView;
+
+import com.faroapp.R;
 
 
 public class PollLandingPage extends Activity {
@@ -23,7 +25,7 @@ public class PollLandingPage extends Activity {
         setContentView(R.layout.activity_poll_landing_page);
 
         EventLandingPage = new Intent(PollLandingPage.this, EventLandingPage.class);
-        final Intent CreateNewPoll = new Intent(PollLandingPage.this, CreateNewPoll.class);
+        final Intent CreateNewPoll = new Intent(PollLandingPage.this, com.faroapp.CreateNewPoll.class);
 
         TextView Poll = (TextView)findViewById(R.id.polls);
         //Poll.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);

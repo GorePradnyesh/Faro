@@ -1,18 +1,18 @@
-package com.example.nakulshah.listviewyoutube;
+package com.faroapp;
 
 import android.annotation.TargetApi;
 import android.app.DatePickerDialog;
-import android.graphics.Color;
 import android.os.Build;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.DatePicker;
-import android.widget.Toast;
+
+import com.faroapp.R;
 
 import java.util.Calendar;
 

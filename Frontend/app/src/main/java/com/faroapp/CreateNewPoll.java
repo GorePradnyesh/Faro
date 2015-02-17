@@ -1,7 +1,6 @@
-package com.example.nakulshah.listviewyoutube;
+package com.faroapp;
 
 import android.app.Activity;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -12,12 +11,14 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
+import com.faroapp.R;
+
 import java.util.ArrayList;
 
 
 public class CreateNewPoll extends Activity {
 
-    private ArrayList<String> pollOptionsArray = new ArrayList<>();
+    private ArrayList<String> pollOptionsArray = new ArrayList<String>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

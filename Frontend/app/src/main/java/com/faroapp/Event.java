@@ -1,13 +1,13 @@
-package com.example.nakulshah.listviewyoutube;
+package com.faroapp;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.faroapp.R;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
 
 /**
  * Created by nakulshah on 1/8/15.
@@ -176,7 +176,7 @@ public class Event implements Parcelable{
         dest.writeString(endTimeStr);
     }
 
-    public static final Parcelable.Creator<Event> CREATOR = new Parcelable.Creator<Event>() {
+    public static final Creator<Event> CREATOR = new Creator<Event>() {
         public Event createFromParcel(Parcel in) {
             return new Event(in);
         }

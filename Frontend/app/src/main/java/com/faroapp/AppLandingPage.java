@@ -1,10 +1,8 @@
-package com.example.nakulshah.listviewyoutube;
+package com.faroapp;
 
 import android.app.Activity;
-import android.app.ListActivity;
 import android.content.Intent;
 import android.graphics.Color;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,7 +11,8 @@ import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TabHost;
-import android.widget.Toast;
+
+import com.faroapp.R;
 
 /*
  * This is the page where all the events are listed in separate tabs based on invitation "Accepted"
