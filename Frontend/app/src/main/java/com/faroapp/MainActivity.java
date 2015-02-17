@@ -19,10 +19,10 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final Button AppLandingPageBtn = (Button)findViewById(R.id.AppLandingPageBtn);
+        final Button signIn = (Button)findViewById(R.id.btnSignIn);
 
-        if(AppLandingPageBtn != null) {
-            AppLandingPageBtn.setOnClickListener(new View.OnClickListener() {
+        if(signIn != null) {
+            signIn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent I = new Intent(MainActivity.this, AppLandingPage.class);
