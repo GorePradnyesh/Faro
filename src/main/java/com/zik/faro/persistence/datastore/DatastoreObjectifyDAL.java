@@ -1,12 +1,16 @@
 package com.zik.faro.persistence.datastore;
 
+import static com.googlecode.objectify.ObjectifyService.ofy;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.cmd.Query;
-
-import java.util.*;
-
-import static com.googlecode.objectify.ObjectifyService.ofy;
+import com.zik.faro.data.Activity;
 
 /**
  * This the lowermost layer which abstracts the fundamental load store operations.
@@ -30,7 +34,38 @@ public class DatastoreObjectifyDAL {
         T object = ofy().load().key(objectKey).now();
         return object;
     }
-
+    
+    public static <T,V> void deleteObjectByIdWithParentId(final String objectId,
+    		Class<T> clazz, final String parentId, Class<V> parentClazz){
+    	Key<V> parentKey = Key.create(parentClazz, parentId);
+    	ofy().delete().type(clazz).parent(parentKey).id(objectId).now();
+    }
+    
+    public static <T,V> void deleteObjectsByIdWithParentId(final List<String> objectIds,
+    		Class<T> clazz, final String parentId, Class<V> parentClazz){
+    	Key<V> parentKey = Key.create(parentClazz, parentId);
+    	// Note: This is a bulk call. Deletes will be async.
+    	ofy().delete().type(clazz).parent(parentKey).ids(objectIds);
+    }
+    
+    public static <T> void delelteObjectById(final String objectId, Class<T> clazz){
+    	ofy().delete().type(clazz).id(objectId).now();
+    }
+    
+    public static <T> void delelteObjectsById(final List<String> objectIds, Class<T> clazz){
+    	// Note: This is a bulk call. Deletes will be async.
+    	ofy().delete().type(clazz).ids(objectIds);
+    }
+    
+    public static <T> void deleteEntity(final T entity){
+    	ofy().delete().entity(entity).now();
+    }
+    
+    public static <T> void deleteEntities(final List<T> entities){
+    	// Note: This is a bulk call. Deletes will be async.
+    	ofy().delete().entities(entities);
+    }
+    
     public static <T> Map<String, T> loadMultipleObjectsByIdSync(List<String> objectIds, Class<T> clazz){
         List<Key<T>> keys = new ArrayList<>();
         Map<String, T> objectMap = new HashMap<>();

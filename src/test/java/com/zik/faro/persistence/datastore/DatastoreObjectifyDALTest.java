@@ -9,6 +9,7 @@ import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
 import com.googlecode.objectify.annotation.Parent;
+
 import org.junit.*;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -236,7 +237,105 @@ public class DatastoreObjectifyDALTest {
         Assert.assertTrue(objects.isEmpty());
     }
 
-
-
+    /** 
+     * Test includes both single and bulk variants of the deleteObjectById api
+     */
+    @Test
+    public void testDeleteObjectById(){
+    	// Create data for testing
+    	A a1 = new A("a10", "a10");DatastoreObjectifyDAL.storeObject(a1);
+    	A a2 = new A("a11", "a11");DatastoreObjectifyDAL.storeObject(a2);
+    	A a3 = new A("a12", "a12");DatastoreObjectifyDAL.storeObject(a3);
+    	
+    	// Verify data indeed created
+        A retrievedObj = DatastoreObjectifyDAL.loadObjectById(a1.id, A.class);
+        Assert.assertEquals(a1.id, retrievedObj.id);
+        Assert.assertEquals(a1.name, retrievedObj.name);
+        retrievedObj = DatastoreObjectifyDAL.loadObjectById(a2.id, A.class);
+        Assert.assertEquals(a2.id, retrievedObj.id);
+        Assert.assertEquals(a2.name, retrievedObj.name);
+        retrievedObj = DatastoreObjectifyDAL.loadObjectById(a3.id, A.class);
+        Assert.assertEquals(a3.id, retrievedObj.id);
+        Assert.assertEquals(a3.name, retrievedObj.name);
+        
+        // Delete
+        DatastoreObjectifyDAL.delelteObjectById(a1.id, A.class);
+        retrievedObj = DatastoreObjectifyDAL.loadObjectById(a1.id, A.class);
+        Assert.assertNull(retrievedObj);
+        
+        List<String> list = new ArrayList<String>();
+        list.add(a2.id);list.add(a3.id);
+        
+        // Delete (Bulk)
+        DatastoreObjectifyDAL.delelteObjectsById(list, A.class);
+    }
+    
+    /** 
+     * Test includes both single and bulk variants of the deleteObjectByIdWithParentId api
+     */
+    @Test
+    public void testDeleteObjectByIdWithParentId(){
+    	// Create data for testing
+    	A parent = new A("parent", "parent");DatastoreObjectifyDAL.storeObject(parent);        
+        B child = new B("child", "parent", 44);DatastoreObjectifyDAL.storeObject(child);
+        B child1 = new B("child1", "parent", 45);DatastoreObjectifyDAL.storeObject(child1);
+        B child2 = new B("child2", "parent", 46);DatastoreObjectifyDAL.storeObject(child2);
+        
+        // Verify data indeed created
+        A retrievedParent = DatastoreObjectifyDAL.loadObjectById(parent.id, A.class);
+        B retrievedChild = DatastoreObjectifyDAL.loadObjectWithParentId(A.class, parent.id, B.class, child.id);
+        B retrievedChild1 = DatastoreObjectifyDAL.loadObjectWithParentId(A.class, parent.id, B.class, child1.id);
+        B retrievedChild2 = DatastoreObjectifyDAL.loadObjectWithParentId(A.class, parent.id, B.class, child2.id);
+        Assert.assertEquals(parent.id, retrievedParent.id);
+        Assert.assertEquals(child.id, retrievedChild.id);
+        Assert.assertEquals(child1.id, retrievedChild1.id);Assert.assertEquals(child2.id, retrievedChild2.id);
+        
+        // Delete child
+        DatastoreObjectifyDAL.deleteObjectByIdWithParentId(child.id, B.class, "parent", A.class);
+        
+        // Verify indeed deleted
+        retrievedChild = DatastoreObjectifyDAL.loadObjectWithParentId(A.class, parent.id, B.class, child.id);
+        Assert.assertNull(retrievedChild);
+        
+        List<String> children = new ArrayList<String>();
+        children.add(child1.id);children.add(child2.id);
+        
+        // Delete child1 and child2 (Bulk call)
+        DatastoreObjectifyDAL.deleteObjectsByIdWithParentId(children, B.class, parent.id, A.class);
+        // Cannot verify since deletion is async.
+    }
+    
+    /**
+     * Test includes both single and bulk variants of deleteEntity
+     */
+    @Test
+    public void testDeleteEntity(){
+    	A a1 = new A("a10", "a10");DatastoreObjectifyDAL.storeObject(a1);
+    	A a2 = new A("a11", "a11");DatastoreObjectifyDAL.storeObject(a2);
+    	A a3 = new A("a12", "a12");DatastoreObjectifyDAL.storeObject(a3);
+    	
+    	// Verify data indeed created
+        A retrievedObj = DatastoreObjectifyDAL.loadObjectById(a1.id, A.class);
+        Assert.assertEquals(a1.id, retrievedObj.id);
+        Assert.assertEquals(a1.name, retrievedObj.name);
+        retrievedObj = DatastoreObjectifyDAL.loadObjectById(a2.id, A.class);
+        Assert.assertEquals(a2.id, retrievedObj.id);
+        Assert.assertEquals(a2.name, retrievedObj.name);
+        retrievedObj = DatastoreObjectifyDAL.loadObjectById(a3.id, A.class);
+        Assert.assertEquals(a3.id, retrievedObj.id);
+        Assert.assertEquals(a3.name, retrievedObj.name);
+        
+        // Delete
+        DatastoreObjectifyDAL.deleteEntity(a1);
+        
+        // Verify indeed deleted
+        retrievedObj = DatastoreObjectifyDAL.loadObjectById(a1.id, A.class);
+        Assert.assertNull(retrievedObj);
+        
+        List<A> list = new ArrayList<A>(); list.add(a2); list.add(a3);
+        // Delete (Bulk)
+        DatastoreObjectifyDAL.deleteEntities(list);
+        // Cannot verify since deletion is async.
+    }
 
 }
