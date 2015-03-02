@@ -30,4 +30,12 @@ public class UserManagement {
         Map<String, FaroUser> users = DatastoreObjectifyDAL.loadMultipleObjectsByIdSync(objectIds, FaroUser.class);
         return users;
     }
+
+    public static boolean isExistingUser(final String userId) {
+        if(UserDatastoreImpl.loadFaroUserById(userId) != null) {
+            return true;
+        }
+
+        return false;
+    }
 }

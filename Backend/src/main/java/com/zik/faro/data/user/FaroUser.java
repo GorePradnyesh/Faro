@@ -81,4 +81,62 @@ public class FaroUser {
     public Address getAddress() {
         return address;
     }
+
+    // TODO : Will have to make the setters private and still have jaxb working fine
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setMiddleName(String middleName) {
+        this.middleName = middleName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public void setExternalExpenseID(String externalExpenseID) {
+        this.externalExpenseID = externalExpenseID;
+    }
+
+    public void setTelephone(String telephone) {
+        this.telephone = telephone;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+
+   /* @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder()
+                .append("[")
+                .append("email = ")
+                .append(getEmail())
+                .append(", ")
+                .append("firstName = ")
+                .append(getFirstName())
+                .append(", ")
+                .append("middleName = ")
+                .append(getMiddleName())
+                .append(", ")
+                .append("lastName =")
+                .append(getLastName())
+                .append(", ")
+                .append("externalExpenseId = ")
+                .append(getExternalExpenseID())
+                .append(", ")
+                .append("telephone = ")
+                .append(getTelephone())
+                .append(", ")
+                .append("address = ")
+                .append(getAddress().toString())
+                .append("]");
+
+        return builder.toString();
+    }*/
 }
