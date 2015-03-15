@@ -11,6 +11,8 @@
     <properties>
         <appengine.app.version>1</appengine.app.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
     </properties>
 
     <prerequisites>
@@ -56,13 +58,17 @@
             <artifactId>jersey-json</artifactId>
             <version>1.18.2</version>
         </dependency>
+        <!-- JWT Authentication lib and its dependency -->
         <dependency>
             <groupId>com.auth0</groupId>
             <artifactId>java-jwt</artifactId>
             <version>1.0.0</version>
         </dependency>
-
-
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.4</version>
+        </dependency>
 
 
         <!-- Test Dependencies -->

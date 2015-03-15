@@ -55,8 +55,14 @@ public class PasswordManager {
         }
     }
 
-    public static boolean checkPasswordEquality(String password, String encryptedPassword) throws NoSuchAlgorithmException {
-        String passwordDigest = generateOneWayDigest(password + getPasswordSalt(), HASH_NUM_ITERATIONS);
+    public static boolean checkPasswordEquality(String password, String encryptedPassword) throws PasswordManagerException {
+        String passwordDigest = null;
+        try {
+            passwordDigest = generateOneWayDigest(password + getPasswordSalt(), HASH_NUM_ITERATIONS);
+        } catch (NoSuchAlgorithmException e) {
+            logger.info("ERROR: Could not get an instance of MessageDigest");
+            throw new PasswordManagerException("Unable to check the equality of the passwords.");
+        }
         return passwordDigest.equals(encryptedPassword);
     }
 
