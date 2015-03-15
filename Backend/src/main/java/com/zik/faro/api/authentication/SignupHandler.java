@@ -9,6 +9,7 @@ import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.data.user.UserCredentials;
 import com.zik.faro.persistence.datastore.UserCredentialsDatastoreImpl;
 import com.zik.faro.persistence.datastore.UserDatastoreImpl;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -16,7 +17,7 @@ import javax.ws.rs.core.Response;
 
 
 import java.text.MessageFormat;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import static com.zik.faro.commons.Constants.*;
 
@@ -25,8 +26,7 @@ import static com.zik.faro.commons.Constants.*;
  */
 @Path(AUTH_PATH_CONST + AUTH_SIGN_UP_PATH_CONST)
 public class SignupHandler {
-    private final Logger logger = Logger.getLogger(SignupHandler.class.getName());
-
+    private static Logger logger = LoggerFactory.getLogger(SignupHandler.class);
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
@@ -64,7 +64,7 @@ public class SignupHandler {
             UserCredentialsDatastoreImpl.storeUserCreds(userCreds);
             UserDatastoreImpl.storeUser(newFaroUser);
         } catch (PasswordManagerException e) {
-            logger.warning("ERROR: Password could not be encrypted");
+            logger.warn("ERROR: Password could not be encrypted");
         }
 
         //TODO : Generate and Send Welcome email
