@@ -27,6 +27,7 @@ import static com.zik.faro.commons.Constants.*;
 @Path(AUTH_PATH_CONST + AUTH_SIGN_UP_PATH_CONST)
 public class SignupHandler {
     private static Logger logger = LoggerFactory.getLogger(SignupHandler.class);
+
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
@@ -64,7 +65,7 @@ public class SignupHandler {
             UserCredentialsDatastoreImpl.storeUserCreds(userCreds);
             UserDatastoreImpl.storeUser(newFaroUser);
         } catch (PasswordManagerException e) {
-            logger.warn("ERROR: Password could not be encrypted");
+            logger.error("Password could not be encrypted", e);
         }
 
         //TODO : Generate and Send Welcome email

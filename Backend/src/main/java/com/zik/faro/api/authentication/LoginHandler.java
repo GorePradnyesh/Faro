@@ -1,10 +1,11 @@
 package com.zik.faro.api.authentication;
 
-import com.google.appengine.repackaged.com.google.common.base.Strings;
 import com.zik.faro.commons.ParamValidation;
 import com.zik.faro.commons.exceptions.InvalidLoginException;
 import com.zik.faro.data.user.UserCredentials;
 import com.zik.faro.persistence.datastore.UserCredentialsDatastoreImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -12,11 +13,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Logger;
 
 import static com.zik.faro.commons.Constants.*;
 
@@ -25,7 +22,7 @@ import static com.zik.faro.commons.Constants.*;
  */
 @Path(AUTH_PATH_CONST)
 public class LoginHandler {
-    private final Logger logger = Logger.getLogger(SignupHandler.class.getName());
+    private final Logger logger = LoggerFactory.getLogger(LoginHandler.class);
 
     /**
      * Login the user by verifying the username/password
@@ -46,20 +43,19 @@ public class LoginHandler {
         ParamValidation.genericParamValidations(password, "password");
 
         logger.info("username : " + username);
-        logger.info("password : " + password);
 
         // Authenticate the user
         UserCredentials userCredentials = UserCredentialsDatastoreImpl.loadUserCreds(username);
 
         if (userCredentials == null) {
             // username does not match
-            logger.info(MessageFormat.format("ERROR - Incorrect username. User {0} does not exist", username));
+            logger.error(MessageFormat.format("Incorrect username. User {0} does not exist", username));
             throw new InvalidLoginException("Invalid username and/or password.");
         }
 
         try {
             if (!PasswordManager.checkPasswordEquality(userCredentials.getPassword(), password)) {
-                logger.info("ERROR - Incorrect password");
+                logger.error("Incorrect password");
                 throw new InvalidLoginException("Invalid username and/or password.");
             }
         } catch (PasswordManagerException e) {

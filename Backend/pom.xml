@@ -21,9 +21,12 @@
 
     <dependencies>
         <!-- Compile/runtime dependencies -->
+        <!-- Logging dependencies
+          In addition to slf4j-log4j12-1.7.10.jar, this will pull slf4j-api-1.7.10.jar
+          as well as log4j-1.2.17.jar into the project. -->
         <dependency>
             <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
+            <artifactId>slf4j-log4j12</artifactId>
             <version>1.7.10</version>
         </dependency>
         <dependency>

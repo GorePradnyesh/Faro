@@ -1,10 +1,12 @@
 package com.zik.faro.api.authentication;
 
 import com.auth0.jwt.internal.org.apache.commons.codec.binary.Hex;
-import com.google.appengine.repackaged.com.google.common.base.Strings;
+import com.google.common.base.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.logging.Logger;
 
 /**
  * Created by granganathan on 2/15/15.
@@ -14,7 +16,7 @@ public class PasswordManager {
     private static final String HASH_ALGORITHM = "SHA";
     private static final int HASH_NUM_ITERATIONS = 1;
 
-    private static final Logger logger = Logger.getLogger(PasswordManager.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(PasswordManager.class);
 
     private static String getPasswordSalt() {
         // TODO: Using fixed salt for now. Change later to use the combination of fixed and variable salt
@@ -50,7 +52,7 @@ public class PasswordManager {
         try {
             return generateOneWayDigest(password + getPasswordSalt(), HASH_NUM_ITERATIONS);
         } catch (NoSuchAlgorithmException e) {
-            logger.info("ERROR: Could not get an instance of MessageDigest");
+            logger.error("Could not get an instance of MessageDigest");
             throw new PasswordManagerException("Unable to encrypt password.");
         }
     }
@@ -60,7 +62,7 @@ public class PasswordManager {
         try {
             passwordDigest = generateOneWayDigest(password + getPasswordSalt(), HASH_NUM_ITERATIONS);
         } catch (NoSuchAlgorithmException e) {
-            logger.info("ERROR: Could not get an instance of MessageDigest");
+            logger.error("Could not get an instance of MessageDigest");
             throw new PasswordManagerException("Unable to check the equality of the passwords.");
         }
         return passwordDigest.equals(encryptedPassword);

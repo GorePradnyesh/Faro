@@ -3,6 +3,8 @@ package com.zik.faro.api.authentication;
 import com.auth0.jwt.JWTSigner;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.internal.org.apache.commons.codec.binary.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -11,13 +13,12 @@ import java.security.SignatureException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
 /**
  * Created by granganathan on 2/6/15.
  */
 public class FaroJwtTokenManager {
-    private static final Logger logger = Logger.getLogger(FaroJwtTokenManager.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(FaroJwtTokenManager.class);
     private static final String JWT_SIGNATURE_SECRET = "SQAAGREEnsYCx8LXBXyBn9zfzHYZxa0TC4CmJRyZ";
     private static final String FARO_JWT_ISSUER_VALUE = "faro";
     private static final long DEFAULT_EXPIRATION_TIME_SECS = TimeUnit.DAYS.toSeconds(60);
@@ -40,10 +41,10 @@ public class FaroJwtTokenManager {
             Map<String, Object> claimsMap = verifier.verify(token);
             return getClaims(claimsMap);
         } catch (IOException e) {
-            logger.info("ERROR - jwt token is invalid. " + e.getMessage());
+            logger.error("jwt token is invalid. ", e);
             throw new JwtTokenValidationException(e.getMessage());
         } catch (IllegalStateException e) {
-            logger.info("Error - jwt token claims are not valid." + e.getMessage());
+            logger.error("jwt token claims are not valid.", e);
             throw new JwtTokenValidationException(e.getMessage());
         }
     }
