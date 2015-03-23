@@ -2,17 +2,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.nakulshah.listviewyoutube.PollLandingPage">
+    tools:context="com.example.nakulshah.FrontEnd.PollLandingPage">
 
     <TextView
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:textAppearance="?android:attr/textAppearanceLarge"
-    android:text="Polls"
-    android:id="@+id/polls"
-    android:layout_alignParentTop="true"
-    android:layout_centerHorizontal="true"
-    android:textColor="@android:color/white"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/Polls"
+        android:id="@+id/polls"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:textAlignment="center"
+        android:textColor="@android:color/white"
         android:background="#ff000000" />
 
     <TabHost
@@ -89,7 +90,7 @@
             android:layout_height="30dp"
             android:id="@+id/add_new_poll"
             android:clickable="true"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:paddingLeft="0dp"
             android:paddingTop="0dp"
             android:paddingRight="0dp"
@@ -97,3 +98,4 @@
     </RelativeLayout>
 
 </RelativeLayout>
+
