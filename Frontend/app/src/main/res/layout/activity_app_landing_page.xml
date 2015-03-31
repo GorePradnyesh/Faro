@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.nakulshah.listviewyoutube.AppLandingPage">
+    tools:context="com.example.nakulshah.FrontEnd.AppLandingPage">
 
     <TabHost
         android:layout_width="fill_parent"
@@ -79,7 +79,7 @@
             android:layout_height="30dp"
             android:id="@+id/add_event"
             android:clickable="true"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:paddingLeft="0dp"
             android:paddingTop="0dp"
             android:paddingRight="0dp"
@@ -89,7 +89,7 @@
             android:layout_height="30dp"
             android:id="@+id/calendar_view"
             android:clickable="true"
-            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
             android:paddingLeft="0dp"
             android:paddingTop="0dp"
             android:paddingRight="0dp"

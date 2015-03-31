@@ -1,7 +1,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.nakulshah.listviewyoutube.EventLandingPage">
+    tools:context="com.example.nakulshah.FrontEnd.EventLandingPage">
 
     <TextView
         android:layout_width="wrap_content"
@@ -11,6 +11,45 @@
         android:id="@+id/eventNameText"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/eventNameText"
+        android:id="@+id/statusButtons">
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/statusYes"
+            android:clickable="true"
+            android:text="@string/YES"
+            android:layout_alignParentStart="true"
+            android:paddingLeft="0dp"
+            android:paddingTop="0dp"
+            android:paddingRight="0dp"
+            android:paddingBottom="0dp"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/statusNo"
+            android:clickable="true"
+            android:text="@string/NO"
+            android:layout_centerInParent="true"
+            android:paddingLeft="0dp"
+            android:paddingTop="0dp"
+            android:paddingRight="0dp"
+            android:paddingBottom="0dp" />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/statusMaybe"
+            android:clickable="true"
+            android:text="@string/MAYBE"
+            android:layout_alignParentEnd="true"
+            android:paddingLeft="0dp"
+            android:paddingTop="0dp"
+            android:paddingRight="0dp"
+            android:paddingBottom="0dp" />
+    </RelativeLayout>
 
     <TextView
         android:layout_width="wrap_content"
@@ -18,22 +57,9 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="@string/event_status"
         android:id="@+id/eventStatusText"
-        android:layout_below="@+id/eventNameText"
-        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/statusButtons"
         android:layout_alignParentStart="true"
         android:layout_marginTop="20dp" />
-
-    <ImageButton
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:id="@+id/back_to_app_landing"
-        android:clickable="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:paddingLeft="0dp"
-        android:paddingTop="0dp"
-        android:paddingRight="0dp"
-        android:paddingBottom="0dp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -42,7 +68,6 @@
         android:text="@string/from"
         android:id="@+id/from"
         android:layout_below="@+id/eventStatusText"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_marginTop="10dp" />
 
@@ -52,7 +77,6 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:id="@+id/startDateDisplay"
         android:layout_below="@+id/from"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="false"
         android:layout_marginTop="5dp" />
 
@@ -62,7 +86,6 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:id="@+id/startTimeDisplay"
         android:layout_alignTop="@+id/startDateDisplay"
-        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
     <TextView
@@ -73,7 +96,6 @@
         android:id="@+id/to"
         android:layout_marginTop="10dp"
         android:layout_below="@+id/startDateDisplay"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
     <TextView
@@ -82,7 +104,6 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:id="@+id/endDateDisplay"
         android:layout_below="@+id/to"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="false"
         android:layout_marginTop="5dp" />
 
@@ -92,7 +113,6 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:id="@+id/endTimeDisplay"
         android:layout_alignTop="@+id/endDateDisplay"
-        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
     <ImageButton
@@ -101,7 +121,6 @@
         android:id="@+id/pollImageButton"
         android:clickable="true"
         android:layout_centerVertical="true"
-        android:layout_alignParentLeft="true"
         android:layout_below="@id/endDateDisplay"
         android:paddingLeft="0dp"
         android:paddingTop="0dp"

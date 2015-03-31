@@ -1,4 +1,4 @@
-package com.example.nakulshah.listviewyoutube;
+package com.example.nakulshah.FrontEnd;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,9 +8,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +18,9 @@ import java.util.List;
  */
 public class EventAdapter extends ArrayAdapter {
     private List list = new ArrayList();
-    private DateFormat dateFormat = DateFormat.getDateInstance();
+
+    DateFormat sdf = new SimpleDateFormat("MMM dd yyyy");
+    DateFormat stf = new SimpleDateFormat("hh:mm a");
 
     public EventAdapter(Context context, int resource) {
         super(context, resource);
@@ -75,9 +76,10 @@ public class EventAdapter extends ArrayAdapter {
         }
         Event EVENT = (Event) getItem(position);
         holder.EVNT_NAME.setText(EVENT.getEventName());
-        holder.STATUS_IMG.setImageResource(EVENT.getImg_resource());
-        holder.EVNT_START_DATE.setText(EVENT.getStartDateStr());
-        holder.EVNT_START_TIME.setText(EVENT.getStartTimeStr());
+        holder.STATUS_IMG.setImageResource(EVENT.getImgResource());
+        //TODO change the below code to display the correct date and time
+        holder.EVNT_START_DATE.setText(sdf.format(EVENT.getStartDateCalendar().getTime()));
+        holder.EVNT_START_TIME.setText(stf.format(EVENT.getStartDateCalendar().getTime()));
         return row;
     }
 }

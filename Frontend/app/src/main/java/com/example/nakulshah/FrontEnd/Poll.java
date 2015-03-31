@@ -1,13 +1,10 @@
-package com.example.nakulshah.listviewyoutube;
+package com.example.nakulshah.FrontEnd;
 
 import java.util.ArrayList;
 
-/**
- * Created by nakulshah on 2/3/15.
- */
 public class Poll {
     private String _pollQuestion = null;
-    ArrayList <String> _pollOptions = new ArrayList<>();
+    ArrayList<String> _pollOptions = new ArrayList<>();
     private boolean _multiChoice = false;
 
     public String get_pollQuestion() {

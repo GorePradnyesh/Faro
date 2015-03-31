@@ -1,10 +1,8 @@
-package com.example.nakulshah.listviewyoutube;
+package com.example.nakulshah.FrontEnd;
 
 import android.app.Activity;
-import android.app.ListActivity;
 import android.content.Intent;
 import android.graphics.Color;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,7 +11,6 @@ import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TabHost;
-import android.widget.Toast;
 
 /*
  * This is the page where all the events are listed in separate tabs based on invitation "Accepted"
@@ -37,8 +34,7 @@ public class AppLandingPage extends Activity {
     public static final int EVENT_UPDATE_TYPE = 100;
     public static final int CREATE_EVENT = 101;*/
 
-
-    EventGenerator evntGen = EventGenerator.getInstance();
+    static EventListHandler eventListHandler = EventListHandler.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,14 +73,21 @@ public class AppLandingPage extends Activity {
         final Intent create_event_page = new Intent(AppLandingPage.this, CreateNewEvent.class);
         final Intent eventCalendarView = new Intent(AppLandingPage.this, EventCalendarView.class);
 
-        //TODO: Insert newly created Event in the list based on start Date if in view
-
-        for (int i = 0; i < evntGen.getAcceptedEventCount(); i++){
-            acceptedEventAdapter.add(evntGen.getAcceptedEventAtPosition(i));
-        }
-
-        for (int i = 0; i < evntGen.getNotAcceptedEventCount(); i++){
-            notAcceptedEventAdapter.add(evntGen.getNotAcceptedEventAtPosition(i));
+        for (int i = 0; i < eventListHandler.getEventListSize(); i++){
+            Event E = eventListHandler.getEventAtPosition(i);
+            switch(E.getEventStatus()){
+                case ACCEPTEDANDPENDING:
+                case ACCEPTEDANDCOMPLETE:
+                    acceptedEventAdapter.add(E);
+                    break;
+                case NOTRESPONDED:
+                case MAYBE:
+                    notAcceptedEventAdapter.add(E);
+                    break;
+                default:
+                    //TODO: How to catch this condition? This should never occur?
+                    break;
+            }
         }
 
         //Listener to go to the Event Landing Page for the event selected in the "Accepted" list
@@ -124,9 +127,7 @@ public class AppLandingPage extends Activity {
 
     private void eventSelectedFromList(AdapterView<?> parent, int position, Intent eventLanding){
         Event E = (Event) parent.getItemAtPosition(position);
-        eventLanding.putExtra("Event", E);
-        eventLanding.putExtra("StartDateCalendar", E.getStartDateCalendar());
-        eventLanding.putExtra("EndDateCalendar", E.getEndDateCalendar());
+        eventLanding.putExtra("eventID", E.getEventId());
         startActivity(eventLanding);
         finish();
     }

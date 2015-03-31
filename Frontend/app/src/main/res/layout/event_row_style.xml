@@ -13,12 +13,12 @@
         android:scaleType="centerCrop"
         android:id="@+id/status_img"
         android:layout_centerVertical="true"
-        android:layout_alignParentLeft="true"/>
+        android:layout_alignParentStart="true"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/status_img"
+        android:layout_toEndOf="@+id/status_img"
         android:layout_centerVertical="true"
         android:paddingRight="10dp"
         android:paddingTop="10dp"

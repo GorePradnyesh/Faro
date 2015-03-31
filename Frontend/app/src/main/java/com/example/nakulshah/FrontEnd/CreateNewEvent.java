@@ -1,25 +1,24 @@
-package com.example.nakulshah.listviewyoutube;
+package com.example.nakulshah.FrontEnd;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.TimePicker;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.text.DateFormat;
-import java.util.Locale;
 
 /*
  * On this page an Event can be created with certain basic requirements like the Event Name, Start
@@ -33,9 +32,9 @@ import java.util.Locale;
 public class CreateNewEvent extends ActionBarActivity {
 
     public static final int NO_CHANGES = 0;
-    EventGenerator evntGen = EventGenerator.getInstance();
+    static EventListHandler eventListHandler = EventListHandler.getInstance();
     Intent AppLanding = null;
-    DateFormat dateFormat = DateFormat.getDateInstance();
+
 
     Calendar startDateCalendar = Calendar.getInstance();
     Calendar endDateCalendar = Calendar.getInstance();
@@ -43,6 +42,8 @@ public class CreateNewEvent extends ActionBarActivity {
     Button startTimeButton = null;
     Button endTimeButton = null;
     Button endDateButton = null;
+
+    DateFormat sdf = new SimpleDateFormat("MMM dd yyyy");
     DateFormat stf = new SimpleDateFormat("hh:mm a");
 
     @Override
@@ -51,7 +52,12 @@ public class CreateNewEvent extends ActionBarActivity {
         setContentView(R.layout.activity_create_new_event);
 
         final EditText eventName = (EditText) findViewById(R.id.eventNameTextEdit);
-        final EditText eventStatus = (EditText) findViewById(R.id.eventStatusEditText);
+
+        //TODO Remove the below added just to test creator EventLanding Page vs Friend eventLandingPage
+        final CheckBox eventCreator = (CheckBox) findViewById(R.id.eventCreatorCheckBox);
+        final CheckBox ifAcceptedCheckBox = (CheckBox) findViewById(R.id.ifAcceptedCheckBox);
+        final CheckBox noResponseCheckBox = (CheckBox) findViewById(R.id.noResponseCheckBox);
+        final CheckBox mayBeCheckBox = (CheckBox) findViewById(R.id.mayBeCheckBox);
 
         startDateButton = (Button) findViewById(R.id.startDateButton);
         startTimeButton = (Button) findViewById(R.id.startTimeButton);
@@ -73,7 +79,7 @@ public class CreateNewEvent extends ActionBarActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                eventStatus.setEnabled(!(eventName.getText().toString().trim().isEmpty()));
+                createNewEventOK.setEnabled(!(eventName.getText().toString().trim().isEmpty()));
 
             }
 
@@ -82,37 +88,36 @@ public class CreateNewEvent extends ActionBarActivity {
 
             }
         });
-
-        eventStatus.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                createNewEventOK.setEnabled(!(eventStatus.getText().toString().trim().isEmpty()));
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
-
 
         createNewEventOK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                int status = Integer.parseInt(eventStatus.getText().toString());
                 String event_Name = eventName.getText().toString();
-                final Event E = new Event(event_Name, status, startDateCalendar, endDateCalendar);
-                evntGen.addNewEvent(E);
-                eventLanding.putExtra("Event", E);
-                startActivity(eventLanding);
-                finish();
-
+                final Event E = new Event(event_Name, startDateCalendar, endDateCalendar);
+                //TODO: instead of setting a booelan save the userID of the creator
+                E.setEventCreator(false);
+                if(eventCreator.isChecked()){
+                    E.setEventCreator(true);
+                }else if(ifAcceptedCheckBox.isChecked()){
+                    E.setEventStatusProperties(EventStatus.ACCEPTEDANDCOMPLETE);
+                }else if(noResponseCheckBox.isChecked()){
+                    E.setEventStatusProperties(EventStatus.NOTRESPONDED);
+                }else if(mayBeCheckBox.isChecked()){
+                    E.setEventStatusProperties(EventStatus.MAYBE);
+                }
+                // TODO uncomment the below code when API implementation is verified to check if the
+                // EventLanding Page displays correctly based on the event Status
+                // Change the setEventCreator function to store the userID of the user who created
+                // event instead of the boolean
+                //E.setEventCreator(eventCreator.isChecked());
+                ErrorCodes eventStatus;
+                eventStatus = eventListHandler.addNewEvent(E);
+                //TODO What to do in Failure case?
+                if (eventStatus == ErrorCodes.SUCCESS) {
+                    eventLanding.putExtra("eventID", E.getEventId());
+                    startActivity(eventLanding);
+                    finish();
+                }
             }
         });
 
@@ -158,8 +163,8 @@ public class CreateNewEvent extends ActionBarActivity {
 
 
     private void setBothTimeAndDateToDefault(){
-        startDateButton.setText(dateFormat.format(startDateCalendar.getTime()));
-        endDateButton.setText(dateFormat.format(startDateCalendar.getTime()));
+        startDateButton.setText(sdf.format(startDateCalendar.getTime()));
+        endDateButton.setText(sdf.format(startDateCalendar.getTime()));
         startTimeButton.setText(stf.format(startDateCalendar.getTime()));
         endTimeButton.setText(stf.format(startDateCalendar.getTime()));
     }
@@ -168,18 +173,18 @@ public class CreateNewEvent extends ActionBarActivity {
         endDateCalendar.set(endDateCalendar.YEAR, startDateCalendar.get(Calendar.YEAR));
         endDateCalendar.set(endDateCalendar.MONTH, startDateCalendar.get(Calendar.MONTH));
         endDateCalendar.set(endDateCalendar.DAY_OF_MONTH, startDateCalendar.get(Calendar.DAY_OF_MONTH));
-        endDateCalendar.set(endDateCalendar.HOUR, startDateCalendar.get(Calendar.HOUR));
+        endDateCalendar.set(endDateCalendar.HOUR_OF_DAY, startDateCalendar.get(Calendar.HOUR_OF_DAY));
         endDateCalendar.set(endDateCalendar.MINUTE, startDateCalendar.get(Calendar.MINUTE));
         updateEndDate();
         updateEndTime();
     }
 
     public void updateStartDate(){
-        startDateButton.setText(dateFormat.format(startDateCalendar.getTime()));
+        startDateButton.setText(sdf.format(startDateCalendar.getTime()));
     }
 
     public void updateEndDate(){
-        endDateButton.setText(dateFormat.format(endDateCalendar.getTime()));
+        endDateButton.setText(sdf.format(endDateCalendar.getTime()));
     }
 
     public void updateStartTime(){
@@ -212,7 +217,7 @@ public class CreateNewEvent extends ActionBarActivity {
     public void setStartTime(){
         new TimePickerDialog(CreateNewEvent.this,
                 startTime,
-                startDateCalendar.get(Calendar.HOUR),
+                startDateCalendar.get(Calendar.HOUR_OF_DAY),
                 startDateCalendar.get(Calendar.MINUTE),
                 false).show();
     }
@@ -220,7 +225,7 @@ public class CreateNewEvent extends ActionBarActivity {
     public void setEndTime(){
         new TimePickerDialog(CreateNewEvent.this,
                 endTime,
-                endDateCalendar.get(Calendar.HOUR),
+                endDateCalendar.get(Calendar.HOUR_OF_DAY),
                 endDateCalendar.get(Calendar.MINUTE),
                 false).show();
     }
@@ -248,12 +253,11 @@ public class CreateNewEvent extends ActionBarActivity {
     /* When setting the startTime, we compare the startCalendar to the endCalendar and if the
     * startCalendar is after the endCalendar then we set the endTime same as the startTime
     */
-    //TODO: AM not displaying when selecting AM time on app.
     TimePickerDialog.OnTimeSetListener startTime = new TimePickerDialog.OnTimeSetListener(){
         @Override
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
 
-            startDateCalendar.set(startDateCalendar.HOUR, hourOfDay);
+            startDateCalendar.set(startDateCalendar.HOUR_OF_DAY, hourOfDay);
             startDateCalendar.set(startDateCalendar.MINUTE, minute);
             updateStartTime();
 
@@ -292,7 +296,7 @@ public class CreateNewEvent extends ActionBarActivity {
     TimePickerDialog.OnTimeSetListener endTime = new TimePickerDialog.OnTimeSetListener(){
         @Override
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-            endDateCalendar.set(endDateCalendar.HOUR, hourOfDay);
+            endDateCalendar.set(endDateCalendar.HOUR_OF_DAY, hourOfDay);
             endDateCalendar.set(endDateCalendar.MINUTE, minute);
 
             if(startDateCalendar.compareTo(endDateCalendar) == 1){
