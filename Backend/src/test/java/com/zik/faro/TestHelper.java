@@ -1,13 +1,23 @@
 package com.zik.faro;
 
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+import com.zik.faro.api.authentication.LoginHandler;
+import com.zik.faro.api.authentication.SignupHandler;
+import com.zik.faro.api.responder.FaroSignupDetails;
+import com.zik.faro.data.user.FaroUser;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 public class TestHelper {
@@ -43,5 +53,40 @@ public class TestHelper {
             port = "8080";
         }
         return new URL("http://" + hostname + ":" + port);
+    }
+
+    public static ClientResponse login(String username, String password)
+            throws URISyntaxException, MalformedURLException {
+        Client client = Client.create();
+        WebResource webResource = client.resource(getExternalTargetEndpoint().toURI());
+
+        ClientResponse response = webResource
+                .path("v1")
+                .path("nativeLogin")
+                .path("login")
+                .queryParam("username", username)
+                .header("Content-Type", MediaType.APPLICATION_JSON_TYPE)
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .post(ClientResponse.class, password);
+
+        return response;
+    }
+
+    public static ClientResponse signupUser(FaroSignupDetails newUserSignupDetails)
+            throws URISyntaxException, IOException {
+        Client client = Client.create();
+        WebResource webResource = client.resource(getExternalTargetEndpoint().toURI());
+        String body = TestHelper.getJsonRep(newUserSignupDetails);
+        System.out.println("body = " +body);
+
+        ClientResponse response = webResource
+                .path("v1")
+                .path("nativeLogin")
+                .path("signup")
+                .header("Content-Type", MediaType.APPLICATION_JSON_TYPE)
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .post(ClientResponse.class, body);
+
+        return response;
     }
 }

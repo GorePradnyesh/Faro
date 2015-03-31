@@ -11,8 +11,6 @@ public final class Constants {
     public static final String SIGNATURE_QUERY_PARAM                            = "Signature";
     public static final String FARO_USER_ID_PARAM                               = "userId";
     public static final String LOGIN_USERNAME_PARAM                             = "username";
-    public static final String LOGIN_PASSWORD_PARAM                             = "password";
-
 
 
     //----- Path Parameters ----//
@@ -75,5 +73,8 @@ public final class Constants {
     public static final String AUTH_LOGIN_PATH_CONST                            = "/login";
     public static final String AUTH_LOGOUT_PATH_CONST                           = "/logout";
     public static final String AUTH_SIGN_UP_PATH_CONST                          = "/signup";
+
+    // -- Test -- //
+    public static final String TESTS_API_PATH_CONST                             = "/test";
 
 }

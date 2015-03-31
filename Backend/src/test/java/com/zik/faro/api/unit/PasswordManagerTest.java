@@ -1,15 +1,10 @@
 package com.zik.faro.api.unit;
 
-import com.google.appengine.repackaged.org.apache.commons.codec.binary.Hex;
-import com.zik.faro.api.authentication.PasswordManager;
-import com.zik.faro.api.authentication.PasswordManagerException;
+import com.zik.faro.auth.PasswordManager;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.math.BigInteger;
-import java.security.MessageDigest;
 import java.text.MessageFormat;
-import java.util.Arrays;
 
 /**
  * Created by granganathan on 2/28/15.

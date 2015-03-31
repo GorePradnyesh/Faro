@@ -3,6 +3,8 @@ package com.zik.faro.api.authentication;
 import com.google.common.base.Strings;
 import com.zik.faro.api.responder.FaroSignupDetails;
 import com.zik.faro.applogic.UserManagement;
+import com.zik.faro.auth.PasswordManager;
+import com.zik.faro.auth.PasswordManagerException;
 import com.zik.faro.commons.exceptions.BadRequestException;
 import com.zik.faro.commons.exceptions.EntityAlreadyExistsException;
 import com.zik.faro.data.user.FaroUser;
@@ -55,7 +57,8 @@ public class SignupHandler {
         // Lookup to sees if an user exists with the same id
         if (UserManagement.isExistingUser(newFaroUser.getId())) {
             // Return  error code indicating user exists
-            throw new EntityAlreadyExistsException(MessageFormat.format("User {0} already exists.", newFaroUser.getEmail()));
+            logger.info("User already exists");
+            throw new EntityAlreadyExistsException(MessageFormat.format("Username {0} already exists.", newFaroUser.getEmail()));
         }
 
         try {

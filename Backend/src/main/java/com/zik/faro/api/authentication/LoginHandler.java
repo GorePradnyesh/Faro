@@ -1,5 +1,8 @@
 package com.zik.faro.api.authentication;
 
+import com.zik.faro.auth.jwt.FaroJwtTokenManager;
+import com.zik.faro.auth.PasswordManager;
+import com.zik.faro.auth.PasswordManagerException;
 import com.zik.faro.commons.ParamValidation;
 import com.zik.faro.commons.exceptions.InvalidLoginException;
 import com.zik.faro.data.user.UserCredentials;
@@ -7,10 +10,7 @@ import com.zik.faro.persistence.datastore.UserCredentialsDatastoreImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
 import java.text.MessageFormat;
@@ -22,7 +22,7 @@ import static com.zik.faro.commons.Constants.*;
  */
 @Path(AUTH_PATH_CONST)
 public class LoginHandler {
-    private final Logger logger = LoggerFactory.getLogger(LoginHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(LoginHandler.class);
 
     /**
      * Login the user by verifying the username/password
@@ -33,16 +33,15 @@ public class LoginHandler {
      */
     @Path(AUTH_LOGIN_PATH_CONST)
     @POST
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public String login(@QueryParam(LOGIN_USERNAME_PARAM) final String username,
                         final String password) {
-
-        String idToken = null;
-
         ParamValidation.genericParamValidations(username, LOGIN_USERNAME_PARAM);
         ParamValidation.genericParamValidations(password, "password");
 
         logger.info("username : " + username);
+        logger.info("password : " + password);
 
         // Authenticate the user
         UserCredentials userCredentials = UserCredentialsDatastoreImpl.loadUserCreds(username);
@@ -54,18 +53,17 @@ public class LoginHandler {
         }
 
         try {
-            if (!PasswordManager.checkPasswordEquality(userCredentials.getPassword(), password)) {
+            if (!PasswordManager.checkPasswordEquality(password, userCredentials.getPassword())) {
                 logger.error("Incorrect password");
                 throw new InvalidLoginException("Invalid username and/or password.");
             }
         } catch (PasswordManagerException e) {
-            e.printStackTrace();
+            logger.error("Could not verify password.", e);
+            throw new IllegalStateException("Unable to authenticate the user.");
         }
 
         // Generate a JWT token
-        idToken = FaroJwtTokenManager.createToken(username);
-
-        return idToken;
+        return FaroJwtTokenManager.createToken(username);
     }
 
     /**

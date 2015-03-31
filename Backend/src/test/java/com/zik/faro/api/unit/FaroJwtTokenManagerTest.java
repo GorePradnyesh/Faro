@@ -1,22 +1,20 @@
 package com.zik.faro.api.unit;
 
 import com.auth0.jwt.internal.org.apache.commons.codec.binary.Base64;
-import com.zik.faro.api.authentication.FaroJwtTokenManager;
-import com.zik.faro.api.authentication.JwtClaimConstants;
-import com.zik.faro.api.authentication.JwtTokenValidationException;
+import com.zik.faro.auth.jwt.FaroJwtClaims;
+import com.zik.faro.auth.jwt.FaroJwtTokenManager;
+import com.zik.faro.auth.jwt.JwtTokenValidationException;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.security.SignatureException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by granganathan on 3/7/15.
  */
 public class FaroJwtTokenManagerTest {
-    private static final String JWT_SIGNATURE_SECRET = "SQAAGREEnsYCx8LXBXyBn9zfzHYZxa0TC4CmJRyZ";
 
     @Test
     public void createAndValidateTokenTest() throws Exception {
@@ -26,13 +24,13 @@ public class FaroJwtTokenManagerTest {
 
         System.out.println("Token : " + token);
 
-        FaroJwtTokenManager.FaroJwtClaims jwtClaims = FaroJwtTokenManager.validateToken(token);
+        FaroJwtClaims jwtClaims = FaroJwtTokenManager.validateToken(token);
         Assert.assertNotNull(jwtClaims);
 
         Assert.assertEquals(jwtClaims.getUsername(), username);
         Assert.assertEquals(jwtClaims.getEmail(), username);
 
-        Assert.assertTrue(System.currentTimeMillis() > jwtClaims.getIssuedAtTimeInMilliSecs());
+        Assert.assertTrue(System.currentTimeMillis() > jwtClaims.getIssuedAtInMilliSecs());
 
         System.out.println("JwtClaims: " + jwtClaims);
     }
@@ -47,7 +45,7 @@ public class FaroJwtTokenManagerTest {
                 .append(Base64.encodeBase64String(UUID.randomUUID().toString().getBytes()))
                 .toString();
 
-        FaroJwtTokenManager.FaroJwtClaims jwtClaims = FaroJwtTokenManager.validateToken(randomJwtToken);
+        FaroJwtTokenManager.validateToken(randomJwtToken);
     }
 
     @Test(expected = SignatureException.class)
@@ -67,6 +65,32 @@ public class FaroJwtTokenManagerTest {
 
         System.out.println("invalidSignatureToken : " + invalidSignatureToken);
 
-        FaroJwtTokenManager.FaroJwtClaims jwtClaims = FaroJwtTokenManager.validateToken(invalidSignatureToken);
+        FaroJwtClaims jwtClaims = FaroJwtTokenManager.validateToken(invalidSignatureToken);
+    }
+
+    @Test(expected = JwtTokenValidationException.class)
+    public void tokenExpirationTest() throws Exception {
+        FaroJwtClaims faroJwtClaims = new FaroJwtClaims();
+        faroJwtClaims.setIssuer("faro");
+        faroJwtClaims.setUsername("johndoe007@gmail.com");
+        faroJwtClaims.setEmail("johndoe007@gmail.com");
+        long currentTime = System.currentTimeMillis();
+        faroJwtClaims.setIssuedAtInMilliSecs(currentTime);
+        faroJwtClaims.setExpirationInSecs(TimeUnit.MILLISECONDS.toSeconds(currentTime) + 5);
+
+        String token = FaroJwtTokenManager.createToken(faroJwtClaims);
+        System.out.println("Created new token = " + token);
+
+        try {
+            FaroJwtTokenManager.validateToken(token);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail("Token validation should have succeeded");
+        }
+        System.out.println("Token validated.");
+
+        Thread.sleep(TimeUnit.SECONDS.toMillis(6));
+        System.out.println("Checking token validity after 6 secs");
+        FaroJwtTokenManager.validateToken(token);
     }
 }

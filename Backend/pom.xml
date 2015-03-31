@@ -29,11 +29,20 @@
             <artifactId>slf4j-log4j12</artifactId>
             <version>1.7.10</version>
         </dependency>
+        <!-- Google app engine SDK -->
         <dependency>
             <groupId>com.google.appengine</groupId>
             <artifactId>appengine-api-1.0-sdk</artifactId>
             <version>1.9.15</version>
         </dependency>
+        <!-- Objectify -->
+        <dependency>
+            <groupId>com.googlecode.objectify</groupId>
+            <artifactId>objectify</artifactId>
+            <version>5.1.1</version>
+        </dependency>
+
+        <!-- Javax servlet -->
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
@@ -45,17 +54,14 @@
             <artifactId>jstl</artifactId>
             <version>1.2</version>
         </dependency>
+
+        <!-- For JAX-RS, jsr311 -->
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>jsr311-api</artifactId>
             <version>1.1.1</version>
         </dependency>
-        <dependency>
-            <groupId>com.googlecode.objectify</groupId>
-            <artifactId>objectify</artifactId>
-            <version>5.1.1</version>
-        </dependency>
-        <!-- For JAX-RS, jsr311 -->
+        <!-- Jersey -->
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-bundle</artifactId>
@@ -66,11 +72,12 @@
             <artifactId>jersey-json</artifactId>
             <version>1.18.2</version>
         </dependency>
+
         <!-- JWT Authentication lib and its dependency -->
         <dependency>
             <groupId>com.auth0</groupId>
             <artifactId>java-jwt</artifactId>
-            <version>1.0.0</version>
+            <version>2.0.1</version>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
@@ -108,12 +115,6 @@
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-mapper-asl</artifactId>
             <version>1.9.13</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax.ws.rs</groupId>
-            <artifactId>javax.ws.rs-api</artifactId>
-            <version>2.0.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

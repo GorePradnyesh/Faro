@@ -3,6 +3,7 @@ package com.zik.faro.api.unit;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
+import com.zik.faro.TestHelper;
 import com.zik.faro.api.authentication.SignupHandler;
 import com.zik.faro.api.responder.FaroSignupDetails;
 import com.zik.faro.applogic.UserManagement;
@@ -106,10 +107,8 @@ public class SignupApiTest {
         createNewUser(user, null);
     }
 
-    public Response createNewUser(FaroUser user, String password) {
-        SignupHandler signupHandler = new SignupHandler();
-        //return signupHandler.signupUser(new FaroSignupDetails(user, password));
-        return null;
+    public static Response createNewUser(FaroUser user, String password) {
+        return new SignupHandler().signupUser(new FaroSignupDetails(user, password));
     }
 
 }

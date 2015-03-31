@@ -1,4 +1,4 @@
-package com.zik.faro.api.authentication;
+package com.zik.faro.auth;
 
 /**
  * Created by granganathan on 2/15/15.

@@ -1,4 +1,4 @@
-package com.zik.faro.api.authentication;
+package com.zik.faro.auth.jwt;
 
 /**
  * Created by granganathan on 3/8/15.

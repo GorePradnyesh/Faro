@@ -1,4 +1,4 @@
-package com.zik.faro.api.authentication;
+package com.zik.faro.auth;
 
 import com.auth0.jwt.internal.org.apache.commons.codec.binary.Hex;
 import com.google.common.base.Strings;
@@ -10,6 +10,11 @@ import java.security.NoSuchAlgorithmException;
 
 /**
  * Created by granganathan on 2/15/15.
+ */
+
+/**
+ * Class for encrypting password and to compare
+ * a given password with an encrypted password from the datastore
  */
 public class PasswordManager {
     private static final String PASSWORD_FIXED_SALT = "iamthenight$";
@@ -48,6 +53,15 @@ public class PasswordManager {
         return Hex.encodeHexString(messageDigest.digest());
     }
 
+    /**
+     * The password is suffixed with a salt and a digest is created
+     * by running through the same digest creation process for a
+     * defined number of iterations
+     *
+     * @param password
+     * @return encrypted password string
+     * @throws PasswordManagerException
+     */
     public static String getEncryptedPassword(String password) throws PasswordManagerException {
         try {
             return generateOneWayDigest(password + getPasswordSalt(), HASH_NUM_ITERATIONS);
@@ -57,6 +71,14 @@ public class PasswordManager {
         }
     }
 
+    /**
+     *
+     * @param password
+     * @param encryptedPassword
+     * @return true if encryptedPassword is the same as the string obtained on encrypting password;
+     *         otherwise false
+     * @throws PasswordManagerException
+     */
     public static boolean checkPasswordEquality(String password, String encryptedPassword) throws PasswordManagerException {
         String passwordDigest = null;
         try {

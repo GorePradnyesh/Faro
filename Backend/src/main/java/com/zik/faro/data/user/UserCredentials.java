@@ -17,6 +17,8 @@ public class UserCredentials {
     private String             email;
     private String             password;
 
+    private UserCredentials() {}
+
     public UserCredentials(String email, String password) {
         this.email = email;
 

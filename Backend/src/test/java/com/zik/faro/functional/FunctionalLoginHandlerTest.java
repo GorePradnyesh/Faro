@@ -4,14 +4,17 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.zik.faro.TestHelper;
-import org.junit.BeforeClass;
+import com.zik.faro.api.responder.FaroSignupDetails;
+import com.zik.faro.data.user.FaroUser;
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.UUID;
 
 /**
  * Created by granganathan on 3/2/15.
@@ -20,29 +23,33 @@ import java.net.URL;
 public class FunctionalLoginHandlerTest {
     private static URL endpoint;
 
-    @BeforeClass
-    public static void init() throws MalformedURLException {
-        endpoint = TestHelper.getExternalTargetEndpoint();
+    public FaroSignupDetails createNewTestUser() throws IOException, URISyntaxException {
+        String newRandomEmail = UUID.randomUUID().toString() + "@gmail.com";
+        FaroUser newUser = new FaroUser(newRandomEmail,
+                                        "sachin",
+                                        "ramesh",
+                                        "tendulkar",
+                                        "splitwise",
+                                        null,
+                                        null);
+        FaroSignupDetails faroSignupDetails = new FaroSignupDetails(newUser, "hero123#");
+        TestHelper.signupUser(faroSignupDetails);
+
+        return faroSignupDetails;
     }
+
+
 
     @Test
     public void loginTest() throws Exception {
-        Client client = Client.create();
-        WebResource webResource = client.resource(endpoint.toURI());
-        String username = "gaurav@gmail.com";
-        String password = "saveTheSpeedsterSaveTheWorld2032!&";
-        String body = TestHelper.getJsonRep(password);
+        // Create a user first
+        FaroSignupDetails userSignupDetails = createNewTestUser();
 
-        ClientResponse response = webResource
-                .path("v1")
-                .path("nativeLogin")
-                .path("login")
-                .queryParam("username", username)
-                .header("Content-Type", MediaType.APPLICATION_JSON_TYPE)
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .post(ClientResponse.class, body);
+        ClientResponse response = TestHelper.login(userSignupDetails.getFaroUser().getId(), userSignupDetails.getPassword());
 
         System.out.println("response = " + response);
-
+        Assert.assertEquals(response.getStatus(), ClientResponse.Status.OK.getStatusCode());
+        Assert.assertNotNull(response.getEntity(String.class));
+        System.out.println("token = " + response.getEntity(String.class));
     }
 }

@@ -12,7 +12,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -26,11 +25,6 @@ import java.util.UUID;
 public class FunctionalSignupHandlerTest {
     private static URL endpoint;
 
-    @BeforeClass
-    public static void init() throws MalformedURLException {
-        endpoint = TestHelper.getExternalTargetEndpoint();
-    }
-
     @Test
     public void signupTest() throws Exception {
         String newRandomEmail = UUID.randomUUID().toString() + "@gmail.com";
@@ -42,25 +36,15 @@ public class FunctionalSignupHandlerTest {
                                         null,
                                         null);
         FaroSignupDetails faroSignupDetails = new FaroSignupDetails(newUser, "hero123#");
-        createLoginRequest(faroSignupDetails);
-    }
-
-    public void createLoginRequest(FaroSignupDetails newUserSignupDetails) throws URISyntaxException, IOException {
-        Client client = Client.create();
-        WebResource webResource = client.resource(endpoint.toURI());
-        String body = TestHelper.getJsonRep(newUserSignupDetails);
-        System.out.println("body = " +body);
-
-        ClientResponse response = webResource
-                .path("v1")
-                .path("nativeLogin")
-                .path("signup")
-                .header("Content-Type", MediaType.APPLICATION_JSON_TYPE)
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .post(ClientResponse.class, body);
+        ClientResponse response = TestHelper.signupUser(faroSignupDetails);
 
         System.out.println("response = " + response);
-
         Assert.assertEquals(response.getStatus(), ClientResponse.Status.OK.getStatusCode());
+
+        // create another signup request for the same user
+        ClientResponse secondResponse = TestHelper.signupUser(faroSignupDetails);
+        System.out.println("response2 = " + secondResponse);
+        Assert.assertEquals(secondResponse.getStatus(), ClientResponse.Status.CONFLICT.getStatusCode());
     }
+
 }
