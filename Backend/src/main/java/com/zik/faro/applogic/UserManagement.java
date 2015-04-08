@@ -16,7 +16,6 @@ public class UserManagement {
             throw new BadRequestException("requesting userId does not match the User to be created");
         }
         UserDatastoreImpl.storeUser(faroUser);
-        //TODO: Store the user name and password mapping in another "table".
     }
 
     public static FaroUser loadFaroUser(final String userId){

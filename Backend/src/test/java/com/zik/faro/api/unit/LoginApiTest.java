@@ -57,7 +57,7 @@ public class LoginApiTest {
         Assert.assertNotNull(token);
     }
 
-    public Response createNewUser(FaroUser user, String password) {
+    public String createNewUser(FaroUser user, String password) {
         SignupHandler signupHandler = new SignupHandler();
         return signupHandler.signupUser(new FaroSignupDetails(user, password));
     }

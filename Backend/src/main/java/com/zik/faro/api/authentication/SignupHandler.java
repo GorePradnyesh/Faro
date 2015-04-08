@@ -5,6 +5,7 @@ import com.zik.faro.api.responder.FaroSignupDetails;
 import com.zik.faro.applogic.UserManagement;
 import com.zik.faro.auth.PasswordManager;
 import com.zik.faro.auth.PasswordManagerException;
+import com.zik.faro.auth.jwt.FaroJwtTokenManager;
 import com.zik.faro.commons.exceptions.BadRequestException;
 import com.zik.faro.commons.exceptions.EntityAlreadyExistsException;
 import com.zik.faro.data.user.FaroUser;
@@ -33,7 +34,7 @@ public class SignupHandler {
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Response signupUser(FaroSignupDetails faroSignupDetails) {
+    public String signupUser(FaroSignupDetails faroSignupDetails) {
         if (faroSignupDetails == null) {
             throw new BadRequestException("User signup  details missing.");
         }
@@ -58,6 +59,7 @@ public class SignupHandler {
         if (UserManagement.isExistingUser(newFaroUser.getId())) {
             // Return  error code indicating user exists
             logger.info("User already exists");
+            // TODO (Code Review) : throw only WebApplicationException . Keep an emum of Faro status codes
             throw new EntityAlreadyExistsException(MessageFormat.format("Username {0} already exists.", newFaroUser.getEmail()));
         }
 
@@ -71,9 +73,7 @@ public class SignupHandler {
             logger.error("Password could not be encrypted", e);
         }
 
-        //TODO : Generate and Send Welcome email
-
-        return Response.ok().build();
+        return FaroJwtTokenManager.createToken(newFaroUser.getId());
     }
 
 }

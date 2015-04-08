@@ -1,9 +1,11 @@
 package com.zik.faro.data.user;
 
+import com.google.common.base.Strings;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
 import com.zik.faro.commons.exceptions.IllegalDataOperation;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -21,6 +23,10 @@ public class FaroUser {
     private String             telephone;   //TODO: type tel number
     private Address            address;
 
+    public FaroUser(final String email) {
+        this(email, null, null, null, null, null, null);
+    }
+
     public FaroUser(final String email,
                 final String firstName,
                 final String middleName,
@@ -28,6 +34,11 @@ public class FaroUser {
                 final String externalExpenseID,
                 final String telephone,
                 final Address address) {
+        // Ensure Email is a valid value as it is a mandatory field
+        if (Strings.isNullOrEmpty(email)) {
+            throw new IllegalArgumentException("Email is null/empty");
+        }
+
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -111,32 +122,8 @@ public class FaroUser {
         this.address = address;
     }
 
-   /* @Override
+   @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder()
-                .append("[")
-                .append("email = ")
-                .append(getEmail())
-                .append(", ")
-                .append("firstName = ")
-                .append(getFirstName())
-                .append(", ")
-                .append("middleName = ")
-                .append(getMiddleName())
-                .append(", ")
-                .append("lastName =")
-                .append(getLastName())
-                .append(", ")
-                .append("externalExpenseId = ")
-                .append(getExternalExpenseID())
-                .append(", ")
-                .append("telephone = ")
-                .append(getTelephone())
-                .append(", ")
-                .append("address = ")
-                .append(getAddress().toString())
-                .append("]");
-
-        return builder.toString();
-    }*/
+        return ToStringBuilder.reflectionToString(this);
+    }
 }

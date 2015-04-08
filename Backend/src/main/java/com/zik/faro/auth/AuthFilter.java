@@ -27,7 +27,8 @@ import java.security.SignatureException;
  */
 public class AuthFilter implements ContainerRequestFilter {
     private  static final Logger logger = LoggerFactory.getLogger(AuthFilter.class);
-    private static  final String AUTH_HEADER = "authentication";
+    // all headers start with upper case
+    private static  final String AUTH_HEADER = "Authentication";
 
     /**
      * Obtain the token from the header and validate the token.
@@ -69,8 +70,9 @@ public class AuthFilter implements ContainerRequestFilter {
             containerRequest.setSecurityContext(new SecurityContext() {
                 @Override
                 public Principal getUserPrincipal() {
-                    return new FaroPrincipal(jwtClaims);
+                    return jwtClaims;
                 }
+
 
                 @Override
                 public boolean isUserInRole(String s) {
@@ -93,6 +95,7 @@ public class AuthFilter implements ContainerRequestFilter {
         } catch (SignatureException e) {
             throw new UnauthorizedException("Invalid token signature");
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            // Add logging
             throw new IllegalStateException("Unable to authenticate the request");
         }
     }

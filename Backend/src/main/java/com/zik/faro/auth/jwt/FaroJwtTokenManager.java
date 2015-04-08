@@ -63,6 +63,7 @@ public class FaroJwtTokenManager {
      * @return JWT token string
      */
     public static String createToken(FaroJwtClaims jwtClaims) {
+        // TODO : Make sure expiration and issuedat are valid values
         Map<String, Object> claimsMap = new HashMap<>();
         claimsMap.put(JwtClaimConstants.ISSUER_KEY, jwtClaims.getIssuer());
         claimsMap.put(JwtClaimConstants.USERNAME, jwtClaims.getUsername());

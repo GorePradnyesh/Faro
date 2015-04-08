@@ -3,7 +3,6 @@ package com.zik.faro.api.unit;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
-import com.zik.faro.TestHelper;
 import com.zik.faro.api.authentication.SignupHandler;
 import com.zik.faro.api.responder.FaroSignupDetails;
 import com.zik.faro.applogic.UserManagement;
@@ -15,7 +14,6 @@ import com.zik.faro.data.user.UserCredentials;
 import com.zik.faro.persistence.datastore.UserCredentialsDatastoreImpl;
 import org.junit.*;
 
-import javax.ws.rs.core.Response;
 import java.util.UUID;
 
 /**
@@ -56,19 +54,19 @@ public class SignupApiTest {
                 new Address(44, "Abby Road","SouthEnd London","UK", 566645));
         String password = "password@#$89";
 
-        Response response = createNewUser(user, password);
+        String token = createNewUser(user, password);
 
-        // Verify the response was no content response
-        Assert.assertEquals(Response.Status.NO_CONTENT.getStatusCode(), response.getStatus());
+        // Verify the response
+        Assert.assertNotNull(token);
 
         // Verify the user exists and credentials have been entered
         Assert.assertTrue(UserManagement.isExistingUser(user.getId()));
         UserCredentials userCredentials = UserCredentialsDatastoreImpl.loadUserCreds(user.getId());
         Assert.assertNotNull(userCredentials);
         userCredentials.getEmail();
-        userCredentials.getPassword();
+        userCredentials.getEncryptedPassword();
         Assert.assertEquals(user.getId(), userCredentials.getEmail());
-        Assert.assertNotNull(userCredentials.getPassword());
+        Assert.assertNotNull(userCredentials.getEncryptedPassword());
     }
 
     @Test(expected = EntityAlreadyExistsException.class)
@@ -107,7 +105,7 @@ public class SignupApiTest {
         createNewUser(user, null);
     }
 
-    public static Response createNewUser(FaroUser user, String password) {
+    public static String createNewUser(FaroUser user, String password) {
         return new SignupHandler().signupUser(new FaroSignupDetails(user, password));
     }
 

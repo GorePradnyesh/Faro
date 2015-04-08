@@ -17,8 +17,10 @@ import java.security.NoSuchAlgorithmException;
  * a given password with an encrypted password from the datastore
  */
 public class PasswordManager {
+    // TODO: Use a better salt string
     private static final String PASSWORD_FIXED_SALT = "iamthenight$";
     private static final String HASH_ALGORITHM = "SHA";
+    // TODO: determine optimal number of iterations
     private static final int HASH_NUM_ITERATIONS = 1;
 
     private static final Logger logger = LoggerFactory.getLogger(PasswordManager.class);

@@ -15,23 +15,23 @@ public class UserCredentials {
     @Id
     @Index
     private String             email;
-    private String             password;
+    private String encryptedPassword;
 
     private UserCredentials() {}
 
-    public UserCredentials(String email, String password) {
+    public UserCredentials(String email, String encryptedPassword) {
         this.email = email;
 
-        // Store the encrypted password
-        this.password = password;
+        // Store the encrypted encryptedPassword
+        this.encryptedPassword = encryptedPassword;
     }
 
-    public String getPassword() {
-        return password;
+    public String getEncryptedPassword() {
+        return encryptedPassword;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setEncryptedPassword(String encryptedPassword) {
+        this.encryptedPassword = encryptedPassword;
     }
 
     public String getEmail() {

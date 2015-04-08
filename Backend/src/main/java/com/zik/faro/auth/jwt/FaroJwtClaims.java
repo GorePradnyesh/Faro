@@ -3,11 +3,16 @@ package com.zik.faro.auth.jwt;
 /**
  * Created by granganathan on 3/30/15.
  */
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import java.security.Principal;
+
 /**
  * Class for specifying the claims for creating a token
  * or for retrieving the claim from a token
  */
-public class FaroJwtClaims implements JwtClaims {
+public class FaroJwtClaims implements JwtClaims, Principal {
     private String issuer;
     private long issuedAt;
     private long expiration;
@@ -74,30 +79,11 @@ public class FaroJwtClaims implements JwtClaims {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder()
-                .append("[")
+        return ToStringBuilder.reflectionToString(this);
+    }
 
-                .append(JwtClaimConstants.ISSUER_KEY)
-                .append(": ")
-                .append(getIssuer())
-                .append(", ")
-
-                .append(JwtClaimConstants.ISSUED_AT_KEY)
-                .append(": ")
-                .append(getIssuedAtInMilliSecs())
-                .append(", ")
-
-                .append(JwtClaimConstants.USERNAME)
-                .append(": ")
-                .append(getUsername())
-                .append(", ")
-
-                .append(JwtClaimConstants.EMAIL)
-                .append(": ")
-                .append(getEmail())
-
-                .append("]");
-
-        return builder.toString();
+    @Override
+    public String getName() {
+        return getUsername();
     }
 }

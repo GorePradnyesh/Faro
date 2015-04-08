@@ -53,7 +53,7 @@ public class LoginHandler {
         }
 
         try {
-            if (!PasswordManager.checkPasswordEquality(password, userCredentials.getPassword())) {
+            if (!PasswordManager.checkPasswordEquality(password, userCredentials.getEncryptedPassword())) {
                 logger.error("Incorrect password");
                 throw new InvalidLoginException("Invalid username and/or password.");
             }
