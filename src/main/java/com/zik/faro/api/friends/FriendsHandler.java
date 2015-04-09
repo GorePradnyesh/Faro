@@ -32,19 +32,8 @@ public class FriendsHandler {
         String requestingUserId = signature;
         String inviteeUsersId = userId;
 
-        try {
-            FriendManagement.inviteFriend(requestingUserId, inviteeUsersId);
-        } catch (IllegalDataOperation illegalDataOperation) {
-            Response badRequestResponse = Response.status(Response.Status.BAD_REQUEST)
-                    .entity(illegalDataOperation.getMessage())
-                    .build();
-            throw new WebApplicationException(badRequestResponse);
-        } catch (DataNotFoundException e) {
-            Response notFoundResponse = Response.status(Response.Status.NOT_FOUND)
-                    .entity(e.getMessage())
-                    .build();
-            throw new WebApplicationException(notFoundResponse);
-        }
+        FriendManagement.inviteFriend(requestingUserId, inviteeUsersId);
+        
         return JResponse.ok(Constants.HTTP_OK).build();
     }
 
@@ -65,10 +54,11 @@ public class FriendsHandler {
     @POST
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN, MediaType.TEXT_HTML})
     public JResponse<String> unFriend(@QueryParam(Constants.SIGNATURE_QUERY_PARAM) final String signature,
-                                      @QueryParam(Constants.FARO_USER_ID_PARAM) final String userId){
+                                      @QueryParam(Constants.FARO_USER_ID_PARAM) final String toBeRemovedUserId
+                                      ){
         ParamValidation.validateSignature(signature);
-        ParamValidation.genericParamValidations(userId, "userId");
-        //TODO: Replace below static response with actual code
+        String requestingUserId = "userIdFromSignature";
+        FriendManagement.removeFriend(requestingUserId, toBeRemovedUserId);
         return JResponse.ok(Constants.HTTP_OK).build();
     }
 

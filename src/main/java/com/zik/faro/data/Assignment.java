@@ -1,10 +1,13 @@
 package com.zik.faro.data;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 //TODO:perform data validations
 
@@ -15,25 +18,34 @@ import java.util.UUID;
 
 @XmlRootElement
 public class Assignment {
-    public final String id;
+    public String id = null;
 
-    private ActionStatus status;
-    private final List<Item> items = new ArrayList<>();
+    private ActionStatus status = null;
+    private Map<String,Item> items = null;
 
     private static final String NA = "N/A";
-
-    public Assignment(){
+    
+	public Assignment(){
         this.id = UUID.randomUUID().toString();
         this.status = ActionStatus.INCOMPLETE;
+        this.items  = new HashMap<String,Item>();
     }
 
     @XmlElement
     public List<Item> getItems(){
-        return this.items;     //TODO: change this to not return the items in the class . clone ?
+        return new ArrayList<Item>(this.items.values());     //TODO: change this to not return the items in the class . clone ?
     }
 
     public void addItem(Item item){
-        items.add(item);
+        items.put(item.getId(), item);
+    }
+    
+    public void setItems(Map<String,Item> items){
+    	this.items = items;
+    }
+    
+    public Item getItem(String key){
+    	return items.get(key);
     }
 
     public ActionStatus getStatus() {
@@ -42,5 +54,9 @@ public class Assignment {
 
     public void setStatus(ActionStatus status) {
         this.status = status;
+    }
+    
+    public String getId(){
+    	return this.id;
     }
 }

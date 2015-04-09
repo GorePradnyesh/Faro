@@ -1,6 +1,8 @@
 package com.zik.faro.persistence.datastore;
 
 import com.zik.faro.api.responder.MinUser;
+import com.zik.faro.applogic.UserManagement;
+import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.IllegalDataOperation;
 import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.data.user.FriendRelation;
@@ -38,7 +40,7 @@ public class FriendRelationDatastoreImpl {
         return friendRelationList;
     }
 
-    public static FriendRelation loadFriendRelation(final String faroUserId1, final String faroUserId2){
+    public static FriendRelation loadFriendRelation(final String faroUserId1, final String faroUserId2) throws DataNotFoundException{
         /* Because of the symmetrical nature of the relation, one could very well switch the faroUserId1,2 args to
         get the same result.*/
         FriendRelation relation =
@@ -47,5 +49,17 @@ public class FriendRelationDatastoreImpl {
                                                                 FriendRelation.class,
                                                                 faroUserId2);
         return relation;
+    }
+    
+    public static void removeFriendRelation(final FaroUser faroUser1, final FaroUser faroUser2) throws IllegalDataOperation{
+    	
+    	// Remove both sides of the relation. Similar to how we create a friend relation
+    	FriendRelation friendRelation = new FriendRelation(faroUser1.getEmail(), faroUser2.getEmail(),
+                faroUser2.getFirstName(), faroUser2.getLastName(), faroUser2.getExternalExpenseID());
+    	DatastoreObjectifyDAL.deleteEntity(friendRelation);
+
+    	friendRelation = new FriendRelation(faroUser2.getEmail(), faroUser1.getEmail(),
+                faroUser1.getFirstName(), faroUser1.getLastName(), faroUser1.getExternalExpenseID());
+    	DatastoreObjectifyDAL.deleteEntity(friendRelation);
     }
 }

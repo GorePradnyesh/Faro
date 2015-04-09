@@ -9,8 +9,10 @@ import java.util.Map;
 
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Ref;
+import com.googlecode.objectify.Work;
 import com.googlecode.objectify.cmd.Query;
-import com.zik.faro.data.Activity;
+import com.zik.faro.commons.Constants;
+import com.zik.faro.commons.exceptions.DataNotFoundException;
 
 /**
  * This the lowermost layer which abstracts the fundamental load store operations.
@@ -29,9 +31,12 @@ public class DatastoreObjectifyDAL {
         return key;
     }
 
-    public static <T> T loadObjectById(final String objectId, Class<T> clazz){
+    public static <T> T loadObjectById(final String objectId, Class<T> clazz) throws DataNotFoundException{
         Key<T> objectKey = Key.create(clazz, objectId);
         T object = ofy().load().key(objectKey).now();
+        if(object == null){
+        	throw new DataNotFoundException("Data not found. Key:" + objectKey.toString());
+        }
         return object;
     }
     
@@ -86,9 +91,12 @@ public class DatastoreObjectifyDAL {
     public static <T,V> T loadObjectWithParentId(final Class<V> parentClazz,
                                                  final String parentIdValue,
                                                  final Class<T> clazz,
-                                                 final String objectId){
+                                                 final String objectId) throws DataNotFoundException{
         Key<T> objectKey = Key.create(Key.create(parentClazz, parentIdValue), clazz, objectId);
         T object = ofy().load().key(objectKey).now();
+        if(object == null){
+        	throw new DataNotFoundException("Data not found. Key:" + objectKey.toString());
+        }
         return object;
     }
 
@@ -96,19 +104,25 @@ public class DatastoreObjectifyDAL {
                                                       final String parentIdValue,
                                                       final Class<T> clazz){
         Ref<V> parentKey = Ref.create(Key.create(parentClazz, parentIdValue));
-        List<T> objectList = ofy().load().type(clazz).ancestor(parentKey).list();
+        List<T> objectList = ofy().load().type(clazz).ancestor(parentKey).
+        		limit(Constants.MAX_ITEMS_TO_FETCH_FROM_DATASTORE).list();
         return objectList;
     }
 
 
     public static <T> List<T> loadObjectsByIndexedStringFieldEQ(final String fieldName, final String fieldValue, Class<T> clazz){
         //TODO: do reflection validation to ensure that fieldName provided is Annotated with @Index
-        List<T> objectList = ofy().load().type(clazz).filter(fieldName, fieldValue).list();
+        List<T> objectList = ofy().load().type(clazz).filter(fieldName, fieldValue)
+        		.limit(Constants.MAX_ITEMS_TO_FETCH_FROM_DATASTORE).list();
         return objectList;
     }
 
-    public static <T> T loadFirstObjectByIndexedStringFieldEQ(final String fieldName, final String fieldValue, Class<T> clazz) {
+    public static <T> T loadFirstObjectByIndexedStringFieldEQ(final String fieldName, 
+    		final String fieldValue, Class<T> clazz) throws DataNotFoundException {
         T object = ofy().load().type(clazz).filter(fieldName, fieldValue).first().now();
+        if(object == null){
+        	throw new DataNotFoundException("Data not found. IndexedFieldName:" + fieldName + " IndexedFieldValue:"+fieldValue);
+        }
         return object;
     }
 
@@ -121,7 +135,7 @@ public class DatastoreObjectifyDAL {
         query = createAndAppendKeyFilters(keyFilterMap, query, clazz);
         query = createAndAppendFilters(filterMap, query);
 
-        List<T> resultSet = query.list();
+        List<T> resultSet = query.limit(Constants.MAX_ITEMS_TO_FETCH_FROM_DATASTORE).list();
         return resultSet;
     }
 
@@ -136,9 +150,12 @@ public class DatastoreObjectifyDAL {
     public static <T> T loadObjectByIndexedRefFieldEQ(final String filterFieldName,
                                                       final Class filterFieldClass,
                                                       final String filterFieldValue,
-                                                      Class<T> clazz){
+                                                      Class<T> clazz) throws DataNotFoundException{
         Ref<T> filterRef = getRefForClassById(filterFieldValue, filterFieldClass);
         T object = ofy().load().type(clazz).filter(filterFieldName, filterRef).first().now();
+        if(object == null){
+        	throw new DataNotFoundException("Data not found. Key:" + filterRef.getKey().toString());
+        }
         return object;
     }
 
@@ -147,10 +164,11 @@ public class DatastoreObjectifyDAL {
                                                       final String filterFieldValue,
                                                       Class<T> clazz){
         Ref<T> filterRef = getRefForClassById(filterFieldValue, filterFieldClass);
-        List<T> objectList = ofy().load().type(clazz).filter(filterFieldName, filterRef).list();
+        List<T> objectList = ofy().load().type(clazz).filter(filterFieldName, filterRef).
+        		limit(Constants.MAX_ITEMS_TO_FETCH_FROM_DATASTORE).list();
         return objectList;
     }
-
+    
     //===================== HELPER FUNCTIONS =====================
 
     public static <T> Query<T> createAndAppendKeyFilters(Map<DatastoreOperator, String> keyFilterMap, Query query, Class<T> clazz){
@@ -171,7 +189,10 @@ public class DatastoreObjectifyDAL {
         }
         return query;
     }
-
+    
+    public static TransactionResult update(Work w){
+    	return ofy().transact(w);
+    }
 
     //TODO: ADD CURSOR COUNTERPARTS / ARGUMENTS FOR THE THE FUNCTIONS ABOVE
 }

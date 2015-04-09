@@ -1,11 +1,20 @@
 package com.zik.faro.applogic;
 
-import com.zik.faro.api.responder.EventCreateData;
-import com.zik.faro.commons.exceptions.DataNotFoundException;
-import com.zik.faro.data.Event;
-import com.zik.faro.persistence.datastore.EventDatastoreImpl;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
+
+import com.zik.faro.api.responder.AddFriendRequest;
+import com.zik.faro.api.responder.EventCreateData;
+import com.zik.faro.commons.exceptions.DataNotFoundException;
+import com.zik.faro.commons.exceptions.IllegalDataOperation;
+import com.zik.faro.data.Event;
+import com.zik.faro.data.EventUser;
+import com.zik.faro.data.user.FaroUser;
+import com.zik.faro.persistence.datastore.DatastoreObjectifyDAL;
+import com.zik.faro.persistence.datastore.EventDatastoreImpl;
+import com.zik.faro.persistence.datastore.EventUserDatastoreImpl;
 
 //TODO: better name ?
 //TODO: Need to add retry logic to the operations
@@ -32,7 +41,36 @@ public class EventManagement {
         //TODO: Validate that the user has permissions to modify event, from the EventUser table
         EventDatastoreImpl.disableEventControlFlag(eventId);
     }
-
+    
+    public static void addFriendToEvent(final String eventId, final String userId, 
+    		final AddFriendRequest friendRequest){
+    	FaroUser existingUser = UserManagement.loadFaroUser(userId);
+    	
+    	for(String friendId : friendRequest.getFriendIds()){
+    		// Create friend if not present and establish friend relation if not present
+    		FriendManagement.inviteFriend(existingUser.getId(), friendId);
+        	
+        	// Add to event invitees
+        	EventUserManagement.storeEventUser(eventId, friendId);
+    	}
+    }
+    
+    public static List<Event> getEvents(final String faroUserId){
+    	// Load first "N" event Ids for particular user
+		List<EventUser> eventUsers = EventUserManagement.getEventsByFaroUser(faroUserId);
+		List<String> eventIds = new ArrayList<String>();
+ 		for(EventUser eventUser : eventUsers){
+			eventIds.add(eventUser.getEvent().getEventId());
+		}
+ 		// Load actual events
+ 		return (List<Event>)DatastoreObjectifyDAL.
+ 				loadMultipleObjectsByIdSync(eventIds, Event.class).values();
+	}
+    
+    public static void removeAttendee(final String eventId, final String userId){
+    	
+    }
+    
     @XmlRootElement
     public static class MinEvent{
         public String id;

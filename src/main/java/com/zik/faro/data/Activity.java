@@ -25,26 +25,28 @@ public class Activity {
     private DateOffset date;
 
     public Activity(String eventId, String name) {
-        this(eventId, name, null, null, null);
+        this(eventId, name, null, null, null, null);
     }
 
     private Activity() {    // TO Satisfy JaxB
-        this(null, null);
+    //    this(null, null);
     }
 
-    public Activity(String eventId, String name, String description, Location location, DateOffset date) {
+    public Activity(String eventId, String name, String description,
+    		Location location, DateOffset date, Assignment assignment) {
         this.id = UUID.randomUUID().toString();
         this.eventId = Ref.create(Key.create(Event.class, eventId));
         this.name = name;
         this.description = description;
         this.location = location;
         this.date = date;
+        this.assignment = assignment;
     }
 
     // Getters and setters
 
     public String getId() {
-        return id;
+    	return id;
     }
 
     public String getEventId() {

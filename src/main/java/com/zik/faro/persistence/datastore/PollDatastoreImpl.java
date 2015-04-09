@@ -1,7 +1,9 @@
 package com.zik.faro.persistence.datastore;
 
+import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.Poll;
+
 import java.util.List;
 
 public class PollDatastoreImpl {
@@ -12,7 +14,7 @@ public class PollDatastoreImpl {
         DatastoreObjectifyDAL.storeObject(poll);
     }
 
-    public static Poll loadPollById(final String pollId, final String eventId){
+    public static Poll loadPollById(final String pollId, final String eventId) throws DataNotFoundException{
         Poll poll = DatastoreObjectifyDAL.loadObjectWithParentId(Event.class, eventId, Poll.class, pollId);
         return poll;
     }

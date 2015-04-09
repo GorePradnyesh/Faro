@@ -36,6 +36,11 @@ public class FaroUser {
         this.telephone = telephone;
         this.address = address;
     }
+    
+    // Required when a user adds a new friend and friend has not yet accepted invitation.
+    public FaroUser(final String email){
+    	this(email,null,null,null,null,null,null);
+    }
 
     public void setIfNullExternalExpenseID(final String externalExpenseID) throws IllegalDataOperation {
         if(this.externalExpenseID == null) {

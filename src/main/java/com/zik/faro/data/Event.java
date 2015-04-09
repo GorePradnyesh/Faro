@@ -21,6 +21,7 @@ public class Event {
     private ExpenseGroup expenseGroup;
     private Location location;
     private ObjectStatus status;
+    private Assignment assignment;
 
     public Event(final String eventName, final DateOffset startDate, final DateOffset endDate,
                  final boolean controlFlag, final ExpenseGroup expenseGroup, final Location location) {
@@ -105,4 +106,12 @@ public class Event {
     public void setStatus(ObjectStatus status) {
         this.status = status;
     }
+
+	public Assignment getAssignment() {
+		return assignment;
+	}
+
+	public void setAssignment(Assignment assignment) {
+		this.assignment = assignment;
+	}
 }

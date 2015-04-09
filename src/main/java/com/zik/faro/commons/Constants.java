@@ -21,7 +21,7 @@ public final class Constants {
 
     public static final String ASSIGNMENT_ID_PATH_PARAM                         = "assignmentId";
     public static final String ASSIGNMENT_ID_PATH_PARAM_STRING                  = "/{" + ASSIGNMENT_ID_PATH_PARAM +"}";
-
+    
     public static final String POLL_ID_PATH_PARAM                               = "pollId";
     public static final String POLL_ID_PATH_PARAM_STRING                        = "/{" + POLL_ID_PATH_PARAM +"}";
 
@@ -41,11 +41,13 @@ public final class Constants {
     public static final String FEEDBACK_PATH_CONST                              = "/feedback";
 
     public static final String EVENT_PATH_CONST                                 = "/event";
+    public static final String EVENTS_PATH_CONST                                 = "/events";
     public static final String EVENT_DETAILS_PATH_CONST                         = "/details";
     public static final String EVENT_INVITEES_PATH_CONST                        = "/invitees";
     public static final String EVENT_DISABLE_CONTROL_PATH_CONST                 = "/disableControl";
     public static final String EVENT_REMOVE_ATTENDEE_PATH_CONST                 = "/removeAttendee";
     public static final String EVENT_CREATE_PATH_CONST                          = "/create";
+    public static final String EVENT_ADD_FRIENDS_CONST							= "/add";
 
     public static final String ACTIVITY_PATH_CONST                              = "/activity";
     public static final String ACTIVITIES_PATH_CONST                            = "/activities";
@@ -67,5 +69,9 @@ public final class Constants {
     public static final String POLL_VOTE_PATH_CONST                             = "/vote";
     public static final String POLL_ADD_OPTION_PATH_CONST                       = "/addOption";
     public static final String POLL_CLOSE_PATH_CONST                            = "/close";
+    
+    // ---- misc constants ---- //
+    public static final String ALL												= "all";
+    public static final int MAX_ITEMS_TO_FETCH_FROM_DATASTORE					= 20;
 
 }

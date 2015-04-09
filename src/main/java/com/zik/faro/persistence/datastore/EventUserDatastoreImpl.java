@@ -24,16 +24,13 @@ public class EventUserDatastoreImpl {
     public static EventUser loadEventUser(final String eventId, final String faroUserId){
         Ref<Event> eventRef = DatastoreObjectifyDAL.getRefForClassById(eventId, Event.class);
         Ref<FaroUser> faroUserRef = DatastoreObjectifyDAL.getRefForClassById(faroUserId, FaroUser.class);
-
+        
         Query<EventUser> eventUserQuery = ofy().load().type(EventUser.class);
         eventUserQuery = eventUserQuery.filter(EVENT_REF_FIELD_NAME, eventRef);
         eventUserQuery = eventUserQuery.filter(FARO_USER_REF_FIELD_NAME, faroUserRef);
-        List<EventUser> eventUserList = eventUserQuery.list();
-        if(eventUserList.size() > 1){
-            //logger.warn("Got more than one result for eventId and farouserID");
-        }
-        return eventUserList.get(0);
-    }
+        // Return the first result since there should be another record with same key.
+        return eventUserQuery.first().now();
+     }
 
     public static List<EventUser> loadEventUserByEvent(final String eventId){
         List<EventUser> eventUserList =
@@ -44,7 +41,6 @@ public class EventUserDatastoreImpl {
         return eventUserList;
     }
 
-
     public static List<EventUser> loadEventUserByFaroUser(final String faroUserId){
         List<EventUser> eventUserList =
                 DatastoreObjectifyDAL.loadObjectsByIndexedRefFieldEQ(FARO_USER_REF_FIELD_NAME,
@@ -52,5 +48,10 @@ public class EventUserDatastoreImpl {
                         faroUserId,
                         EventUser.class);
         return eventUserList;
+    }
+    
+    public static void deleteEventUser(final String eventId, final String faroUserId){
+    	EventUser user = new EventUser(eventId, faroUserId);
+    	DatastoreObjectifyDAL.delelteObjectById(user.getId(), EventUser.class);
     }
 }
