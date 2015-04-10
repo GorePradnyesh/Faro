@@ -3,8 +3,9 @@ package com.zik.faro.api.authentication;
 import com.zik.faro.auth.jwt.FaroJwtTokenManager;
 import com.zik.faro.auth.PasswordManager;
 import com.zik.faro.auth.PasswordManagerException;
+import com.zik.faro.commons.FaroResponseStatus;
 import com.zik.faro.commons.ParamValidation;
-import com.zik.faro.commons.exceptions.InvalidLoginException;
+import com.zik.faro.commons.exceptions.FaroWebAppException;
 import com.zik.faro.data.user.UserCredentials;
 import com.zik.faro.persistence.datastore.UserCredentialsDatastoreImpl;
 import org.slf4j.Logger;
@@ -49,13 +50,13 @@ public class LoginHandler {
         if (userCredentials == null) {
             // username does not match
             logger.error(MessageFormat.format("Incorrect username. User {0} does not exist", username));
-            throw new InvalidLoginException("Invalid username and/or password.");
+            throw new FaroWebAppException(FaroResponseStatus.INVALID_LOGIN, "Invalid username and/or password.");
         }
 
         try {
             if (!PasswordManager.checkPasswordEquality(password, userCredentials.getEncryptedPassword())) {
                 logger.error("Incorrect password");
-                throw new InvalidLoginException("Invalid username and/or password.");
+                throw new FaroWebAppException(FaroResponseStatus.INVALID_LOGIN, "Invalid username and/or password.");
             }
         } catch (PasswordManagerException e) {
             logger.error("Could not verify password.", e);

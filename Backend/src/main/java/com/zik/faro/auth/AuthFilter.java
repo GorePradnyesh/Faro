@@ -7,7 +7,8 @@ import com.zik.faro.auth.jwt.FaroJwtClaims;
 import com.zik.faro.auth.jwt.FaroJwtTokenManager;
 import com.zik.faro.auth.jwt.JwtTokenValidationException;
 import com.zik.faro.commons.Constants;
-import com.zik.faro.commons.exceptions.UnauthorizedException;
+import com.zik.faro.commons.FaroResponseStatus;
+import com.zik.faro.commons.exceptions.FaroWebAppException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +37,7 @@ public class AuthFilter implements ContainerRequestFilter {
      * to the resource class.
      * @param containerRequest
      * @return containerRequest
-     * @throws UnauthorizedException - If the token is not present or not valid
+     * @throws FaroWebAppException - If the token is not present or not valid
      * @throws IllegalStateException - If token validation itself fails
      */
     @Override
@@ -58,7 +59,7 @@ public class AuthFilter implements ContainerRequestFilter {
         String authHeaderValue = containerRequest.getHeaderValue(AUTH_HEADER);
 
         if (Strings.isNullOrEmpty(authHeaderValue)) {
-            throw new UnauthorizedException("Authentication token not provided");
+            throw new FaroWebAppException(FaroResponseStatus.UNAUTHORIZED, "Authentication token not provided");
         }
 
         logger.info("header value : " + authHeaderValue);
@@ -91,9 +92,9 @@ public class AuthFilter implements ContainerRequestFilter {
             });
             return containerRequest;
         } catch (JwtTokenValidationException e) {
-            throw new UnauthorizedException("Invalid token");
+            throw new FaroWebAppException(FaroResponseStatus.UNAUTHORIZED, "Invalid token");
         } catch (SignatureException e) {
-            throw new UnauthorizedException("Invalid token signature");
+            throw new FaroWebAppException(FaroResponseStatus.UNAUTHORIZED, "Invalid token signature");
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             // Add logging
             throw new IllegalStateException("Unable to authenticate the request");

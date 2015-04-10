@@ -6,8 +6,8 @@ import com.zik.faro.applogic.UserManagement;
 import com.zik.faro.auth.PasswordManager;
 import com.zik.faro.auth.PasswordManagerException;
 import com.zik.faro.auth.jwt.FaroJwtTokenManager;
-import com.zik.faro.commons.exceptions.BadRequestException;
-import com.zik.faro.commons.exceptions.EntityAlreadyExistsException;
+import com.zik.faro.commons.FaroResponseStatus;
+import com.zik.faro.commons.exceptions.FaroWebAppException;
 import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.data.user.UserCredentials;
 import com.zik.faro.persistence.datastore.UserCredentialsDatastoreImpl;
@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 
 import java.text.MessageFormat;
@@ -36,11 +35,10 @@ public class SignupHandler {
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public String signupUser(FaroSignupDetails faroSignupDetails) {
         if (faroSignupDetails == null) {
-            throw new BadRequestException("User signup  details missing.");
+            throw new FaroWebAppException(FaroResponseStatus.BAD_REQUEST, "User signup  details missing.");
         }
 
         logger.info("faro user = " + faroSignupDetails.getFaroUser());
-        logger.info("faroUser email = " + faroSignupDetails.getFaroUser().getEmail());
 
         FaroUser newFaroUser = faroSignupDetails.getFaroUser();
         String password = faroSignupDetails.getPassword();
@@ -48,11 +46,13 @@ public class SignupHandler {
         // Validate Faro user details specified and password
         if (newFaroUser == null) {
             logger.info("User account details missing");
-            throw new BadRequestException("User account details missing.");
+            throw new FaroWebAppException(FaroResponseStatus.BAD_REQUEST, "User account details missing.");
         }
 
+        logger.info("faroUser email = " + faroSignupDetails.getFaroUser().getEmail());
+
         if (Strings.isNullOrEmpty(password)) {
-            throw new BadRequestException("User password not specifed.");
+            throw new FaroWebAppException(FaroResponseStatus.BAD_REQUEST, "User password not specifed.");
         }
 
         // Lookup to sees if an user exists with the same id
@@ -60,7 +60,7 @@ public class SignupHandler {
             // Return  error code indicating user exists
             logger.info("User already exists");
             // TODO (Code Review) : throw only WebApplicationException . Keep an emum of Faro status codes
-            throw new EntityAlreadyExistsException(MessageFormat.format("Username {0} already exists.", newFaroUser.getEmail()));
+            throw new FaroWebAppException(FaroResponseStatus.ENTITY_EXISTS, MessageFormat.format("Username {0} already exists.", newFaroUser.getEmail()));
         }
 
         try {

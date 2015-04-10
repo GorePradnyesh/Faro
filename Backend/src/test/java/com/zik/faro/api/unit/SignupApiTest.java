@@ -6,14 +6,15 @@ import com.googlecode.objectify.ObjectifyService;
 import com.zik.faro.api.authentication.SignupHandler;
 import com.zik.faro.api.responder.FaroSignupDetails;
 import com.zik.faro.applogic.UserManagement;
-import com.zik.faro.commons.exceptions.BadRequestException;
-import com.zik.faro.commons.exceptions.EntityAlreadyExistsException;
+import com.zik.faro.commons.FaroResponseStatus;
+import com.zik.faro.commons.exceptions.FaroWebAppException;
 import com.zik.faro.data.user.Address;
 import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.data.user.UserCredentials;
 import com.zik.faro.persistence.datastore.UserCredentialsDatastoreImpl;
 import org.junit.*;
 
+import javax.ws.rs.core.Response;
 import java.util.UUID;
 
 /**
@@ -69,32 +70,51 @@ public class SignupApiTest {
         Assert.assertNotNull(userCredentials.getEncryptedPassword());
     }
 
-    @Test(expected = EntityAlreadyExistsException.class)
+    @Test
     public void testSignupExistingUser() {
         final String fName = UUID.randomUUID().toString();
-        FaroUser user = new FaroUser("rwaters@gmail.com",
+        FaroUser user = new FaroUser(fName+ "@gmail.com",
                 fName, null, "waters",
-                "rwaters@splitwise.com",
+                fName + "@splitwise.com",
                 "4085393212",
                 new Address(44, "Abby Road","SouthEnd London","UK", 566645));
         String password = "password@#$89";
         createNewUser(user, password);
 
-        createNewUser(user, password);
+        try {
+            createNewUser(user, password);
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof FaroWebAppException);
+            FaroWebAppException faroWebAppException = (FaroWebAppException)e;
+            Assert.assertEquals(FaroResponseStatus.ENTITY_EXISTS, faroWebAppException.getFaroResponseStatus());
+        }
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void testInvalidArgsNullSignupDetails() {
         SignupHandler signupHandler = new SignupHandler();
-        signupHandler.signupUser(null);
+        try {
+            signupHandler.signupUser(null);
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof FaroWebAppException);
+            FaroWebAppException faroWebAppException = (FaroWebAppException)e;
+            Assert.assertEquals(FaroResponseStatus.BAD_REQUEST, faroWebAppException.getFaroResponseStatus());
+        }
+
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void testInvalidArgsNullFaroUser() {
-        createNewUser(null, "password");
+        try {
+            createNewUser(null, "password");
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof FaroWebAppException);
+            FaroWebAppException faroWebAppException = (FaroWebAppException)e;
+            Assert.assertEquals(FaroResponseStatus.BAD_REQUEST, faroWebAppException.getFaroResponseStatus());
+        }
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void testInvalidArgsNullPassword() {
         final String fName = UUID.randomUUID().toString();
         FaroUser user = new FaroUser("rwaters@gmail.com",
@@ -102,7 +122,13 @@ public class SignupApiTest {
                 "rwaters@splitwise.com",
                 "4085393212",
                 new Address(44, "Abby Road","SouthEnd London","UK", 566645));
-        createNewUser(user, null);
+        try {
+            createNewUser(user, null);
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof FaroWebAppException);
+            FaroWebAppException faroWebAppException = (FaroWebAppException)e;
+            Assert.assertEquals(FaroResponseStatus.BAD_REQUEST, faroWebAppException.getFaroResponseStatus());
+        }
     }
 
     public static String createNewUser(FaroUser user, String password) {
