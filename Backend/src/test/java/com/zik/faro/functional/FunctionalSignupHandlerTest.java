@@ -40,6 +40,9 @@ public class FunctionalSignupHandlerTest {
 
         System.out.println("response = " + response);
         Assert.assertEquals(response.getStatus(), ClientResponse.Status.OK.getStatusCode());
+        String token = response.getEntity(String.class);
+        Assert.assertNotNull(token);
+        System.out.println("token: " + token);
 
         // create another signup request for the same user
         ClientResponse secondResponse = TestHelper.signupUser(faroSignupDetails);
