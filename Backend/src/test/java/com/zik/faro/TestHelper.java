@@ -11,6 +11,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -19,6 +20,11 @@ import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.Principal;
+import java.util.UUID;
+
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 public class TestHelper {
     /*Private helper functions*/
@@ -88,5 +94,28 @@ public class TestHelper {
                 .post(ClientResponse.class, body);
 
         return response;
+    }
+
+    private static SecurityContext createMockSecurityContext(final String userId) {
+        // Setup mocked security context object
+        SecurityContext securityContextMock = mock(SecurityContext.class);
+        when(securityContextMock.getUserPrincipal()).thenReturn(new Principal() {
+            @Override
+            public String getName() {
+                return userId;
+            }
+        });
+
+        return securityContextMock;
+    }
+
+    public static SecurityContext setupMockSecurityContext() {
+        final String testUserId = "testuser-" + UUID.randomUUID() + "@gmail.com";
+        return createMockSecurityContext(testUserId);
+
+    }
+
+    public static SecurityContext setupMockSecurityContext(String userId) {
+        return createMockSecurityContext(userId);
     }
 }

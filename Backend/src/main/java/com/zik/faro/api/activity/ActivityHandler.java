@@ -14,13 +14,12 @@ import java.util.Date;
 
 @Path(EVENT_PATH_CONST + EVENT_ID_PATH_PARAM_STRING + ACTIVITY_PATH_CONST)
 public class ActivityHandler {
+
     @Path(ACTIVITY_ID_PATH_PARAM_STRING)
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Activity getActivity(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-                                @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public Activity getActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                 @PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId){
-        ParamValidation.validateSignature(signature);
         //TODO: replace the dummy static code below with the actual calls
         return new Activity(eventId, "dummyname", "dummyDescription",
                 new Location("Lake Shasta"),
@@ -38,10 +37,8 @@ public class ActivityHandler {
     @Path(ACTIVITY_CREATE_PATH_CONST)
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public String createActivity(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-                                 @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public String createActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                  Activity activity){
-        ParamValidation.validateSignature(signature);
         ParamValidation.genericParamValidations(activity, "activity");
         //TODO: validate event_id and activity information
 
@@ -66,11 +63,9 @@ public class ActivityHandler {
     @Path(ACTIVITY_ID_PATH_PARAM_STRING + ACTIVITY_UPDATE_PATH_CONST)
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public String updateActivity(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-                               @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
-                               @PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId,
+    public String updateActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+                                 @PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId,
                                activityUpdateData activityUpdateData){
-        ParamValidation.validateSignature(signature);
         ParamValidation.genericParamValidations(activityUpdateData, "activityUpdateData");
         ParamValidation.genericParamValidations(eventId, "eventId");
         ParamValidation.genericParamValidations(activityId, "actvityId");
@@ -81,10 +76,8 @@ public class ActivityHandler {
 
     @Path(ACTIVITY_ID_PATH_PARAM_STRING)
     @DELETE
-    public String deleteActivity(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-                                 @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public String deleteActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                  @PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId){
-        ParamValidation.validateSignature(signature);
         ParamValidation.genericParamValidations(eventId, "eventId");
         ParamValidation.genericParamValidations(activityId, "activityId");
         //TODO: Validate the eventID and activityID permissions

@@ -11,13 +11,10 @@ import javax.ws.rs.QueryParam;
 
 @Path(Constants.FEEDBACK_PATH_CONST)
 public class FeedBack {
-
     private static final int MAX_FEEDBACK_STRING_LENGTH = 2000;
 
     @POST
-    public String sendFeedback(@QueryParam(Constants.SIGNATURE_QUERY_PARAM) final String signature,
-                             final String feedbackString){
-        ParamValidation.validateSignature(signature);
+    public String sendFeedback(final String feedbackString){
         ParamValidation.genericParamValidations(feedbackString, "feedbackString");
         if(feedbackString.length() > MAX_FEEDBACK_STRING_LENGTH){
             throw new FaroWebAppException(FaroResponseStatus.BAD_REQUEST, "FeedBack String length exceeds max size : " + MAX_FEEDBACK_STRING_LENGTH);
