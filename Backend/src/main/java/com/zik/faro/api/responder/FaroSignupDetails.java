@@ -17,10 +17,7 @@ public class FaroSignupDetails {
         this.password = password;
     }
 
-    public FaroSignupDetails() {
-        this.faroUser = null;
-        this.password = null;
-    }
+    private FaroSignupDetails() {}
 
     public FaroUser getFaroUser() {
         return faroUser;

@@ -58,7 +58,7 @@ public class FaroUser {
 
     // To Satisfy the JAXB no-arg constructor requirement
     private FaroUser(){
-        this(null, null, null, null, null, null, null);
+
     }
 
     /*Getters*/

@@ -48,8 +48,9 @@ public class FunctionalLoginHandlerTest {
         ClientResponse response = TestHelper.login(userSignupDetails.getFaroUser().getId(), userSignupDetails.getPassword());
 
         System.out.println("response = " + response);
-        Assert.assertEquals(response.getStatus(), ClientResponse.Status.OK.getStatusCode());
-        Assert.assertNotNull(response.getEntity(String.class));
-        System.out.println("token = " + response.getEntity(String.class));
+        Assert.assertEquals(ClientResponse.Status.OK.getStatusCode(), response.getStatus());
+        String token = response.getEntity(String.class);
+        Assert.assertNotNull(token);
+        System.out.println("token = " + token);
     }
 }

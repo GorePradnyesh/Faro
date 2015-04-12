@@ -55,7 +55,6 @@ public class FunctionalEventTest {
                 .path("v1")
                 .path("event")
                 .path("create")
-                .queryParam("Signature", "dummySignature")
                 .header("Content-Type", mediaType)
                 .post(String.class, body);
         System.out.println(response);
@@ -71,7 +70,6 @@ public class FunctionalEventTest {
                 .path("v1")
                 .path("event")
                 .path("myExampleEventID")
-                .queryParam("Signature", "dummySignature")
                 .get(String.class);
         Assert.assertNotNull(response);
         Assert.assertTrue(!response.isEmpty());

@@ -1,7 +1,6 @@
 package com.zik.faro.api.test;
 
-import com.zik.faro.auth.FaroPrincipal;
-import com.zik.faro.auth.jwt.JwtClaims;
+import com.zik.faro.auth.jwt.FaroJwtClaims;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +23,7 @@ public class TestApiHandler {
     public Response testApi() {
         logger.info("Test API Invoked .........");
 
-        JwtClaims jwtClaims = ((FaroPrincipal)securityContext.getUserPrincipal()).getJwtClaims();
+        FaroJwtClaims jwtClaims = (FaroJwtClaims)securityContext.getUserPrincipal();
         logger.info("jwtclaims: " + jwtClaims);
 
         return Response.ok().build();
