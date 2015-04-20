@@ -1,5 +1,6 @@
 package com.zik.faro.auth.jwt;
 
+import com.auth0.jwt.FaroJwtVerifier;
 import com.auth0.jwt.JWTSigner;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.JWTVerifyException;
@@ -46,13 +47,29 @@ public class FaroJwtTokenManager {
             Map<String, Object> claimsMap = verifier.verify(token);
             return getClaims(claimsMap);
         } catch (IOException e) {
-            logger.warn("JWT token is invalid.", e);
+            logger.error("JWT token is invalid.", e);
             throw new JwtTokenValidationException(e.getMessage());
         } catch (IllegalStateException e) {
-            logger.warn("JWT token claims are not valid.", e);
+            logger.error("JWT token claims are not valid.", e);
             throw new JwtTokenValidationException(e.getMessage());
         } catch (JWTVerifyException e) {
-            logger.warn("Invalid claims in the JWT token.", e);
+            logger.error("Invalid claims in the JWT token.", e);
+            throw new JwtTokenValidationException(e.getMessage());
+        }
+    }
+
+    /**
+     *
+     * @param token
+     * @return FaroJwtClaims
+     */
+    public static FaroJwtClaims obtainClaimsWithNoChecks(String token) throws JwtTokenValidationException {
+        FaroJwtVerifier verifier = new FaroJwtVerifier(JWT_SIGNATURE_SECRET, null, FARO_JWT_ISSUER_VALUE);
+        try {
+            Map<String, Object> claimsMap = verifier.obtainJwtClaimsWithoutValidations(token);
+            return getClaims(claimsMap);
+        } catch (IOException e) {
+            logger.error("JWT token is invalid.", e);
             throw new JwtTokenValidationException(e.getMessage());
         }
     }

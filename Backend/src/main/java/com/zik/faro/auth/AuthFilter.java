@@ -66,7 +66,13 @@ public class AuthFilter implements ContainerRequestFilter {
 
         try {
             // Validate the JWT token and obtain JWT claims
+            // TODO: Create maven "production" and "test" profiles and
+            // do complete JWT token validation only for "production" maven profile and
+            // not in "test" profile
+            //final FaroJwtClaims jwtClaims = FaroJwtTokenManager.obtainClaimsWithNoChecks(authHeaderValue);
+
             final FaroJwtClaims jwtClaims = FaroJwtTokenManager.validateToken(authHeaderValue);
+
             // Pass the JWT claims up to the resource classes through the SecurityContext object
             containerRequest.setSecurityContext(new SecurityContext() {
                 @Override
