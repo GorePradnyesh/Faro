@@ -16,9 +16,7 @@ import static com.zik.faro.commons.Constants.*;
 public class GlobalActivityHandler {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public JResponse<List<Activity>> getActivities(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-                                                   @PathParam(EVENT_ID_PATH_PARAM) final String eventId){
-        ParamValidation.validateSignature(signature);
+    public JResponse<List<Activity>> getActivities(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
         ParamValidation.genericParamValidations(eventId, "eventId");
 
         //TODO: replace the dummy static code below with the actual calls

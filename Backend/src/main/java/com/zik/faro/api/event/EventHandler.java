@@ -7,30 +7,28 @@ import static com.zik.faro.commons.Constants.*;
 import com.zik.faro.applogic.EventManagement;
 import com.zik.faro.commons.ParamValidation;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
-import com.zik.faro.data.DateOffset;
 import com.zik.faro.data.Event;
-import com.zik.faro.data.Location;
-import com.zik.faro.data.expense.ExpenseGroup;
 import com.zik.faro.data.user.InviteStatus;
-import com.zik.faro.persistence.datastore.EventDatastoreImpl;
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import java.util.Date;
 
 
 @Path(EVENT_PATH_CONST + EVENT_ID_PATH_PARAM_STRING)
 public class EventHandler {
+    @Context
+    SecurityContext securityContext;
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Event getEventDetails(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-                                 @PathParam(EVENT_ID_PATH_PARAM) final String eventId){
-        ParamValidation.validateSignature(signature);
+    public Event getEventDetails(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
         //TODO: validate eventIDs
 
-        String userId = "userIdExtractedFromSignature";
+        String userId = securityContext.getUserPrincipal().getName();
         Event retrievedEvent = EventManagement.getEventDetails(userId, eventId);
         return retrievedEvent;
     }
@@ -39,9 +37,7 @@ public class EventHandler {
     @Path(EVENT_INVITEES_PATH_CONST)
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public InviteeList getEventInvitees(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-                                            @PathParam(EVENT_ID_PATH_PARAM) final String eventId){
-        ParamValidation.validateSignature(signature);
+    public InviteeList getEventInvitees(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
         //TODO: validate eventIDs
 
         //TODO: replace the dummy static code below with the actual calls
@@ -53,12 +49,10 @@ public class EventHandler {
 
     @Path(EVENT_DISABLE_CONTROL_PATH_CONST)
     @POST
-    public String disableEventControl(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-                                      @PathParam(EVENT_ID_PATH_PARAM) final String eventId){
-        ParamValidation.validateSignature(signature);
+    public String disableEventControl(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
         //TODO: validate eventIDs
 
-        String userId = "userIdExtractedFromSignature";
+        String userId = securityContext.getUserPrincipal().getName();
         try {
             EventManagement.disableEventControls(userId, eventId);
         } catch (DataNotFoundException e) {
@@ -72,9 +66,7 @@ public class EventHandler {
 
     @Path(EVENT_REMOVE_ATTENDEE_PATH_CONST)
     @POST
-    public String removeAttendee(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-                                 @QueryParam(FARO_USER_ID_PARAM) final String userId){
-        ParamValidation.validateSignature(signature);
+    public String removeAttendee(@QueryParam(FARO_USER_ID_PARAM) final String userId){
         ParamValidation.genericParamValidations(userId, "userId");
         //TODO: replace the dummy static code below with the actual calls
         return HTTP_OK;

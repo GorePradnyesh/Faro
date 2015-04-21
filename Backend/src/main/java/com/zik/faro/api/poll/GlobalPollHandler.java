@@ -17,9 +17,7 @@ import static com.zik.faro.commons.Constants.*;
 public class GlobalPollHandler {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public JResponse<List<Poll>> getPolls(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-                        @PathParam(EVENT_ID_PATH_PARAM) final String eventId) {
-        ParamValidation.validateSignature(signature);
+    public JResponse<List<Poll>> getPolls(@PathParam(EVENT_ID_PATH_PARAM) final String eventId) {
         ParamValidation.genericParamValidations(eventId, "eventId");
 
         List<Poll> polls = new ArrayList<>();

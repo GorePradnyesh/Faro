@@ -16,11 +16,8 @@ public class ExpenseHandler {
     @Path(EXPENSE_ID_PATH_CONST)
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public JResponse<List<MinUser>> getExpenseIds(
-            @QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-            @PathParam(EVENT_ID_PATH_PARAM) final String eventId)
+    public JResponse<List<MinUser>> getExpenseIds(@PathParam(EVENT_ID_PATH_PARAM) final String eventId)
     {
-        ParamValidation.validateSignature(signature);
         // TODO: ensure that eventId is valid
 
         final List<MinUser> friendList = new ArrayList<>();
@@ -47,10 +44,8 @@ public class ExpenseHandler {
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public JResponse<String> createExpenseGroup(
-            @QueryParam(SIGNATURE_QUERY_PARAM) final String signature, final ExpenseGroup expenseGroup)
+    public JResponse<String> createExpenseGroup(final ExpenseGroup expenseGroup)
     {
-        ParamValidation.validateSignature(signature);
         ParamValidation.genericParamValidations(expenseGroup, "expenseGroup");
         // TODO: ensure that expense Group is valid
 

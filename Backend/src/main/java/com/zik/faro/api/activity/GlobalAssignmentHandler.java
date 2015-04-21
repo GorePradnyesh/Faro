@@ -18,9 +18,7 @@ import static com.zik.faro.commons.Constants.*;
 public class GlobalAssignmentHandler {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public JResponse<List<Assignment>> getAssignments(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-                                    @PathParam(EVENT_ID_PATH_PARAM) final String eventId){
-        ParamValidation.validateSignature(signature);
+    public JResponse<List<Assignment>> getAssignments(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
         ParamValidation.genericParamValidations(eventId, "eventId");
         //TODO: Validate the eventID, userId permissions
 

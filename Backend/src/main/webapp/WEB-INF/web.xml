@@ -5,11 +5,12 @@
         <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
         <init-param>
             <param-name>com.sun.jersey.config.property.packages</param-name>
-            <param-value>com.zik.faro</param-value>
+            <param-value>com.zik.faro com.zik.faro.auth</param-value>
         </init-param>
         <init-param>
             <param-name>com.sun.jersey.spi.container.ContainerRequestFilters</param-name>
-            <param-value>com.sun.jersey.api.container.filter.LoggingFilter</param-value>
+            <param-value>com.sun.jersey.api.container.filter.LoggingFilter
+                com.zik.faro.auth.AuthFilter</param-value>
         </init-param>
         <init-param>
             <param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
@@ -29,6 +30,17 @@
     <listener>
         <listener-class>com.zik.faro.api.base.DefaultServletContextListener</listener-class>
     </listener>
+
+    <!-- Enable the Authentication filter for all requests
+    <filter>
+        <filter-name>authFilter</filter-name>
+        <filter-class>com.zik.faro.auth.AuthFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>authFilter</filter-name>
+        <url-pattern>/v1/*</url-pattern>
+    </filter-mapping>  -->
+
     <!-- ENABLE THE OBJECTIFY FILTER FOR ALL THE REQUESTS /* PATTERN -->
     <filter>
         <filter-name>ObjectifyFilter</filter-name>

@@ -4,15 +4,20 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
 import com.sun.jersey.api.JResponse;
+import com.zik.faro.TestHelper;
 import com.zik.faro.api.friends.FriendsHandler;
 import com.zik.faro.api.responder.MinUser;
+import com.zik.faro.commons.exceptions.FaroWebAppException;
 import com.zik.faro.data.user.Address;
 import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.data.user.FriendRelation;
 import com.zik.faro.persistence.datastore.UserDatastoreImpl;
 
 import org.junit.*;
+import org.powermock.reflect.Whitebox;
 
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import java.util.List;
 
 public class FriendApiTest {
@@ -43,7 +48,7 @@ public class FriendApiTest {
     @Test
     public void testFriendRelation(){
         int userCount = 3;
-        for(int i=0; i< userCount; i++) {
+        for(int i = 0; i< userCount; i++) {
             FaroUser user = new FaroUser("user"+i+"@gmail.com",
                     "user"+i, null, "user"+i+"lname",
                     "user"+i+"@splitwise.com",
@@ -52,12 +57,25 @@ public class FriendApiTest {
             UserDatastoreImpl.storeUser(user);
         }
         FriendsHandler friendsHandler = new FriendsHandler();
-        friendsHandler.inviteFriend("user1@gmail.com", "user2@gmail.com");
-        friendsHandler.inviteFriend("user1@gmail.com", "user2@gmail.com");
-        friendsHandler.inviteFriend("user0@gmail.com", "user1@gmail.com");
+        // Setup mock Security context for the handler
+        Whitebox.setInternalState(friendsHandler, TestHelper.setupMockSecurityContext("user0@gmail.com"));
 
-        JResponse<List<MinUser>> relationList =
-                friendsHandler.getFriends("user1@gmail.com");
+        // Invite 2 friends
+        friendsHandler.inviteFriend("user2@gmail.com");
+        friendsHandler.inviteFriend("user2@gmail.com");
+        friendsHandler.inviteFriend("user1@gmail.com");
+
+        // Verify inviting yourself results in bad request response status
+        try {
+            friendsHandler.inviteFriend("user0@gmail.com");
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof FaroWebAppException);
+            FaroWebAppException faroWebAppException = (FaroWebAppException)e;
+            Assert.assertEquals(faroWebAppException.getFaroResponseStatus().getRestResponseStatus(),
+                    Response.Status.BAD_REQUEST);
+        }
+
+        JResponse<List<MinUser>> relationList = friendsHandler.getFriends();
         List<MinUser> minUsers1 = relationList.getEntity();
         Assert.assertEquals(2, minUsers1.size());
         for(MinUser minUser: minUsers1){
@@ -71,9 +89,6 @@ public class FriendApiTest {
                 Assert.assertEquals("user0lname", minUser.lastName);
             } 
         }
-        relationList = friendsHandler.getFriends("user2@gmail.com");
-        List<MinUser> minUsers2 = relationList.getEntity();
-        Assert.assertEquals(1, minUsers2.size());
     }
 
     @Test
@@ -88,17 +103,17 @@ public class FriendApiTest {
             UserDatastoreImpl.storeUser(user);
         }
         FriendsHandler friendsHandler = new FriendsHandler();
-        friendsHandler.inviteFriend("user0@gmail.com", "user1@gmail.com");
-        friendsHandler.inviteFriend("user0@gmail.com", "user2@gmail.com");
+        Whitebox.setInternalState(friendsHandler, TestHelper.setupMockSecurityContext("user0@gmail.com"));
+        friendsHandler.inviteFriend("user1@gmail.com");
+        friendsHandler.inviteFriend("user2@gmail.com");
 
-        JResponse<List<MinUser>> relationList =
-                friendsHandler.getFriends("user0@gmail.com");
+        JResponse<List<MinUser>> relationList = friendsHandler.getFriends();
         List<MinUser> minUsers1 = relationList.getEntity();
         Assert.assertEquals(2, minUsers1.size());
 
-        friendsHandler.unFriend("user0@gmail.com", "user1@gmail.com");
+        friendsHandler.unFriend("user1@gmail.com");
         JResponse<List<MinUser>> deletedRelationList =
-                friendsHandler.getFriends("user0@gmail.com");
+                friendsHandler.getFriends();
         Assert.assertEquals(1, deletedRelationList.getEntity().size());
 
     }

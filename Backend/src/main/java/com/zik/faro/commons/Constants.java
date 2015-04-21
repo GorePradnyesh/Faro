@@ -10,6 +10,7 @@ public final class Constants {
     //----- Query String parameters ----- //
     public static final String SIGNATURE_QUERY_PARAM                            = "Signature";
     public static final String FARO_USER_ID_PARAM                               = "userId";
+    public static final String LOGIN_USERNAME_PARAM                             = "username";
 
 
     //----- Path Parameters ----//
@@ -24,7 +25,6 @@ public final class Constants {
 
     public static final String POLL_ID_PATH_PARAM                               = "pollId";
     public static final String POLL_ID_PATH_PARAM_STRING                        = "/{" + POLL_ID_PATH_PARAM +"}";
-
 
     //---- Path Constants ---- //
     public static final String EXPENSE_ID_PATH_CONST                            = "/expenseIds";
@@ -67,5 +67,14 @@ public final class Constants {
     public static final String POLL_VOTE_PATH_CONST                             = "/vote";
     public static final String POLL_ADD_OPTION_PATH_CONST                       = "/addOption";
     public static final String POLL_CLOSE_PATH_CONST                            = "/close";
+
+    // -- authentication path constants -- //
+    public static final String AUTH_PATH_CONST                                  = "/nativeLogin";
+    public static final String AUTH_LOGIN_PATH_CONST                            = "/login";
+    public static final String AUTH_LOGOUT_PATH_CONST                           = "/logout";
+    public static final String AUTH_SIGN_UP_PATH_CONST                          = "/signup";
+
+    // -- Test -- //
+    public static final String TESTS_API_PATH_CONST                             = "/test";
 
 }

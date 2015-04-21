@@ -4,11 +4,13 @@ package com.zik.faro.api.unit;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
+import com.zik.faro.TestHelper;
 import com.zik.faro.api.profile.ProfileHandler;
 
 import com.zik.faro.data.user.Address;
 import com.zik.faro.data.user.FaroUser;
 import org.junit.*;
+import org.powermock.reflect.Whitebox;
 
 import java.util.UUID;
 
@@ -44,9 +46,11 @@ public class ProfileApiTest {
                 "4085393212",
                 new Address(44, "Abby Road","SouthEnd London","UK", 566645));
         ProfileHandler profileHandler = new ProfileHandler();
-        profileHandler.createProfile("signatureWithUserName", user);
+        // Setup mock Security context for the handler
+        Whitebox.setInternalState(profileHandler, TestHelper.setupMockSecurityContext("rwaters@gmail.com"));
+        profileHandler.createProfile(user);
 
-        FaroUser retrievedUser = profileHandler.getProfile(user.getId());
+        FaroUser retrievedUser = profileHandler.getProfile();
         Assert.assertEquals(user.getFirstName(), retrievedUser.getFirstName());
     }
 }

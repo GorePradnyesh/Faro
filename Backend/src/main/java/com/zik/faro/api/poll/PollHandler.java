@@ -19,10 +19,8 @@ public class PollHandler {
     @Path(POLL_ID_PATH_PARAM_STRING)
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Poll getPoll(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-                        @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public Poll getPoll(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                         @PathParam(POLL_ID_PATH_PARAM) final String pollId){
-        ParamValidation.validateSignature(signature);
         ParamValidation.genericParamValidations(eventId, "eventId");
         ParamValidation.genericParamValidations(pollId, "pollId");
 
@@ -41,10 +39,8 @@ public class PollHandler {
     @Path(POLL_CREATE_PATH_CONST)
     @PUT
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public String createPoll(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-                             @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public String createPoll(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                              Poll poll){
-        ParamValidation.validateSignature(signature);
         ParamValidation.genericParamValidations(eventId, "eventId");
         ParamValidation.genericParamValidations(poll, "poll");
         //TODO: Validate the poll object make sure the exact set of parameters are set. Not more not less
@@ -55,10 +51,8 @@ public class PollHandler {
     @Path(POLL_ID_PATH_PARAM_STRING + POLL_UNVOTED_COUNT_CONST)
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public VoteCount getUnvotedCount(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-                                @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
-                                @PathParam(POLL_ID_PATH_PARAM) final String pollId){
-        ParamValidation.validateSignature(signature);
+    public VoteCount getUnvotedCount(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+                                     @PathParam(POLL_ID_PATH_PARAM) final String pollId){
         ParamValidation.genericParamValidations(eventId, "eventId");
         ParamValidation.genericParamValidations(pollId, "pollId");
 
@@ -77,11 +71,9 @@ public class PollHandler {
     @Path(POLL_ID_PATH_PARAM_STRING + POLL_VOTE_PATH_CONST)
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public String castVote(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-                          @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
-                          @PathParam(POLL_ID_PATH_PARAM) final String pollId,
-                          Identifier voteId){
-        ParamValidation.validateSignature(signature);
+    public String castVote(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+                           @PathParam(POLL_ID_PATH_PARAM) final String pollId,
+                           Identifier voteId){
         ParamValidation.genericParamValidations(eventId, "eventId");
         ParamValidation.genericParamValidations(pollId, "pollId");
         ParamValidation.genericParamValidations(voteId, "voteId");
@@ -96,10 +88,8 @@ public class PollHandler {
 
     @Path(POLL_ID_PATH_PARAM_STRING + POLL_CLOSE_PATH_CONST)
     @POST
-    public String closePoll(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-                           @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
-                           @PathParam(POLL_ID_PATH_PARAM) final String pollId){
-        ParamValidation.validateSignature(signature);
+    public String closePoll(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+                            @PathParam(POLL_ID_PATH_PARAM) final String pollId){
         ParamValidation.genericParamValidations(eventId, "eventId");
         ParamValidation.genericParamValidations(pollId, "pollId");
 
@@ -111,10 +101,8 @@ public class PollHandler {
 
     @Path(POLL_ID_PATH_PARAM_STRING)
     @DELETE
-    public String deletePoll(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-                            @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
-                            @PathParam(POLL_ID_PATH_PARAM) final String pollId){
-        ParamValidation.validateSignature(signature);
+    public String deletePoll(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+                             @PathParam(POLL_ID_PATH_PARAM) final String pollId){
         ParamValidation.genericParamValidations(eventId, "eventId");
         ParamValidation.genericParamValidations(pollId, "pollId");
 

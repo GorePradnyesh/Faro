@@ -1,5 +1,7 @@
 package com.zik.faro.data.user;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 public class Address {
     public final int addressNumber;
     public final String line1;
@@ -17,5 +19,10 @@ public class Address {
 
     private Address(){
         this(0, null, null, null, 0);
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 }
