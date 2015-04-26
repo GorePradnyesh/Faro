@@ -1,137 +1,133 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.example.nakulshah.FrontEnd.CreateNewEvent">
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context="com.zik.faro.frontend.CreateNewEvent">
 
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/CreateNewEvent"
-        android:id="@+id/textView"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/CreateNewEvent"
+            android:id="@+id/textView"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true" />
 
-    <EditText
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/eventNameTextEdit"
-        android:layout_below="@+id/textView"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="40dp"
-        android:hint="@string/EventName" />
+        <EditText
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/eventNameTextEdit"
+            android:layout_below="@+id/textView"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="40dp"
+            android:hint="@string/EventName" />
 
-    <CheckBox
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/eventCreatorCheckBox"
-        android:text="@string/EventCreator"
-        android:layout_below="@+id/eventNameTextEdit"
-        android:layout_alignParentStart="true"/>
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/eventCreatorCheckBox"
+            android:text="@string/EventCreator"
+            android:layout_below="@+id/eventNameTextEdit"
+            android:layout_alignParentStart="true"/>
 
-    <CheckBox
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/ifAcceptedCheckBox"
-        android:text="@string/IfAccepted"
-        android:layout_below="@+id/eventCreatorCheckBox"
-        android:layout_alignParentStart="true"/>
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/ifAcceptedCheckBox"
+            android:text="@string/IfAccepted"
+            android:layout_below="@+id/eventCreatorCheckBox"
+            android:layout_alignParentStart="true"/>
 
-    <CheckBox
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/noResponseCheckBox"
-        android:text="@string/NoResponse"
-        android:layout_below="@+id/ifAcceptedCheckBox"
-        android:layout_alignParentStart="true"/>
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/noResponseCheckBox"
+            android:text="@string/NoResponse"
+            android:layout_below="@+id/ifAcceptedCheckBox"
+            android:layout_alignParentStart="true"/>
 
-    <CheckBox
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/mayBeCheckBox"
-        android:text="@string/MAYBE"
-        android:layout_below="@+id/noResponseCheckBox"
-        android:layout_alignParentStart="true"/>
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/mayBeCheckBox"
+            android:text="@string/MAYBE"
+            android:layout_below="@+id/noResponseCheckBox"
+            android:layout_alignParentStart="true"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/from"
-        android:id="@+id/startDateTextView"
-        android:layout_below="@+id/mayBeCheckBox"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="15dp"
-        android:enabled="false"
-        android:textColor="#ff000000"
-        android:textSize="@dimen/abc_text_size_medium_material" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/from"
+            android:id="@+id/startDateTextView"
+            android:layout_below="@+id/mayBeCheckBox"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="15dp"
+            android:enabled="false"
+            android:textColor="#ff000000"
+            android:textSize="@dimen/abc_text_size_medium_material" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/startDateButton"
-        android:textSize="@dimen/abc_text_size_medium_material"
-        android:layout_below="@+id/startDateTextView" />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/startDateButton"
+            android:textSize="@dimen/abc_text_size_medium_material"
+            android:layout_below="@+id/startDateTextView" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/startTimeButton"
-        android:layout_alignBottom="@+id/startDateButton"
-        android:layout_alignParentEnd="true" />
-
-
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/to"
-        android:id="@+id/EndDateTextView"
-        android:layout_below="@+id/startDateButton"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="15dp"
-        android:enabled="false"
-        android:textColor="#ff000000"
-        android:textSize="@dimen/abc_text_size_medium_material" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/endDateButton"
-        android:textSize="@dimen/abc_text_size_medium_material"
-        android:layout_below="@+id/EndDateTextView" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/endTimeButton"
-        android:layout_alignBottom="@+id/endDateButton"
-        android:layout_alignParentEnd="true" />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/startTimeButton"
+            android:layout_alignBottom="@+id/startDateButton"
+            android:layout_alignParentEnd="true" />
 
 
 
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/OK"
-        android:id="@+id/createNewEventOK"
-        android:enabled="false"
-        android:layout_alignParentBottom="true"
-        android:layout_alignStart="@+id/textView"
-        android:layout_marginBottom="36dp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/to"
+            android:id="@+id/EndDateTextView"
+            android:layout_below="@+id/startDateButton"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="15dp"
+            android:enabled="false"
+            android:textColor="#ff000000"
+            android:textSize="@dimen/abc_text_size_medium_material" />
 
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/Cancel"
-        android:id="@+id/createNewEventCancel"
-        android:layout_alignTop="@+id/createNewEventOK"
-        android:layout_alignEnd="@+id/textView" />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/endDateButton"
+            android:textSize="@dimen/abc_text_size_medium_material"
+            android:layout_below="@+id/EndDateTextView" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/endTimeButton"
+            android:layout_alignBottom="@+id/endDateButton"
+            android:layout_alignParentEnd="true" />
 
 
 
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/OK"
+            android:id="@+id/createNewEventOK"
+            android:enabled="false"
+            android:layout_alignParentBottom="true"
+            android:layout_alignStart="@+id/textView"
+            android:layout_marginBottom="36dp" />
 
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/Cancel"
+            android:id="@+id/createNewEventCancel"
+            android:layout_alignTop="@+id/createNewEventOK"
+            android:layout_alignEnd="@+id/textView" />
 </RelativeLayout>
