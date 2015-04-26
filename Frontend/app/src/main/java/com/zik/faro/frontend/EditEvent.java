@@ -307,7 +307,6 @@ public class EditEvent extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    //TODO
     @Override
     public void onBackPressed() {
         finish();

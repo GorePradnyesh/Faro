@@ -15,9 +15,6 @@ public class Event{
     //different enums
     private EventStatus eventStatus;        //Status of the event for the user
     private EventControlFlag controlFlag;
-    //TODO: Dint make this part of class. When displaying just check the status and represent the
-    //appropriate image.
-    private int imgResource;
 
     //TODO: Change Server side code from Date Offset to Calendar
     private Calendar startDateCalendar;
@@ -36,13 +33,11 @@ public class Event{
     public Event(String eventName,
                  Calendar startDateCalendar,
                  Calendar endDateCalendar) {
-        setEventName(eventName);
-        //TODO: (Code Review) Do not delete this. First time when the user opens the event landing
-        //page for an event then compare the userid and the creator id and set this boolean.
-        setEventCreator(true);
-        setStartDateCalendar(startDateCalendar);
-        setEndDateCalendar(endDateCalendar);
-        setEventStatusProperties(EventStatus.ACCEPTED);
+        this.eventName = eventName;
+        this.eventCreator = true;
+        this.startDateCalendar = startDateCalendar;
+        this.endDateCalendar = endDateCalendar;
+        this.eventStatus = EventStatus.ACCEPTED;
     }
 
     //TODO (Code Review) Create and overloaded constructor for the time when the Server sends me
@@ -89,14 +84,6 @@ public class Event{
         this.controlFlag = controlFlag;
     }
 
-    public void setImgResource(int imgResource) {
-        this.imgResource = imgResource;
-    }
-
-    public int getImgResource() {
-        return imgResource;
-    }
-
     public Calendar getStartDateCalendar() {
         return startDateCalendar;
     }
@@ -113,19 +100,17 @@ public class Event{
         this.endDateCalendar = endDateCalendar;
     }
 
-    void setEventStatusProperties(EventStatus eventStatus){
-        setEventStatus(eventStatus);
-        switch (eventStatus) {
+    public int getEventStatusImage(){
+        switch (this.eventStatus) {
             case ACCEPTED:
-                setImgResource(R.drawable.green);
-                break;
+                return R.drawable.green;
             case MAYBE:
-                setImgResource(R.drawable.yellow);
-                break;
+                return R.drawable.yellow;
             case NOTRESPONDED:
-                setImgResource(R.drawable.red);
+                return R.drawable.red;
+            default:
+                return R.drawable.red;
         }
     }
-
 }
 

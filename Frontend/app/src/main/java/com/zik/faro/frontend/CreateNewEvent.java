@@ -101,11 +101,11 @@ public class CreateNewEvent extends ActionBarActivity {
                 if(eventCreator.isChecked()){
                     E.setEventCreator(true);
                 }else if(ifAcceptedCheckBox.isChecked()){
-                    E.setEventStatusProperties(EventStatus.ACCEPTED);
+                    E.setEventStatus(EventStatus.ACCEPTED);
                 }else if(noResponseCheckBox.isChecked()){
-                    E.setEventStatusProperties(EventStatus.NOTRESPONDED);
+                    E.setEventStatus(EventStatus.NOTRESPONDED);
                 }else if(mayBeCheckBox.isChecked()){
-                    E.setEventStatusProperties(EventStatus.MAYBE);
+                    E.setEventStatus(EventStatus.MAYBE);
                 }
 
                 ErrorCodes eventStatus;

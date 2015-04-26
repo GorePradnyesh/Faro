@@ -79,7 +79,7 @@ public class EventAdapter extends ArrayAdapter {
         }
         Event EVENT = (Event) getItem(position);
         holder.EVNT_NAME.setText(EVENT.getEventName());
-        holder.STATUS_IMG.setImageResource(EVENT.getImgResource());
+        holder.STATUS_IMG.setImageResource(EVENT.getEventStatusImage());
         holder.EVNT_START_DATE.setText(sdf.format(EVENT.getStartDateCalendar().getTime()));
         holder.EVNT_START_TIME.setText(stf.format(EVENT.getStartDateCalendar().getTime()));
         return row;

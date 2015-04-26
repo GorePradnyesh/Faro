@@ -177,13 +177,13 @@ public class EventListHandler {
 
     public void changeEventStatusToYes(Event event){
         removeEventForEditing(event);
-        event.setEventStatusProperties(EventStatus.ACCEPTED);
+        event.setEventStatus(EventStatus.ACCEPTED);
         addNewEvent(event);
     }
 
     public void changeEventStatusToMaybe(Event event){
         removeEventForEditing(event);
-        event.setEventStatusProperties(EventStatus.MAYBE);
+        event.setEventStatus(EventStatus.MAYBE);
         addNewEvent(event);
     }
 }
