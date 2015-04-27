@@ -9,6 +9,11 @@ public class FaroUser {
     private String             telephone;   //TODO: type tel number
     private Address            address;
 
+
+    public FaroUser(final String email){
+        this(email, null, null, null, null, null, null);
+    }
+
     public FaroUser(final String email,
                 final String firstName,
                 final String middleName,

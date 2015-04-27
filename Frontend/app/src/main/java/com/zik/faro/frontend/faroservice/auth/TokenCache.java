@@ -3,6 +3,7 @@ package com.zik.faro.frontend.faroservice.auth;
 import android.util.Base64;
 
 import com.auth0.jwt.JWTSigner;
+import com.auth0.jwt.internal.com.fasterxml.jackson.databind.JsonNode;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -19,7 +20,7 @@ public class TokenCache {
     private static TokenCache sTokenCache;
 
     // Singleton
-    public static synchronized TokenCache getsTokenCache(){
+    public static synchronized TokenCache getTokenCache(){
             return sTokenCache;
     }
 
@@ -34,13 +35,13 @@ public class TokenCache {
      * Call this on a successful sign-in/sign-up
      * @param token
      */
-    public static synchronized void setsTokenCache(final String token){
+    public static synchronized void setTokenCache(final String token){
         sTokenCache = new TokenCache(token);
     }
 
 
     public String getAuthToken(){
-        if(this.token != null || this.token.hasExpired()){
+        if(this.token == null || this.token.hasExpired()){
             CredentialCache credentialCache = CredentialCache.getCredentialCache();
             if(credentialCache == null){
                 throw new RuntimeException("getAuthToken invoked before signing-in");
@@ -50,7 +51,7 @@ public class TokenCache {
         return this.token.tokenString;
     }
 
-    // =========
+    // ============== Private Methods ================== //
 
     private TokenCache(String token){
         this.token = new JWTToken(token);
@@ -77,13 +78,21 @@ public class TokenCache {
 
    private static FaroJwtClaims getClaimsFromToken(final String token){
        try {
-           String jsonString = new String(Base64.decode(token, Base64.DEFAULT), "UTF-8");
+           String[] pieces = token.split("\\.");
+           // check number of segments
+           if (pieces.length != 3) {
+               throw new IllegalStateException("Wrong number of segments: " + pieces.length);
+           }
+           String jsonString = new String(Base64.decode(pieces[1], Base64.DEFAULT), "UTF-8");
            Map<String, Object> claimsMap = new Gson().fromJson(jsonString, new TypeToken<HashMap<String, Object>>() {}.getType());
+           Double issuedAt = Double.parseDouble(claimsMap.get(JwtClaimConstants.ISSUED_AT_KEY).toString());
+           Double expiresAt = Double.parseDouble(claimsMap.get(JwtClaimConstants.EXPIRATION_KEY).toString());
            FaroJwtClaims faroJwtClaims = new FaroJwtClaims()
                    .setIssuer(claimsMap.get(JwtClaimConstants.ISSUER_KEY).toString())
-                   .setIssuedAtInMilliSecs(Long.parseLong(claimsMap.get(JwtClaimConstants.ISSUED_AT_KEY).toString()))
+                   .setIssuedAtInMilliSecs(issuedAt.longValue())
                    .setUsername(claimsMap.get(JwtClaimConstants.USERNAME).toString())
-                   .setEmail(claimsMap.get(JwtClaimConstants.EMAIL).toString());
+                   .setEmail(claimsMap.get(JwtClaimConstants.EMAIL).toString())
+                   .setExpirationInSecs(expiresAt.longValue());
            return faroJwtClaims;
        } catch (UnsupportedEncodingException e) {
            // this condition should never hit. If it does something very bad has happened

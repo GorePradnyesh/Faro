@@ -50,8 +50,9 @@ public class FaroJwtClaims implements Principal {
         return this;
     }
 
-    public void setExpirationInSecs(long expiration) {
+    public FaroJwtClaims setExpirationInSecs(long expiration) {
         this.expiration = expiration;
+        return this;
     }
 
     public FaroJwtClaims setUsername(String username) {
