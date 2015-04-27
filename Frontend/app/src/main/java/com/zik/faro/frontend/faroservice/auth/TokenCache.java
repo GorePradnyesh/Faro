@@ -3,7 +3,6 @@ package com.zik.faro.frontend.faroservice.auth;
 import android.util.Base64;
 
 import com.auth0.jwt.JWTSigner;
-import com.auth0.jwt.internal.com.fasterxml.jackson.databind.JsonNode;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 

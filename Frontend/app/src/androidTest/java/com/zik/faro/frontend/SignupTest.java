@@ -35,7 +35,7 @@ public class SignupTest extends ApplicationTestCase<Application> {
         String uuidEmail = UUID.randomUUID().toString()+ "@gmail.com";
         String password = UUID.randomUUID().toString();
 
-        TestSignupCallback callback = new TestSignupCallback(waitSem, 404);
+        Utils.TestSignupCallback callback = new Utils.TestSignupCallback(waitSem, 200);
         serviceHandler.getSignupHandler().signup(callback, new FaroUser(uuidEmail), password);
         boolean timeout;
         timeout = !waitSem.tryAcquire(30000, TimeUnit.MILLISECONDS);
@@ -48,27 +48,5 @@ public class SignupTest extends ApplicationTestCase<Application> {
     }
 
 
-    final static class TestSignupCallback
-            extends Utils.BaseTestCallbackHandler
-            implements BaseFaroRequestCallback<String> {
-        String token;
-        TestSignupCallback(Semaphore semaphore, int expectedCode){
-            super(semaphore, expectedCode);
-        }
 
-        @Override
-        public void onFailure(Request request, IOException e) {
-            waitSem.release();
-        }
-
-        @Override
-        public void onResponse(String token, HttpError error){
-            if(error != null){
-                this.failed = true;
-                return;
-            }
-            this.token = token;
-            waitSem.release();
-        }
-    }
 }
