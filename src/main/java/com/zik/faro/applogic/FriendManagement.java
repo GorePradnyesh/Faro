@@ -11,39 +11,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
 public class FriendManagement {
 	
-	public static void inviteFriend(final String existingUserId, final String friendId){
-		FaroUser existingUser = UserManagement.loadFaroUser(existingUserId);
-    	
-		// Invite friend to app if not already there.
-        FaroUser invitedFaroUser = getFaroUser(friendId); 	
+	public static void inviteFriend(final String existingUserId, final String friendId) throws DataNotFoundException, IllegalDataOperation{
+		
         
         // Create friend relation between user and new friend
-        try {
-        	// Create relation only if it does not exist.
-        	// This method is invoked by "Invite Friend API and "Add Friend To An Event API"
-        	if(FriendRelationDatastoreImpl.loadFriendRelation(existingUser.getId(),
-        			invitedFaroUser.getId()) == null){
-        		storeFriendRelation(existingUser.getId(), invitedFaroUser.getId());
-        	}
-        } catch (IllegalDataOperation e) {
-				// TODO
-		} catch (DataNotFoundException e) {
-				// TODO
-		}
+    	// Create relation only if it does not exist.
+    	// This method is invoked by "Invite Friend API and "Add Friend To An Event API"
+    	if(FriendRelationDatastoreImpl.loadFriendRelation(existingUserId,
+    			friendId) == null){
+    		storeFriendRelation(existingUserId,	friendId);
+    	}
     }
 	
-	private static FaroUser getFaroUser(final String userId){
+	private static FaroUser getFaroUser(final String userId) throws DataNotFoundException{
     	FaroUser faroUser = UserManagement.loadFaroUser(userId);
-    	if(faroUser == null){
-    		// TODO: Send out web invite
-    		
-    		// Create new faroUser. This has to be later updated with all other details
-    		// once user agrees to create a profile and accepts the web request to join
-    		faroUser = new FaroUser(userId);
-    		UserManagement.storeFaroUser(userId,faroUser);
-    	}
     	return faroUser;
     }
 
@@ -83,20 +69,13 @@ public class FriendManagement {
     }
     
     public static void removeFriend(final String requestingUserId, 
-    		final String toBeRemovedUserId){
-    	FaroUser faroUser1 = UserManagement.loadFaroUser(requestingUserId);
-    	FaroUser faroUser2 = UserManagement.loadFaroUser(toBeRemovedUserId);
-    	
-    	if(faroUser1 == null || faroUser2 == null){
-    		//TODO: What to do here if one of the users dont exist. Simply return?
-    		return;
-    	}
-    	try {
-			FriendRelationDatastoreImpl.removeFriendRelation(faroUser1, faroUser2);
-		} catch (IllegalDataOperation e) {
-			// TODO:
-		}
-    }
+    		final String toBeRemovedUserId) throws DataNotFoundException, IllegalDataOperation{
+    	FaroUser faroUser1, faroUser2;
+    	//TODO: No need to load the the faro user as long as remove doesnt care about non existent ids
+		faroUser1 = UserManagement.loadFaroUser(requestingUserId);
+		faroUser2 = UserManagement.loadFaroUser(toBeRemovedUserId);
+		FriendRelationDatastoreImpl.removeFriendRelation(faroUser1, faroUser2);
+	}
     
 
 }

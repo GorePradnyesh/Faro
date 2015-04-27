@@ -9,7 +9,8 @@ import java.util.UUID;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-//TODO:perform data validations
+import com.zik.faro.commons.exceptions.IllegalDataOperation;
+
 
 /**
  * NOTE: This is not an @Entity because Assignment is CONTAINED within Activity for now. This therefore does not
@@ -18,19 +19,24 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class Assignment {
-    public String id = null;
-
-    private ActionStatus status = null;
-    private Map<String,Item> items = null;
+    private String id;
+    private ActionStatus status;
+    private Map<String,Item> items;
 
     private static final String NA = "N/A";
     
-	public Assignment(){
-        this.id = UUID.randomUUID().toString();
-        this.status = ActionStatus.INCOMPLETE;
-        this.items  = new HashMap<String,Item>();
+    public Assignment(){
     }
-
+    
+    public Assignment(final String id, final ActionStatus status, final Map<String,Item> items) throws IllegalDataOperation{
+    	if(this.id == null || this.id.isEmpty()){
+    		throw new IllegalDataOperation("Assignment id cannot be null");
+    	}
+    	this.id = id;
+    	this.status = status;
+    	this.items = items;
+    }
+    
     @XmlElement
     public List<Item> getItems(){
         return new ArrayList<Item>(this.items.values());     //TODO: change this to not return the items in the class . clone ?
@@ -58,5 +64,9 @@ public class Assignment {
     
     public String getId(){
     	return this.id;
+    }
+    
+    public void setId(String id){
+    	this.id = id;
     }
 }

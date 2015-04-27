@@ -25,12 +25,12 @@ public class FriendRelationDatastoreImpl {
 
         Also data is de-normalized and duplicated to reduce the queries needed to load entities in the future.
         */
-        FriendRelation friendRelation = new FriendRelation(bob.email, alice.email,
-                                                alice.firstName, alice.lastName, alice.expenseUserId);
+        FriendRelation friendRelation = new FriendRelation(bob.getEmail(), alice.getEmail(),
+                                                alice.getFirstName(), alice.getLastName(), alice.getExpenseUserId());
         DatastoreObjectifyDAL.storeObject(friendRelation);
 
-        friendRelation = new FriendRelation(alice.email, bob.email,
-                                                bob.firstName, bob.lastName, bob.expenseUserId);
+        friendRelation = new FriendRelation(alice.getEmail(), bob.getEmail(),
+                                                bob.getFirstName(), bob.getLastName(), bob.getExpenseUserId());
         DatastoreObjectifyDAL.storeObject(friendRelation);
     }
 

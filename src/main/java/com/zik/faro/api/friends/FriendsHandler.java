@@ -13,14 +13,13 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
 @Path(Constants.FRIENDS_PATH_CONST)
 public class FriendsHandler {
-
-    @Path(Constants.INVITE_PATH_CONST)
+	
+	@Path(Constants.INVITE_PATH_CONST)
     @POST
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN, MediaType.TEXT_HTML})
     public JResponse<String> inviteFriend(@QueryParam(Constants.SIGNATURE_QUERY_PARAM) final String signature,
@@ -32,13 +31,24 @@ public class FriendsHandler {
         String requestingUserId = signature;
         String inviteeUsersId = userId;
 
-        FriendManagement.inviteFriend(requestingUserId, inviteeUsersId);
+        try {
+			FriendManagement.inviteFriend(requestingUserId, inviteeUsersId);
+		} catch (DataNotFoundException e) {
+			Response response = Response.status(Response.Status.NOT_FOUND)
+					.entity(e.getMessage())
+					.build();
+            throw new WebApplicationException(response);
+		} catch (IllegalDataOperation e) {
+			Response response = Response.status(Response.Status.BAD_REQUEST)
+					.entity(e.getMessage())
+					.build();
+            throw new WebApplicationException(response);
+		}
         
         return JResponse.ok(Constants.HTTP_OK).build();
     }
 
 
-    //TODO: response return List<MinUser> instead of List<FriendRelation>
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public JResponse<List<MinUser>> getFriends(@QueryParam(Constants.SIGNATURE_QUERY_PARAM) final String signature){
@@ -53,13 +63,25 @@ public class FriendsHandler {
     @Path(Constants.REMOVE_PATH_CONST)
     @POST
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN, MediaType.TEXT_HTML})
-    public JResponse<String> unFriend(@QueryParam(Constants.SIGNATURE_QUERY_PARAM) final String signature,
+    public void unFriend(@QueryParam(Constants.SIGNATURE_QUERY_PARAM) final String signature,
                                       @QueryParam(Constants.FARO_USER_ID_PARAM) final String toBeRemovedUserId
                                       ){
         ParamValidation.validateSignature(signature);
         String requestingUserId = "userIdFromSignature";
-        FriendManagement.removeFriend(requestingUserId, toBeRemovedUserId);
-        return JResponse.ok(Constants.HTTP_OK).build();
+        try {
+			FriendManagement.removeFriend(requestingUserId, toBeRemovedUserId);
+		} catch (DataNotFoundException e) {
+			Response response = Response.status(Response.Status.NOT_FOUND)
+					.entity(e.getMessage())
+					.build();
+            throw new WebApplicationException(response);
+		} catch (IllegalDataOperation e) {
+			Response response = Response.status(Response.Status.BAD_REQUEST)
+					.entity(e.getMessage())
+					.build();
+            throw new WebApplicationException(response);
+		}
+        
     }
 
 }

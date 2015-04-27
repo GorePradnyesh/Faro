@@ -5,10 +5,12 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
 import com.zik.faro.api.responder.MinUser;
+import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.IllegalDataOperation;
 import com.zik.faro.data.user.Address;
 import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.data.user.FriendRelation;
+
 import org.junit.*;
 
 import java.util.List;
@@ -67,7 +69,7 @@ public class FriendRelationDatastoreImplTest {
     }
 
     @Test
-    public void testFriendRelation() throws IllegalDataOperation {
+    public void testFriendRelation() throws IllegalDataOperation, DataNotFoundException {
         FaroUser user1 = new FaroUser("user1@gmail.com",
                 "user", null, "1","user1@splitwise.com",
                 "00000001", new Address(44, "Abby Road","SouthEnd London","UK", 566645));

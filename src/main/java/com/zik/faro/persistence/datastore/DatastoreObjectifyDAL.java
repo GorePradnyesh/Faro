@@ -23,9 +23,7 @@ public class DatastoreObjectifyDAL {
     //===================== HELPER FUNCTIONS FOR FILTERING INDEXED STRING FIELDS =====================
 
     public static <T> Key<T> storeObject(final T object){
-        if(enableReflectionCheck){
-            //TODO: ensure that the object class has been annotated with @Entity
-        }
+       
         Key<T> key = ofy().save().entity(object).now();
         //logger.info("Successfully stored : {}", key.getId())
         return key;
@@ -99,7 +97,7 @@ public class DatastoreObjectifyDAL {
         }
         return object;
     }
-
+    
     public static <T,V> List<T> loadObjectsByAncestorRef(final Class<V> parentClazz,
                                                       final String parentIdValue,
                                                       final Class<T> clazz){
@@ -158,16 +156,28 @@ public class DatastoreObjectifyDAL {
         }
         return object;
     }
-
+    
+   
     public static <T> List<T> loadObjectsByIndexedRefFieldEQ(final String filterFieldName,
                                                       final Class filterFieldClass,
                                                       final String filterFieldValue,
                                                       Class<T> clazz){
         Ref<T> filterRef = getRefForClassById(filterFieldValue, filterFieldClass);
         List<T> objectList = ofy().load().type(clazz).filter(filterFieldName, filterRef).
-        		limit(Constants.MAX_ITEMS_TO_FETCH_FROM_DATASTORE).list();
+        		list();
         return objectList;
     }
+    
+    public static <T> List<T> loadObjectsByIndexedRefFieldEQ(final String filterFieldName,
+            final Class filterFieldClass,
+            final String filterFieldValue,
+            Class<T> clazz,
+            final int count){
+		Ref<T> filterRef = getRefForClassById(filterFieldValue, filterFieldClass);
+		List<T> objectList = ofy().load().type(clazz).filter(filterFieldName, filterRef).
+				limit(count).list();
+		return objectList;
+	} 
     
     //===================== HELPER FUNCTIONS =====================
 

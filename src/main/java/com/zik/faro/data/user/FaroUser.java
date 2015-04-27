@@ -3,15 +3,15 @@ package com.zik.faro.data.user;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
+import com.zik.faro.commons.exceptions.BadRequestException;
 import com.zik.faro.commons.exceptions.IllegalDataOperation;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-// TODO: Add data validations
 @Entity
 @XmlRootElement
 public class FaroUser {
-    @Id @Index
+	@Id @Index
     private String             email;
     @Index
     private String             firstName;
@@ -28,6 +28,9 @@ public class FaroUser {
                 final String externalExpenseID,
                 final String telephone,
                 final Address address) {
+    	if(this.email == null || this.email.isEmpty()){
+    		throw new BadRequestException("FaroUser email cannot be null");
+    	}
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -52,7 +55,6 @@ public class FaroUser {
 
     // To Satisfy the JAXB no-arg constructor requirement
     private FaroUser(){
-        this(null, null, null, null, null, null, null);
     }
 
     /*Getters*/
@@ -86,4 +88,32 @@ public class FaroUser {
     public Address getAddress() {
         return address;
     }
+    
+    public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public void setMiddleName(String middleName) {
+		this.middleName = middleName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	public void setExternalExpenseID(String externalExpenseID) {
+		this.externalExpenseID = externalExpenseID;
+	}
+
+	public void setTelephone(String telephone) {
+		this.telephone = telephone;
+	}
+
+	public void setAddress(Address address) {
+		this.address = address;
+	}
 }

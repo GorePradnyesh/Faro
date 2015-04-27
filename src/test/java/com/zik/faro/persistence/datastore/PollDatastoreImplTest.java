@@ -4,7 +4,9 @@ package com.zik.faro.persistence.datastore;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
+import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.data.Poll;
+
 import org.junit.*;
 
 import java.util.ArrayList;
@@ -47,7 +49,7 @@ public class PollDatastoreImplTest {
     }
 
     @Test
-    public void testPollLoadStore(){
+    public void testPollLoadStore() throws DataNotFoundException{
         String eventId = "sampleEventId";
         Poll dummyPoll = createPollObjectForEventId(eventId);
         PollDatastoreImpl.storePoll(dummyPoll);
@@ -57,7 +59,7 @@ public class PollDatastoreImplTest {
     }
 
     @Test
-    public void testLoadPollsForEvent(){
+    public void testLoadPollsForEvent() throws DataNotFoundException{
         String eventId = "testEventId";
         Poll poll1 = createPollObjectForEventId(eventId);
         PollDatastoreImpl.storePoll(poll1);

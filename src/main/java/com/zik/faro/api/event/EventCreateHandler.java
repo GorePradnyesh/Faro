@@ -17,9 +17,7 @@ import static com.zik.faro.commons.Constants.*;
 
 @Path(EVENT_PATH_CONST + EVENT_CREATE_PATH_CONST)
 public class EventCreateHandler {
-    //TODO: Get events for a particular USER !!!
-
-
+    
     /*
     Accepts something like
     <eventCreateData>
@@ -41,7 +39,7 @@ public class EventCreateHandler {
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public EventManagement.MinEvent createEvent(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
+    public Event createEvent(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
                                 EventCreateData eventCreateData){
         ParamValidation.validateSignature(signature);
         ParamValidation.genericParamValidations(eventCreateData,"eventCreateData");
@@ -49,8 +47,8 @@ public class EventCreateHandler {
         //TODO: Extract userID from Signature
         final String userId = "dummyUser";
 
-        EventManagement.MinEvent minEvent = EventManagement.createEvent(userId, eventCreateData);
-        return minEvent;
+        Event event = EventManagement.createEvent(userId, eventCreateData);
+        return event;
     }
 
 }

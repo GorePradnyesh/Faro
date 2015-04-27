@@ -10,6 +10,7 @@ public final class Constants {
     //----- Query String parameters ----- //
     public static final String SIGNATURE_QUERY_PARAM                            = "Signature";
     public static final String FARO_USER_ID_PARAM                               = "userId";
+    public static final String COUNT_PARAM										= "count";
 
 
     //----- Path Parameters ----//

@@ -1,14 +1,10 @@
 package com.zik.faro.applogic;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.zik.faro.api.responder.InviteeList;
 import com.zik.faro.api.responder.MinUser;
-import com.zik.faro.data.Event;
 import com.zik.faro.data.EventUser;
-import com.zik.faro.persistence.datastore.DatastoreObjectifyDAL;
-import com.zik.faro.persistence.datastore.EventDatastoreImpl;
 import com.zik.faro.persistence.datastore.EventUserDatastoreImpl;
 
 public class EventUserManagement {

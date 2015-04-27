@@ -5,13 +5,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class MinUser {
-    public final String firstName;
-    public final String lastName;
-    public final String email;     //TODO: Make of type email ?
-    public final String expenseUserId;
+    
+	private String firstName;
+    private String lastName;
+    private String email;     //TODO: Make of type email ?
+    private String expenseUserId;
 
     private MinUser(){          // For JAXB
-        this(null, null, null, null);
     }
 
     public MinUser(final String firstName, final String lastName, final String email){
@@ -24,6 +24,38 @@ public class MinUser {
         this.email = email;
         this.expenseUserId = expenseUserId;
     }
+    
+    public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getExpenseUserId() {
+		return expenseUserId;
+	}
+
+	public void setExpenseUserId(String expenseUserId) {
+		this.expenseUserId = expenseUserId;
+	}
 }
 
 

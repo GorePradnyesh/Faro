@@ -22,6 +22,7 @@ import com.zik.faro.data.Activity;
 
 @Path(EVENT_PATH_CONST + EVENT_ID_PATH_PARAM_STRING + ACTIVITIES_PATH_CONST)
 public class GlobalActivityHandler {
+	
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public JResponse<List<Activity>> getActivities(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,

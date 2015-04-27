@@ -1,21 +1,21 @@
 package com.zik.faro.persistence.datastore;
 
 
-import static com.googlecode.objectify.ObjectifyService.ofy;
-
-import java.util.List;
-
-import com.googlecode.objectify.VoidWork;
 import com.googlecode.objectify.Work;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
+import com.zik.faro.commons.exceptions.DatastoreException;
 import com.zik.faro.data.Event;
-import com.zik.faro.data.EventUser;
 
-public class EventDatastoreImpl {       //TODO: Have this implement a EventStore interface.
-    //TODO: Add exception handling for the operations
-
-    public static void storeEvent(final Event event){
-        DatastoreObjectifyDAL.storeObject(event);
+public class EventDatastoreImpl {       
+    public static void storeEvent(final String userId, final Event event){
+    	DatastoreObjectifyDAL.storeObject(event);
+    	// Creating event user relation if event creation succeeds
+    	EventUserDatastoreImpl.storeEventUser(event.getEventId(), userId, userId);
+    }
+    
+    // For use cases where we do not need to store eventuser relation
+    public static void storeEventOnly(final Event event){
+    	DatastoreObjectifyDAL.storeObject(event);
     }
 
     public static Event loadEventByID(final String eventId) throws DataNotFoundException{
@@ -23,7 +23,7 @@ public class EventDatastoreImpl {       //TODO: Have this implement a EventStore
         return event;
     }
 
-    public static void disableEventControlFlag(final String eventId) throws DataNotFoundException{
+    public static void disableEventControlFlag(final String eventId) throws DataNotFoundException, DatastoreException{
         Work w = new Work<TransactionResult>() {
 			
 			@Override
@@ -40,10 +40,7 @@ public class EventDatastoreImpl {       //TODO: Have this implement a EventStore
 			}
 		};
         TransactionResult result = DatastoreObjectifyDAL.update(w);
-        if(result.equals(TransactionResult.DATANOTFOUND)){
-    		//TODO change enum to send message as well to extract key of entity
-    		throw new DataNotFoundException("");
-    	}
+        DatastoreUtil.processResult(result);
     }
     
 //    public static List<Event> getEventsOfFaroUser(final String faroUserId){

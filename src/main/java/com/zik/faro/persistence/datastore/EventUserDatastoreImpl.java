@@ -20,6 +20,14 @@ public class EventUserDatastoreImpl {
         EventUser eventUserRelation = new EventUser(eventId, faroUserId);
         DatastoreObjectifyDAL.storeObject(eventUserRelation);
     }
+    
+    // overloaded method to store ownerId in the the relation.
+    // should only be called while new event is being created since that is the time
+    // we need to save user creating event as owner
+    public static void storeEventUser(final String eventId, final String faroUserId, String ownerId){
+    	EventUser eventUserRelation = new EventUser(eventId, faroUserId, ownerId);
+    	DatastoreObjectifyDAL.storeObject(eventUserRelation);
+    }
 
     public static EventUser loadEventUser(final String eventId, final String faroUserId){
         Ref<Event> eventRef = DatastoreObjectifyDAL.getRefForClassById(eventId, Event.class);
@@ -31,7 +39,7 @@ public class EventUserDatastoreImpl {
         // Return the first result since there should be another record with same key.
         return eventUserQuery.first().now();
      }
-
+    
     public static List<EventUser> loadEventUserByEvent(final String eventId){
         List<EventUser> eventUserList =
                 DatastoreObjectifyDAL.loadObjectsByIndexedRefFieldEQ(EVENT_REF_FIELD_NAME,

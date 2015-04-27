@@ -18,6 +18,8 @@ import com.zik.faro.applogic.EventManagement;
 import com.zik.faro.applogic.EventUserManagement;
 import com.zik.faro.commons.ParamValidation;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
+import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.IllegalDataOperation;
 import com.zik.faro.data.Event;
 
 
@@ -33,16 +35,25 @@ public class EventHandler {
         //TODO: validate eventIDs
 
         String userId = "userIdExtractedFromSignature";
-        Event retrievedEvent = EventManagement.getEventDetails(userId, eventId);
+        Event retrievedEvent;
+		try {
+			retrievedEvent = EventManagement.getEventDetails(userId, eventId);
+			
+		} catch (DataNotFoundException e) {
+			Response response = Response.status(Response.Status.NOT_FOUND)
+					.entity(e.getMessage())
+					.build();
+            throw new WebApplicationException(response);
+		}
         return retrievedEvent;
     }
 
-    //TODO: Add maxCount query idString param;
     @Path(EVENT_INVITEES_PATH_CONST)
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public InviteeList getEventInvitees(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-                                            @PathParam(EVENT_ID_PATH_PARAM) final String eventId){
+                                            @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+                                            @QueryParam(COUNT_PARAM) final int count){
         ParamValidation.validateSignature(signature);
         //TODO: validate eventIDs
 
@@ -52,46 +63,59 @@ public class EventHandler {
 
     @Path(EVENT_DISABLE_CONTROL_PATH_CONST)
     @POST
-    public String disableEventControl(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
+    public void disableEventControl(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
                                       @PathParam(EVENT_ID_PATH_PARAM) final String eventId){
         ParamValidation.validateSignature(signature);
         //TODO: validate eventIDs
 
-        String userId = "userIdExtractedFromSignature";        try {
+        String userId = "userIdExtractedFromSignature";
+        try {
             EventManagement.disableEventControls(userId, eventId);
         } catch (DataNotFoundException e) {
             Response response = Response.status(Response.Status.NOT_FOUND)
                     .entity(e.getMessage())
                     .build();
             throw new WebApplicationException(response);
-        }
-        return HTTP_OK;
+        } catch (DatastoreException e) {
+        	Response response = Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                     .entity(e.getMessage())
+                     .build();
+            throw new WebApplicationException(response);
+		}
     }
 
     @Path(EVENT_REMOVE_ATTENDEE_PATH_CONST)
     @POST
-    public String removeAttendee(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public void removeAttendee(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
     							 @QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
                                  @QueryParam(FARO_USER_ID_PARAM) final String userId){
         ParamValidation.validateSignature(signature);
         ParamValidation.genericParamValidations(userId, "userId");
         EventUserManagement.removeEventUser(eventId, userId);
-        // TODO: What should be returned here?
-        return HTTP_OK;
     }
     
     @Path(EVENT_ADD_FRIENDS_CONST)
     @POST
-    public String addFriend(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public void addFriend(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
 				    		@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
 				            @QueryParam(FARO_USER_ID_PARAM) final String userId,
     						final AddFriendRequest data){
     	ParamValidation.validateSignature(signature);
         ParamValidation.genericParamValidations(userId, "userId");
         
-        EventManagement.addFriendToEvent(eventId, userId, data);
-        
-    	return null;
+        try {
+			EventManagement.addFriendToEvent(eventId, userId, data);
+		} catch (DataNotFoundException e) {
+			Response response = Response.status(Response.Status.NOT_FOUND)
+					.entity(e.getMessage())
+					.build();
+            throw new WebApplicationException(response);
+		} catch (IllegalDataOperation e) {
+			Response response = Response.status(Response.Status.BAD_REQUEST)
+					.entity(e.getMessage())
+					.build();
+            throw new WebApplicationException(response);
+		}
     }
    
 }

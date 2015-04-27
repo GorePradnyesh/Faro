@@ -1,5 +1,6 @@
 package com.zik.faro.persistence.datastore;
 
+import java.util.Date;
 import java.util.List;
 
 import com.googlecode.objectify.Work;
@@ -11,7 +12,7 @@ public class ActivityDatastoreImpl {
     private static final String EVENTID_FIELD_NAME = "eventId";
 
     public static void storeActivity(final Activity activity){
-        //TODO: Should we ensure that eventId exists before storing the Activity for that EventID
+        //TODO: Ensure that eventId exists before storing the Activity for that EventID
         DatastoreObjectifyDAL.storeObject(activity);
     }
 
@@ -45,11 +46,19 @@ public class ActivityDatastoreImpl {
 				}
 	        	
 	            // Modify.
-	            activity.setDate(updateActivity.getDate());
-	            activity.setDescription(updateActivity.getDescription());
-	            activity.setLocation(updateActivity.getLocation());
-	            activity.setAssignment(updateActivity.getAssignment());
-	            
+				if(updateActivity.getDate() != null){
+					activity.setDate(updateActivity.getDate());
+				}
+				if(updateActivity.getDescription() != null && !updateActivity.getDescription().isEmpty()){
+					activity.setDescription(updateActivity.getDescription());
+				}
+				if(updateActivity.getLocation() != null){
+					activity.setLocation(updateActivity.getLocation());
+				}
+				if(updateActivity.getAssignment() != null){
+					activity.setAssignment(updateActivity.getAssignment());
+				}
+				
 	            // Store
 	            storeActivity(activity);
 	            return TransactionResult.SUCCESS;
@@ -58,8 +67,7 @@ public class ActivityDatastoreImpl {
 	    
     	TransactionResult result = DatastoreObjectifyDAL.update(w);
     	if(result.equals(TransactionResult.DATANOTFOUND)){
-    		//TODO change enum to send message as well to extract key of entity
-    		throw new DataNotFoundException("");
+    		throw new DataNotFoundException("Activity not found");
     	}
     }
 	

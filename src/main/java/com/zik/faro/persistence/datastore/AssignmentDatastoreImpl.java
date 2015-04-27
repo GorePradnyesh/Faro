@@ -1,11 +1,13 @@
 package com.zik.faro.persistence.datastore;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import com.googlecode.objectify.VoidWork;
 import com.googlecode.objectify.Work;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
+import com.zik.faro.commons.exceptions.DatastoreException;
 import com.zik.faro.data.ActionStatus;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Assignment;
@@ -14,16 +16,20 @@ import com.zik.faro.data.Item;
 
 public class AssignmentDatastoreImpl {
 	
-	public static List<Assignment> getAllAssignments(final String eventId) throws DataNotFoundException{
+	// Returning Map<Identifier,Assignment>
+	// where identifier is activityId for all activity assignments
+	// and identifier is eventId for event assignment
+	public static Map<String,Assignment> getAllAssignments(final String eventId) throws DataNotFoundException{
 		// Returns assignments of all activities in an event
 		List<Activity> activities = ActivityDatastoreImpl.loadActivitiesByEventId(eventId);
+		Map<String,Assignment> assignmentMap = new HashMap<String, Assignment>();
 		List<Assignment> assignments = new ArrayList<Assignment>();
 		for(Activity activity : activities){
-			assignments.add(activity.getAssignment());
+			assignmentMap.put(activity.getId(), activity.getAssignment());
 		}
 		// Add Event level assignment as well.
-		assignments.add(EventDatastoreImpl.loadEventByID(eventId).getAssignment());
-		return assignments;
+		assignmentMap.put(eventId, EventDatastoreImpl.loadEventByID(eventId).getAssignment());
+		return assignmentMap;
 	}
 	
 	public static Assignment getEventAssignment(final String eventId) throws DataNotFoundException{
@@ -33,7 +39,7 @@ public class AssignmentDatastoreImpl {
 	public static Assignment getActivityAssignment(final String eventId, final String activityId, 
 			String assignmentId) throws DataNotFoundException{
 		Activity activity = ActivityDatastoreImpl.loadActivityById(activityId, eventId);
-		if(activity.getAssignment().id.equals(assignmentId)){
+		if(activity.getAssignment().getId().equals(assignmentId)){
 			return activity.getAssignment();
 		}
 		throw new DataNotFoundException("No data found for assignmentId:" + assignmentId);
@@ -65,7 +71,7 @@ public class AssignmentDatastoreImpl {
 	}
 	
 	public static void updateItemsForActivityAssignment(final String eventId, final String activityId,
-			final List<Item> items) throws DataNotFoundException{
+			final List<Item> items) throws DataNotFoundException, DatastoreException{
 		Work w = new Work<TransactionResult>() {			
 			@Override
 			public TransactionResult run() {
@@ -88,14 +94,10 @@ public class AssignmentDatastoreImpl {
 	        }
 		};
 		TransactionResult result = DatastoreObjectifyDAL.update(w);
-		//TODO: this if block used in multiple places. Not cool.
-		if(result.equals(TransactionResult.DATANOTFOUND)){
-    		//TODO change enum to send message as well to extract key of entity
-    		throw new DataNotFoundException("");
-    	}
+		DatastoreUtil.processResult(result);
 	}
 	
-	public static void updateItemsForEventAssignment(final String eventId, final List<Item> items) throws DataNotFoundException{
+	public static void updateItemsForEventAssignment(final String eventId, final List<Item> items) throws DataNotFoundException, DatastoreException{
 		Work w = new Work<TransactionResult>() {
 			
 			@Override
@@ -114,14 +116,11 @@ public class AssignmentDatastoreImpl {
 	            }
 	            
 	            // Store
-	            EventDatastoreImpl.storeEvent(event);
+	            EventDatastoreImpl.storeEventOnly(event);
 	            return TransactionResult.SUCCESS;
 			}
 		};
 		TransactionResult result = DatastoreObjectifyDAL.update(w);
-		if(result.equals(TransactionResult.DATANOTFOUND)){
-    		//TODO change enum to send message as well to extract key of entity
-    		throw new DataNotFoundException("");
-    	}
+		DatastoreUtil.processResult(result);
 	}
 }

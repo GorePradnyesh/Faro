@@ -9,7 +9,7 @@ import com.zik.faro.commons.exceptions.IllegalDataOperation;
 public class Item {
     private String id;
     private String name;
-    private String assigneeId; //TODO: change to type Id;
+    private String assigneeId; 
     private int count;
     private Unit unit;
     private ActionStatus status;

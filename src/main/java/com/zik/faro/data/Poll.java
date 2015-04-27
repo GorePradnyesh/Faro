@@ -1,16 +1,21 @@
 package com.zik.faro.data;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Parent;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 @Entity
 @XmlRootElement
@@ -19,25 +24,28 @@ public class Poll {
     private String id;
     @Parent
     private Ref<Event> eventId;
-    private String creator;
+    private String creatorId;
 
     private List<PollOption> pollOptions = new ArrayList<>();
     private String winnerId;
     private String owner;
     private String description;
     private ObjectStatus status;
-    private DateOffset deadline;                // Will not be used in V1.
+    private Calendar deadline;                // Will not be used in V1.
 
     private Poll(){ //to satisfy jaxb;
-        this.id=null;
-        this.eventId = null;
-        this.creator = null;
+        
     }
 
     public Poll(String eventId, String creator, List<PollOption> pollOptions, String owner, String description) {
-        this.id = UUID.randomUUID().toString();
-        this.eventId = Ref.create(Key.create(Event.class, eventId));
-        this.creator = creator;
+    	this(UUID.randomUUID().toString(),eventId, creator, pollOptions,
+    			owner, description);
+    }
+    
+    public Poll(String id, String eventId, String creator, List<PollOption> pollOptions, String owner, String description){
+    	this.id = id;
+    	this.eventId = Ref.create(Key.create(Event.class, eventId));
+        this.creatorId = creator;
         this.pollOptions = pollOptions;
         this.owner = owner;
         this.description = description;
@@ -47,12 +55,12 @@ public class Poll {
 
     @XmlRootElement
     public static class PollOption{
-        public final String id;                                 //TODO: Change type to Id
-        public final String option;
-        public final List<String> voters = new ArrayList<>();   //TODO: Change type to List<Id>/List<MinUser>?
+        public String id;                                 
+        public String option;
+        public Set<String> voters = new HashSet<String>();   
 
         private PollOption(){
-            this.id = null; this.option = null; // To satisfy JAXB
+            
         }
 
         public PollOption(final String option){
@@ -61,7 +69,7 @@ public class Poll {
         }
 
         public List<String> getVoters(){
-            return this.voters;                                 //TODO: return clone and not the actual reference.
+        	return Arrays.asList((String[])this.voters.toArray());                              
         }
 
         public void addVoters(final String voterId){
@@ -81,7 +89,7 @@ public class Poll {
 
     @XmlElement
     public String getCreator() {
-        return creator;
+        return creatorId;
     }
 
     @XmlElement
@@ -122,11 +130,11 @@ public class Poll {
         this.status = status;
     }
 
-    public DateOffset getDeadline() {
+    public Calendar getDeadline() {
         return deadline;
     }
 
-    public void setDeadline(DateOffset deadline) {
+    public void setDeadline(Calendar deadline) {
         this.deadline = deadline;
     }
 }

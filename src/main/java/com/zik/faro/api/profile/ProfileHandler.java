@@ -5,6 +5,7 @@ import static com.zik.faro.commons.Constants.*;
 
 import com.zik.faro.applogic.UserManagement;
 import com.zik.faro.commons.ParamValidation;
+import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.data.user.Address;
 import com.zik.faro.data.user.FaroUser;
 
@@ -20,11 +21,14 @@ public class ProfileHandler {
         ParamValidation.validateSignature(signature);
 
         String userId = signature;      //TODO: Extract userId from signature !!
-        FaroUser user = UserManagement.loadFaroUser(userId);
-        if(user == null){
-            Response response = Response.status(404).entity("User not found " + userId).build();
+        FaroUser user;
+		try {
+			user = UserManagement.loadFaroUser(userId);
+		} catch (DataNotFoundException e) {
+			Response response = Response.status(404).entity("User not found " + userId).build();
             throw new WebApplicationException(response);
-        }
+		}
+       
         return user;
     }
 

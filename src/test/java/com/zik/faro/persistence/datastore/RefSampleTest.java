@@ -7,6 +7,8 @@ import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
+import com.zik.faro.commons.exceptions.DataNotFoundException;
+
 import org.junit.*;
 
 import java.util.List;
@@ -86,7 +88,7 @@ public class RefSampleTest {
     }
 
     @Test
-    public void sampleTest(){
+    public void sampleTest() throws DataNotFoundException{
         Person owner = new Person("person1", "Sam");
         DatastoreObjectifyDAL.storeObject(owner);
 

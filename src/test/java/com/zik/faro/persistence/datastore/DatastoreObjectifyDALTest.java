@@ -1,5 +1,23 @@
 package com.zik.faro.persistence.datastore;
 
+import static com.googlecode.objectify.ObjectifyService.ofy;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.Key;
@@ -9,24 +27,28 @@ import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
 import com.googlecode.objectify.annotation.Parent;
-
-import org.junit.*;
-
-import javax.xml.bind.annotation.XmlRootElement;
-
-import java.util.*;
-
-import static com.googlecode.objectify.ObjectifyService.ofy;
+import com.zik.faro.commons.exceptions.DataNotFoundException;
+import com.zik.faro.commons.exceptions.IllegalDataOperation;
+import com.zik.faro.data.Activity;
+import com.zik.faro.data.Assignment;
+import com.zik.faro.data.Event;
+import com.zik.faro.data.Item;
+import com.zik.faro.data.Location;
+import com.zik.faro.data.Unit;
 
 public class DatastoreObjectifyDALTest {
 
-    private static final LocalServiceTestHelper helper =
-            new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+	private static final LocalServiceTestHelper helper =
+            new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig()
+                    .setDefaultHighRepJobPolicyUnappliedJobPercentage(50));
+    
 
     static{
         ObjectifyService.register(TestClass.class);
         ObjectifyService.register(A.class);
         ObjectifyService.register(B.class);
+        ObjectifyService.register(Activity.class);
+        ObjectifyService.register(Event.class);
     }
 
     @XmlRootElement
@@ -63,7 +85,7 @@ public class DatastoreObjectifyDALTest {
     }
 
     @Test
-    public void testLoadObjectById() {
+    public void testLoadObjectById() throws DataNotFoundException {
         final String testID = UUID.randomUUID().toString();
         TestClass testObject = new TestClass(testID, "indexedField1");
         DatastoreObjectifyDAL.storeObject(testObject);
@@ -73,7 +95,7 @@ public class DatastoreObjectifyDALTest {
     }
 
     @Test
-    public void testLoadFirstObjectByIndexedFieldEQ(){
+    public void testLoadFirstObjectByIndexedFieldEQ() throws DataNotFoundException{
         TestClass testClass = new TestClass("sammy");
         testClass.id = "possible1";
         DatastoreObjectifyDAL.storeObject(testClass);
@@ -91,10 +113,10 @@ public class DatastoreObjectifyDALTest {
         TestClass secondObject = new TestClass("sammy");
         secondObject.id = UUID.randomUUID().toString();
         DatastoreObjectifyDAL.storeObject(secondObject);
-
+        
         List<TestClass> objectList =
-                DatastoreObjectifyDAL.loadObjectsByIndexedStringFieldEQ("firstName", "sammy", TestClass.class);
-        Assert.assertEquals(2, objectList.size());
+                    DatastoreObjectifyDAL.loadObjectsByIndexedStringFieldEQ("firstName", "sammy", TestClass.class);
+       Assert.assertEquals(2, objectList.size());
     }
 
     @Test
@@ -164,7 +186,7 @@ public class DatastoreObjectifyDALTest {
     }
 
     @Test
-    public void testParentRelation(){
+    public void testParentRelation() throws DataNotFoundException{
         /* A is parent of B */
 
         A a1 = new A("a1", "a1");
@@ -239,9 +261,10 @@ public class DatastoreObjectifyDALTest {
 
     /** 
      * Test includes both single and bulk variants of the deleteObjectById api
+     * @throws DataNotFoundException 
      */
     @Test
-    public void testDeleteObjectById(){
+    public void testDeleteObjectById() throws DataNotFoundException{
     	// Create data for testing
     	A a1 = new A("a10", "a10");DatastoreObjectifyDAL.storeObject(a1);
     	A a2 = new A("a11", "a11");DatastoreObjectifyDAL.storeObject(a2);
@@ -272,9 +295,10 @@ public class DatastoreObjectifyDALTest {
     
     /** 
      * Test includes both single and bulk variants of the deleteObjectByIdWithParentId api
+     * @throws DataNotFoundException 
      */
     @Test
-    public void testDeleteObjectByIdWithParentId(){
+    public void testDeleteObjectByIdWithParentId() throws DataNotFoundException{
     	// Create data for testing
     	A parent = new A("parent", "parent");DatastoreObjectifyDAL.storeObject(parent);        
         B child = new B("child", "parent", 44);DatastoreObjectifyDAL.storeObject(child);
@@ -307,9 +331,10 @@ public class DatastoreObjectifyDALTest {
     
     /**
      * Test includes both single and bulk variants of deleteEntity
+     * @throws DataNotFoundException 
      */
     @Test
-    public void testDeleteEntity(){
+    public void testDeleteEntity() throws DataNotFoundException{
     	A a1 = new A("a10", "a10");DatastoreObjectifyDAL.storeObject(a1);
     	A a2 = new A("a11", "a11");DatastoreObjectifyDAL.storeObject(a2);
     	A a3 = new A("a12", "a12");DatastoreObjectifyDAL.storeObject(a3);
@@ -336,6 +361,41 @@ public class DatastoreObjectifyDALTest {
         // Delete (Bulk)
         DatastoreObjectifyDAL.deleteEntities(list);
         // Cannot verify since deletion is async.
+    }
+    
+    // Activity id is a UUID. Client must know this id when he sends an update
+    // otherwise there is no way to find that activity
+    @Test
+    public void testUpdateActivity() throws IllegalDataOperation, DataNotFoundException{
+    	// Create activity
+    	Event event = new Event("TestEvent");
+    	String eventId = event.getEventId();
+    	EventDatastoreImpl.storeEventOnly(event);
+    	Activity a = new Activity(event.getEventId(), "TestEvent", "Testing update",
+    			new Location("San Jose"), new GregorianCalendar(), new Assignment());
+    	DatastoreObjectifyDAL.storeObject(a);
+    	
+    	// Verify indeed created
+    	Activity retrievedActivity = DatastoreObjectifyDAL.loadObjectWithParentId(Event.class,
+    			event.getEventId(), Activity.class, a.getId());
+    	Assert.assertNotNull(retrievedActivity);
+    	// Modify
+    	a.getAssignment().addItem(new Item("Test", "123", 1, Unit.CENTIMETER));
+    	a.setDate(new GregorianCalendar());
+    	a.setDescription("Description changed");
+    	a.setLocation(new Location("Fremont"));
+    	
+    	// Update
+    	ActivityDatastoreImpl.updateActivity(a, event.getEventId());
+    	retrievedActivity = DatastoreObjectifyDAL.loadObjectWithParentId(Event.class,
+    			event.getEventId(), Activity.class, a.getId());
+    	Assert.assertNotNull(retrievedActivity);
+    	
+    	// Verify
+    	Assert.assertEquals(retrievedActivity.getAssignment().getItems().get(0).getAssigneeId(), "123");
+    	Assert.assertEquals(retrievedActivity.getLocation().locationName, "Fremont");
+    	Assert.assertEquals(retrievedActivity.getDescription(), "Description changed");
+    	
     }
 
 }

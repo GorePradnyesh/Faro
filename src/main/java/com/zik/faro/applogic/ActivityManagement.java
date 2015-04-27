@@ -2,6 +2,7 @@ package com.zik.faro.applogic;
 
 import java.util.List;
 
+import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.data.Activity;
 import com.zik.faro.persistence.datastore.ActivityDatastoreImpl;
 
@@ -14,7 +15,7 @@ public class ActivityManagement {
 		return ActivityDatastoreImpl.loadActivitiesByEventId(eventId);
 	}
 	
-	public static Activity getActivity(String eventId, String activityId){
+	public static Activity getActivity(String eventId, String activityId) throws DataNotFoundException{
 		return ActivityDatastoreImpl.loadActivityById(activityId, eventId);
 	}
 	
@@ -22,7 +23,7 @@ public class ActivityManagement {
 		ActivityDatastoreImpl.delelteActivityById(activityId, eventId);
 	}
 	
-	public static void updateActivity(Activity updateActivity, String eventId){
+	public static void updateActivity(Activity updateActivity, String eventId) throws DataNotFoundException{
 		ActivityDatastoreImpl.updateActivity(updateActivity, eventId);
 	}
 }
