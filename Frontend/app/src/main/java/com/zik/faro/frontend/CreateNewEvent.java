@@ -52,6 +52,7 @@ public class CreateNewEvent extends ActionBarActivity {
         setContentView(R.layout.activity_create_new_event);
 
         final EditText eventName = (EditText) findViewById(R.id.eventNameTextEdit);
+        final EditText eventDescription = (EditText) findViewById(R.id.eventDescriptionEditText);
 
         //TODO Remove the below added just to test creator EventLanding Page vs Friend eventLandingPage
         final CheckBox eventCreator = (CheckBox) findViewById(R.id.eventCreatorCheckBox);
@@ -91,11 +92,33 @@ public class CreateNewEvent extends ActionBarActivity {
             }
         });
 
+        eventDescription.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
         createNewEventOK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String event_Name = eventName.getText().toString();
-                final Event E = new Event(event_Name, startDateCalendar, endDateCalendar);
+                String eventDesc = eventDescription.getText().toString();
+                final Event E = new Event(event_Name,
+                                          startDateCalendar,
+                                          endDateCalendar,
+                                          EventStatus.ACCEPTED,
+                                          eventDesc);
                 //TODO: instead of setting a boolean save the userID of the creator
                 E.setEventCreator(false);
                 if(eventCreator.isChecked()){

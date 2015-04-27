@@ -109,25 +109,33 @@
             android:layout_alignBottom="@+id/endDateButton"
             android:layout_alignParentEnd="true" />
 
+        <EditText
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/eventDescriptionEditText"
+            android:hint="Description"
+            android:layout_below="@id/endDateButton"/>
 
-
-        <Button
-            style="?android:attr/buttonStyleSmall"
+        <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/OK"
-            android:id="@+id/createNewEventOK"
-            android:enabled="false"
-            android:layout_alignParentBottom="true"
-            android:layout_alignStart="@+id/textView"
-            android:layout_marginBottom="36dp" />
+            android:layout_below="@+id/eventDescriptionEditText">
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/OK"
+                android:id="@+id/createNewEventOK"
+                android:enabled="false"
+                android:layout_alignParentLeft="true"/>
 
-        <Button
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/Cancel"
-            android:id="@+id/createNewEventCancel"
-            android:layout_alignTop="@+id/createNewEventOK"
-            android:layout_alignEnd="@+id/textView" />
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/Cancel"
+                android:id="@+id/createNewEventCancel"
+                android:layout_alignParentRight="true"/>
+        </RelativeLayout>
+
 </RelativeLayout>

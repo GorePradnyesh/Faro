@@ -23,7 +23,7 @@ public class EventAdapter extends ArrayAdapter {
     //TODO (Code Review) Implement sorted list instead of Linkedlist
     public List<Event> list = new LinkedList<>();
 
-    DateFormat sdf = new SimpleDateFormat("MMM dd yyyy");
+    DateFormat sdf = new SimpleDateFormat("EEE, MMM dd yyyy");
     DateFormat stf = new SimpleDateFormat("hh:mm a");
 
     public EventAdapter(Context context, int resource) {
@@ -79,7 +79,7 @@ public class EventAdapter extends ArrayAdapter {
         }
         Event EVENT = (Event) getItem(position);
         holder.EVNT_NAME.setText(EVENT.getEventName());
-        holder.STATUS_IMG.setImageResource(EVENT.getEventStatusImage());
+        holder.STATUS_IMG.setImageResource(SetDisplayProperties.getEventStatusImage(EVENT));
         holder.EVNT_START_DATE.setText(sdf.format(EVENT.getStartDateCalendar().getTime()));
         holder.EVNT_START_TIME.setText(stf.format(EVENT.getStartDateCalendar().getTime()));
         return row;

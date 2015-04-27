@@ -17,7 +17,8 @@ public class EventLandingPage extends Activity {
 
     public static final int NO_CHANGES = 0;
     //private Intent AppLandingPage = null;
-    private DateFormat sdf = DateFormat.getDateInstance();
+    //private DateFormat sdf = DateFormat.getDateInstance();
+    private DateFormat sdf = new SimpleDateFormat(" EEE, MMM d, yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
     private  static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static Event E;
@@ -36,11 +37,11 @@ public class EventLandingPage extends Activity {
 
         TextView event_name = (TextView)findViewById(R.id.eventNameText);
         event_status = (TextView)findViewById(R.id.eventStatusText);
-        TextView startDate = (TextView)findViewById(R.id.startDateDisplay);
-        TextView startTime = (TextView)findViewById(R.id.startTimeDisplay);
+        TextView eventDescription = (TextView) findViewById(R.id.eventDescriptionTextView);
 
-        TextView endDate = (TextView)findViewById(R.id.endDateDisplay);
-        TextView endTime = (TextView)findViewById(R.id.endTimeDisplay);
+        TextView startDateAndTime = (TextView)findViewById(R.id.startDateAndTimeDisplay);
+
+        TextView endDateAndTime = (TextView)findViewById(R.id.endDateAndTimeDisplay);
 
         pollButton = (ImageButton)findViewById(R.id.pollImageButton);
         pollButton.setImageResource(R.drawable.poll_icon);
@@ -70,11 +71,14 @@ public class EventLandingPage extends Activity {
                 String ev_name = E.getEventName();
                 event_name.setText(ev_name);
 
-                startDate.setText(sdf.format(E.getStartDateCalendar().getTime()));
-                startTime.setText(stf.format(E.getStartDateCalendar().getTime()));
+                String eventDescr = E.getEventDescription();
+                eventDescription.setText(eventDescr);
 
-                endDate.setText(sdf.format(E.getEndDateCalendar().getTime()));
-                endTime.setText(stf.format(E.getEndDateCalendar().getTime()));
+                startDateAndTime.setText(sdf.format(E.getStartDateCalendar().getTime()) + " at " +
+                        stf.format(E.getStartDateCalendar().getTime()));
+
+                endDateAndTime.setText(sdf.format(E.getEndDateCalendar().getTime()) + " at " +
+                        stf.format(E.getEndDateCalendar().getTime()));
 
                 statusYes.setOnClickListener(new View.OnClickListener() {
                     @Override

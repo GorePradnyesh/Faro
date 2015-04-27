@@ -32,7 +32,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true">
+        android:layout_centerVertical="true"
+        android:id="@+id/startDateAndTimeDisplay">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -46,7 +47,8 @@
             android:id="@+id/startTime"
             android:textColor="@android:color/white"
             android:textSize="@dimen/abc_text_size_caption_material"
-            android:layout_below="@+id/startDate"/>
+            android:layout_below="@+id/startDate"
+            android:layout_alignEnd="@id/startDate" />
     </RelativeLayout>
 
 </RelativeLayout>

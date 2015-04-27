@@ -11,8 +11,6 @@ public class Event{
     private String eventId;                 //Get this from Server
     private String eventName;
 
-    //TODO Seperate the event status and the assignment completion status and represent them in 2
-    //different enums
     private EventStatus eventStatus;        //Status of the event for the user
     private EventControlFlag controlFlag;
 
@@ -20,28 +18,30 @@ public class Event{
     private Calendar startDateCalendar;
     private Calendar endDateCalendar;
 
-    //TODO change eventCreator boolean to be set based on a check to compare userID to eventCreatorID.
-    //eventCreator boolean is not stored or updated to the server.
+    private String eventDescription;
+
+    /*TODO change eventCreator boolean to be set based on a check to compare userID to eventCreatorID.
+    eventCreator boolean is not stored or updated to the server. It should not be part of the event
+    This is only to see whether the user gets to see the control flag option on eventEdit Page.
+    That can be determined by comparing the eventCreator userID and my own userID.
+    */
     private boolean eventCreator;
 
-    /*Whenever the Event constructor is called we can safely assume the following, since it will be
-    * only called from Create New Event Page.
-    * 1. Caller is the eventCreator since called only from the Create Event Page
-    * 2. Status of event is ACCEPTEDANDCOMPLETE
-    */
-    //TODO Do not call setters in a constructor.
     public Event(String eventName,
                  Calendar startDateCalendar,
-                 Calendar endDateCalendar) {
+                 Calendar endDateCalendar,
+                 EventStatus eventStatus,
+                 String eventDescription) {
         this.eventName = eventName;
         this.eventCreator = true;
         this.startDateCalendar = startDateCalendar;
         this.endDateCalendar = endDateCalendar;
-        this.eventStatus = EventStatus.ACCEPTED;
+        this.eventStatus = eventStatus;
+        this.eventDescription = eventDescription;
     }
 
     //TODO (Code Review) Create and overloaded constructor for the time when the Server sends me
-    //events. In that case, the constructor will have all the feilds as params.
+    //events. In that case, the constructor will have all the fields as params.
 
     //Getters and Setters
     public boolean isEventCreator() {
@@ -100,17 +100,12 @@ public class Event{
         this.endDateCalendar = endDateCalendar;
     }
 
-    public int getEventStatusImage(){
-        switch (this.eventStatus) {
-            case ACCEPTED:
-                return R.drawable.green;
-            case MAYBE:
-                return R.drawable.yellow;
-            case NOTRESPONDED:
-                return R.drawable.red;
-            default:
-                return R.drawable.red;
-        }
+    public String getEventDescription() {
+        return eventDescription;
+    }
+
+    public void setEventDescription(String eventDescription) {
+        this.eventDescription = eventDescription;
     }
 }
 
