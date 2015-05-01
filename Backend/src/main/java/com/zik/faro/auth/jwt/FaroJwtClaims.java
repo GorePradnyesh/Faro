@@ -18,12 +18,18 @@ public class FaroJwtClaims implements JwtClaims, Principal {
     private long expiration;
     private String username;
     private String email;
+    private String jwtId;
 
     public FaroJwtClaims(String issuer, long issuedAt, String username, String email) {
         this.issuer = issuer;
         this.issuedAt = issuedAt;
         this.username = username;
         this.email = email;
+    }
+
+    public FaroJwtClaims(String issuer, long issuedAt, String username, String email, String jwtId) {
+        this(issuer, issuedAt, username, email);
+        this.jwtId = jwtId;
     }
 
     public FaroJwtClaims() {}
@@ -63,8 +69,9 @@ public class FaroJwtClaims implements JwtClaims, Principal {
         return this;
     }
 
-    public void setExpirationInSecs(long expiration) {
+    public FaroJwtClaims setExpirationInSecs(long expiration) {
         this.expiration = expiration;
+        return this;
     }
 
     public FaroJwtClaims setUsername(String username) {
@@ -74,6 +81,15 @@ public class FaroJwtClaims implements JwtClaims, Principal {
 
     public FaroJwtClaims setEmail(String email) {
         this.email = email;
+        return this;
+    }
+
+    public String getJwtId() {
+        return jwtId;
+    }
+
+    public FaroJwtClaims setJwtId(String jwtId) {
+        this.jwtId = jwtId;
         return this;
     }
 

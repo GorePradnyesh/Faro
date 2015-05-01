@@ -1,6 +1,7 @@
 package com.zik.faro.api.test;
 
 import com.zik.faro.auth.jwt.FaroJwtClaims;
+import com.zik.faro.mail.FaroEmailClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +26,9 @@ public class TestApiHandler {
 
         FaroJwtClaims jwtClaims = (FaroJwtClaims)securityContext.getUserPrincipal();
         logger.info("jwtclaims: " + jwtClaims);
+        logger.info("Sending email .....");
+        FaroEmailClient emailClient = new FaroEmailClient();
+        emailClient.sendEmail();
 
         return Response.ok().build();
     }

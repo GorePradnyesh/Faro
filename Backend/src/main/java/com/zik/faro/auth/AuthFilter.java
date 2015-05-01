@@ -46,19 +46,26 @@ public class AuthFilter implements ContainerRequestFilter {
 
         String nativeLoginPath = Constants.AUTH_PATH_CONST + Constants.AUTH_LOGIN_PATH_CONST;
         String nativeSignupPath = Constants.AUTH_PATH_CONST + Constants.AUTH_SIGN_UP_PATH_CONST;
+        String forgotPasswordPath = Constants.AUTH_PATH_CONST + Constants.AUTH_PASSWORD_PATH_CONST
+                                    + Constants.AUTH_FORGOT_PASSWORD_PATH_CONST;
+        String forgotPasswordFormPath = Constants.AUTH_PATH_CONST + Constants.AUTH_PASSWORD_PATH_CONST
+                                         + Constants.AUTH_FORGOT_PASSWORD_FORM_PATH_CONST;
         String requestPath = "/" + containerRequest.getPath();
 
         logger.info("request path : " + requestPath);
 
         // No authentication required for login/signup requests
         if (requestPath.equals(nativeLoginPath) ||
-                requestPath.equals(nativeSignupPath)) {
+                requestPath.equals(nativeSignupPath) ||
+                requestPath.equals(forgotPasswordPath) ||
+                requestPath.equals(forgotPasswordFormPath)) {
             return containerRequest;
         }
 
         String authHeaderValue = containerRequest.getHeaderValue(AUTH_HEADER);
 
         if (Strings.isNullOrEmpty(authHeaderValue)) {
+            logger.error("Authentication header not present");
             throw new FaroWebAppException(FaroResponseStatus.UNAUTHORIZED, "Authentication token not provided");
         }
 
