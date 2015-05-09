@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.zik.faro.frontend" >
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".AppLandingPage"
+            android:label="@string/title_activity_app_landing_page" >
+        </activity>
+        <activity
+            android:name=".CreateNewEvent"
+            android:label="@string/title_activity_create_new_event" >
+        </activity>
+        <activity
+            android:name=".CreateNewPoll"
+            android:label="@string/title_activity_create_new_poll" >
+        </activity>
+        <activity
+            android:name=".EditEvent"
+            android:label="@string/title_activity_edit_event" >
+        </activity>
+        <activity
+            android:name=".EventCalendarView"
+            android:label="@string/title_activity_event_calendar_view" >
+        </activity>
+        <activity
+            android:name=".EventLandingPage"
+            android:label="@string/title_activity_event_landing_page" >
+        </activity>
+        <activity
+            android:name=".ExceptionPrintPage"
+            android:label="@string/title_activity_exception_print_page" >
+        </activity>
+        <activity
+            android:name=".PollLandingPage"
+            android:label="@string/title_activity_poll_landing_page" >
+        </activity>
+    </application>
+
+</manifest>

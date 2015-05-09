@@ -1,0 +1,140 @@
+package com.zik.faro.api.activity;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.sun.jersey.api.JResponse;
+import com.zik.faro.applogic.AssignmentManagement;
+import com.zik.faro.commons.ParamValidation;
+import com.zik.faro.commons.exceptions.DataNotFoundException;
+import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.data.Assignment;
+import com.zik.faro.data.Item;
+import com.zik.faro.data.Unit;
+
+import static com.zik.faro.commons.Constants.*;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+@Path(EVENT_PATH_CONST + EVENT_ID_PATH_PARAM_STRING + ASSIGNMENT_PATH_CONST)
+public class AssignmentHandler {
+
+   
+	
+    @Path(ASSIGNMENT_ID_PATH_PARAM_STRING)
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public Assignment getAssignment(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
+                                    @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+                                    @PathParam(ASSIGNMENT_ID_PATH_PARAM) final String assignmentId,
+                                    // No seperate API for event or activity's assignment. 
+                                    // If activity passed, assignment of that activity is returned else event assignment returned.
+                                    @QueryParam(ACTIVITY_ID_PATH_PARAM) final String activityId) throws DataNotFoundException{
+        ParamValidation.validateSignature(signature);
+        ParamValidation.genericParamValidations(eventId, "eventId");
+        ParamValidation.genericParamValidations(assignmentId, "assignmentId");
+        
+        if(activityId == null || activityId.isEmpty())
+        	return AssignmentManagement.getEventLevelAssignment(eventId);
+        else
+        	return AssignmentManagement.getActivityLevelAssignment(eventId, activityId, assignmentId);
+    }
+
+    @Path(ASSIGNMENT_PENDING_COUNT_PATH_CONST)
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public AssignmentCount getPendingAssignmentCount(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
+        ParamValidation.genericParamValidations(eventId, "eventId");
+        //TODO: Validate the eventID, userId permissions
+        try {
+			return new AssignmentCount(eventId,AssignmentManagement.getPendingAssignmentCount(eventId));
+		} catch (DataNotFoundException e) {
+			Response response = Response.status(Response.Status.NOT_FOUND)
+                    .entity(e.getMessage())
+                    .build();
+            throw new WebApplicationException(response);
+		}
+    }
+    
+    @Path(ALL)
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public Map<String,Assignment> getAssignments(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
+                                    @PathParam(EVENT_ID_PATH_PARAM) final String eventId){
+    	ParamValidation.validateSignature(signature);
+        ParamValidation.genericParamValidations(eventId, "eventId");
+        
+        try {
+			return AssignmentManagement.getAllAssignments(eventId);
+		} catch (DataNotFoundException e) {
+			Response response = Response.status(Response.Status.NOT_FOUND)
+                    .entity(e.getMessage())
+                    .build();
+            throw new WebApplicationException(response);
+		}
+    }
+
+    @Path(ASSIGNMENT_ID_PATH_PARAM_STRING)
+    @DELETE
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public String deleteAssignment(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+                                   @PathParam(ASSIGNMENT_ID_PATH_PARAM) final String assignmentId){
+        ParamValidation.genericParamValidations(eventId, "eventId");
+        ParamValidation.genericParamValidations(assignmentId, "assignmentId");
+        //TODO: Validate the eventID, userId permissions
+        
+        return HTTP_OK;
+    }
+    
+    // If activityId is present in queryparam, update is for assignment of the activityId
+    // present in the request.
+    // Else update is for assignment at event level
+    @Path(ASSIGNMENT_ID_PATH_PARAM_STRING+ASSIGNMENT_UPDATE_PATH_CONST)
+    @POST
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public JResponse<String> updateAssignment(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    		@QueryParam(ACTIVITY_ID_PATH_PARAM) final String activityId,
+    		final List<Item> items){
+    	ParamValidation.genericParamValidations(eventId, "eventId");
+        
+    	
+		try {
+			if(activityId == null || activityId.isEmpty()){
+				AssignmentManagement.updateEventItems(eventId, items);
+			}else{
+				AssignmentManagement.updateActivityItems(eventId, activityId, items);
+			}
+		} catch (DataNotFoundException e) {
+			Response response = Response.status(Response.Status.NOT_FOUND)
+                    .entity(e.getMessage())
+                    .build();
+            throw new WebApplicationException(response);
+		} catch (DatastoreException e) {
+			Response response = Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(e.getMessage())
+                    .build();
+            throw new WebApplicationException(response);
+		}
+    	return JResponse.ok(HTTP_OK).build();
+    }
+    
+
+    @XmlRootElement
+    private static class AssignmentCount{
+        public String eventId;      
+        public int assignmentCount;
+        AssignmentCount(final String eventId, final int assignmentCount){
+            this.eventId = eventId;
+            this.assignmentCount = assignmentCount;
+        }
+        AssignmentCount(){}
+    }
+
+
+}
