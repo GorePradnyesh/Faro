@@ -4,9 +4,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -28,7 +30,7 @@ import android.widget.TabHost;
  *      5. See the App related options like Settings, Profile page, etc (Top Left corner)
 */
 
-public class AppLandingPage extends Activity {
+public class AppLandingPage extends Activity{
 
     /*public static final int NO_CHANGES = 0;
     public static final int EVENT_UPDATE_TYPE = 100;
@@ -90,6 +92,31 @@ public class AppLandingPage extends Activity {
                 eventSelectedFromList(parent, position, eventLanding);
             }
         });
+
+        theAcceptedListView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                if(eventListHandler.getAcceptedEventListSize() > EventListHandler.MIN_EVENTS_PAGE_SIZE) {
+                    final int lastItem = firstVisibleItem + visibleItemCount;
+                    if (lastItem == totalItemCount) {
+                        /*TODO Make call to server to get events after the last event. Send the date
+                        of the last event and also send the eventID to resolve sorting conflicts.
+                         */
+                        Log.d("Last", "Last");
+                    }
+                }
+            }
+        });
+
+
+
+        //TODO Implement function to refresh event list. Watch Vipul Shah's video on youtube. The
+        //link is https://www.youtube.com/watch?v=Phc9tVSG6Aw
 
         //Listener to go to the Create Event page when clicked on add_event button.
         add_event.setOnClickListener(new View.OnClickListener() {

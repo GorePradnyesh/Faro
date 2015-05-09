@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class EventListHandler {
 
-    private static final int MIN_EVENTS_PAGE_SIZE = 10;
+    public static final int MIN_EVENTS_PAGE_SIZE = 100;
     private static final int MAX_TOTAL_EVENTS_IN_CACHE = 500;
 
 
@@ -185,5 +185,9 @@ public class EventListHandler {
         removeEventForEditing(event);
         event.setEventStatus(EventStatus.MAYBE);
         addNewEvent(event);
+    }
+
+    public int getAcceptedEventListSize(){
+        return acceptedEventAdapter.list.size();
     }
 }
