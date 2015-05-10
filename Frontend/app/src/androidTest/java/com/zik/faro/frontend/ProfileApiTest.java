@@ -26,6 +26,17 @@ public class ProfileApiTest extends ApplicationTestCase<Application> {
     }
     private static final String baseUrl = "http://10.0.2.2:8080/v1/";
 
+    private String getTokenForNewUser(final String username, final String password) throws InterruptedException, MalformedURLException {
+        final Semaphore waitSem = new Semaphore(0);
+        FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
+        
+        Utils.TestSignupCallback callback = new Utils.TestSignupCallback(waitSem, 200);
+        serviceHandler.getSignupHandler().signup(callback, new FaroUser(username), password);
+        boolean timeout;
+        timeout = !waitSem.tryAcquire(30000, TimeUnit.MILLISECONDS);
+        return callback.token;
+    }
+    
     @LargeTest
     public void testCreateGetProfile() throws InterruptedException, MalformedURLException {
         final Semaphore waitSem = new Semaphore(0);
@@ -41,7 +52,7 @@ public class ProfileApiTest extends ApplicationTestCase<Application> {
 
         TestCreateProfileCallbackHandler callback = new TestCreateProfileCallbackHandler(waitSem, 200);
         serviceHandler.getProfileHandler().createProfile(callback, faroUser);
-        boolean timeout = false;
+        boolean timeout = false;    
         timeout = !waitSem.tryAcquire(3000, TimeUnit.MILLISECONDS);
 
         Assert.assertFalse(timeout);

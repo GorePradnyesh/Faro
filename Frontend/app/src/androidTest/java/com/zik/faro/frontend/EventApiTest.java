@@ -74,7 +74,7 @@ public class EventApiTest extends ApplicationTestCase<Application> {
         EventCreateData eventCreateData= new EventCreateData("MySampleEvent", new DateOffset(new Date(), 1000), null, null, null);
         serviceHandler.getEventHandler().createEvent(createCallback, eventCreateData);
         timeout = false;
-        timeout = !waitSem.tryAcquire(3000, TimeUnit.MILLISECONDS);
+        timeout = !waitSem.tryAcquire(10000, TimeUnit.MILLISECONDS);
 
         Assert.assertFalse(timeout);
         Assert.assertFalse(createCallback.failed);
@@ -129,8 +129,7 @@ public class EventApiTest extends ApplicationTestCase<Application> {
         @Override
         public void onResponse(MinEvent event, HttpError error){
             if(error != null){
-                this.failed = true;
-                return;
+                this.failed = true;               
             }
             // Assert that event == min event
             this.receivedMinEvent = event;
