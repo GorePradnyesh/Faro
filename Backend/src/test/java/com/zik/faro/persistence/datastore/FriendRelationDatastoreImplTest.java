@@ -141,7 +141,7 @@ public class FriendRelationDatastoreImplTest {
         List<FriendRelation> relationUser1 = FriendRelationDatastoreImpl.loadFriendsForUserId(user1.getEmail());
         Assert.assertEquals(1, relationUser1.size());
 
-        FriendRelationDatastoreImpl.deleteFriendRelation(user1.getId(), user2.getId());
+        FriendRelationDatastoreImpl.removeFriendRelation(user1, user2);
         List<FriendRelation> deletedRelations = FriendRelationDatastoreImpl.loadFriendsForUserId(user1.getEmail());
         Assert.assertEquals(0, deletedRelations.size());
     }

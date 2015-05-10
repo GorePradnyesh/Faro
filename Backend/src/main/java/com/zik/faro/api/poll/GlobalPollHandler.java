@@ -27,7 +27,6 @@ public class GlobalPollHandler {
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public List<Poll> getPolls(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
                         @PathParam(EVENT_ID_PATH_PARAM) final String eventId) {
-        ParamValidation.validateSignature(signature);
         ParamValidation.genericParamValidations(eventId, "eventId");
 
         return PollManagement.getPolls(eventId);
@@ -38,7 +37,6 @@ public class GlobalPollHandler {
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public int getUnvotedCount(@PathParam(EVENT_ID_PATH_PARAM_STRING) final String eventId,
     		@QueryParam(SIGNATURE_QUERY_PARAM) final String signature){
-    	ParamValidation.validateSignature(signature);
     	String userId = signature;
     	return PollManagement.getCountOfUnvotedPolls(userId, eventId);
     }

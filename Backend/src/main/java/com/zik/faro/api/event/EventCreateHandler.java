@@ -19,7 +19,7 @@ import static com.zik.faro.commons.Constants.*;
 @Path(EVENT_PATH_CONST + EVENT_CREATE_PATH_CONST)
 public class EventCreateHandler {
     @Context
-    SecurityContext context;
+    private SecurityContext context;
     //TODO: Get events for a particular USER !!!
 
     /*
@@ -43,9 +43,7 @@ public class EventCreateHandler {
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Event createEvent(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-                                EventCreateData eventCreateData){
-        ParamValidation.validateSignature(signature);
+    public Event createEvent(EventCreateData eventCreateData){
         ParamValidation.genericParamValidations(eventCreateData,"eventCreateData");
 
         final String userId = context.getUserPrincipal().getName();

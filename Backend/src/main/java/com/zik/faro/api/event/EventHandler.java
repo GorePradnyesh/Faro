@@ -1,6 +1,16 @@
 package com.zik.faro.api.event;
 
-import static com.zik.faro.commons.Constants.*;
+import static com.zik.faro.commons.Constants.COUNT_PARAM;
+import static com.zik.faro.commons.Constants.EVENT_ADD_FRIENDS_CONST;
+import static com.zik.faro.commons.Constants.EVENT_DETAILS_PATH_CONST;
+import static com.zik.faro.commons.Constants.EVENT_DISABLE_CONTROL_PATH_CONST;
+import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM;
+import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM_STRING;
+import static com.zik.faro.commons.Constants.EVENT_INVITEES_PATH_CONST;
+import static com.zik.faro.commons.Constants.EVENT_PATH_CONST;
+import static com.zik.faro.commons.Constants.EVENT_REMOVE_ATTENDEE_PATH_CONST;
+import static com.zik.faro.commons.Constants.FARO_USER_ID_PARAM;
+import static com.zik.faro.commons.Constants.SIGNATURE_QUERY_PARAM;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -9,8 +19,10 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 
 import com.zik.faro.api.responder.AddFriendRequest;
 import com.zik.faro.api.responder.InviteeList;
@@ -25,6 +37,8 @@ import com.zik.faro.data.Event;
 
 @Path(EVENT_PATH_CONST + EVENT_ID_PATH_PARAM_STRING)
 public class EventHandler {
+	@Context
+	SecurityContext context;
 	
 	@Path(EVENT_DETAILS_PATH_CONST)
     @GET
@@ -52,7 +66,6 @@ public class EventHandler {
     public InviteeList getEventInvitees(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
                                             @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                             @QueryParam(COUNT_PARAM) final int count){
-        ParamValidation.validateSignature(signature);
         //TODO: validate eventIDs
 
         //TODO: replace the dummy static code below with the actual calls
@@ -61,10 +74,9 @@ public class EventHandler {
 
     @Path(EVENT_DISABLE_CONTROL_PATH_CONST)
     @POST
-    public String disableEventControl(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
+    public void disableEventControl(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
         //TODO: validate eventIDs
-
-        String userId = securityContext.getUserPrincipal().getName();
+    	String userId = context.getUserPrincipal().getName();
         try {
             EventManagement.disableEventControls(userId, eventId);
         } catch (DataNotFoundException e) {
@@ -85,7 +97,6 @@ public class EventHandler {
     public void removeAttendee(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
     							 @QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
                                  @QueryParam(FARO_USER_ID_PARAM) final String userId){
-        ParamValidation.validateSignature(signature);
         ParamValidation.genericParamValidations(userId, "userId");
         EventUserManagement.removeEventUser(eventId, userId);
     }
@@ -96,8 +107,7 @@ public class EventHandler {
 				    		@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
 				            @QueryParam(FARO_USER_ID_PARAM) final String userId,
     						final AddFriendRequest data){
-    	ParamValidation.validateSignature(signature);
-        ParamValidation.genericParamValidations(userId, "userId");
+    	ParamValidation.genericParamValidations(userId, "userId");
         
         try {
 			EventManagement.addFriendToEvent(eventId, userId, data);

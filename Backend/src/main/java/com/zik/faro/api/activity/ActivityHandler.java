@@ -1,16 +1,35 @@
 package com.zik.faro.api.activity;
 
+import static com.zik.faro.commons.Constants.ACTIVITY_CREATE_PATH_CONST;
+import static com.zik.faro.commons.Constants.ACTIVITY_ID_PATH_PARAM;
+import static com.zik.faro.commons.Constants.ACTIVITY_ID_PATH_PARAM_STRING;
+import static com.zik.faro.commons.Constants.ACTIVITY_PATH_CONST;
+import static com.zik.faro.commons.Constants.ACTIVITY_UPDATE_PATH_CONST;
+import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM;
+import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM_STRING;
+import static com.zik.faro.commons.Constants.EVENT_PATH_CONST;
+import static com.zik.faro.commons.Constants.SIGNATURE_QUERY_PARAM;
+
+import java.util.Calendar;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.zik.faro.applogic.ActivityManagement;
 import com.zik.faro.commons.ParamValidation;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Location;
-
-import static com.zik.faro.commons.Constants.*;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Date;
 
 @Path(EVENT_PATH_CONST + EVENT_ID_PATH_PARAM_STRING + ACTIVITY_PATH_CONST)
 public class ActivityHandler {
@@ -22,10 +41,10 @@ public class ActivityHandler {
     							@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                 @PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId){
     	//TODO: Ensure all event or its children calls are validated with the user being part of event.. Essentially check EventUser relation..
-        ParamValidation.validateSignature(signature);
         try{
         	 return ActivityManagement.getActivity(eventId, activityId);
         } catch (DataNotFoundException e) {
+        	
             Response response = Response.status(Response.Status.NOT_FOUND)
                     .entity(e.getMessage())
                     .build();
@@ -48,7 +67,6 @@ public class ActivityHandler {
                                  @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                  Activity activity){
     	
-        ParamValidation.validateSignature(signature);
         ParamValidation.genericParamValidations(activity, "activity");
         //TODO: validate event_id and activity information
         ActivityManagement.createActivity(activity);
@@ -75,7 +93,6 @@ public class ActivityHandler {
                                @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                @PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId,
                                ActivityUpdateData activityUpdateData){
-        ParamValidation.validateSignature(signature);
         ParamValidation.genericParamValidations(activityUpdateData, "activityUpdateData");
         ParamValidation.genericParamValidations(eventId, "eventId");
         ParamValidation.genericParamValidations(activityId, "actvityId");
@@ -100,7 +117,6 @@ public class ActivityHandler {
     public void deleteActivity(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
                                  @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                  @PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId){
-        ParamValidation.validateSignature(signature);
         ParamValidation.genericParamValidations(eventId, "eventId");
         ParamValidation.genericParamValidations(activityId, "activityId");
         //TODO: Validate the eventID and activityID permissions

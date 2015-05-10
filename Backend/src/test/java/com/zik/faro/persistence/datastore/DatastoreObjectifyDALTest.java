@@ -233,7 +233,7 @@ public class DatastoreObjectifyDALTest {
     }
 
     @Test
-    public void deleteObjectUsingParentId(){
+    public void deleteObjectUsingParentId() throws DataNotFoundException{
         B b3 = new B("b1", "a2", 6);
         DatastoreObjectifyDAL.storeObject(b3);
         // Verify the latest b3 objects stored with id b1, parent a2

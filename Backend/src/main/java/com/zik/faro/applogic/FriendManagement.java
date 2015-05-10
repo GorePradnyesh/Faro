@@ -78,8 +78,8 @@ public class FriendManagement {
 	}
     
 
-    public static void deleteFriendRelationship(final String fromUserId, final String toUserId){
-        FriendRelationDatastoreImpl.deleteFriendRelation(fromUserId, toUserId);
-    }
+//    public static void deleteFriendRelationship(final String fromUserId, final String toUserId){
+//        FriendRelationDatastoreImpl.removeFriendRelation(fromUserId, toUserId);
+//    }
 
 }

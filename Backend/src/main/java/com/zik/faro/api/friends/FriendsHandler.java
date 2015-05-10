@@ -64,10 +64,8 @@ public class FriendsHandler {
     @Path(Constants.REMOVE_PATH_CONST)
     @POST
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN, MediaType.TEXT_HTML})
-    public void unFriend(@QueryParam(Constants.SIGNATURE_QUERY_PARAM) final String signature,
-                                      @QueryParam(Constants.FARO_USER_ID_PARAM) final String toBeRemovedUserId
+    public void unFriend(@QueryParam(Constants.FARO_USER_ID_PARAM) final String toBeRemovedUserId
                                       ){
-        ParamValidation.validateSignature(signature);
         String requestingUserId = "userIdFromSignature";
         try {
 			FriendManagement.removeFriend(requestingUserId, toBeRemovedUserId);

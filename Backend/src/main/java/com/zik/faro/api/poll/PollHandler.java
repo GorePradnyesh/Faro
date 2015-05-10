@@ -79,7 +79,6 @@ public class PollHandler {
     public int getUnvotedCount(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
                                 @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                 @PathParam(POLL_ID_PATH_PARAM) final String pollId){
-        ParamValidation.validateSignature(signature);
         ParamValidation.genericParamValidations(eventId, "eventId");
         ParamValidation.genericParamValidations(pollId, "pollId");
         String userId = signature;
@@ -103,7 +102,6 @@ public class PollHandler {
                           @PathParam(POLL_ID_PATH_PARAM) final String pollId,
                           // Ids of poll options
                           Set<String> options){
-        ParamValidation.validateSignature(signature);
         ParamValidation.genericParamValidations(eventId, "eventId");
         ParamValidation.genericParamValidations(pollId, "pollId");
         String userId = signature;
