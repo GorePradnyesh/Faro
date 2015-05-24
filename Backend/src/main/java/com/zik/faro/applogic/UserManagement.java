@@ -12,7 +12,6 @@ import java.util.Map;
 
 public class UserManagement {
     public static void storeFaroUser(final String userId, final FaroUser faroUser){
-        // TODO: Validate FaroUser parameters
         if(faroUser.getId() != userId){
             throw new BadRequestException("requesting userId does not match the User to be created");
         }

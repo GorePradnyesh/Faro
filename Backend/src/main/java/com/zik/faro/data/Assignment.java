@@ -39,7 +39,7 @@ public class Assignment {
     
     @XmlElement
     public List<Item> getItems(){
-        return new ArrayList<Item>(this.items.values());     //TODO: change this to not return the items in the class . clone ?
+        return new ArrayList<Item>(this.items.values());     
     }
 
     public void addItem(Item item){

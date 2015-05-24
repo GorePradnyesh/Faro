@@ -66,8 +66,9 @@ public class FriendsHandler {
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN, MediaType.TEXT_HTML})
     public void unFriend(@QueryParam(Constants.FARO_USER_ID_PARAM) final String toBeRemovedUserId
                                       ){
-        String requestingUserId = "userIdFromSignature";
-        try {
+    	ParamValidation.genericParamValidations(toBeRemovedUserId, Constants.FARO_USER_ID_PARAM);
+    	String requestingUserId = securityContext.getUserPrincipal().getName();
+    	try {
 			FriendManagement.removeFriend(requestingUserId, toBeRemovedUserId);
 		} catch (DataNotFoundException e) {
 			Response response = Response.status(Response.Status.NOT_FOUND)
@@ -80,7 +81,6 @@ public class FriendsHandler {
 					.build();
             throw new WebApplicationException(response);
 		}
-        
     }
 
 }

@@ -21,8 +21,10 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.zik.faro.applogic.ActivityManagement;
@@ -33,15 +35,16 @@ import com.zik.faro.data.Location;
 
 @Path(EVENT_PATH_CONST + EVENT_ID_PATH_PARAM_STRING + ACTIVITY_PATH_CONST)
 public class ActivityHandler {
-
+	@Context
+	SecurityContext context;
+	
     @Path(ACTIVITY_ID_PATH_PARAM_STRING)
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Activity getActivity(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
     							@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                 @PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId){
-    	//TODO: Ensure all event or its children calls are validated with the user being part of event.. Essentially check EventUser relation..
-        try{
+    	try{
         	 return ActivityManagement.getActivity(eventId, activityId);
         } catch (DataNotFoundException e) {
         	
@@ -66,10 +69,7 @@ public class ActivityHandler {
     public void createActivity(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
                                  @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                  Activity activity){
-    	
-        ParamValidation.genericParamValidations(activity, "activity");
-        //TODO: validate event_id and activity information
-        ActivityManagement.createActivity(activity);
+    	ActivityManagement.createActivity(activity);
     }
 
     /*
@@ -89,14 +89,9 @@ public class ActivityHandler {
     @Path(ACTIVITY_ID_PATH_PARAM_STRING + ACTIVITY_UPDATE_PATH_CONST)
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public void updateActivity(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-                               @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public void updateActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                @PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId,
                                ActivityUpdateData activityUpdateData){
-        ParamValidation.genericParamValidations(activityUpdateData, "activityUpdateData");
-        ParamValidation.genericParamValidations(eventId, "eventId");
-        ParamValidation.genericParamValidations(activityId, "actvityId");
-        //TODO: Validate the eventID and activityID permissions
         Activity activity = new Activity(eventId, null, 
         		activityUpdateData.getDescription(), activityUpdateData.getLocation(), 
         		activityUpdateData.getDate(), null);
@@ -117,10 +112,7 @@ public class ActivityHandler {
     public void deleteActivity(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
                                  @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                  @PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId){
-        ParamValidation.genericParamValidations(eventId, "eventId");
-        ParamValidation.genericParamValidations(activityId, "activityId");
-        //TODO: Validate the eventID and activityID permissions
-        ActivityManagement.deteleActivity(eventId, activityId);
+       ActivityManagement.deteleActivity(eventId, activityId);
     }
 
     @XmlRootElement

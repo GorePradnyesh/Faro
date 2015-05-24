@@ -80,4 +80,9 @@ public class PollDatastoreImpl {
         DatastoreUtil.processResult(result);
     }
     
+    public static void deletePoll(final String eventId, final String pollId){
+    	DatastoreObjectifyDAL.deleteObjectByIdWithParentId(pollId, Poll.class,
+    			eventId, Event.class);
+    }
+    
 }

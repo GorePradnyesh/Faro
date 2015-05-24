@@ -8,7 +8,7 @@ public class MinUser {
     
 	private String firstName;
     private String lastName;
-    private String email;     //TODO: Make of type email ?
+    private String email;     
     private String expenseUserId;
 
     private MinUser(){          // For JAXB

@@ -31,7 +31,6 @@ public class EventManagement {
     }
 
     public static Event getEventDetails(final String userId, final String eventId) throws DataNotFoundException{
-        //TODO: Validate that the user has permissions to access eventId, from the EventUser table
         Event event = EventDatastoreImpl.loadEventByID(eventId);
         return event;
     }

@@ -1,16 +1,6 @@
 package com.zik.faro.api.event;
 
-import static com.zik.faro.commons.Constants.COUNT_PARAM;
-import static com.zik.faro.commons.Constants.EVENT_ADD_FRIENDS_CONST;
-import static com.zik.faro.commons.Constants.EVENT_DETAILS_PATH_CONST;
-import static com.zik.faro.commons.Constants.EVENT_DISABLE_CONTROL_PATH_CONST;
-import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM;
-import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM_STRING;
-import static com.zik.faro.commons.Constants.EVENT_INVITEES_PATH_CONST;
-import static com.zik.faro.commons.Constants.EVENT_PATH_CONST;
-import static com.zik.faro.commons.Constants.EVENT_REMOVE_ATTENDEE_PATH_CONST;
-import static com.zik.faro.commons.Constants.FARO_USER_ID_PARAM;
-import static com.zik.faro.commons.Constants.SIGNATURE_QUERY_PARAM;
+import static com.zik.faro.commons.Constants.*;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -44,13 +34,10 @@ public class EventHandler {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Event getEventDetails(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
-        //TODO: validate eventIDs
-
-        String userId = "userIdExtractedFromSignature";
+        String userId = context.getUserPrincipal().getName();
         Event retrievedEvent;
 		try {
 			retrievedEvent = EventManagement.getEventDetails(userId, eventId);
-			
 		} catch (DataNotFoundException e) {
 			Response response = Response.status(Response.Status.NOT_FOUND)
 					.entity(e.getMessage())
@@ -63,20 +50,15 @@ public class EventHandler {
     @Path(EVENT_INVITEES_PATH_CONST)
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public InviteeList getEventInvitees(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-                                            @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public InviteeList getEventInvitees(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                             @QueryParam(COUNT_PARAM) final int count){
-        //TODO: validate eventIDs
-
-        //TODO: replace the dummy static code below with the actual calls
         return EventUserManagement.getEventInvitees(eventId);
     }
 
     @Path(EVENT_DISABLE_CONTROL_PATH_CONST)
     @POST
     public void disableEventControl(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
-        //TODO: validate eventIDs
-    	String userId = context.getUserPrincipal().getName();
+        String userId = context.getUserPrincipal().getName();
         try {
             EventManagement.disableEventControls(userId, eventId);
         } catch (DataNotFoundException e) {
@@ -94,21 +76,16 @@ public class EventHandler {
 
     @Path(EVENT_REMOVE_ATTENDEE_PATH_CONST)
     @POST
-    public void removeAttendee(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
-    							 @QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-                                 @QueryParam(FARO_USER_ID_PARAM) final String userId){
-        ParamValidation.genericParamValidations(userId, "userId");
+    public void removeAttendee(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
+    	String userId = context.getUserPrincipal().getName();
         EventUserManagement.removeEventUser(eventId, userId);
     }
     
     @Path(EVENT_ADD_FRIENDS_CONST)
     @POST
     public void addFriend(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
-				    		@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-				            @QueryParam(FARO_USER_ID_PARAM) final String userId,
-    						final AddFriendRequest data){
-    	ParamValidation.genericParamValidations(userId, "userId");
-        
+				    		final AddFriendRequest data){
+    	String userId = context.getUserPrincipal().getName();
         try {
 			EventManagement.addFriendToEvent(eventId, userId, data);
 		} catch (DataNotFoundException e) {

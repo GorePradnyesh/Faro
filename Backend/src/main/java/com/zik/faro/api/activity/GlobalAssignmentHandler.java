@@ -25,9 +25,6 @@ public class GlobalAssignmentHandler {
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Map<String,Assignment> getAssignments(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
                                     @PathParam(EVENT_ID_PATH_PARAM) final String eventId){
-        ParamValidation.genericParamValidations(eventId, "eventId");
-        //TODO: Validate the eventID, userId permissions
-
         Map<String,Assignment> assignments = null;
 		try {
 			assignments = AssignmentManagement.getAllAssignments(eventId);

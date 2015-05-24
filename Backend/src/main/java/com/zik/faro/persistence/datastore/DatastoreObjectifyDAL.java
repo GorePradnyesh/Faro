@@ -134,7 +134,6 @@ public class DatastoreObjectifyDAL {
     }
 
 
-    //TODO: Use a cleaner way to use Operators with the filters provided ( DatastoreOperator Enum etc ) currently the operators are expected in the incoming string
     public static <T> List<T> loadObjectsByStringFilters(Map<DatastoreOperator, String> keyFilterMap,
                                                          Map<String, String> filterMap,
                                                          Class<T> clazz){

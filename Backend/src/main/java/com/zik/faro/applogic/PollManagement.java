@@ -30,5 +30,8 @@ public class PollManagement {
 		PollDatastoreImpl.castVote(eventId, pollId, options, userId);
 	}
 	
+	public static void deletePoll(final String eventId, final String pollId){
+		PollDatastoreImpl.deletePoll(eventId, pollId);
+	}
 	
 }

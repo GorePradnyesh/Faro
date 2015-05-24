@@ -14,8 +14,6 @@ import static com.zik.faro.commons.Constants.POLL_UNVOTED_COUNT_CONST;
 import static com.zik.faro.commons.Constants.POLL_VOTE_PATH_CONST;
 import static com.zik.faro.commons.Constants.SIGNATURE_QUERY_PARAM;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -28,8 +26,10 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.sun.jersey.api.JResponse;
@@ -41,36 +41,38 @@ import com.zik.faro.data.Poll;
 
 @Path(EVENT_PATH_CONST + EVENT_ID_PATH_PARAM_STRING + POLL_PATH_CONST)
 public class PollHandler {
-    @Path(POLL_ID_PATH_PARAM_STRING)
+    @Context
+    SecurityContext context;
+	
+	@Path(POLL_ID_PATH_PARAM_STRING)
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Poll getPoll(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                         @PathParam(POLL_ID_PATH_PARAM) final String pollId){
-        ParamValidation.genericParamValidations(eventId, "eventId");
-        ParamValidation.genericParamValidations(pollId, "pollId");
-
-        //TODO: Validate the pollId, eventID, userID ACLS
-        List<Poll.PollOption> options = new ArrayList<>();
-        options.add(new Poll.PollOption("Shasta"));
-        Poll.PollOption vegasOption = new Poll.PollOption("Las Vegas");
-        vegasOption.addVoters("user1");
-        vegasOption.addVoters("user2");
-        options.add(vegasOption);
-        Poll dummyPoll = new Poll(eventId, "dummyCreator", options, "dummyOwner", "sample skeleton poll");
-        dummyPoll.setWinnerId(vegasOption.id);
-        return dummyPoll;
+        try {
+			return PollManagement.getPoll(eventId, pollId);
+		} catch (DataNotFoundException e) {
+			Response response = Response.status(Response.Status.NOT_FOUND)
+					.entity(e.getMessage())
+					.build();
+            throw new WebApplicationException(response);
+		}
     }
 
     @Path(POLL_CREATE_PATH_CONST)
     @PUT
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public String createPoll(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public void createPoll(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                              Poll poll){
-        ParamValidation.genericParamValidations(eventId, "eventId");
-        ParamValidation.genericParamValidations(poll, "poll");
-        //TODO: Validate the poll object make sure the exact set of parameters are set. Not more not less
-        
-        return HTTP_OK;
+        try {
+			PollManagement.createPoll(poll);
+		} catch (DataNotFoundException e) {
+			// If event not present exception thrown.
+			Response response = Response.status(Response.Status.NOT_FOUND)
+					.entity(e.getMessage())
+					.build();
+            throw new WebApplicationException(response);
+		}
     }
 
     @Path(POLL_ID_PATH_PARAM_STRING + POLL_UNVOTED_COUNT_CONST)
@@ -79,10 +81,7 @@ public class PollHandler {
     public int getUnvotedCount(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
                                 @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                 @PathParam(POLL_ID_PATH_PARAM) final String pollId){
-        ParamValidation.genericParamValidations(eventId, "eventId");
-        ParamValidation.genericParamValidations(pollId, "pollId");
-        String userId = signature;
-        //TODO: Validate the pollId, eventID, userID ACLs
+        String userId = context.getUserPrincipal().getName();
         return PollManagement.getCountOfUnvotedPolls(userId, eventId);
     }
 
@@ -102,9 +101,7 @@ public class PollHandler {
                           @PathParam(POLL_ID_PATH_PARAM) final String pollId,
                           // Ids of poll options
                           Set<String> options){
-        ParamValidation.genericParamValidations(eventId, "eventId");
-        ParamValidation.genericParamValidations(pollId, "pollId");
-        String userId = signature;
+        String userId = context.getUserPrincipal().getName();
         
         try {
 			PollManagement.castVote(eventId, pollId, options, userId);
@@ -126,26 +123,17 @@ public class PollHandler {
     @POST
     public String closePoll(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                             @PathParam(POLL_ID_PATH_PARAM) final String pollId){
-        ParamValidation.genericParamValidations(eventId, "eventId");
-        ParamValidation.genericParamValidations(pollId, "pollId");
-
-        //TODO: Validate the pollId, eventID, userID ACLs
-        //TODO: Validate pollOption has only the particular fields set.
-        //TODO: Validate existence of poll option specified
+        // TODO: Still to implement.. Do not have a very clear view of how this 
+        // feature works.
+        
         return HTTP_OK;
     }
 
     @Path(POLL_ID_PATH_PARAM_STRING)
     @DELETE
-    public String deletePoll(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public void deletePoll(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                              @PathParam(POLL_ID_PATH_PARAM) final String pollId){
-        ParamValidation.genericParamValidations(eventId, "eventId");
-        ParamValidation.genericParamValidations(pollId, "pollId");
-
-        //TODO: Validate the pollId, eventID, userID ACLs
-        //TODO: Validate pollOption has only the particular fields set.
-        //TODO: Validate existence of poll option specified
-        return HTTP_OK;
+        PollManagement.deletePoll(eventId, pollId);
     }
 
     @XmlRootElement

@@ -25,9 +25,8 @@ public class GlobalActivityHandler {
 	
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public JResponse<List<Activity>> getActivities(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
-        ParamValidation.genericParamValidations(eventId, "eventId");
+    public List<Activity> getActivities(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
         List<Activity> activityList = ActivityManagement.getActivities(eventId);
-        return JResponse.ok(activityList).build();
+        return activityList;
     }
 }

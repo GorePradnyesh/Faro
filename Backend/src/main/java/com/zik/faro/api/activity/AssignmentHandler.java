@@ -42,15 +42,11 @@ public class AssignmentHandler {
     @Path(ASSIGNMENT_ID_PATH_PARAM_STRING)
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Assignment getAssignment(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-                                    @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public Assignment getAssignment(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                     @PathParam(ASSIGNMENT_ID_PATH_PARAM) final String assignmentId,
                                     // No seperate API for event or activity's assignment. 
                                     // If activity passed, assignment of that activity is returned else event assignment returned.
                                     @QueryParam(ACTIVITY_ID_PATH_PARAM) final String activityId) throws DataNotFoundException{
-        ParamValidation.genericParamValidations(eventId, "eventId");
-        ParamValidation.genericParamValidations(assignmentId, "assignmentId");
-        
         if(activityId == null || activityId.isEmpty())
         	return AssignmentManagement.getEventLevelAssignment(eventId);
         else
@@ -61,8 +57,6 @@ public class AssignmentHandler {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public AssignmentCount getPendingAssignmentCount(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
-        ParamValidation.genericParamValidations(eventId, "eventId");
-        //TODO: Validate the eventID, userId permissions
         try {
 			return new AssignmentCount(eventId,AssignmentManagement.getPendingAssignmentCount(eventId));
 		} catch (DataNotFoundException e) {
@@ -78,9 +72,7 @@ public class AssignmentHandler {
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Map<String,Assignment> getAssignments(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
                                     @PathParam(EVENT_ID_PATH_PARAM) final String eventId){
-    	ParamValidation.genericParamValidations(eventId, "eventId");
-        
-        try {
+    	try {
 			return AssignmentManagement.getAllAssignments(eventId);
 		} catch (DataNotFoundException e) {
 			Response response = Response.status(Response.Status.NOT_FOUND)
@@ -95,10 +87,7 @@ public class AssignmentHandler {
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public String deleteAssignment(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                    @PathParam(ASSIGNMENT_ID_PATH_PARAM) final String assignmentId){
-        ParamValidation.genericParamValidations(eventId, "eventId");
-        ParamValidation.genericParamValidations(assignmentId, "assignmentId");
-        //TODO: Validate the eventID, userId permissions
-        
+        // TODO: Dont have clarity. Skipping for now.
         return HTTP_OK;
     }
     
@@ -111,8 +100,6 @@ public class AssignmentHandler {
     public JResponse<String> updateAssignment(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
     		@QueryParam(ACTIVITY_ID_PATH_PARAM) final String activityId,
     		final List<Item> items){
-    	ParamValidation.genericParamValidations(eventId, "eventId");
-        
     	
 		try {
 			if(activityId == null || activityId.isEmpty()){

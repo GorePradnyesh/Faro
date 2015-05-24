@@ -15,11 +15,11 @@ import com.zik.faro.data.expense.ExpenseGroup;
 @XmlRootElement
 public class Event {
     @Id @Index
-    private String eventId;           // TODO: make this of type ID
-    private String eventName;         // TODO: Indexing this wont help. We need to add this to "Full Text Search"
-    private Calendar startDate;     // TODO: Move this to a junction table ?
+    private String eventId;           
+    private String eventName;         
+    private Calendar startDate;     
     private Calendar endDate;
-    private boolean controlFlag;      // TODO: Move this to Objectstatus
+    private boolean controlFlag;      
     private ExpenseGroup expenseGroup;
     private Location location;
     private ObjectStatus status;
@@ -44,7 +44,7 @@ public class Event {
     }
 
     private Event(){
-        this(null); // To satisfy JAXB
+       
     }
 
     @XmlElement

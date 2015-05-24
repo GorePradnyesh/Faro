@@ -19,7 +19,7 @@ import static com.zik.faro.commons.Constants.*;
 @Path(EVENT_PATH_CONST + EVENT_CREATE_PATH_CONST)
 public class EventCreateHandler {
     @Context
-    private SecurityContext context;
+    SecurityContext context;
     //TODO: Get events for a particular USER !!!
 
     /*

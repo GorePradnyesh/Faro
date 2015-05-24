@@ -9,7 +9,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-// TODO: Add data validations
 @Entity
 @XmlRootElement
 public class FaroUser {
@@ -20,7 +19,7 @@ public class FaroUser {
     private String             middleName;
     private String             lastName;
     private String             externalExpenseID;
-    private String             telephone;   //TODO: type tel number
+    private String             telephone;   
     private Address            address;
 
     public FaroUser(final String email) {
@@ -93,7 +92,6 @@ public class FaroUser {
         return address;
     }
 
-    // TODO : Will have to make the setters private and still have jaxb working fine
     public void setEmail(String email) {
         this.email = email;
     }

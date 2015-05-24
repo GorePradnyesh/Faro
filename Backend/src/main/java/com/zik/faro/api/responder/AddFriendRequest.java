@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-//TODO: Remove if not required and use list directly.
 @XmlRootElement
 public class AddFriendRequest {
 	private List<String> friendIds;
