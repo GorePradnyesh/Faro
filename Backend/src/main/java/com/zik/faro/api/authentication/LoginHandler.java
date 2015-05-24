@@ -42,7 +42,6 @@ public class LoginHandler {
         ParamValidation.genericParamValidations(password, "password");
 
         logger.info("username : " + username);
-        logger.info("password : " + password);
 
         // Authenticate the user
         UserCredentials userCredentials = UserCredentialsDatastoreImpl.loadUserCreds(username);

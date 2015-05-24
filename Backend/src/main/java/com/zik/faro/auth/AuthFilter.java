@@ -9,6 +9,8 @@ import com.zik.faro.auth.jwt.JwtTokenValidationException;
 import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.FaroResponseStatus;
 import com.zik.faro.commons.exceptions.FaroWebAppException;
+import com.zik.faro.data.user.UserCredentials;
+import com.zik.faro.persistence.datastore.UserCredentialsDatastoreImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +52,8 @@ public class AuthFilter implements ContainerRequestFilter {
                                     + Constants.AUTH_FORGOT_PASSWORD_PATH_CONST;
         String forgotPasswordFormPath = Constants.AUTH_PATH_CONST + Constants.AUTH_PASSWORD_PATH_CONST
                                          + Constants.AUTH_FORGOT_PASSWORD_FORM_PATH_CONST;
+        String newPasswordPath = Constants.AUTH_PATH_CONST + Constants.AUTH_PASSWORD_PATH_CONST
+                                 + Constants.AUTH_NEW_PASSWORD_PATH_CONST;
         String requestPath = "/" + containerRequest.getPath();
 
         logger.info("request path : " + requestPath);
@@ -79,6 +83,16 @@ public class AuthFilter implements ContainerRequestFilter {
             //final FaroJwtClaims jwtClaims = FaroJwtTokenManager.obtainClaimsWithNoChecks(authHeaderValue);
 
             final FaroJwtClaims jwtClaims = FaroJwtTokenManager.validateToken(authHeaderValue);
+            logger.info("jwtClaims : " + jwtClaims);
+
+            // For new password API, check if the token has valid JWT id
+            if (requestPath.equals(newPasswordPath)) {
+                UserCredentials userCredentials = UserCredentialsDatastoreImpl.loadUserCreds(jwtClaims.getUsername());
+                String userCredsUuid = userCredentials.getUserCredsUUid();
+                if (!userCredsUuid.equals(jwtClaims.getJwtId())) {
+                    throw new FaroWebAppException(FaroResponseStatus.UNAUTHORIZED, "Invalid token");
+                }
+            }
 
             // Pass the JWT claims up to the resource classes through the SecurityContext object
             containerRequest.setSecurityContext(new SecurityContext() {

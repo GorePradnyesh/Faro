@@ -87,6 +87,9 @@ public class FaroJwtTokenManager {
         claimsMap.put(JwtClaimConstants.EMAIL, jwtClaims.getEmail());
         claimsMap.put(JwtClaimConstants.ISSUED_AT_KEY, jwtClaims.getIssuedAtInMilliSecs());
         claimsMap.put(JwtClaimConstants.EXPIRATION_KEY, jwtClaims.getExpirationInSecs());
+        claimsMap.put(JwtClaimConstants.JWT_KEY, jwtClaims.getJwtId());
+
+        logger.info("claimsMap: " + claimsMap);
 
         JWTSigner signer = new JWTSigner(JWT_SIGNATURE_SECRET);
 
@@ -122,9 +125,10 @@ public class FaroJwtTokenManager {
                 .setIssuer(claimsMap.get(JwtClaimConstants.ISSUER_KEY).toString())
                 .setIssuedAtInMilliSecs(Long.parseLong(claimsMap.get(JwtClaimConstants.ISSUED_AT_KEY).toString()))
                 .setUsername(claimsMap.get(JwtClaimConstants.USERNAME).toString())
-                .setEmail(claimsMap.get(JwtClaimConstants.EMAIL).toString());
+                .setEmail(claimsMap.get(JwtClaimConstants.EMAIL).toString())
+                .setExpirationInSecs(Long.parseLong(claimsMap.get(JwtClaimConstants.EXPIRATION_KEY).toString()))
+                .setJwtId(claimsMap.get(JwtClaimConstants.JWT_KEY) != null ? claimsMap.get(JwtClaimConstants.JWT_KEY).toString() : null);
 
         return faroJwtClaims;
     }
-
 }

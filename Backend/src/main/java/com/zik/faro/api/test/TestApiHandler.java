@@ -26,9 +26,6 @@ public class TestApiHandler {
 
         FaroJwtClaims jwtClaims = (FaroJwtClaims)securityContext.getUserPrincipal();
         logger.info("jwtclaims: " + jwtClaims);
-        logger.info("Sending email .....");
-        FaroEmailClient emailClient = new FaroEmailClient();
-        emailClient.sendEmail();
 
         return Response.ok().build();
     }

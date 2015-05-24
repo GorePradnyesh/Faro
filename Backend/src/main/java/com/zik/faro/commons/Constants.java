@@ -11,6 +11,7 @@ public final class Constants {
     public static final String SIGNATURE_QUERY_PARAM                            = "Signature";
     public static final String FARO_USER_ID_PARAM                               = "userId";
     public static final String FARO_USERNAME_PARAM                              = "username";
+    public static final String FARO_TOKEN_PARAM                                 = "token";
 
     //----- Path Parameters ----//
     public static final String EVENT_ID_PATH_PARAM                              = "eventId";

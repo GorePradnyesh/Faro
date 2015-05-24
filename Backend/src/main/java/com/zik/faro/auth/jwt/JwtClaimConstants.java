@@ -28,6 +28,8 @@ public final class JwtClaimConstants {
         // or after which the JWT MUST NOT be accepted for processing.
         public static final String EXPIRATION_KEY = "exp";
 
+        public static final String JWT_KEY = "jti";
+
         /**** Private claim names ****/
 
         // Faro username of the user

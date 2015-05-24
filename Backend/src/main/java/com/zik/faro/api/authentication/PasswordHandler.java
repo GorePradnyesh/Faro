@@ -1,12 +1,15 @@
-package com.zik.faro.api.authentication;
+ package com.zik.faro.api.authentication;
 
+import com.google.common.base.Strings;
 import com.zik.faro.applogic.UserManagement;
 import com.zik.faro.auth.PasswordManager;
 import com.zik.faro.auth.PasswordManagerException;
 import com.zik.faro.auth.jwt.FaroJwtClaims;
 import com.zik.faro.auth.jwt.FaroJwtTokenManager;
+import com.zik.faro.auth.jwt.JwtTokenValidationException;
 import com.zik.faro.commons.FaroResponseStatus;
 import com.zik.faro.commons.exceptions.FaroWebAppException;
+import com.zik.faro.data.user.FaroResetPasswordData;
 import com.zik.faro.data.user.UserCredentials;
 import com.zik.faro.persistence.datastore.UserCredentialsDatastoreImpl;
 import org.slf4j.Logger;
@@ -21,8 +24,13 @@ import javax.ws.rs.core.UriInfo;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.text.MessageFormat;
+import java.util.Properties;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static com.zik.faro.commons.Constants.*;
 
@@ -33,6 +41,7 @@ import static com.zik.faro.commons.Constants.*;
 @Path(AUTH_PATH_CONST + AUTH_PASSWORD_PATH_CONST)
 public class PasswordHandler {
     private static final Logger logger = LoggerFactory.getLogger(PasswordHandler.class);
+    private static final String FORGOT_PASSWORD_HTML_PAGE = "WEB-INF/ForgotPasswordForm.html";
 
     @Context
     UriInfo uriInfo;
@@ -40,11 +49,15 @@ public class PasswordHandler {
     @Context
     SecurityContext securityContext;
 
+    /**
+     * Reset password for a logged in user
+     * @param resetPasswordData
+     */
     @Path(AUTH_RESET_PASSWORD_PATH_CONST)
     @PUT
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public void resetPassword(String oldPassword, String newPassword) {
+    public void resetPassword(FaroResetPasswordData resetPasswordData) {
         String userId = securityContext.getUserPrincipal().getName();
         // Lookup the user
         if (!UserManagement.isExistingUser(userId)) {
@@ -56,7 +69,7 @@ public class PasswordHandler {
         UserCredentials userCredentials = UserCredentialsDatastoreImpl.loadUserCreds(userId);
 
         try {
-            if(!PasswordManager.checkPasswordEquality(oldPassword, userCredentials.getEncryptedPassword())) {
+            if(!PasswordManager.checkPasswordEquality(resetPasswordData.getOldPassword(), userCredentials.getEncryptedPassword())) {
                 throw new FaroWebAppException(FaroResponseStatus.UNAUTHORIZED);
             }
         } catch (PasswordManagerException e) {
@@ -64,16 +77,14 @@ public class PasswordHandler {
             throw new IllegalStateException("Cannot verify the user credentials to reset password");
         }
 
-        try {
-            // Update the password
-            UserCredentials userCreds = new UserCredentials(userId, PasswordManager.getEncryptedPassword(newPassword));
-            UserCredentialsDatastoreImpl.storeUserCreds(userCreds);
-        } catch(PasswordManagerException e) {
-            logger.error("Unable to encrypt the new password", e);
-            throw new IllegalStateException("Failed to update the password");
-        }
+        updatePassword(userId, resetPasswordData.getNewPassword());
     }
 
+    /**
+     * Generate and return URL for changing the password for this user
+     * @param userId
+     * @return
+     */
     @Path(AUTH_FORGOT_PASSWORD_PATH_CONST)
     @GET
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
@@ -86,57 +97,128 @@ public class PasswordHandler {
                     MessageFormat.format("User {0} does not exist.", userId));
         }
 
+        UserCredentials userCredentials = UserCredentialsDatastoreImpl.loadUserCreds(userId);
+        if (userCredentials == null) {
+            logger.error(MessageFormat.format("Usercredentials could not be obtained for user {0}", userId));
+            throw new FaroWebAppException(FaroResponseStatus.NOT_FOUND,
+                    MessageFormat.format("User {0} does not exist.", userId));
+        }
+
+        String userCredsUuid = userCredentials.getUserCredsUUid();
+
         // Create a JWT token for forgot password URL
-        //String jwtId = UUID.randomUUID().toString();
-        //FaroJwtClaims faroJwtClaims = new FaroJwtClaims("faro", System.currentTimeMillis(),
-                                                        //userId, userId);
-        String token = FaroJwtTokenManager.createToken(userId);
+        // including the user creds uuid as the JWT id and a 24 hour expiration
+        long currentTimeInMillisecs = System.currentTimeMillis();
+        long expirationTimeInSecs = currentTimeInMillisecs/1000L + TimeUnit.HOURS.toSeconds(24);
+        FaroJwtClaims faroJwtClaims = new FaroJwtClaims("faro", currentTimeInMillisecs,
+                                                        userId, userId, userCredsUuid);
 
+        faroJwtClaims.setExpirationInSecs(expirationTimeInSecs);
+        String token = FaroJwtTokenManager.createToken(faroJwtClaims);
 
-        String forgotPasswordRequestURL = removeTrailingSlash(uriInfo.getBaseUri().toString())
-                                          + AUTH_PATH_CONST
-                                          + AUTH_PASSWORD_PATH_CONST
-                                          + AUTH_FORGOT_PASSWORD_FORM_PATH_CONST
-                                          + "?"
-                                          + "token="
-                                          + token;
+        logger.info("jwt claims of token in URL: " + faroJwtClaims);
 
-        logger.info("uriInfo RequestUri = " + uriInfo.getRequestUri());
+        // Create the forgot password form URL with the token in the query string
+        String  forgotPasswordFormUrl = new StringBuilder()
+                .append(removeTrailingSlash(uriInfo.getBaseUri().toString()))
+                .append(AUTH_PATH_CONST)
+                .append(AUTH_PASSWORD_PATH_CONST)
+                .append(AUTH_FORGOT_PASSWORD_FORM_PATH_CONST)
+                .append("?")
+                .append("token=")
+                .append(token)
+                .toString();
 
-        return forgotPasswordRequestURL;
+        return forgotPasswordFormUrl;
     }
 
+    /**
+     * Return HTML page for entering the new password
+     * @param token
+     * @return
+     */
     @Path(AUTH_FORGOT_PASSWORD_FORM_PATH_CONST)
     @GET
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces(MediaType.TEXT_HTML)
-    public String forgotPasswordForm() {
-        logger.info("urInfo RequestUri = " + uriInfo.getRequestUri());
-        logger.info("Generating forgotpassword for m");
-
+    public String forgotPasswordForm(@QueryParam(FARO_TOKEN_PARAM)String token) {
         try {
+            // Authenticate the request first
+            FaroJwtClaims jwtClaims = FaroJwtTokenManager.validateToken(token);
+            logger.info("jwtClaims : " + jwtClaims);
+            // Lookup the user
+            if (!UserManagement.isExistingUser(jwtClaims.getUsername())) {
+                throw new FaroWebAppException(FaroResponseStatus.NOT_FOUND,
+                        MessageFormat.format("User {0} does not exist.", jwtClaims.getUsername()));
+            }
+            String userCredsUuid = UserCredentialsDatastoreImpl.loadUserCreds(jwtClaims.getUsername()).getUserCredsUUid();
+            if (!userCredsUuid.equals(jwtClaims.getJwtId())) {
+                logger.error(MessageFormat.format("jwt id {0} is invalid. userCredsUuid = {1}",
+                        jwtClaims.getJwtId(), userCredsUuid));
+                throw new FaroWebAppException(FaroResponseStatus.UNAUTHORIZED, "Invalid token to change password");
+            }
+
+            // return the html page
+            logger.info("Generating forgot password form");
             return getForgotPasswordForm();
-        } catch (IOException | URISyntaxException e) {
-            logger.error("Could not read the html form", e);
+        } catch (JwtTokenValidationException e) {
+            throw new FaroWebAppException(FaroResponseStatus.UNAUTHORIZED, "Invalid token");
+        } catch (SignatureException e) {
+            throw new FaroWebAppException(FaroResponseStatus.UNAUTHORIZED, "Invalid token signature");
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            logger.error("Unable to validate the token", e);
+            throw new IllegalStateException("Unable to authenticate the request to change password");
+        } catch (URISyntaxException | IOException e) {
+            logger.error("Failed to generate forgot password html page", e);
             throw new IllegalStateException("Unable to generate forgot password form");
         }
     }
 
+    /**
+     * Invoked from the forgot password page to update the password
+     * @param newPassword
+     */
     @Path(AUTH_NEW_PASSWORD_PATH_CONST)
     @PUT
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public void newPassword() {
-        logger.info("newPassword API invoked");
-    }
-
-    private String getForgotPasswordForm() throws IOException, URISyntaxException {
-        InputStream inputStream = new FileInputStream("WEB-INF/ForgotPasswordForm.html");
-        if (inputStream == null) {
-            logger.info("----- inputstream is Null!! ----");
-        } else {
-            logger.info("----- File found!! ----");
+    public void newPassword(String newPassword) {
+        // No need to authenticate the request as this API request would have been authenticated
+        // by the auth filter by verifying the token
+        logger.info("newPassword API invoked ....");
+        if (Strings.isNullOrEmpty(newPassword)) {
+            throw new FaroWebAppException(FaroResponseStatus.BAD_REQUEST, "Password is null or empty");
         }
 
+        String userId = securityContext.getUserPrincipal().getName();
+        logger.info(MessageFormat.format("Updating the password of user {0}, password = {1}", userId, newPassword));
+
+        updatePassword(userId, newPassword);
+    }
+
+    /**
+     * Update the password
+     * @param userId
+     * @param newPassword
+     */
+    private void updatePassword(String userId, String newPassword) {
+        try {
+            // Update the password
+            UserCredentials userCreds = new UserCredentials(userId, PasswordManager.getEncryptedPassword(newPassword), UUID.randomUUID().toString());
+            UserCredentialsDatastoreImpl.storeUserCreds(userCreds);
+        } catch(PasswordManagerException e) {
+            logger.error("Unable to encrypt the new password", e);
+            throw new IllegalStateException("Failed to update the password");
+        }
+    }
+
+    /**
+     * Return the forgot password html page as a string
+     * @return
+     * @throws IOException
+     * @throws URISyntaxException
+     */
+    private String getForgotPasswordForm() throws IOException, URISyntaxException {
+        InputStream inputStream = getHtmlFormAsStream();
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         BufferedReader reader = new BufferedReader(inputStreamReader);
         String         line = null;
@@ -151,6 +233,27 @@ public class PasswordHandler {
         return stringBuilder.toString();
     }
 
+    /**
+     * Return the InputStream for the html form
+     * @return
+     * @throws FileNotFoundException
+     */
+    private InputStream getHtmlFormAsStream() throws FileNotFoundException {
+        Properties properties = System.getProperties();
+        String testProp = properties.getProperty("unit-test");
+
+        if("true".equals(testProp)) {
+            return ClassLoader.getSystemResourceAsStream(FORGOT_PASSWORD_HTML_PAGE);
+        }
+
+        return new FileInputStream(FORGOT_PASSWORD_HTML_PAGE);
+    }
+
+    /**
+     * Remove '/' at the end of the path if it exists
+     * @param input
+     * @return
+     */
     private String removeTrailingSlash(String input) {
         if(input.charAt(input.length() - 1) == '/') {
             return input.substring(0, input.length() - 1);

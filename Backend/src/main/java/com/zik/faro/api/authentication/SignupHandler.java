@@ -19,6 +19,8 @@ import javax.ws.rs.core.MediaType;
 
 
 import java.text.MessageFormat;
+import java.util.UUID;
+
 import org.slf4j.Logger;
 
 import static com.zik.faro.commons.Constants.*;
@@ -59,14 +61,14 @@ public class SignupHandler {
         if (UserManagement.isExistingUser(newFaroUser.getId())) {
             // Return  error code indicating user exists
             logger.info("User already exists");
-            // TODO (Code Review) : throw only WebApplicationException . Keep an emum of Faro status codes
             throw new FaroWebAppException(FaroResponseStatus.ENTITY_EXISTS, MessageFormat.format("Username {0} already exists.", newFaroUser.getEmail()));
         }
 
         try {
             // Store the New user's credentials and user details
             UserCredentials userCreds = new UserCredentials(newFaroUser.getEmail(),
-                                                            PasswordManager.getEncryptedPassword(password));
+                                                            PasswordManager.getEncryptedPassword(password),
+                                                            UUID.randomUUID().toString());
             UserCredentialsDatastoreImpl.storeUserCreds(userCreds);
             UserDatastoreImpl.storeUser(newFaroUser);
         } catch (PasswordManagerException e) {
