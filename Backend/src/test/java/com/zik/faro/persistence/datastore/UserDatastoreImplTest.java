@@ -3,8 +3,10 @@ package com.zik.faro.persistence.datastore;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
+import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.data.user.Address;
 import com.zik.faro.data.user.FaroUser;
+
 import org.junit.*;
 
 import java.util.List;
@@ -35,7 +37,7 @@ public class UserDatastoreImplTest {
     }
 
     @Test
-    public void testLoadUser(){
+    public void testLoadUser() throws DataNotFoundException{
         final String email = "dg@gmail.com";
         final String firstName = "David";
         FaroUser faroUser = new FaroUser(email, firstName, null, "Gilmour", "dg@splitwise.com",

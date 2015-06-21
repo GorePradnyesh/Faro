@@ -1,29 +1,58 @@
 package com.zik.faro.api.activity;
 
-import com.zik.faro.commons.ParamValidation;
-import com.zik.faro.data.Activity;
-import com.zik.faro.data.DateOffset;
-import com.zik.faro.data.Location;
+import static com.zik.faro.commons.Constants.ACTIVITY_CREATE_PATH_CONST;
+import static com.zik.faro.commons.Constants.ACTIVITY_ID_PATH_PARAM;
+import static com.zik.faro.commons.Constants.ACTIVITY_ID_PATH_PARAM_STRING;
+import static com.zik.faro.commons.Constants.ACTIVITY_PATH_CONST;
+import static com.zik.faro.commons.Constants.ACTIVITY_UPDATE_PATH_CONST;
+import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM;
+import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM_STRING;
+import static com.zik.faro.commons.Constants.EVENT_PATH_CONST;
+import static com.zik.faro.commons.Constants.SIGNATURE_QUERY_PARAM;
 
-import static com.zik.faro.commons.Constants.*;
+import java.util.Calendar;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Date;
+
+import com.zik.faro.applogic.ActivityManagement;
+import com.zik.faro.commons.ParamValidation;
+import com.zik.faro.commons.exceptions.DataNotFoundException;
+import com.zik.faro.data.Activity;
+import com.zik.faro.data.Location;
 
 @Path(EVENT_PATH_CONST + EVENT_ID_PATH_PARAM_STRING + ACTIVITY_PATH_CONST)
 public class ActivityHandler {
-
+	@Context
+	SecurityContext context;
+	
     @Path(ACTIVITY_ID_PATH_PARAM_STRING)
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Activity getActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public Activity getActivity(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
+    							@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                 @PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId){
-        //TODO: replace the dummy static code below with the actual calls
-        return new Activity(eventId, "dummyname", "dummyDescription",
-                new Location("Lake Shasta"),
-                new DateOffset(new Date(), 60 * 1000));
+    	try{
+        	 return ActivityManagement.getActivity(eventId, activityId);
+        } catch (DataNotFoundException e) {
+        	
+            Response response = Response.status(Response.Status.NOT_FOUND)
+                    .entity(e.getMessage())
+                    .build();
+            throw new WebApplicationException(response);
+        }
     }
 
     /*
@@ -37,13 +66,10 @@ public class ActivityHandler {
     @Path(ACTIVITY_CREATE_PATH_CONST)
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public String createActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public void createActivity(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
+                                 @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                  Activity activity){
-        ParamValidation.genericParamValidations(activity, "activity");
-        //TODO: validate event_id and activity information
-
-        //TODO: replace the dummy static code below with the actual calls
-        return HTTP_OK;
+    	ActivityManagement.createActivity(activity);
     }
 
     /*
@@ -59,37 +85,69 @@ public class ActivityHandler {
         </location>
     </activityUpdateData>
     */
-
+    
     @Path(ACTIVITY_ID_PATH_PARAM_STRING + ACTIVITY_UPDATE_PATH_CONST)
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public String updateActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
-                                 @PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId,
-                               activityUpdateData activityUpdateData){
-        ParamValidation.genericParamValidations(activityUpdateData, "activityUpdateData");
-        ParamValidation.genericParamValidations(eventId, "eventId");
-        ParamValidation.genericParamValidations(activityId, "actvityId");
-        //TODO: Validate the eventID and activityID permissions
-        return HTTP_OK;
+    public void updateActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+                               @PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId,
+                               ActivityUpdateData activityUpdateData){
+        Activity activity = new Activity(eventId, null, 
+        		activityUpdateData.getDescription(), activityUpdateData.getLocation(), 
+        		activityUpdateData.getDate(), null);
+        try {
+			ActivityManagement.updateActivity(activity, eventId);
+		} catch (DataNotFoundException e) {
+			Response response = Response.status(Response.Status.NOT_FOUND)
+                    .entity(e.getMessage())
+                    .build();
+            throw new WebApplicationException(response);
+		}
+        
     }
 
 
     @Path(ACTIVITY_ID_PATH_PARAM_STRING)
     @DELETE
-    public String deleteActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public void deleteActivity(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
+                                 @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                  @PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId){
-        ParamValidation.genericParamValidations(eventId, "eventId");
-        ParamValidation.genericParamValidations(activityId, "activityId");
-        //TODO: Validate the eventID and activityID permissions
-        return HTTP_OK;
+       ActivityManagement.deteleActivity(eventId, activityId);
     }
 
-
     @XmlRootElement
-    private static class activityUpdateData {
-        public String description;
-        public DateOffset date;
-        public Location location;
+    private static class ActivityUpdateData {
+        private String description;
+        private Calendar date;
+        private Location location;
+        
+        private ActivityUpdateData(){
+        }
+        
+        public String getDescription() {
+			return description;
+		}
+
+		public void setDescription(String description) {
+			this.description = description;
+		}
+
+		public Calendar getDate() {
+			return date;
+		}
+
+		public void setDate(Calendar date) {
+			this.date = date;
+		}
+
+		public Location getLocation() {
+			return location;
+		}
+
+		public void setLocation(Location location) {
+			this.location = location;
+		}
+
     }
 
 }

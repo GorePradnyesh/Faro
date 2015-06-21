@@ -4,11 +4,18 @@ package com.zik.faro.persistence.datastore;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
+import com.zik.faro.commons.exceptions.DataNotFoundException;
+import com.zik.faro.data.Event;
+import com.zik.faro.data.Location;
 import com.zik.faro.data.Poll;
+import com.zik.faro.data.expense.ExpenseGroup;
+
 import org.junit.*;
 
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.UUID;
 
 public class PollDatastoreImplTest {
 
@@ -17,6 +24,7 @@ public class PollDatastoreImplTest {
 
     static{
         ObjectifyService.register(Poll.class);
+        ObjectifyService.register(Event.class);
     }
 
     @BeforeClass
@@ -33,6 +41,19 @@ public class PollDatastoreImplTest {
     public void tearDown() {
         helper.tearDown();
     }
+    
+    private Event createEvent(){
+    	String eventNameSuffix = UUID.randomUUID().toString();
+        Event testEvent = new Event("Lake Shasta "+ eventNameSuffix,
+        		new GregorianCalendar(),
+        		new GregorianCalendar(),
+                false,
+                new ExpenseGroup("Lake Shasta", "shasta123"),
+                new Location("Lake Shasta"));
+
+        EventDatastoreImpl.storeEventOnly(testEvent);
+        return testEvent;
+    }
 
     private Poll createPollObjectForEventId(final String eventId){
         List<Poll.PollOption> options = new ArrayList<>();
@@ -47,18 +68,19 @@ public class PollDatastoreImplTest {
     }
 
     @Test
-    public void testPollLoadStore(){
-        String eventId = "sampleEventId";
-        Poll dummyPoll = createPollObjectForEventId(eventId);
+    public void testPollLoadStore() throws DataNotFoundException{
+        Event event = createEvent();
+        Poll dummyPoll = createPollObjectForEventId(event.getEventId());
         PollDatastoreImpl.storePoll(dummyPoll);
-        Poll retPoll = PollDatastoreImpl.loadPollById(dummyPoll.getId(), eventId);
+        Poll retPoll = PollDatastoreImpl.loadPollById(dummyPoll.getId(), event.getEventId());
         Assert.assertNotNull(retPoll);
-        Assert.assertEquals(retPoll.getEventId(), eventId);
+        Assert.assertEquals(retPoll.getEventId(), event.getEventId());
     }
 
     @Test
-    public void testLoadPollsForEvent(){
-        String eventId = "testEventId";
+    public void testLoadPollsForEvent() throws DataNotFoundException{
+    	Event event = createEvent();
+    	String eventId = event.getEventId();
         Poll poll1 = createPollObjectForEventId(eventId);
         PollDatastoreImpl.storePoll(poll1);
         Poll poll2 = createPollObjectForEventId(eventId);

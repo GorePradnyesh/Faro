@@ -1,28 +1,32 @@
 package com.zik.faro.data;
 
-import com.googlecode.objectify.annotation.Entity;
-import com.googlecode.objectify.annotation.Id;
-import com.googlecode.objectify.annotation.Index;
-import com.zik.faro.data.expense.ExpenseGroup;
+import java.util.Calendar;
+import java.util.UUID;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.UUID;
+
+import com.googlecode.objectify.annotation.Entity;
+import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Index;
+import com.googlecode.objectify.annotation.Serialize;
+import com.zik.faro.data.expense.ExpenseGroup;
 
 @Entity
 @XmlRootElement
 public class Event {
     @Id @Index
-    private String eventId;           // TODO: make this of type ID
-    private String eventName;         // TODO: Indexing this wont help. We need to add this to "Full Text Search"
-    private DateOffset startDate;     // TODO: Move this to a junction table ?
-    private DateOffset endDate;
-    private boolean controlFlag;      // TODO: Move this to Objectstatus
+    private String eventId;           
+    private String eventName;         
+    @Serialize private Calendar startDate;     
+    @Serialize private Calendar endDate;
+    private boolean controlFlag;      
     private ExpenseGroup expenseGroup;
     private Location location;
     private ObjectStatus status;
+    private Assignment assignment;
 
-    public Event(final String eventName, final DateOffset startDate, final DateOffset endDate,
+    public Event(final String eventName, final Calendar startDate, final Calendar endDate,
                  final boolean controlFlag, final ExpenseGroup expenseGroup, final Location location) {
         this.eventId = UUID.randomUUID().toString();
         this.eventName = eventName;
@@ -41,7 +45,7 @@ public class Event {
     }
 
     private Event(){
-        this(null); // To satisfy JAXB
+       
     }
 
     @XmlElement
@@ -49,19 +53,20 @@ public class Event {
         return eventName;
     }
 
-    public DateOffset getStartDate() {
+    public Calendar getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(DateOffset startDate) {
+    public void setStartDate(Calendar startDate) {
         this.startDate = startDate;
     }
 
-    public DateOffset getEndDate() {
+    public Calendar getEndDate() {
+    	
         return endDate;
     }
 
-    public void setEndDate(DateOffset endDate) {
+    public void setEndDate(Calendar endDate) {
         this.endDate = endDate;
     }
 
@@ -105,4 +110,13 @@ public class Event {
     public void setStatus(ObjectStatus status) {
         this.status = status;
     }
+
+	public Assignment getAssignment() {
+		return assignment;
+	}
+
+	public void setAssignment(Assignment assignment) {
+		this.assignment = assignment;
+	}
+	
 }

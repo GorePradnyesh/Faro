@@ -8,6 +8,7 @@ import java.util.Map;
 
 @XmlRootElement
 public class InviteeList {
+	// TODO: Do we need the eventId? In the service call client already provides the eventId
     public final String eventID;
     public final Map<MinUser, InviteStatus> userStatusMap = new HashMap<>();
 

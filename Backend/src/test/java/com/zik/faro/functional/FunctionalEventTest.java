@@ -1,28 +1,27 @@
 package com.zik.faro.functional;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.GregorianCalendar;
+import java.util.UUID;
+
+import javax.ws.rs.core.MediaType;
+
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
+
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.zik.faro.TestHelper;
 import com.zik.faro.api.responder.EventCreateData;
 import com.zik.faro.api.responder.FaroSignupDetails;
-import com.zik.faro.data.DateOffset;
 import com.zik.faro.data.Location;
-
 import com.zik.faro.data.user.FaroUser;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
-
-import javax.ws.rs.core.MediaType;
-import javax.xml.bind.JAXBException;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.Date;
-import java.util.UUID;
 
 
 @Ignore
@@ -36,16 +35,16 @@ public class FunctionalEventTest {
 
     @Test
     public void createEventTestJSON() throws Exception {
-        EventCreateData eventCreateData = new EventCreateData("MySampleEvent", new DateOffset(new Date(), 0),
-                new DateOffset(new Date(), 60 * 1000), new Location("Random Location"), null);
+        EventCreateData eventCreateData = new EventCreateData("MySampleEvent", new GregorianCalendar(),
+                new GregorianCalendar(), new Location("Random Location"), null);
         String body = TestHelper.getJsonRep(eventCreateData);
         createEventTest(body, MediaType.APPLICATION_JSON_TYPE);
     }
 
     @Test
     public void createEventTestXML() throws Exception {
-        EventCreateData eventCreateData = new EventCreateData("MySampleEvent", new DateOffset(new Date(), 0),
-                new DateOffset(new Date(), 60 * 1000), new Location("Random Location"), null);
+        EventCreateData eventCreateData = new EventCreateData("MySampleEvent", new GregorianCalendar(),
+        		new GregorianCalendar(), new Location("Random Location"), null);
         String body = TestHelper.getXMLRep(eventCreateData, EventCreateData.class);
         createEventTest(body, MediaType.APPLICATION_XML_TYPE);
     }

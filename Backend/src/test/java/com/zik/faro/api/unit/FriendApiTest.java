@@ -79,14 +79,14 @@ public class FriendApiTest {
         List<MinUser> minUsers1 = relationList.getEntity();
         Assert.assertEquals(2, minUsers1.size());
         for(MinUser minUser: minUsers1){
-            if(minUser.email.equals("user2@gmail.com")){
-                Assert.assertEquals("user2@splitwise.com", minUser.expenseUserId);
-                Assert.assertEquals("user2", minUser.firstName);
-                Assert.assertEquals("user2lname", minUser.lastName);
-            }else if(minUser.email.equals("user0@gmail.com")){
-                Assert.assertEquals("user0@splitwise.com", minUser.expenseUserId);
-                Assert.assertEquals("user0", minUser.firstName);
-                Assert.assertEquals("user0lname", minUser.lastName);
+            if(minUser.getEmail().equals("user2@gmail.com")){
+                Assert.assertEquals("user2@splitwise.com", minUser.getExpenseUserId());
+                Assert.assertEquals("user2", minUser.getFirstName());
+                Assert.assertEquals("user2lname", minUser.getLastName());
+            }else if(minUser.getEmail().equals("user0@gmail.com")){
+                Assert.assertEquals("user0@splitwise.com", minUser.getExpenseUserId());
+                Assert.assertEquals("user0", minUser.getFirstName());
+                Assert.assertEquals("user0lname", minUser.getLastName());
             } 
         }
     }

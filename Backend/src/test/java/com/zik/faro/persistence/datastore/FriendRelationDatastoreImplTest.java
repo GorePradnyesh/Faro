@@ -5,10 +5,12 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
 import com.zik.faro.api.responder.MinUser;
+import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.IllegalDataOperation;
 import com.zik.faro.data.user.Address;
 import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.data.user.FriendRelation;
+
 import org.junit.*;
 
 import java.util.List;
@@ -67,7 +69,7 @@ public class FriendRelationDatastoreImplTest {
     }
 
     @Test
-    public void testFriendRelation() throws IllegalDataOperation {
+    public void testFriendRelation() throws IllegalDataOperation, DataNotFoundException {
         FaroUser user1 = new FaroUser("user1@gmail.com",
                 "user", null, "1","user1@splitwise.com",
                 "00000001", new Address(44, "Abby Road","SouthEnd London","UK", 566645));
@@ -117,9 +119,14 @@ public class FriendRelationDatastoreImplTest {
         Assert.assertNotNull(relation12);
         FriendRelation relation21 = FriendRelationDatastoreImpl.loadFriendRelation(user2.getEmail(), user1.getEmail());
         Assert.assertNotNull(relation21);
-
-        FriendRelation relation23 = FriendRelationDatastoreImpl.loadFriendRelation(user2.getEmail(), user3.getEmail());
-        Assert.assertNull(relation23);
+        try{
+        	FriendRelation relation23 = FriendRelationDatastoreImpl.loadFriendRelation(user2.getEmail(), user3.getEmail());
+        }catch(DataNotFoundException e){
+        	Assert.assertNotNull(e);
+        	return;
+        }
+        // Should never reach here
+        Assert.assertNotNull("Should not have reached here");
 
     }
 
@@ -139,7 +146,7 @@ public class FriendRelationDatastoreImplTest {
         List<FriendRelation> relationUser1 = FriendRelationDatastoreImpl.loadFriendsForUserId(user1.getEmail());
         Assert.assertEquals(1, relationUser1.size());
 
-        FriendRelationDatastoreImpl.deleteFriendRelation(user1.getId(), user2.getId());
+        FriendRelationDatastoreImpl.removeFriendRelation(user1, user2);
         List<FriendRelation> deletedRelations = FriendRelationDatastoreImpl.loadFriendsForUserId(user1.getEmail());
         Assert.assertEquals(0, deletedRelations.size());
     }

@@ -4,6 +4,8 @@ package com.zik.faro.api.event;
 import com.zik.faro.api.responder.EventCreateData;
 import com.zik.faro.applogic.EventManagement;
 import com.zik.faro.commons.ParamValidation;
+import com.zik.faro.data.Event;
+import com.zik.faro.persistence.datastore.EventDatastoreImpl;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -41,13 +43,13 @@ public class EventCreateHandler {
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public EventManagement.MinEvent createEvent(EventCreateData eventCreateData){
+    public Event createEvent(EventCreateData eventCreateData){
         ParamValidation.genericParamValidations(eventCreateData,"eventCreateData");
 
         final String userId = context.getUserPrincipal().getName();
 
-        EventManagement.MinEvent minEvent = EventManagement.createEvent(userId, eventCreateData);
-        return minEvent;
+        Event event = EventManagement.createEvent(userId, eventCreateData);
+        return event;
     }
 
 }

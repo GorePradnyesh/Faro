@@ -1,15 +1,19 @@
 package com.zik.faro.data;
 
+
+import java.util.Calendar;
+import java.util.UUID;
+
+import javax.xml.bind.annotation.XmlRootElement;
+
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Parent;
+import com.googlecode.objectify.annotation.Serialize;
 
-import javax.xml.bind.annotation.XmlRootElement;
-import java.util.UUID;
 
-// TODO : do data validations
 @XmlRootElement
 @Entity
 public class Activity {
@@ -22,29 +26,30 @@ public class Activity {
 
     private String description;
     private Location location;
-    private DateOffset date;
-
+    @Serialize private Calendar date;
+    
     public Activity(String eventId, String name) {
-        this(eventId, name, null, null, null);
+        this(eventId, name, null, null, null, null);
     }
 
     private Activity() {    // TO Satisfy JaxB
-        this(null, null);
     }
 
-    public Activity(String eventId, String name, String description, Location location, DateOffset date) {
-        this.id = UUID.randomUUID().toString();
+    public Activity(String eventId, String name, String description,
+    		Location location, Calendar date, Assignment assignment) {
+        this.id = UUID.randomUUID().toString();;
         this.eventId = Ref.create(Key.create(Event.class, eventId));
         this.name = name;
         this.description = description;
         this.location = location;
         this.date = date;
+        this.assignment = assignment;
     }
 
     // Getters and setters
 
     public String getId() {
-        return id;
+    	return id;
     }
 
     public String getEventId() {
@@ -71,11 +76,11 @@ public class Activity {
         this.location = location;
     }
 
-    public DateOffset getDate() {
+    public Calendar getDate() {
         return date;
     }
 
-    public void setDate(DateOffset date) {
+    public void setDate(Calendar date) {
         this.date = date;
     }
 

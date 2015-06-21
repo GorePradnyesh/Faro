@@ -1,12 +1,18 @@
 package com.zik.faro.persistence.datastore;
 
+import static com.googlecode.objectify.ObjectifyService.ofy;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Ref;
+import com.googlecode.objectify.Work;
 import com.googlecode.objectify.cmd.Query;
-
-import java.util.*;
-
-import static com.googlecode.objectify.ObjectifyService.ofy;
+import com.zik.faro.commons.Constants;
+import com.zik.faro.commons.exceptions.DataNotFoundException;
 
 /**
  * This the lowermost layer which abstracts the fundamental load store operations.
@@ -17,20 +23,52 @@ public class DatastoreObjectifyDAL {
     //===================== HELPER FUNCTIONS FOR FILTERING INDEXED STRING FIELDS =====================
 
     public static <T> Key<T> storeObject(final T object){
-        if(enableReflectionCheck){
-            //TODO: ensure that the object class has been annotated with @Entity
-        }
+       
         Key<T> key = ofy().save().entity(object).now();
         //logger.info("Successfully stored : {}", key.getId())
         return key;
     }
 
-    public static <T> T loadObjectById(final String objectId, Class<T> clazz){
+    public static <T> T loadObjectById(final String objectId, Class<T> clazz) throws DataNotFoundException{
         Key<T> objectKey = Key.create(clazz, objectId);
         T object = ofy().load().key(objectKey).now();
+        if(object == null){
+        	throw new DataNotFoundException("Data not found. Key:" + objectKey.toString());
+        }
         return object;
     }
-
+    
+    public static <T,V> void deleteObjectByIdWithParentId(final String objectId,
+    		Class<T> clazz, final String parentId, Class<V> parentClazz){
+    	Key<V> parentKey = Key.create(parentClazz, parentId);
+    	ofy().delete().type(clazz).parent(parentKey).id(objectId).now();
+    }
+    
+    public static <T,V> void deleteObjectsByIdWithParentId(final List<String> objectIds,
+    		Class<T> clazz, final String parentId, Class<V> parentClazz){
+    	Key<V> parentKey = Key.create(parentClazz, parentId);
+    	// Note: This is a bulk call. Deletes will be async.
+    	ofy().delete().type(clazz).parent(parentKey).ids(objectIds);
+    }
+    
+    public static <T> void delelteObjectById(final String objectId, Class<T> clazz){
+    	ofy().delete().type(clazz).id(objectId).now();
+    }
+    
+    public static <T> void delelteObjectsById(final List<String> objectIds, Class<T> clazz){
+    	// Note: This is a bulk call. Deletes will be async.
+    	ofy().delete().type(clazz).ids(objectIds);
+    }
+    
+    public static <T> void deleteEntity(final T entity){
+    	ofy().delete().entity(entity).now();
+    }
+    
+    public static <T> void deleteEntities(final List<T> entities){
+    	// Note: This is a bulk call. Deletes will be async.
+    	ofy().delete().entities(entities);
+    }
+    
     public static <T> Map<String, T> loadMultipleObjectsByIdSync(List<String> objectIds, Class<T> clazz){
         List<Key<T>> keys = new ArrayList<>();
         Map<String, T> objectMap = new HashMap<>();
@@ -51,9 +89,12 @@ public class DatastoreObjectifyDAL {
     public static <T,V> T loadObjectWithParentId(final Class<V> parentClazz,
                                                  final String parentIdValue,
                                                  final Class<T> clazz,
-                                                 final String objectId){
+                                                 final String objectId) throws DataNotFoundException{
         Key<T> objectKey = Key.create(Key.create(parentClazz, parentIdValue), clazz, objectId);
         T object = ofy().load().key(objectKey).now();
+        if(object == null){
+        	throw new DataNotFoundException("Data not found. Key:" + objectKey.toString());
+        }
         return object;
     }
 
@@ -70,24 +111,29 @@ public class DatastoreObjectifyDAL {
                                                       final String parentIdValue,
                                                       final Class<T> clazz){
         Ref<V> parentKey = Ref.create(Key.create(parentClazz, parentIdValue));
-        List<T> objectList = ofy().load().type(clazz).ancestor(parentKey).list();
+        List<T> objectList = ofy().load().type(clazz).ancestor(parentKey).
+        		limit(Constants.MAX_ITEMS_TO_FETCH_FROM_DATASTORE).list();
         return objectList;
     }
 
 
     public static <T> List<T> loadObjectsByIndexedStringFieldEQ(final String fieldName, final String fieldValue, Class<T> clazz){
         //TODO: do reflection validation to ensure that fieldName provided is Annotated with @Index
-        List<T> objectList = ofy().load().type(clazz).filter(fieldName, fieldValue).list();
+        List<T> objectList = ofy().load().type(clazz).filter(fieldName, fieldValue)
+        		.limit(Constants.MAX_ITEMS_TO_FETCH_FROM_DATASTORE).list();
         return objectList;
     }
 
-    public static <T> T loadFirstObjectByIndexedStringFieldEQ(final String fieldName, final String fieldValue, Class<T> clazz) {
+    public static <T> T loadFirstObjectByIndexedStringFieldEQ(final String fieldName, 
+    		final String fieldValue, Class<T> clazz) throws DataNotFoundException {
         T object = ofy().load().type(clazz).filter(fieldName, fieldValue).first().now();
+        if(object == null){
+        	throw new DataNotFoundException("Data not found. IndexedFieldName:" + fieldName + " IndexedFieldValue:"+fieldValue);
+        }
         return object;
     }
 
 
-    //TODO: Use a cleaner way to use Operators with the filters provided ( DatastoreOperator Enum etc ) currently the operators are expected in the incoming string
     public static <T> List<T> loadObjectsByStringFilters(Map<DatastoreOperator, String> keyFilterMap,
                                                          Map<String, String> filterMap,
                                                          Class<T> clazz){
@@ -95,7 +141,7 @@ public class DatastoreObjectifyDAL {
         query = createAndAppendKeyFilters(keyFilterMap, query, clazz);
         query = createAndAppendFilters(filterMap, query);
 
-        List<T> resultSet = query.list();
+        List<T> resultSet = query.limit(Constants.MAX_ITEMS_TO_FETCH_FROM_DATASTORE).list();
         return resultSet;
     }
 
@@ -110,22 +156,37 @@ public class DatastoreObjectifyDAL {
     public static <T> T loadObjectByIndexedRefFieldEQ(final String filterFieldName,
                                                       final Class filterFieldClass,
                                                       final String filterFieldValue,
-                                                      Class<T> clazz){
+                                                      Class<T> clazz) throws DataNotFoundException{
         Ref<T> filterRef = getRefForClassById(filterFieldValue, filterFieldClass);
         T object = ofy().load().type(clazz).filter(filterFieldName, filterRef).first().now();
+        if(object == null){
+        	throw new DataNotFoundException("Data not found. Key:" + filterRef.getKey().toString());
+        }
         return object;
     }
-
+    
+   
     public static <T> List<T> loadObjectsByIndexedRefFieldEQ(final String filterFieldName,
                                                       final Class filterFieldClass,
                                                       final String filterFieldValue,
                                                       Class<T> clazz){
         Ref<T> filterRef = getRefForClassById(filterFieldValue, filterFieldClass);
-        List<T> objectList = ofy().load().type(clazz).filter(filterFieldName, filterRef).list();
+        List<T> objectList = ofy().load().type(clazz).filter(filterFieldName, filterRef).
+        		list();
         return objectList;
     }
-
-
+    
+    public static <T> List<T> loadObjectsByIndexedRefFieldEQ(final String filterFieldName,
+            final Class filterFieldClass,
+            final String filterFieldValue,
+            Class<T> clazz,
+            final int count){
+		Ref<T> filterRef = getRefForClassById(filterFieldValue, filterFieldClass);
+		List<T> objectList = ofy().load().type(clazz).filter(filterFieldName, filterRef).
+				limit(count).list();
+		return objectList;
+	} 
+    
     //===================== HELPER FUNCTIONS =====================
 
     public static <T> Query<T> createAndAppendKeyFilters(Map<DatastoreOperator, String> keyFilterMap, Query query, Class<T> clazz){
@@ -146,7 +207,10 @@ public class DatastoreObjectifyDAL {
         }
         return query;
     }
-
+    
+    public static TransactionResult update(Work w){
+    	return ofy().transact(w);
+    }
 
     //TODO: ADD CURSOR COUNTERPARTS / ARGUMENTS FOR THE THE FUNCTIONS ABOVE
 }
