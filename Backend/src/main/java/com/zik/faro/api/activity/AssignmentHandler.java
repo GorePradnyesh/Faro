@@ -11,7 +11,6 @@ import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM;
 import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM_STRING;
 import static com.zik.faro.commons.Constants.EVENT_PATH_CONST;
 import static com.zik.faro.commons.Constants.HTTP_OK;
-import static com.zik.faro.commons.Constants.SIGNATURE_QUERY_PARAM;
 
 import java.util.List;
 import java.util.Map;
@@ -74,8 +73,7 @@ public class AssignmentHandler {
     @Path(ALL)
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public JResponse<Map<String,Assignment>> getAssignments(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-                                    @PathParam(EVENT_ID_PATH_PARAM) final String eventId){
+    public JResponse<Map<String,Assignment>> getAssignments(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
     	try {
 			Map<String,Assignment> assignments = AssignmentManagement.
 					getAllAssignments(eventId);

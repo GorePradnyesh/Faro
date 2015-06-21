@@ -1,14 +1,12 @@
 package com.zik.faro.api.event;
 
 import static com.zik.faro.commons.Constants.EVENTS_PATH_CONST;
-import static com.zik.faro.commons.Constants.SIGNATURE_QUERY_PARAM;
 
 import java.util.List;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
@@ -25,7 +23,7 @@ public class GlobalEventHandler {
 	
 	@GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public JResponse<List<Event>> getEvents(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature){
+    public JResponse<List<Event>> getEvents(){
     	String userId = context.getUserPrincipal().getName();
         List<Event> eventList = EventManagement.getEvents(userId);
         return JResponse.ok(eventList).build();
