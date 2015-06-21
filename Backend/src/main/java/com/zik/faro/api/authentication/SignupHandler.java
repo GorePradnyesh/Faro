@@ -1,6 +1,21 @@
 package com.zik.faro.api.authentication;
 
+import static com.zik.faro.commons.Constants.AUTH_PATH_CONST;
+import static com.zik.faro.commons.Constants.AUTH_SIGN_UP_PATH_CONST;
+
+import java.text.MessageFormat;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Strings;
+import com.sun.jersey.api.JResponse;
 import com.zik.faro.api.responder.FaroSignupDetails;
 import com.zik.faro.applogic.UserManagement;
 import com.zik.faro.auth.PasswordManager;
@@ -14,17 +29,6 @@ import com.zik.faro.data.user.UserCredentials;
 import com.zik.faro.persistence.datastore.UserCredentialsDatastoreImpl;
 import com.zik.faro.persistence.datastore.UserDatastoreImpl;
 
-import org.slf4j.LoggerFactory;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-
-import java.text.MessageFormat;
-
-import org.slf4j.Logger;
-
-import static com.zik.faro.commons.Constants.*;
-
 
 /**
  * Created by granganathan on 2/8/15.
@@ -36,7 +40,7 @@ public class SignupHandler {
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public String signupUser(FaroSignupDetails faroSignupDetails) {
+    public JResponse<String> signupUser(FaroSignupDetails faroSignupDetails) {
         if (faroSignupDetails == null) {
             throw new FaroWebAppException(FaroResponseStatus.BAD_REQUEST, "User signup  details missing.");
         }
@@ -77,7 +81,8 @@ public class SignupHandler {
        
 		}
 
-        return FaroJwtTokenManager.createToken(newFaroUser.getId());
+        return JResponse.ok(FaroJwtTokenManager.createToken(newFaroUser.getId()))
+        		.build();
     }
 
 }

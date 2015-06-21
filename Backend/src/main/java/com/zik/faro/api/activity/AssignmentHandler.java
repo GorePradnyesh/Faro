@@ -30,7 +30,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.sun.jersey.api.JResponse;
 import com.zik.faro.applogic.AssignmentManagement;
-import com.zik.faro.commons.ParamValidation;
+import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
 import com.zik.faro.data.Assignment;
@@ -42,23 +42,27 @@ public class AssignmentHandler {
     @Path(ASSIGNMENT_ID_PATH_PARAM_STRING)
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Assignment getAssignment(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public JResponse<Assignment> getAssignment(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                     @PathParam(ASSIGNMENT_ID_PATH_PARAM) final String assignmentId,
                                     // No seperate API for event or activity's assignment. 
                                     // If activity passed, assignment of that activity is returned else event assignment returned.
                                     @QueryParam(ACTIVITY_ID_PATH_PARAM) final String activityId) throws DataNotFoundException{
-        if(activityId == null || activityId.isEmpty())
-        	return AssignmentManagement.getEventLevelAssignment(eventId);
+        Assignment assignment = null;
+    	if(activityId == null || activityId.isEmpty())
+        	assignment = AssignmentManagement.getEventLevelAssignment(eventId);
         else
-        	return AssignmentManagement.getActivityLevelAssignment(eventId, activityId, assignmentId);
+        	assignment = AssignmentManagement.getActivityLevelAssignment(eventId, activityId, assignmentId);
+    	return JResponse.ok(assignment).build();
     }
 
     @Path(ASSIGNMENT_PENDING_COUNT_PATH_CONST)
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public AssignmentCount getPendingAssignmentCount(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
+    public JResponse<AssignmentCount> getPendingAssignmentCount(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
         try {
-			return new AssignmentCount(eventId,AssignmentManagement.getPendingAssignmentCount(eventId));
+			AssignmentCount assignmentCount =  new AssignmentCount(eventId,
+					AssignmentManagement.getPendingAssignmentCount(eventId));
+			return JResponse.ok(assignmentCount).build();
 		} catch (DataNotFoundException e) {
 			Response response = Response.status(Response.Status.NOT_FOUND)
                     .entity(e.getMessage())
@@ -70,10 +74,12 @@ public class AssignmentHandler {
     @Path(ALL)
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Map<String,Assignment> getAssignments(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
+    public JResponse<Map<String,Assignment>> getAssignments(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
                                     @PathParam(EVENT_ID_PATH_PARAM) final String eventId){
     	try {
-			return AssignmentManagement.getAllAssignments(eventId);
+			Map<String,Assignment> assignments = AssignmentManagement.
+					getAllAssignments(eventId);
+			return JResponse.ok(assignments).build();
 		} catch (DataNotFoundException e) {
 			Response response = Response.status(Response.Status.NOT_FOUND)
                     .entity(e.getMessage())
@@ -85,10 +91,10 @@ public class AssignmentHandler {
     @Path(ASSIGNMENT_ID_PATH_PARAM_STRING)
     @DELETE
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public String deleteAssignment(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public JResponse<String> deleteAssignment(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                    @PathParam(ASSIGNMENT_ID_PATH_PARAM) final String assignmentId){
         // TODO: Dont have clarity. Skipping for now.
-        return HTTP_OK;
+    	return JResponse.ok(Constants.HTTP_OK).build();
     }
     
     // If activityId is present in queryparam, update is for assignment of the activityId

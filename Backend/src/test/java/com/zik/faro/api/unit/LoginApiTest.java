@@ -1,18 +1,23 @@
 package com.zik.faro.api.unit;
 
+import java.util.UUID;
+
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
+import com.sun.jersey.api.JResponse;
 import com.zik.faro.api.authentication.LoginHandler;
 import com.zik.faro.api.authentication.SignupHandler;
 import com.zik.faro.api.responder.FaroSignupDetails;
 import com.zik.faro.data.user.Address;
 import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.data.user.UserCredentials;
-import org.junit.*;
-
-import javax.ws.rs.core.Response;
-import java.util.UUID;
 
 /**
  * Created by granganathan on 3/30/15.
@@ -52,13 +57,13 @@ public class LoginApiTest {
         createNewUser(faroUser, "pfloyd782$");
 
         LoginHandler loginHandler = new LoginHandler();
-        String token = loginHandler.login(faroUser.getId(), "pfloyd782$");
+        JResponse<String> token = loginHandler.login(faroUser.getId(), "pfloyd782$");
 
-        Assert.assertNotNull(token);
+        Assert.assertNotNull(token.getEntity());
     }
 
     public String createNewUser(FaroUser user, String password) {
         SignupHandler signupHandler = new SignupHandler();
-        return signupHandler.signupUser(new FaroSignupDetails(user, password));
+        return signupHandler.signupUser(new FaroSignupDetails(user, password)).getEntity();
     }
 }

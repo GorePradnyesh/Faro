@@ -135,7 +135,7 @@ public class SignupApiTest {
     }
 
     public static String createNewUser(FaroUser user, String password) {
-        return new SignupHandler().signupUser(new FaroSignupDetails(user, password));
+        return new SignupHandler().signupUser(new FaroSignupDetails(user, password)).getEntity();
     }
 
 }

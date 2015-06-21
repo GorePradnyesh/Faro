@@ -25,11 +25,10 @@ public class GlobalEventHandler {
 	
 	@GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public List<Event> getEvents(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature){
+    public JResponse<List<Event>> getEvents(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature){
     	String userId = context.getUserPrincipal().getName();
         List<Event> eventList = EventManagement.getEvents(userId);
-        return eventList;
+        return JResponse.ok(eventList).build();
     }
-    
   
 }

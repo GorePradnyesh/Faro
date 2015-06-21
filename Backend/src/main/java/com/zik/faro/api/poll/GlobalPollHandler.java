@@ -16,6 +16,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
 
+import com.sun.jersey.api.JResponse;
 import com.zik.faro.applogic.PollManagement;
 import com.zik.faro.data.Poll;
 
@@ -27,16 +28,17 @@ public class GlobalPollHandler {
 	
 	@GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public List<Poll> getPolls(@PathParam(EVENT_ID_PATH_PARAM) final String eventId) {
-        return PollManagement.getPolls(eventId);
+    public JResponse<List<Poll>> getPolls(@PathParam(EVENT_ID_PATH_PARAM) final String eventId) {
+        return JResponse.ok(PollManagement.getPolls(eventId)).build();
     }
     
     @GET
     @Path(POLL_UNVOTED_COUNT_CONST)
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public int getUnvotedCount(@PathParam(EVENT_ID_PATH_PARAM_STRING) final String eventId){
+    public JResponse<Integer> getUnvotedCount(@PathParam(EVENT_ID_PATH_PARAM_STRING) final String eventId){
     	String userId = context.getUserPrincipal().getName();
-    	return PollManagement.getCountOfUnvotedPolls(userId, eventId);
+    	return JResponse.ok(PollManagement.getCountOfUnvotedPolls(userId, eventId))
+    			.build();
     }
     
 }

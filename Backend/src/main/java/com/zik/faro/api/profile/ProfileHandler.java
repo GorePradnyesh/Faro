@@ -13,7 +13,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
 
+import com.sun.jersey.api.JResponse;
 import com.zik.faro.applogic.UserManagement;
+import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.FaroResponseStatus;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.FaroWebAppException;
@@ -26,7 +28,7 @@ public class ProfileHandler {
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public FaroUser getProfile(){
+    public JResponse<FaroUser> getProfile(){
         String userId = securityContext.getUserPrincipal().getName();
         FaroUser user;
 		try {
@@ -35,15 +37,15 @@ public class ProfileHandler {
 			throw new FaroWebAppException(FaroResponseStatus.NOT_FOUND, "User not found " + userId);
 		}
      
-        return user;
+        return JResponse.ok(user).build();
     }
 
     @Path(PROFILE_CREATE_PATH_CONST)
     @PUT
-    public String createProfile(final FaroUser faroUser){
+    public JResponse<String> createProfile(final FaroUser faroUser){
         //TODO: Verify that username in Signature and the faroUser.id is the same
         UserManagement.storeFaroUser(faroUser.getId(), faroUser);
-        return HTTP_OK;
+        return JResponse.ok(Constants.HTTP_OK).build();
     }
 
 

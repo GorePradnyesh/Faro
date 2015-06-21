@@ -8,7 +8,6 @@ import static com.zik.faro.commons.Constants.ACTIVITY_UPDATE_PATH_CONST;
 import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM;
 import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM_STRING;
 import static com.zik.faro.commons.Constants.EVENT_PATH_CONST;
-import static com.zik.faro.commons.Constants.SIGNATURE_QUERY_PARAM;
 
 import java.util.Calendar;
 
@@ -19,7 +18,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -27,8 +25,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.sun.jersey.api.JResponse;
 import com.zik.faro.applogic.ActivityManagement;
-import com.zik.faro.commons.ParamValidation;
+import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Location;
@@ -41,11 +40,12 @@ public class ActivityHandler {
     @Path(ACTIVITY_ID_PATH_PARAM_STRING)
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Activity getActivity(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-    							@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public JResponse<Activity> getActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                 @PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId){
     	try{
-        	 return ActivityManagement.getActivity(eventId, activityId);
+    		Activity activity = ActivityManagement.getActivity(eventId, activityId);
+    		return JResponse.ok(activity).build();
+    		
         } catch (DataNotFoundException e) {
         	
             Response response = Response.status(Response.Status.NOT_FOUND)
@@ -66,10 +66,10 @@ public class ActivityHandler {
     @Path(ACTIVITY_CREATE_PATH_CONST)
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public void createActivity(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-                                 @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public JResponse<String> createActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                  Activity activity){
     	ActivityManagement.createActivity(activity);
+    	return JResponse.ok(Constants.HTTP_OK).build();
     }
 
     /*
@@ -89,7 +89,7 @@ public class ActivityHandler {
     @Path(ACTIVITY_ID_PATH_PARAM_STRING + ACTIVITY_UPDATE_PATH_CONST)
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public void updateActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public JResponse<String> updateActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                @PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId,
                                ActivityUpdateData activityUpdateData){
         Activity activity = new Activity(eventId, null, 
@@ -103,16 +103,16 @@ public class ActivityHandler {
                     .build();
             throw new WebApplicationException(response);
 		}
-        
+        return JResponse.ok(Constants.HTTP_OK).build();
     }
 
 
     @Path(ACTIVITY_ID_PATH_PARAM_STRING)
     @DELETE
-    public void deleteActivity(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-                                 @PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public JResponse<String> deleteActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                  @PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId){
        ActivityManagement.deteleActivity(eventId, activityId);
+       return JResponse.ok(Constants.HTTP_OK).build();
     }
 
     @XmlRootElement

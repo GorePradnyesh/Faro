@@ -1,24 +1,32 @@
 package com.zik.faro.api.authentication;
 
-import com.zik.faro.auth.jwt.FaroJwtTokenManager;
+import static com.zik.faro.commons.Constants.AUTH_LOGIN_PATH_CONST;
+import static com.zik.faro.commons.Constants.AUTH_LOGOUT_PATH_CONST;
+import static com.zik.faro.commons.Constants.AUTH_PATH_CONST;
+import static com.zik.faro.commons.Constants.LOGIN_USERNAME_PARAM;
+
+import java.text.MessageFormat;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.sun.jersey.api.JResponse;
 import com.zik.faro.auth.PasswordManager;
 import com.zik.faro.auth.PasswordManagerException;
+import com.zik.faro.auth.jwt.FaroJwtTokenManager;
 import com.zik.faro.commons.FaroResponseStatus;
 import com.zik.faro.commons.ParamValidation;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.FaroWebAppException;
 import com.zik.faro.data.user.UserCredentials;
 import com.zik.faro.persistence.datastore.UserCredentialsDatastoreImpl;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-
-import java.text.MessageFormat;
-
-import static com.zik.faro.commons.Constants.*;
 
 /**
  * Created by granganathan on 2/3/15.
@@ -38,7 +46,7 @@ public class LoginHandler {
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public String login(@QueryParam(LOGIN_USERNAME_PARAM) final String username,
+    public JResponse<String> login(@QueryParam(LOGIN_USERNAME_PARAM) final String username,
                         final String password) {
         ParamValidation.genericParamValidations(username, LOGIN_USERNAME_PARAM);
         ParamValidation.genericParamValidations(password, "password");
@@ -63,7 +71,7 @@ public class LoginHandler {
 		}
 
         // Generate a JWT token
-        return FaroJwtTokenManager.createToken(username);
+        return JResponse.ok(FaroJwtTokenManager.createToken(username)).build();
     }
 
     /**
