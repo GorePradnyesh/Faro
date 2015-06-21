@@ -31,13 +31,15 @@ public class Event{
                  Calendar startDateCalendar,
                  Calendar endDateCalendar,
                  EventStatus eventStatus,
-                 String eventDescription) {
+                 String eventDescription,
+                 EventControlFlag controlFlag) {
         this.eventName = eventName;
         this.eventCreator = true;
         this.startDateCalendar = startDateCalendar;
         this.endDateCalendar = endDateCalendar;
         this.eventStatus = eventStatus;
         this.eventDescription = eventDescription;
+        this.controlFlag = controlFlag;
     }
 
     //TODO (Code Review) Create and overloaded constructor for the time when the Server sends me

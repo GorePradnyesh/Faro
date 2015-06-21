@@ -12,17 +12,17 @@ import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
 
-public class PollLandingPage extends Activity {
+public class PollListPage extends Activity {
 
     Intent EventLandingPage = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_poll_landing_page);
+        setContentView(R.layout.activity_poll_list_page);
 
-        EventLandingPage = new Intent(PollLandingPage.this, EventLandingPage.class);
-        final Intent CreateNewPoll = new Intent(PollLandingPage.this, CreateNewPoll.class);
+        EventLandingPage = new Intent(PollListPage.this, EventLandingPage.class);
+        final Intent CreateNewPoll = new Intent(PollListPage.this, CreateNewPoll.class);
 
         TextView Poll = (TextView)findViewById(R.id.polls);
         //Poll.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);

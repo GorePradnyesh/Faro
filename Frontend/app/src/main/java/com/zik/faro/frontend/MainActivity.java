@@ -22,7 +22,7 @@ public class MainActivity extends ActionBarActivity {
             AppLandingPageBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent I = new Intent(MainActivity.this, AppLandingPage.class);
+                    Intent I = new Intent(MainActivity.this, EventListPage.class);
                     startActivity(I);
                 }
             });

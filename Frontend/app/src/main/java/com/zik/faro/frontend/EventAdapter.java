@@ -61,7 +61,6 @@ public class EventAdapter extends ArrayAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-
         View row = convertView;
         ImgHolder holder = new ImgHolder();
 

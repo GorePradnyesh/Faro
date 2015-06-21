@@ -1,10 +1,10 @@
 package com.zik.faro.frontend;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Menu;
@@ -29,7 +29,7 @@ import java.util.Calendar;
  * Checks are made to make sure that the Start Date/Time is not set after the End Date/Time.
  *
  */
-public class CreateNewEvent extends ActionBarActivity {
+public class CreateNewEvent extends Activity {
 
     //public static final int NO_CHANGES = 0;
     static EventListHandler eventListHandler = EventListHandler.getInstance();
@@ -66,11 +66,13 @@ public class CreateNewEvent extends ActionBarActivity {
         endDateButton = (Button) findViewById(R.id.endDateButton);
         endTimeButton = (Button) findViewById(R.id.endTimeButton);
 
+        final CheckBox controlFlagCheckBox = (CheckBox)findViewById(R.id.controlFlag);
+
         final Button createNewEventOK = (Button) findViewById(R.id.createNewEventOK);
         final Button createNewEventCancel = (Button) findViewById(R.id.createNewEventCancel);
 
         final Intent eventLanding = new Intent(CreateNewEvent.this, EventLandingPage.class);
-        AppLanding = new Intent(CreateNewEvent.this, AppLandingPage.class);
+        AppLanding = new Intent(CreateNewEvent.this, EventListPage.class);
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
@@ -89,6 +91,13 @@ public class CreateNewEvent extends ActionBarActivity {
             @Override
             public void afterTextChanged(Editable s) {
 
+            }
+        });
+
+        controlFlagCheckBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO: Implement popup: This flag once set cannot be changed.
             }
         });
 
@@ -114,28 +123,33 @@ public class CreateNewEvent extends ActionBarActivity {
             public void onClick(View v) {
                 String event_Name = eventName.getText().toString();
                 String eventDesc = eventDescription.getText().toString();
-                final Event E = new Event(event_Name,
+                EventControlFlag controlFlag;
+                if (controlFlagCheckBox.isChecked()) controlFlag = EventControlFlag.FRIENDS_CANNOT_EDIT;
+                else controlFlag = EventControlFlag.FRIENDS_CAN_EDIT;
+
+                final Event event = new Event(event_Name,
                                           startDateCalendar,
                                           endDateCalendar,
                                           EventStatus.ACCEPTED,
-                                          eventDesc);
+                                          eventDesc,
+                                          controlFlag);
                 //TODO: instead of setting a boolean save the userID of the creator
-                E.setEventCreator(false);
+                event.setEventCreator(false);
                 if(eventCreator.isChecked()){
-                    E.setEventCreator(true);
+                    event.setEventCreator(true);
                 }else if(ifAcceptedCheckBox.isChecked()){
-                    E.setEventStatus(EventStatus.ACCEPTED);
+                    event.setEventStatus(EventStatus.ACCEPTED);
                 }else if(noResponseCheckBox.isChecked()){
-                    E.setEventStatus(EventStatus.NOTRESPONDED);
+                    event.setEventStatus(EventStatus.NOTRESPONDED);
                 }else if(mayBeCheckBox.isChecked()){
-                    E.setEventStatus(EventStatus.MAYBE);
+                    event.setEventStatus(EventStatus.MAYBE);
                 }
 
                 ErrorCodes eventStatus;
-                eventStatus = eventListHandler.addNewEvent(E);
+                eventStatus = eventListHandler.addNewEvent(event);
                 //TODO What to do in Failure case?
                 if (eventStatus == ErrorCodes.SUCCESS) {
-                    eventLanding.putExtra("eventID", E.getEventId());
+                    eventLanding.putExtra("eventID", event.getEventId());
                     startActivity(eventLanding);
                     finish();
                 }

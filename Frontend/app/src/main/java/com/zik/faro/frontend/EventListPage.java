@@ -30,7 +30,7 @@ import android.widget.TabHost;
  *      5. See the App related options like Settings, Profile page, etc (Top Left corner)
 */
 
-public class AppLandingPage extends Activity{
+public class EventListPage extends Activity{
 
     /*public static final int NO_CHANGES = 0;
     public static final int EVENT_UPDATE_TYPE = 100;
@@ -41,7 +41,7 @@ public class AppLandingPage extends Activity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_app_landing_page);
+        setContentView(R.layout.activity_event_list_page);
 
         TabHost eventTabHost = (TabHost)findViewById(R.id.eventTabHost);
 
@@ -71,9 +71,9 @@ public class AppLandingPage extends Activity{
         ImageButton calendar_view = (ImageButton)findViewById(R.id.calendarViewButton);
         calendar_view.setImageResource(R.drawable.calendar);
 
-        final Intent eventLanding = new Intent(AppLandingPage.this, EventLandingPage.class);
-        final Intent create_event_page = new Intent(AppLandingPage.this, CreateNewEvent.class);
-        final Intent eventCalendarView = new Intent(AppLandingPage.this, EventCalendarView.class);
+        final Intent eventLanding = new Intent(EventListPage.this, EventLandingPage.class);
+        final Intent create_event_page = new Intent(EventListPage.this, CreateNewEvent.class);
+        final Intent eventCalendarView = new Intent(EventListPage.this, EventCalendarView.class);
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 

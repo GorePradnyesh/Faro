@@ -17,7 +17,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".AppLandingPage"
+            android:name=".EventListPage"
             android:label="@string/title_activity_app_landing_page" >
         </activity>
         <activity
@@ -45,7 +45,7 @@
             android:label="@string/title_activity_exception_print_page" >
         </activity>
         <activity
-            android:name=".PollLandingPage"
+            android:name=".PollListPage"
             android:label="@string/title_activity_poll_landing_page" >
         </activity>
     </application>

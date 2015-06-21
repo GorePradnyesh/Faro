@@ -135,7 +135,7 @@ public class EventListHandler {
 
     /*
     * For the case when event is part of Map but not inserted to the List, once we return to
-    * AppLandingPage from EventLandingPage, i.e. we are completely done with that event we need to
+    * EventListPage from EventLandingPage, i.e. we are completely done with that event we need to
     * remove the event from the Map also to maintain sync between the Map and List.
     * Event is present in the list if
     * 1. event startDate is smaller than or equal to the last event startDate

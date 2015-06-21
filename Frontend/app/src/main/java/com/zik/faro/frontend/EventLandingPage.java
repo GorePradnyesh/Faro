@@ -16,8 +16,6 @@ import java.text.SimpleDateFormat;
 public class EventLandingPage extends Activity {
 
     public static final int NO_CHANGES = 0;
-    //private Intent AppLandingPage = null;
-    //private DateFormat sdf = DateFormat.getDateInstance();
     private DateFormat sdf = new SimpleDateFormat(" EEE, MMM d, yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
     private  static EventListHandler eventListHandler = EventListHandler.getInstance();
@@ -53,8 +51,7 @@ public class EventLandingPage extends Activity {
         statusNo = (Button)findViewById(R.id.statusNo);
         statusMaybe = (Button)findViewById(R.id.statusMaybe);
 
-        //AppLandingPage = new Intent(EventLandingPage.this, AppLandingPage.class);
-        final Intent PollLandingPage = new Intent(EventLandingPage.this, PollLandingPage.class);
+        final Intent PollLandingPage = new Intent(EventLandingPage.this, PollListPage.class);
         final Intent EditEvent = new Intent(EventLandingPage.this, EditEvent.class);
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
@@ -67,6 +64,8 @@ public class EventLandingPage extends Activity {
 
                 //Display elements based on Event Status
                 eventStateBasedView();
+
+                controlFlagBasedView();
 
                 String ev_name = E.getEventName();
                 event_name.setText(ev_name);
@@ -130,7 +129,6 @@ public class EventLandingPage extends Activity {
                 event_status.setText("Not responded");
                 break;
         }
-
         if (E.isEventCreator()){
             statusYes.setVisibility(View.GONE);
             statusNo.setVisibility(View.GONE);
@@ -151,6 +149,16 @@ public class EventLandingPage extends Activity {
             statusNo.setVisibility(View.VISIBLE);
             statusMaybe.setVisibility(View.GONE);
             pollButton.setVisibility(View.GONE);
+        }
+    }
+
+    private void controlFlagBasedView() {
+        if(!E.isEventCreator()) {
+            switch (E.getControlFlag()) {
+                case FRIENDS_CANNOT_EDIT:
+                    editButton.setVisibility(View.GONE);
+                    break;
+            }
         }
     }
 
