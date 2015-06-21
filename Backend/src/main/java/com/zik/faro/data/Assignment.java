@@ -21,20 +21,19 @@ import com.zik.faro.commons.exceptions.IllegalDataOperation;
 public class Assignment {
     private String id;
     private ActionStatus status;
-    private Map<String,Item> items;
+    private Map<String,Item> items = new HashMap<String, Item>();
 
     private static final String NA = "N/A";
     
-    public Assignment(){
+    private Assignment(){
     }
     
-    public Assignment(final String id, final ActionStatus status, final Map<String,Item> items) throws IllegalDataOperation{
-    	if(this.id == null || this.id.isEmpty()){
+    public Assignment(final String id, final ActionStatus status) throws IllegalDataOperation{
+    	if(id == null || id.isEmpty()){
     		throw new IllegalDataOperation("Assignment id cannot be null");
     	}
     	this.id = id;
     	this.status = status;
-    	this.items = items;
     }
     
     @XmlElement

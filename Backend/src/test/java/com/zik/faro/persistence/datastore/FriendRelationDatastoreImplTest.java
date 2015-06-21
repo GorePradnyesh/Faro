@@ -119,9 +119,14 @@ public class FriendRelationDatastoreImplTest {
         Assert.assertNotNull(relation12);
         FriendRelation relation21 = FriendRelationDatastoreImpl.loadFriendRelation(user2.getEmail(), user1.getEmail());
         Assert.assertNotNull(relation21);
-
-        FriendRelation relation23 = FriendRelationDatastoreImpl.loadFriendRelation(user2.getEmail(), user3.getEmail());
-        Assert.assertNull(relation23);
+        try{
+        	FriendRelation relation23 = FriendRelationDatastoreImpl.loadFriendRelation(user2.getEmail(), user3.getEmail());
+        }catch(DataNotFoundException e){
+        	Assert.assertNotNull(e);
+        	return;
+        }
+        // Should never reach here
+        Assert.assertNotNull("Should not have reached here");
 
     }
 

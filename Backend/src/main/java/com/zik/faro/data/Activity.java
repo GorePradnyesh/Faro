@@ -1,5 +1,6 @@
 package com.zik.faro.data;
 
+
 import java.util.Calendar;
 import java.util.UUID;
 
@@ -10,6 +11,7 @@ import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Parent;
+import com.googlecode.objectify.annotation.Serialize;
 
 
 @XmlRootElement
@@ -24,8 +26,8 @@ public class Activity {
 
     private String description;
     private Location location;
-    private Calendar date;
-
+    @Serialize private Calendar date;
+    
     public Activity(String eventId, String name) {
         this(eventId, name, null, null, null, null);
     }
@@ -35,7 +37,7 @@ public class Activity {
 
     public Activity(String eventId, String name, String description,
     		Location location, Calendar date, Assignment assignment) {
-        this.id = eventId;
+        this.id = UUID.randomUUID().toString();;
         this.eventId = Ref.create(Key.create(Event.class, eventId));
         this.name = name;
         this.description = description;

@@ -1,5 +1,6 @@
 package com.zik.faro.persistence.datastore;
 
+import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.UUID;
 
@@ -21,6 +22,7 @@ public class EventDatastoreImplTest {
 
     private static final LocalServiceTestHelper helper =
             new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+    
 
     static{
         ObjectifyService.register(Event.class);

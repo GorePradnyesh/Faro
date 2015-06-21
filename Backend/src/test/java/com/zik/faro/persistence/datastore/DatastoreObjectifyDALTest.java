@@ -29,6 +29,7 @@ import com.googlecode.objectify.annotation.Index;
 import com.googlecode.objectify.annotation.Parent;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.IllegalDataOperation;
+import com.zik.faro.data.ActionStatus;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Assignment;
 import com.zik.faro.data.Event;
@@ -105,7 +106,7 @@ public class DatastoreObjectifyDALTest {
 
 
     @Test
-    public void testLoadObjectsByIndexField(){
+    public void testLoadObjectsByIndexField() throws InterruptedException{
         TestClass firstObject = new TestClass("sammy");
         firstObject.id = UUID.randomUUID().toString();
         DatastoreObjectifyDAL.storeObject(firstObject);
@@ -113,7 +114,7 @@ public class DatastoreObjectifyDALTest {
         TestClass secondObject = new TestClass("sammy");
         secondObject.id = UUID.randomUUID().toString();
         DatastoreObjectifyDAL.storeObject(secondObject);
-        
+        Thread.sleep(1000);
         List<TestClass> objectList =
                     DatastoreObjectifyDAL.loadObjectsByIndexedStringFieldEQ("firstName", "sammy", TestClass.class);
        Assert.assertEquals(2, objectList.size());
@@ -241,8 +242,12 @@ public class DatastoreObjectifyDALTest {
         Assert.assertEquals(b3.val, rb3.val);
 
         DatastoreObjectifyDAL.deleteObjectWithParentId(A.class, "a2", B.class, "b1");
-        B deletedObject = DatastoreObjectifyDAL.loadObjectWithParentId(A.class, "a2", B.class, "b1");
-        Assert.assertNull(deletedObject);
+        try{
+        	B deletedObject = DatastoreObjectifyDAL.loadObjectWithParentId(A.class, "a2", B.class, "b1");
+        }catch(DataNotFoundException e){
+        	Assert.assertNotNull(e);
+        }
+       
     }
 
 
@@ -296,8 +301,11 @@ public class DatastoreObjectifyDALTest {
         
         // Delete
         DatastoreObjectifyDAL.delelteObjectById(a1.id, A.class);
-        retrievedObj = DatastoreObjectifyDAL.loadObjectById(a1.id, A.class);
-        Assert.assertNull(retrievedObj);
+        try{
+        	retrievedObj = DatastoreObjectifyDAL.loadObjectById(a1.id, A.class);
+        }catch(DataNotFoundException e){
+        	Assert.assertNotNull(e);
+        }
         
         List<String> list = new ArrayList<String>();
         list.add(a2.id);list.add(a3.id);
@@ -331,8 +339,11 @@ public class DatastoreObjectifyDALTest {
         DatastoreObjectifyDAL.deleteObjectByIdWithParentId(child.id, B.class, "parent", A.class);
         
         // Verify indeed deleted
-        retrievedChild = DatastoreObjectifyDAL.loadObjectWithParentId(A.class, parent.id, B.class, child.id);
-        Assert.assertNull(retrievedChild);
+        try{
+        	retrievedChild = DatastoreObjectifyDAL.loadObjectWithParentId(A.class, parent.id, B.class, child.id);
+        }catch(DataNotFoundException e){
+        	Assert.assertNotNull(e);
+        }
         
         List<String> children = new ArrayList<String>();
         children.add(child1.id);children.add(child2.id);
@@ -367,8 +378,11 @@ public class DatastoreObjectifyDALTest {
         DatastoreObjectifyDAL.deleteEntity(a1);
         
         // Verify indeed deleted
-        retrievedObj = DatastoreObjectifyDAL.loadObjectById(a1.id, A.class);
-        Assert.assertNull(retrievedObj);
+        try{
+        	retrievedObj = DatastoreObjectifyDAL.loadObjectById(a1.id, A.class);
+        }catch(DataNotFoundException e){
+        	Assert.assertNotNull(e);
+        }
         
         List<A> list = new ArrayList<A>(); list.add(a2); list.add(a3);
         // Delete (Bulk)
@@ -385,7 +399,7 @@ public class DatastoreObjectifyDALTest {
     	String eventId = event.getEventId();
     	EventDatastoreImpl.storeEventOnly(event);
     	Activity a = new Activity(event.getEventId(), "TestEvent", "Testing update",
-    			new Location("San Jose"), new GregorianCalendar(), new Assignment());
+    			new Location("San Jose"), new GregorianCalendar(), new Assignment(UUID.randomUUID().toString(), ActionStatus.INCOMPLETE));
     	DatastoreObjectifyDAL.storeObject(a);
     	
     	// Verify indeed created

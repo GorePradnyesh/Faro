@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
+import com.googlecode.objectify.annotation.Serialize;
 import com.zik.faro.data.expense.ExpenseGroup;
 
 @Entity
@@ -17,8 +18,8 @@ public class Event {
     @Id @Index
     private String eventId;           
     private String eventName;         
-    private Calendar startDate;     
-    private Calendar endDate;
+    @Serialize private Calendar startDate;     
+    @Serialize private Calendar endDate;
     private boolean controlFlag;      
     private ExpenseGroup expenseGroup;
     private Location location;
@@ -61,6 +62,7 @@ public class Event {
     }
 
     public Calendar getEndDate() {
+    	
         return endDate;
     }
 

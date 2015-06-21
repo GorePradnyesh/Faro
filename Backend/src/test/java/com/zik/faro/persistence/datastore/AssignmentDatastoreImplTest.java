@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import junit.framework.Assert;
 
@@ -57,8 +58,8 @@ public class AssignmentDatastoreImplTest {
     	Activity activity1 = new Activity(eventId, name, "dummyDescription",
                 new Location("Lake Shasta"),
                 new GregorianCalendar(),
-                new Assignment());
-        Assignment tempAssignment = new Assignment();
+                new Assignment(UUID.randomUUID().toString(), ActionStatus.INCOMPLETE));
+        Assignment tempAssignment = new Assignment(UUID.randomUUID().toString(), ActionStatus.INCOMPLETE);
         tempAssignment.addItem(new Item("blankets", "David", 4, Unit.COUNT));
         tempAssignment.addItem(new Item("rice", "Roger", 10, Unit.LB));
         activity1.setAssignment(tempAssignment);
@@ -78,7 +79,7 @@ public class AssignmentDatastoreImplTest {
     	ActivityDatastoreImpl.storeActivity(activity3);
     	
     	Map<String,Assignment> assignments = AssignmentDatastoreImpl.getAllAssignments(event.getEventId());
-    	Assert.assertEquals(assignments.size(), 4);
+    	Assert.assertEquals(4, assignments.size());
     }
 	
 	@Test
@@ -157,7 +158,7 @@ public class AssignmentDatastoreImplTest {
 	@Test
 	public void updateEventLevelAssignmentItems() throws IllegalDataOperation, DataNotFoundException, DatastoreException{
 		Event event = new Event("TestEvent", new GregorianCalendar(), new GregorianCalendar(), false, null, new Location("San Jose"));
-		Assignment eventAssignment = new Assignment();
+		Assignment eventAssignment = new Assignment(UUID.randomUUID().toString(), ActionStatus.INCOMPLETE);
 		eventAssignment.addItem(new Item("Kaivan", "420", 3, Unit.KG));
 		event.setAssignment(eventAssignment);
     	EventDatastoreImpl.storeEventOnly(event);
