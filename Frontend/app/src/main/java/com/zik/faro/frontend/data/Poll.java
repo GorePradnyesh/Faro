@@ -106,4 +106,18 @@ public class Poll {
     public void setDeadline(DateOffset deadline) {
         this.deadline = deadline;
     }
+
+
+    public static class VoteCount{
+        public String eventId;
+        public String pollId;
+        public Integer pollCount;
+
+        private VoteCount(){}
+        VoteCount(final String eventId, final String pollId, final Integer pollCount) {
+            this.pollCount = pollCount;
+            this.eventId = eventId;
+            this.pollId = pollId;
+        }
+    }
 }
