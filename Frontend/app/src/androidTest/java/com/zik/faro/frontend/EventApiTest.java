@@ -9,6 +9,7 @@ import com.squareup.okhttp.Request;
 import com.zik.faro.frontend.data.DateOffset;
 import com.zik.faro.frontend.data.EventCreateData;
 import com.zik.faro.frontend.data.MinEvent;
+import com.zik.faro.frontend.data.Event;
 import com.zik.faro.frontend.data.user.FaroUser;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -34,7 +36,18 @@ public class EventApiTest extends ApplicationTestCase<Application> {
     }
     private static final String baseUrl = "http://10.0.2.2:8080/v1/";
 
+    private String getTokenForNewUser(final String username, final String password) throws InterruptedException, MalformedURLException {
+        final Semaphore waitSem = new Semaphore(0);
+        FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
 
+        Utils.TestSignupCallback callback = new Utils.TestSignupCallback(waitSem, 200);
+        serviceHandler.getSignupHandler().signup(callback, new FaroUser(username), password);
+        boolean timeout;
+        timeout = !waitSem.tryAcquire(30000, TimeUnit.MILLISECONDS);
+        Assert.assertFalse(timeout);
+        return callback.token;
+    }
+    
     @LargeTest
     public void testGetEvent() throws InterruptedException, MalformedURLException {
         final Semaphore waitSem = new Semaphore(0);
@@ -53,22 +66,15 @@ public class EventApiTest extends ApplicationTestCase<Application> {
 
     @LargeTest
     public void testCreateGetEvent() throws InterruptedException, MalformedURLException {
-        // Sign up user
+        // Sign up user, so that the token cache is populated
         final Semaphore waitSem = new Semaphore(0);
         FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
         String uuidEmail = UUID.randomUUID().toString()+ "@gmail.com";
         String password = UUID.randomUUID().toString();
-        Utils.TestSignupCallback signupCallback = new Utils.TestSignupCallback(waitSem, 404);
-
-        serviceHandler.getSignupHandler().signup(signupCallback, new FaroUser(uuidEmail), password);
+        
+        getTokenForNewUser(uuidEmail, password);
         boolean timeout;
-        timeout = !waitSem.tryAcquire(3000, TimeUnit.MILLISECONDS);
-        Assert.assertFalse(timeout);
-        Assert.assertFalse(signupCallback.failed);
-        Assert.assertNotNull(signupCallback.token);
-
-        final String userToken = signupCallback.token;
-
+        
         // Create Event
         TestEventCreateCallback createCallback = new TestEventCreateCallback(waitSem, 200, null);
         EventCreateData eventCreateData= new EventCreateData("MySampleEvent", new DateOffset(new Date(), 1000), null, null, null);
@@ -110,7 +116,53 @@ public class EventApiTest extends ApplicationTestCase<Application> {
         Assert.assertFalse(callback.unexpectedResponseCode);
     }
 
+    @LargeTest
+    public void testGetEvents() throws InterruptedException, MalformedURLException {
+        // Sign up user, so that the token cache is populated
+        final Semaphore waitSem = new Semaphore(0);
+        FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
+        String uuidEmail = UUID.randomUUID().toString()+ "@gmail.com";
+        String password = UUID.randomUUID().toString();
 
+        getTokenForNewUser(uuidEmail, password);
+        boolean timeout = false;
+
+        // Get event list
+        TestGetEventsCallback getEventsCallback 
+                = new TestGetEventsCallback(waitSem);
+        serviceHandler.getEventHandler().getEvents(getEventsCallback);
+        Assert.assertFalse(timeout);
+        Assert.assertFalse(getEventsCallback.failed);
+        Assert.assertTrue(getEventsCallback.eventList.size() > 0);
+        System.out.println("Got " + getEventsCallback.eventList.size() + "Events");
+    }
+    
+    // ------------------------ Helpers 
+
+    
+    final static class TestGetEventsCallback 
+            extends Utils.BaseTestCallbackHandler
+            implements BaseFaroRequestCallback<List<Event>>{
+        List<Event> eventList;
+        TestGetEventsCallback(Semaphore semaphore){
+            super(semaphore, 0);
+        }
+        
+        @Override
+        public void onFailure(Request request, IOException ex) {
+            waitSem.release();    
+        }
+
+        @Override
+        public void onResponse(List<Event> eventList, HttpError error) {
+            if(error != null){
+                this.failed = true;
+            }
+            this.eventList = eventList;
+            waitSem.release();
+        }
+    }
+    
     final static class TestEventCreateCallback
             extends Utils.BaseTestCallbackHandler
             implements BaseFaroRequestCallback<MinEvent>{
