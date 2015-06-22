@@ -8,7 +8,6 @@ public final class Constants {
     public static final String HTTP_OK                                          = "OK";
 
     //----- Query String parameters ----- //
-    public static final String SIGNATURE_QUERY_PARAM                            = "Signature";
     public static final String FARO_USER_ID_PARAM                               = "userId";
     public static final String COUNT_PARAM										= "count";
 	public static final String LOGIN_USERNAME_PARAM                             = "username";

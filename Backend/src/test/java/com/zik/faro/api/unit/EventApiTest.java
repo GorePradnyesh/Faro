@@ -71,14 +71,14 @@ public class EventApiTest {
 		EventCreateHandler eventCreateHandler = new EventCreateHandler();
 		Whitebox.setInternalState(eventCreateHandler, securityContextMock);
 		Event event = eventCreateHandler
-				.createEvent(eventCreateData);
+				.createEvent(eventCreateData).getEntity();
 
 		String eventId = event.getEventId();
 
 		EventHandler eventHandler = new EventHandler();
 		Whitebox.setInternalState(eventHandler, securityContextMock);
 
-		event = eventHandler.getEventDetails(eventId);
+		event = eventHandler.getEventDetails(eventId).getEntity();
 		Assert.assertEquals(eventId, event.getEventId());
 		Assert.assertEquals(eventName, event.getEventName());
 	}
@@ -96,18 +96,18 @@ public class EventApiTest {
 				new GregorianCalendar(), new GregorianCalendar(),
 				new Location("Random Location"), null);
 		Event minEvent = eventCreateHandler
-				.createEvent(eventCreateData);
+				.createEvent(eventCreateData).getEntity();
 
 		String eventId = minEvent.getEventId();
 		// Retrieve event, verify control flag
-		Event event = eventHandler.getEventDetails(eventId);
+		Event event = eventHandler.getEventDetails(eventId).getEntity();
 		Assert.assertEquals(false, event.isControlFlag());
 
 		// Disable control flag
 		eventHandler.disableEventControl(eventId);
 		
 		// Retrieve event again, verify control flag
-		event = eventHandler.getEventDetails(eventId);
+		event = eventHandler.getEventDetails(eventId).getEntity();
 		Assert.assertEquals(true, event.isControlFlag());
 	}
 

@@ -64,7 +64,7 @@ public class FriendsHandler {
     @Path(Constants.REMOVE_PATH_CONST)
     @POST
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN, MediaType.TEXT_HTML})
-    public void unFriend(@QueryParam(Constants.FARO_USER_ID_PARAM) final String toBeRemovedUserId
+    public JResponse<String> unFriend(@QueryParam(Constants.FARO_USER_ID_PARAM) final String toBeRemovedUserId
                                       ){
     	ParamValidation.genericParamValidations(toBeRemovedUserId, Constants.FARO_USER_ID_PARAM);
     	String requestingUserId = securityContext.getUserPrincipal().getName();
@@ -81,6 +81,7 @@ public class FriendsHandler {
 					.build();
             throw new WebApplicationException(response);
 		}
+    	return JResponse.ok(Constants.HTTP_OK).build();
     }
 
 }

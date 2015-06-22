@@ -1,21 +1,22 @@
 package com.zik.faro.api.activity;
 
-import static com.zik.faro.commons.Constants.*;
+import static com.zik.faro.commons.Constants.ASSIGNMENTS_PATH_CONST;
+import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM;
+import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM_STRING;
+import static com.zik.faro.commons.Constants.EVENT_PATH_CONST;
 
-import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.sun.jersey.api.JResponse;
 import com.zik.faro.applogic.AssignmentManagement;
-import com.zik.faro.commons.ParamValidation;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.data.Assignment;
 
@@ -23,8 +24,7 @@ import com.zik.faro.data.Assignment;
 public class GlobalAssignmentHandler {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Map<String,Assignment> getAssignments(@QueryParam(SIGNATURE_QUERY_PARAM) final String signature,
-                                    @PathParam(EVENT_ID_PATH_PARAM) final String eventId){
+    public JResponse<Map<String,Assignment>> getAssignments(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
         Map<String,Assignment> assignments = null;
 		try {
 			assignments = AssignmentManagement.getAllAssignments(eventId);
@@ -34,6 +34,6 @@ public class GlobalAssignmentHandler {
                     .build();
             throw new WebApplicationException(response);
 		}
-		return assignments;
+		return JResponse.ok(assignments).build();
     }
 }

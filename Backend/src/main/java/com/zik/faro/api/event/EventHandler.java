@@ -1,6 +1,14 @@
 package com.zik.faro.api.event;
 
-import static com.zik.faro.commons.Constants.*;
+import static com.zik.faro.commons.Constants.COUNT_PARAM;
+import static com.zik.faro.commons.Constants.EVENT_ADD_FRIENDS_CONST;
+import static com.zik.faro.commons.Constants.EVENT_DETAILS_PATH_CONST;
+import static com.zik.faro.commons.Constants.EVENT_DISABLE_CONTROL_PATH_CONST;
+import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM;
+import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM_STRING;
+import static com.zik.faro.commons.Constants.EVENT_INVITEES_PATH_CONST;
+import static com.zik.faro.commons.Constants.EVENT_PATH_CONST;
+import static com.zik.faro.commons.Constants.EVENT_REMOVE_ATTENDEE_PATH_CONST;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -14,11 +22,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
+import com.sun.jersey.api.JResponse;
 import com.zik.faro.api.responder.AddFriendRequest;
 import com.zik.faro.api.responder.InviteeList;
 import com.zik.faro.applogic.EventManagement;
 import com.zik.faro.applogic.EventUserManagement;
-import com.zik.faro.commons.ParamValidation;
+import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
 import com.zik.faro.commons.exceptions.IllegalDataOperation;
@@ -33,7 +42,7 @@ public class EventHandler {
 	@Path(EVENT_DETAILS_PATH_CONST)
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Event getEventDetails(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
+    public JResponse<Event> getEventDetails(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
         String userId = context.getUserPrincipal().getName();
         Event retrievedEvent;
 		try {
@@ -44,20 +53,20 @@ public class EventHandler {
 					.build();
             throw new WebApplicationException(response);
 		}
-        return retrievedEvent;
+        return JResponse.ok(retrievedEvent).build();
     }
 
     @Path(EVENT_INVITEES_PATH_CONST)
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public InviteeList getEventInvitees(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public JResponse<InviteeList> getEventInvitees(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                             @QueryParam(COUNT_PARAM) final int count){
-        return EventUserManagement.getEventInvitees(eventId);
+        return JResponse.ok(EventUserManagement.getEventInvitees(eventId)).build();
     }
 
     @Path(EVENT_DISABLE_CONTROL_PATH_CONST)
     @POST
-    public void disableEventControl(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
+    public JResponse<String> disableEventControl(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
         String userId = context.getUserPrincipal().getName();
         try {
             EventManagement.disableEventControls(userId, eventId);
@@ -72,18 +81,20 @@ public class EventHandler {
                      .build();
             throw new WebApplicationException(response);
 		}
+        return JResponse.ok(Constants.HTTP_OK).build();
     }
 
     @Path(EVENT_REMOVE_ATTENDEE_PATH_CONST)
     @POST
-    public void removeAttendee(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
+    public JResponse<String> removeAttendee(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
     	String userId = context.getUserPrincipal().getName();
         EventUserManagement.removeEventUser(eventId, userId);
+        return JResponse.ok(Constants.HTTP_OK).build();
     }
     
     @Path(EVENT_ADD_FRIENDS_CONST)
     @POST
-    public void addFriend(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public JResponse<String> addFriend(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
 				    		final AddFriendRequest data){
     	String userId = context.getUserPrincipal().getName();
         try {
@@ -99,6 +110,7 @@ public class EventHandler {
 					.build();
             throw new WebApplicationException(response);
 		}
+        return JResponse.ok(Constants.HTTP_OK).build();
     }
    
 }
