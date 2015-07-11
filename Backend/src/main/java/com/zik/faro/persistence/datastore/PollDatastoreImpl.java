@@ -44,7 +44,7 @@ public class PollDatastoreImpl {
     				break;
     			}
     		}
-    		if(found){
+    		if(!found){
     			count++;
     		}
     	}
@@ -53,7 +53,7 @@ public class PollDatastoreImpl {
     
     public static void castVote(final String eventId, final String pollId,
     		final Set<String> options, final String userId) throws DatastoreException, DataNotFoundException{
-    	Work w = new Work<TransactionResult>() {
+    	Work<TransactionResult> w = new Work<TransactionResult>() {
     		
 			@Override
 			public TransactionResult run(){
