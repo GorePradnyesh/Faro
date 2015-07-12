@@ -28,11 +28,14 @@ public class UserManagement {
         return users;
     }
 
-    public static boolean isExistingUser(final String userId) throws DataNotFoundException {
-        if(UserDatastoreImpl.loadFaroUserById(userId) != null) {
-            return true;
+    public static boolean isExistingUser(final String userId){
+        try{
+        	if(UserDatastoreImpl.loadFaroUserById(userId) != null) {
+                return true;
+            }
+        }catch(DataNotFoundException e){
+        	return false;
         }
-
-        return false;
+    	return false;
     }
 }

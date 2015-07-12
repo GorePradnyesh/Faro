@@ -61,25 +61,25 @@ public class SignupHandler {
         if (Strings.isNullOrEmpty(password)) {
             throw new FaroWebAppException(FaroResponseStatus.BAD_REQUEST, "User password not specifed.");
         }
-
+        
+        // Lookup to sees if an user exists with the same id
+        if (UserManagement.isExistingUser(newFaroUser.getId())) {
+            // Return  error code indicating user exists
+            logger.info("User already exists");
+            // TODO (Code Review) : throw only WebApplicationException . Keep an emum of Faro status codes
+            throw new FaroWebAppException(FaroResponseStatus.ENTITY_EXISTS, MessageFormat.format("Username {0} already exists.", newFaroUser.getEmail()));
+        }
         
 
         try {
-        	UserManagement.isExistingUser(newFaroUser.getId());
-            // Store the New user's credentials and user details
+        	// Store the New user's credentials and user details
             UserCredentials userCreds = new UserCredentials(newFaroUser.getEmail(),
                                                             PasswordManager.getEncryptedPassword(password));
             UserCredentialsDatastoreImpl.storeUserCreds(userCreds);
             UserDatastoreImpl.storeUser(newFaroUser);
         } catch (PasswordManagerException e) {
             logger.error("Password could not be encrypted", e);
-        } catch (DataNotFoundException e) {
-        	// Return  error code indicating user exists
-            logger.info("User already exists");
-            // TODO (Code Review) : throw only WebApplicationException . Keep an emum of Faro status codes
-            throw new FaroWebAppException(FaroResponseStatus.ENTITY_EXISTS, MessageFormat.format("Username {0} already exists.", newFaroUser.getEmail()));
-       
-		}
+        }
 
         return JResponse.ok(FaroJwtTokenManager.createToken(newFaroUser.getId()))
         		.build();

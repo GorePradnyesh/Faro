@@ -152,7 +152,7 @@ public class PollDatastoreImplTest {
         Assert.assertNotNull(p);
         
         // Delete
-        PollDatastoreImpl.deletePoll(poll1.getId(), poll1.getEventId());
+        PollDatastoreImpl.deletePoll(poll1.getEventId(), poll1.getId());
         
         // Verify indeed deleted
         try{
