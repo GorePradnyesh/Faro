@@ -44,9 +44,13 @@ public class AuthFilter implements ContainerRequestFilter {
     public ContainerRequest filter(ContainerRequest containerRequest) {
         logger.info("---- Auth filter invoked. ----");
 
-        String nativeLoginPath = Constants.AUTH_PATH_CONST + Constants.AUTH_LOGIN_PATH_CONST;
-        String nativeSignupPath = Constants.AUTH_PATH_CONST + Constants.AUTH_SIGN_UP_PATH_CONST;
+        String nativeLoginPath = Constants.AUTH_PATH_CONST + Constants.AUTH_LOGIN_PATH_CONST + "/";
+        String nativeSignupPath = Constants.AUTH_PATH_CONST + Constants.AUTH_SIGN_UP_PATH_CONST + "/";
         String requestPath = "/" + containerRequest.getPath();
+
+        if(!requestPath.endsWith("/")){
+            requestPath += "/";
+        }
 
         logger.info("request path : " + requestPath);
 

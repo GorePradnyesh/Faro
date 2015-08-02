@@ -20,7 +20,7 @@ public class OkHttpWrapperProfile extends BaseFaroOKHttpWrapper implements Profi
         // TODO: Move create to string constants
         String eventPutBody = mapper.toJson(faroUser);
         Request request = new Request.Builder()
-                .url(baseHandlerURL.toString() + "create" + "?Signature=dummySignature")
+                .url(baseHandlerURL.toString() + "create")
                 .put(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), eventPutBody))
                 .build();
 
@@ -31,7 +31,7 @@ public class OkHttpWrapperProfile extends BaseFaroOKHttpWrapper implements Profi
     public void getProfile(final BaseFaroRequestCallback<FaroUser> callback, String userId) {
         // TODO: add param checks
          Request request = new Request.Builder()
-                .url(baseHandlerURL.toString() + "?Signature=" + userId)
+                .url(baseHandlerURL.toString() + userId)
                 .build();
 
         this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<FaroUser>(callback, FaroUser.class));
