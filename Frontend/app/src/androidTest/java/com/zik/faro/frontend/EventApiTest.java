@@ -7,14 +7,12 @@ import android.util.Log;
 
 import com.squareup.okhttp.Request;
 import com.zik.faro.frontend.data.DateOffset;
-import com.zik.faro.frontend.data.EventCreateData;
-import com.zik.faro.frontend.data.MinEvent;
 import com.zik.faro.frontend.data.Event;
+import com.zik.faro.frontend.data.EventCreateData;
 import com.zik.faro.frontend.data.user.FaroUser;
+import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
-import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
-import com.zik.faro.frontend.faroservice.okHttp.OKHttpWrapperEvent;
 
 import junit.framework.Assert;
 
@@ -35,7 +33,7 @@ public class EventApiTest extends ApplicationTestCase<Application> {
         super(Application.class);
     }
     private static final String baseUrl = "http://10.0.2.2:8080/v1/";
-
+    private static final int testTimeout = 3000;
     private String getTokenForNewUser(final String username, final String password) throws InterruptedException, MalformedURLException {
         final Semaphore waitSem = new Semaphore(0);
         FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
@@ -87,7 +85,7 @@ public class EventApiTest extends ApplicationTestCase<Application> {
         Assert.assertFalse(createCallback.unexpectedResponseCode);
 
         // Get Event
-        String eventId = createCallback.receivedMinEvent.id;
+        String eventId = createCallback.receivedEvent.getEventId();
         TestGetEventCallbackHandler callback = new TestGetEventCallbackHandler(waitSem, 200);
         serviceHandler.getEventHandler().getEvent(callback, eventId);
         timeout = !waitSem.tryAcquire(3000, TimeUnit.MILLISECONDS);
@@ -98,42 +96,40 @@ public class EventApiTest extends ApplicationTestCase<Application> {
         Assert.assertFalse(callback.failed);
         Assert.assertFalse(callback.unexpectedResponseCode);
     }
-
+    
     @LargeTest
-    public void testCreateEvent() throws InterruptedException, MalformedURLException {
-        final Semaphore waitSem = new Semaphore(0);
-        OKHttpWrapperEvent reqEvent = new OKHttpWrapperEvent(new URL(baseUrl));
-        TestEventCreateCallback callback = new TestEventCreateCallback(waitSem, 200, null);
-
-        EventCreateData eventCreateData= new EventCreateData("MySampleEvent", new DateOffset(new Date(), 1000), null, null, null);
-
-        reqEvent.createEvent(callback, eventCreateData);
-        boolean timeout = false;
-        timeout = !waitSem.tryAcquire(3000, TimeUnit.MILLISECONDS);
-
-        Assert.assertFalse(timeout);
-        Assert.assertFalse(callback.failed);
-        Assert.assertFalse(callback.unexpectedResponseCode);
-    }
-
-    @LargeTest
-    public void testGetEvents() throws InterruptedException, MalformedURLException {
+    public void testCreateGetEvents() throws InterruptedException, MalformedURLException {
         // Sign up user, so that the token cache is populated
         final Semaphore waitSem = new Semaphore(0);
         FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
         String uuidEmail = UUID.randomUUID().toString()+ "@gmail.com";
         String password = UUID.randomUUID().toString();
-
+        
         getTokenForNewUser(uuidEmail, password);
+        
+        TestEventCreateCallback callback = new TestEventCreateCallback(waitSem, 200, null);
+        EventCreateData eventCreateData= new EventCreateData("MySampleEvent", new DateOffset(new Date(), 1000), null, null, null);
+        
+        // Create Event
+        serviceHandler.getEventHandler().createEvent(callback, eventCreateData);
         boolean timeout = false;
+        timeout = !waitSem.tryAcquire(testTimeout, TimeUnit.MILLISECONDS);
 
+        Assert.assertFalse(timeout);
+        Assert.assertFalse(callback.failed);
+        Assert.assertFalse(callback.unexpectedResponseCode);
+        Assert.assertNotNull(callback.receivedEvent.getEventId());
+        
+        timeout = false;
         // Get event list
         TestGetEventsCallback getEventsCallback 
                 = new TestGetEventsCallback(waitSem);
         serviceHandler.getEventHandler().getEvents(getEventsCallback);
+        timeout = !waitSem.tryAcquire(testTimeout, TimeUnit.MILLISECONDS);
+        
         Assert.assertFalse(timeout);
         Assert.assertFalse(getEventsCallback.failed);
-        Assert.assertTrue(getEventsCallback.eventList.size() > 0);
+        Assert.assertTrue(getEventsCallback.eventList.size() > 0); 
         System.out.println("Got " + getEventsCallback.eventList.size() + "Events");
     }
     
@@ -165,12 +161,12 @@ public class EventApiTest extends ApplicationTestCase<Application> {
     
     final static class TestEventCreateCallback
             extends Utils.BaseTestCallbackHandler
-            implements BaseFaroRequestCallback<MinEvent>{
-        MinEvent expectedMinEvent;
-        MinEvent receivedMinEvent;
-        TestEventCreateCallback(Semaphore semaphore, int expectedCode, MinEvent expectedEvent){
+            implements BaseFaroRequestCallback<Event>{
+        Event expectedEvent;
+        Event receivedEvent;
+        TestEventCreateCallback(Semaphore semaphore, int expectedCode, Event expectedEvent){
             super(semaphore, expectedCode);
-            this.expectedMinEvent = expectedEvent;
+            this.expectedEvent = expectedEvent;
         }
 
         @Override
@@ -179,12 +175,12 @@ public class EventApiTest extends ApplicationTestCase<Application> {
         }
 
         @Override
-        public void onResponse(MinEvent event, HttpError error){
+        public void onResponse(Event event, HttpError error){
             if(error != null){
                 this.failed = true;               
             }
             // Assert that event == min event
-            this.receivedMinEvent = event;
+            this.receivedEvent = event;
             waitSem.release();
         }
     }
