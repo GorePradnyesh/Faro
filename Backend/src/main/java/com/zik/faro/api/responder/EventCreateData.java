@@ -18,8 +18,8 @@ public class EventCreateData {
     private ExpenseGroup   expenseGroup;
 
     public EventCreateData(String eventName, Calendar startDate, Calendar endDate, Location location, ExpenseGroup expenseGroup) {
-        if(this.eventName == null || this.eventName.isEmpty()
-        		|| this.startDate == null ){
+        if(eventName == null || eventName.isEmpty()
+        		|| startDate == null ){
         	throw new BadRequestException("Mandatory event name and start date missing");
         }
     	this.eventName = eventName;

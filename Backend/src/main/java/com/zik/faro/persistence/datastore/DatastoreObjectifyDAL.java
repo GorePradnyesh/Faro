@@ -208,7 +208,7 @@ public class DatastoreObjectifyDAL {
         return query;
     }
     
-    public static TransactionResult update(Work w){
+    public static TransactionResult update(Work<TransactionResult> w){
     	return ofy().transact(w);
     }
 
