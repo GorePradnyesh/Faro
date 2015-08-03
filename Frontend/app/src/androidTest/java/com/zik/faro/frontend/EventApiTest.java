@@ -28,24 +28,11 @@ import java.util.concurrent.TimeUnit;
 /**
  * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
  */
-public class EventApiTest extends ApplicationTestCase<Application> {
+public class EventApiTest extends ApiBaseTest {
     public EventApiTest() {
         super(Application.class);
     }
-    private static final String baseUrl = "http://10.0.2.2:8080/v1/";
-    private static final int testTimeout = 3000;
-    private String getTokenForNewUser(final String username, final String password) throws InterruptedException, MalformedURLException {
-        final Semaphore waitSem = new Semaphore(0);
-        FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
-
-        Utils.TestSignupCallback callback = new Utils.TestSignupCallback(waitSem, 200);
-        serviceHandler.getSignupHandler().signup(callback, new FaroUser(username), password);
-        boolean timeout;
-        timeout = !waitSem.tryAcquire(30000, TimeUnit.MILLISECONDS);
-        Assert.assertFalse(timeout);
-        return callback.token;
-    }
-    
+        
     @LargeTest
     public void testGetEvent() throws InterruptedException, MalformedURLException {
         final Semaphore waitSem = new Semaphore(0);
@@ -133,79 +120,4 @@ public class EventApiTest extends ApplicationTestCase<Application> {
         System.out.println("Got " + getEventsCallback.eventList.size() + "Events");
     }
     
-    // ------------------------ Helpers 
-
-    
-    final static class TestGetEventsCallback 
-            extends Utils.BaseTestCallbackHandler
-            implements BaseFaroRequestCallback<List<Event>>{
-        List<Event> eventList;
-        TestGetEventsCallback(Semaphore semaphore){
-            super(semaphore, 0);
-        }
-        
-        @Override
-        public void onFailure(Request request, IOException ex) {
-            waitSem.release();    
-        }
-
-        @Override
-        public void onResponse(List<Event> eventList, HttpError error) {
-            if(error != null){
-                this.failed = true;
-            }
-            this.eventList = eventList;
-            waitSem.release();
-        }
-    }
-    
-    final static class TestEventCreateCallback
-            extends Utils.BaseTestCallbackHandler
-            implements BaseFaroRequestCallback<Event>{
-        Event expectedEvent;
-        Event receivedEvent;
-        TestEventCreateCallback(Semaphore semaphore, int expectedCode, Event expectedEvent){
-            super(semaphore, expectedCode);
-            this.expectedEvent = expectedEvent;
-        }
-
-        @Override
-        public void onFailure(Request request, IOException e) {
-            waitSem.release();
-        }
-
-        @Override
-        public void onResponse(Event event, HttpError error){
-            if(error != null){
-                this.failed = true;               
-            }
-            // Assert that event == min event
-            this.receivedEvent = event;
-            waitSem.release();
-        }
-    }
-
-    final static class TestGetEventCallbackHandler<Event>
-            extends Utils.BaseTestCallbackHandler implements BaseFaroRequestCallback<Event>{
-        public Event receivedEvent;
-        TestGetEventCallbackHandler(final Semaphore sem, int expectedCode){
-            super(sem, expectedCode);
-        }
-
-        @Override
-        public void onFailure(Request request, IOException e) {
-            Log.v("Get Event", "Failed");
-            failed = true;
-            waitSem.release();
-        }
-
-        @Override
-        public void onResponse(Event event, HttpError error){
-            if(event != null){
-                this.receivedEvent = event;
-            }
-            Log.v("Get Event", "Success");
-            waitSem.release();
-        }
-    }
 }

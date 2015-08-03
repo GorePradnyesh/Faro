@@ -22,7 +22,7 @@ public class OKHttpWrapperPoll extends BaseFaroOKHttpWrapper implements PollHand
     private static final String pollsPath = "polls";
     
     
-    OKHttpWrapperPoll(final URL baseURL){
+    public OKHttpWrapperPoll(final URL baseURL){
         super(baseURL, "event");
     }
     
@@ -62,7 +62,7 @@ public class OKHttpWrapperPoll extends BaseFaroOKHttpWrapper implements PollHand
             String pollPostBody = mapper.toJson(poll);
             Request request = new Request.Builder()
                     .url(baseHandlerURL.toString() + eventId + "/poll/create/")
-                    .post(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), pollPostBody))
+                    .put(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), pollPostBody))
                     .addHeader("Authentication", token)
                     .build();
             this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<String>(callback, String.class));

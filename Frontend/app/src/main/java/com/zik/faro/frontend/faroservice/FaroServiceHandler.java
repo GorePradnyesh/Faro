@@ -1,18 +1,22 @@
 package com.zik.faro.frontend.faroservice;
 
 import com.zik.faro.frontend.faroservice.okHttp.OKHttpWrapperEvent;
+import com.zik.faro.frontend.faroservice.okHttp.OKHttpWrapperPoll;
 import com.zik.faro.frontend.faroservice.okHttp.OKHttpWrapperSignup;
 import com.zik.faro.frontend.faroservice.okHttp.OkHttpWrapperProfile;
 import com.zik.faro.frontend.faroservice.spec.EventHandler;
+import com.zik.faro.frontend.faroservice.spec.PollHandler;
 import com.zik.faro.frontend.faroservice.spec.ProfileHandler;
 import com.zik.faro.frontend.faroservice.spec.SignupHandler;
 
 import java.net.URL;
 
 public class FaroServiceHandler {
-    private EventHandler eventHandler;
-    private ProfileHandler profileHandler;
-    private SignupHandler signupHandler;
+    private EventHandler        eventHandler;
+    private ProfileHandler      profileHandler;
+    private SignupHandler       signupHandler;
+
+    private PollHandler         pollHandler;
 
     private FaroServiceHandler(){}
 
@@ -21,6 +25,7 @@ public class FaroServiceHandler {
         serviceHandler.eventHandler = new OKHttpWrapperEvent(baseUrl);
         serviceHandler.profileHandler = new OkHttpWrapperProfile(baseUrl);
         serviceHandler.signupHandler = new OKHttpWrapperSignup(baseUrl);
+        serviceHandler.pollHandler = new OKHttpWrapperPoll(baseUrl);
         return serviceHandler;
     }
 
@@ -35,5 +40,8 @@ public class FaroServiceHandler {
     public SignupHandler getSignupHandler() {
         return signupHandler;
     }
-
+    
+    public PollHandler getPollHandler() {
+        return pollHandler;
+    }
 }
