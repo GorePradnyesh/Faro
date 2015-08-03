@@ -16,6 +16,8 @@ public class BaseFaroOKHttpWrapper {
     protected URL baseUrl;
     protected URL baseHandlerURL;
 
+    protected final String authHeaderName = "Authentication";
+    
     BaseFaroOKHttpWrapper(final URL baseUrl, final String pathPrefix){
         this.baseUrl = baseUrl;
         this.baseHandlerURL = this.constructUrl(this.baseUrl, pathPrefix);

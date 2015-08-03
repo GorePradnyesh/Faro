@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Set;
 
 public interface PollHandler {
-    void getPolls(final BaseFaroRequestCallback<List<Poll>> callback);
+    void getPolls(final BaseFaroRequestCallback<List<Poll>> callback, String eventId);
     void getPoll(final BaseFaroRequestCallback<Poll> callback, final String eventId, final String pollId);
-    void createPoll(final BaseFaroRequestCallback<Void> callback, final Poll poll);
-    void getUnvotedCount(final BaseFaroRequestCallback<Integer> callback);
-    void castVote(final BaseFaroRequestCallback<String> callback, final String eventId, final String voteId, Set<String> options);
+    void createPoll(BaseFaroRequestCallback<String> callback, String eventId, Poll poll);
+    void getUnvotedCount(final BaseFaroRequestCallback<Integer> callback, String eventId);
+    void castVote(final BaseFaroRequestCallback<String> callback, final String eventId, final String pollId, Set<String> options);
     void closePoll(final BaseFaroRequestCallback<String> callback, final String eventId, final String pollId);
-    void deletePoll(final BaseFaroRequestCallback<Void> callabck, final String eventId, final String pollId);   
+    void deletePoll(final BaseFaroRequestCallback<String> callback, final String eventId, final String pollId);   
 }
