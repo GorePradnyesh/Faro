@@ -1,6 +1,7 @@
 package com.zik.faro.applogic;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.ws.rs.WebApplicationException;
@@ -62,8 +63,9 @@ public class EventManagement {
 			eventIds.add(eventUser.getEvent().getEventId());
 		}
  		// Load actual events
- 		return (List<Event>)DatastoreObjectifyDAL.
+ 		Collection<Event> events = DatastoreObjectifyDAL.
  				loadMultipleObjectsByIdSync(eventIds, Event.class).values();
+ 		return new ArrayList<Event>(events);
 	}
     
     public static void removeAttendee(final String eventId, final String userId){
