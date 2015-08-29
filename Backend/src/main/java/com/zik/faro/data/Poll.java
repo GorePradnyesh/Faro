@@ -23,7 +23,7 @@ public class Poll {
     @Id
     private String id;
     @Parent
-    private Ref<Event> eventId;
+    private Ref<EventDo> eventId;
     private String creatorId;
 
     private List<PollOption> pollOptions = new ArrayList<>();
@@ -34,7 +34,7 @@ public class Poll {
     private Calendar deadline;                // Will not be used in V1.
 
     private Poll(){ //to satisfy jaxb;
-        
+        System.out.println();
     }
 
     public Poll(String eventId, String creator, List<PollOption> pollOptions, String owner, String description) {
@@ -44,7 +44,7 @@ public class Poll {
     
     public Poll(String id, String eventId, String creator, List<PollOption> pollOptions, String owner, String description){
     	this.id = id;
-    	this.eventId = Ref.create(Key.create(Event.class, eventId));
+    	this.eventId = Ref.create(Key.create(EventDo.class, eventId));
         this.creatorId = creator;
         this.pollOptions = pollOptions;
         this.owner = owner;
@@ -75,6 +75,10 @@ public class Poll {
         public void addVoters(final String voterId){
             this.voters.add(voterId);
         }
+        
+        public void setVoters(final Set<String> voters){
+        	this.voters = voters;
+        }
     }
 
     @XmlElement
@@ -88,7 +92,7 @@ public class Poll {
     }
 
     @XmlElement
-    public String getCreator() {
+    public String getCreatorId() {
         return creatorId;
     }
 
@@ -137,4 +141,19 @@ public class Poll {
     public void setDeadline(Calendar deadline) {
         this.deadline = deadline;
     }
+    
+    public void setCreatorId(String creatorId){
+    	this.creatorId = creatorId;
+    }
+    
+    public void setId(String id){
+    	this.id = id;
+    }
+    
+    public void setEventId(String eventId){
+    	this.eventId = Ref.create(Key.create(EventDo.class, eventId));;
+    }
+    
+   
 }
+
