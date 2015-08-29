@@ -23,7 +23,7 @@ public class Poll {
     @Id
     private String id;
     @Parent
-    private Ref<EventDo> eventId;
+    private Ref<Event> eventId;
     private String creatorId;
 
     private List<PollOption> pollOptions = new ArrayList<>();
@@ -44,7 +44,7 @@ public class Poll {
     
     public Poll(String id, String eventId, String creator, List<PollOption> pollOptions, String owner, String description){
     	this.id = id;
-    	this.eventId = Ref.create(Key.create(EventDo.class, eventId));
+    	this.eventId = Ref.create(Key.create(Event.class, eventId));
         this.creatorId = creator;
         this.pollOptions = pollOptions;
         this.owner = owner;
@@ -151,7 +151,7 @@ public class Poll {
     }
     
     public void setEventId(String eventId){
-    	this.eventId = Ref.create(Key.create(EventDo.class, eventId));;
+    	this.eventId = Ref.create(Key.create(Event.class, eventId));;
     }
     
    
