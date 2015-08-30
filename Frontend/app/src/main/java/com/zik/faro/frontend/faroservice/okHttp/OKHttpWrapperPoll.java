@@ -124,7 +124,7 @@ public class OKHttpWrapperPoll extends BaseFaroOKHttpWrapper implements PollHand
         String token = TokenCache.getTokenCache().getAuthToken();
         if(token != null) {
             Request request = new Request.Builder()
-                    .url(baseHandlerURL.toString() + eventId + "/poll/" + pollId + "/delete/")
+                    .url(baseHandlerURL.toString() + eventId + "/poll/" + pollId)
                     .addHeader("Authentication", token)
                     .delete()
                     .build();

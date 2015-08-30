@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ApiBaseTest extends ApplicationTestCase<Application> {
     protected static final String baseUrl = "http://10.0.2.2:8080/v1/";
-    protected static final int testTimeout = 3000;
+    protected static final int testTimeout = 30000;
     
     public ApiBaseTest(Class<Application> applicationClass) {
         super(applicationClass);
