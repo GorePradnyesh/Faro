@@ -26,7 +26,7 @@ import java.util.UUID;
 
 public class OKHttpWrapperEvent extends BaseFaroOKHttpWrapper implements EventHandler {
     
-    final String authHeaderName = "Authentication";
+    
     final URL getEventsUrl;
     public OKHttpWrapperEvent(final URL baseUrl){
         super(baseUrl, "event");

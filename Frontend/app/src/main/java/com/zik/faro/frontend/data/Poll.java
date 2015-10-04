@@ -7,7 +7,7 @@ import java.util.UUID;
 public class Poll {
     private String id;
     private String eventId;
-    private String creator;
+    private String creatorId;
 
     private List<PollOption> pollOptions = new ArrayList<>();
     private String winnerId;
@@ -16,10 +16,10 @@ public class Poll {
     private ObjectStatus status;
     private DateOffset deadline;                // Will not be used in V1.
 
-    public Poll(String eventId, String creator, List<PollOption> pollOptions, String owner, String description) {
+    public Poll(String eventId, String creatorId, List<PollOption> pollOptions, String owner, String description) {
         this.id = UUID.randomUUID().toString();
         this.eventId = eventId;
-        this.creator = creator;
+        this.creatorId = creatorId;
         this.pollOptions = pollOptions;
         this.owner = owner;
         this.description = description;
@@ -58,8 +58,8 @@ public class Poll {
         return eventId;
     }
 
-    public String getCreator() {
-        return creator;
+    public String getCreatorId() {
+        return creatorId;
     }
 
     public List<PollOption> getPollOptions(){

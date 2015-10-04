@@ -17,6 +17,7 @@ public class RequestHandleException implements ExceptionMapper<Throwable>
     @Override
     public Response toResponse(Throwable t) {
         if (t instanceof WebApplicationException) {
+            t.printStackTrace();
         	logger.error("****** WEB APP EXCEPTION :" + t.getMessage());
             return ((WebApplicationException)t).getResponse();
         } else {
