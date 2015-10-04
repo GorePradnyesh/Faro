@@ -35,7 +35,7 @@ public class GlobalPollHandler {
     @GET
     @Path(POLL_UNVOTED_COUNT_CONST)
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public JResponse<Integer> getUnvotedCount(@PathParam(EVENT_ID_PATH_PARAM_STRING) final String eventId){
+    public JResponse<Integer> getUnvotedCount(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
     	String userId = context.getUserPrincipal().getName();
     	return JResponse.ok(PollManagement.getCountOfUnvotedPolls(userId, eventId))
     			.build();
