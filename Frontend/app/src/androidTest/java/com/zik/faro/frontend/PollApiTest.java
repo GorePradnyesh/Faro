@@ -95,6 +95,7 @@ public class PollApiTest extends ApiBaseTest{
         
         /*
         // Cast Vote
+        //TODO: finish implementation at the backend
         Set<String> options = new HashSet<>();
         options.add(optionValue);
         TestPollCastVoteCallback castVoteCallback = new TestPollCastVoteCallback(waitSem, 200);
@@ -106,6 +107,7 @@ public class PollApiTest extends ApiBaseTest{
         
         
         // Close Poll
+        //TODO: finish implementation at the backend 
         TestPollCloseCallback pollCloseCallback = new TestPollCloseCallback(waitSem, 200);
         serviceHandler.getPollHandler().closePoll(pollCloseCallback, eventId, poll1.getId());
         timeout = !waitSem.tryAcquire(testTimeout, TimeUnit.MILLISECONDS);
@@ -115,12 +117,15 @@ public class PollApiTest extends ApiBaseTest{
         */
 
         // Get unvoted count
+        //TODO: finish implementation at the backend
+        /*
         TestPollUnvotedCountCallback unvotedCountCallback = new TestPollUnvotedCountCallback(waitSem, 200);
         serviceHandler.getPollHandler().getUnvotedCount(unvotedCountCallback, eventId);
         timeout = !waitSem.tryAcquire(testTimeout, TimeUnit.MILLISECONDS);
         Assert.assertFalse(timeout);
         Assert.assertFalse(unvotedCountCallback.failed);
         Assert.assertFalse(unvotedCountCallback.unexpectedResponseCode);
+        */
         
         // Delete Poll
         TestPollDeleteCallback deletePollCallBack = new TestPollDeleteCallback(waitSem, 200);
