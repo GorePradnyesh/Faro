@@ -14,7 +14,7 @@ import com.zik.faro.data.expense.ExpenseGroup;
 
 @Entity
 @XmlRootElement
-public class Event {
+public class EventDo {
     @Id @Index
     private String eventId;           
     private String eventName;         
@@ -26,7 +26,7 @@ public class Event {
     private ObjectStatus status;
     private Assignment assignment;
 
-    public Event(final String eventName, final Calendar startDate, final Calendar endDate,
+    public EventDo(final String eventName, final Calendar startDate, final Calendar endDate,
                  final boolean controlFlag, final ExpenseGroup expenseGroup, final Location location) {
         this.eventId = UUID.randomUUID().toString();
         this.eventName = eventName;
@@ -38,19 +38,23 @@ public class Event {
         this.status = ObjectStatus.OPEN;
     }
 
-    public Event(final String eventName){
+    public EventDo(final String eventName){
         this.eventId = UUID.randomUUID().toString();
         this.eventName = eventName;
         this.status = ObjectStatus.OPEN;
     }
 
-    private Event(){
+    public EventDo(){
        
     }
 
     @XmlElement
     public String getEventName() {
         return eventName;
+    }
+    
+    public void setEventName(String eventName){
+    	this.eventName = eventName;
     }
 
     public Calendar getStartDate() {
@@ -62,8 +66,7 @@ public class Event {
     }
 
     public Calendar getEndDate() {
-    	
-        return endDate;
+    	return endDate;
     }
 
     public void setEndDate(Calendar endDate) {
@@ -101,6 +104,10 @@ public class Event {
     @XmlElement
     public String getEventId() {
         return eventId;
+    }
+    
+    public void setEventId(String eventId){
+    	this.eventId = eventId;
     }
 
     public ObjectStatus getStatus() {

@@ -44,7 +44,7 @@ public class ProfileHandler {
     @PUT
     public JResponse<String> createProfile(final FaroUser faroUser){
         //TODO: Verify that username in Signature and the faroUser.id is the same
-        UserManagement.storeFaroUser(faroUser.getId(), faroUser);
+        UserManagement.storeFaroUser(faroUser.getEmail(), faroUser);
         return JResponse.ok(Constants.HTTP_OK).build();
     }
 

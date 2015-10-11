@@ -12,7 +12,7 @@ import java.util.Map;
 
 public class UserManagement {
     public static void storeFaroUser(final String userId, final FaroUser faroUser){
-        if(faroUser.getId() != userId){
+        if(faroUser.getEmail() != userId){
             throw new BadRequestException("requesting userId does not match the User to be created");
         }
         UserDatastoreImpl.storeUser(faroUser);

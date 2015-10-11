@@ -4,21 +4,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.zik.faro.api.bean.Event;
 import com.zik.faro.api.responder.AddFriendRequest;
 import com.zik.faro.api.responder.EventCreateData;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
 import com.zik.faro.commons.exceptions.IllegalDataOperation;
-import com.zik.faro.data.Event;
+import com.zik.faro.data.EventDo;
 import com.zik.faro.data.EventUser;
 import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.persistence.datastore.DatastoreObjectifyDAL;
 import com.zik.faro.persistence.datastore.EventDatastoreImpl;
-import com.zik.faro.persistence.datastore.EventUserDatastoreImpl;
 
 public class EventManagement {
 
@@ -26,14 +24,15 @@ public class EventManagement {
         /*Create a new event with the provided data, with the FALSE control flag.*/
         Event newEvent = new Event(eventCreateData.getEventName(), eventCreateData.getStartDate(),
                 eventCreateData.getEndDate(), false, eventCreateData.getExpenseGroup(), eventCreateData.getLocation());
-        EventDatastoreImpl.storeEvent(userId, newEvent);
+        
+        EventDatastoreImpl.storeEvent(userId, ConversionUtils.toDo(newEvent));
         //TODO: send out notifications t
         return newEvent;
     }
 
     public static Event getEventDetails(final String userId, final String eventId) throws DataNotFoundException{
-        Event event = EventDatastoreImpl.loadEventByID(eventId);
-        return event;
+        EventDo event = EventDatastoreImpl.loadEventByID(eventId);
+        return ConversionUtils.fromDo(event);
     }
 
     public static void disableEventControls(final String userId, final String eventId) throws DataNotFoundException, DatastoreException {
@@ -48,7 +47,10 @@ public class EventManagement {
     	
     	for(String friendId : friendRequest.getFriendIds()){
     		// Create friend if not present and establish friend relation if not present
-    		FriendManagement.inviteFriend(existingUser.getId(), friendId);
+    		// TODO: If friend is not in the system, then we need to create a FaroUser with friend's email
+    		// and send out the invite to him and after that establish friend relation with a "NOTACCEPTED" kind of state.
+    		// Once user accepts invitation and joins Faro this has to be updated.
+    		FriendManagement.inviteFriend(existingUser.getEmail(), friendId);
         	
         	// Add to event invitees
         	EventUserManagement.storeEventUser(eventId, friendId);
@@ -63,9 +65,14 @@ public class EventManagement {
 			eventIds.add(eventUser.getEvent().getEventId());
 		}
  		// Load actual events
- 		Collection<Event> events = DatastoreObjectifyDAL.
- 				loadMultipleObjectsByIdSync(eventIds, Event.class).values();
- 		return new ArrayList<Event>(events);
+ 		Collection<EventDo> eventDos = DatastoreObjectifyDAL.
+ 				loadMultipleObjectsByIdSync(eventIds, EventDo.class).values();
+ 		List<Event> events = new ArrayList<Event>();
+ 		for(EventDo eventDo:eventDos){
+ 			events.add(ConversionUtils.fromDo(eventDo));
+ 		}
+ 		
+ 		return events;
 	}
     
     public static void removeAttendee(final String eventId, final String userId){

@@ -1,35 +1,32 @@
 package com.zik.faro.api.unit;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.UUID;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.powermock.reflect.Whitebox;
 
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
 import com.zik.faro.TestHelper;
+import com.zik.faro.api.bean.Event;
 import com.zik.faro.api.event.EventCreateHandler;
 import com.zik.faro.api.event.EventHandler;
 import com.zik.faro.api.responder.EventCreateData;
-import com.zik.faro.applogic.EventManagement;
-import com.zik.faro.data.Event;
+import com.zik.faro.data.EventDo;
+import com.zik.faro.data.EventUser;
 import com.zik.faro.data.Location;
-import org.junit.*;
-import org.powermock.reflect.Whitebox;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import java.util.Date;
-import java.util.UUID;
 
 public class EventApiTest {
 	private static final LocalServiceTestHelper helper = new LocalServiceTestHelper(
@@ -39,7 +36,9 @@ public class EventApiTest {
 	private static SecurityContext securityContextMock;
 
 	static {
-		ObjectifyService.register(Event.class);
+		ObjectifyService.register(EventDo.class);
+		ObjectifyService.register(EventUser.class);
+		 
 	}
 
 	@BeforeClass
@@ -65,7 +64,7 @@ public class EventApiTest {
 		String eventName = UUID.randomUUID().toString();
 
 		EventCreateData eventCreateData = new EventCreateData(eventName,
-				new GregorianCalendar(), new GregorianCalendar(), new Location(
+				Calendar.getInstance(), Calendar.getInstance(), new Location(
 						"Random Location"), null);
 
 		EventCreateHandler eventCreateHandler = new EventCreateHandler();
@@ -93,7 +92,7 @@ public class EventApiTest {
 
 		// Store event
 		EventCreateData eventCreateData = new EventCreateData(eventName,
-				new GregorianCalendar(), new GregorianCalendar(),
+				Calendar.getInstance(), Calendar.getInstance(),
 				new Location("Random Location"), null);
 		Event minEvent = eventCreateHandler
 				.createEvent(eventCreateData).getEntity();
@@ -101,14 +100,14 @@ public class EventApiTest {
 		String eventId = minEvent.getEventId();
 		// Retrieve event, verify control flag
 		Event event = eventHandler.getEventDetails(eventId).getEntity();
-		Assert.assertEquals(false, event.isControlFlag());
+		Assert.assertEquals(false, event.getControlFlag());
 
 		// Disable control flag
 		eventHandler.disableEventControl(eventId);
 		
 		// Retrieve event again, verify control flag
 		event = eventHandler.getEventDetails(eventId).getEntity();
-		Assert.assertEquals(true, event.isControlFlag());
+		Assert.assertEquals(true, event.getControlFlag());
 	}
 
 	@Test

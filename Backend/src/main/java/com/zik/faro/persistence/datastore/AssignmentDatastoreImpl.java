@@ -11,7 +11,7 @@ import com.zik.faro.commons.exceptions.DatastoreException;
 import com.zik.faro.data.ActionStatus;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Assignment;
-import com.zik.faro.data.Event;
+import com.zik.faro.data.EventDo;
 import com.zik.faro.data.Item;
 
 public class AssignmentDatastoreImpl {
@@ -103,7 +103,7 @@ public class AssignmentDatastoreImpl {
 			@Override
 			public TransactionResult run() {
 				// Read from datastore
-	        	Event event;
+	        	EventDo event;
 				try {
 					event = EventDatastoreImpl.loadEventByID(eventId);
 				} catch (DataNotFoundException e) {

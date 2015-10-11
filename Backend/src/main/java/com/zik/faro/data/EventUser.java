@@ -18,7 +18,7 @@ public class EventUser {
 	@Id
     private String id;
     @Index
-    private Ref<Event> eventRef;
+    private Ref<EventDo> eventRef;
     @Index
     private Ref<FaroUser> faroUserRef;
     private InviteStatus inviteStatus;
@@ -30,7 +30,7 @@ public class EventUser {
 
     public EventUser(final String eventId, final String faroUserId){
         this.id = generateEventUserId(eventId, faroUserId);
-        this.eventRef = Ref.create(Key.create(Event.class, eventId));
+        this.eventRef = Ref.create(Key.create(EventDo.class, eventId));
         this.faroUserRef = Ref.create(Key.create(FaroUser.class, faroUserId));
         this.inviteStatus = InviteStatus.INVITED;
     }
@@ -55,7 +55,7 @@ public class EventUser {
         this.id = id;
     }
 
-    public Ref<Event> getEventRef() {
+    public Ref<EventDo> getEventRef() {
         return eventRef;
     }
 
@@ -63,7 +63,7 @@ public class EventUser {
         return faroUserRef;
     }
 
-    public Event getEvent(){
+    public EventDo getEvent(){
         return this.eventRef.get();
     }
 

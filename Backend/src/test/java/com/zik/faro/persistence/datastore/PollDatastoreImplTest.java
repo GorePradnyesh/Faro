@@ -1,13 +1,17 @@
 package com.zik.faro.persistence.datastore;
 
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.GregorianCalendar;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -19,7 +23,7 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
-import com.zik.faro.data.Event;
+import com.zik.faro.data.EventDo;
 import com.zik.faro.data.Location;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.expense.ExpenseGroup;
@@ -32,7 +36,7 @@ public class PollDatastoreImplTest {
 
     static{
         ObjectifyService.register(Poll.class);
-        ObjectifyService.register(Event.class);
+        ObjectifyService.register(EventDo.class);
     }
 
     @BeforeClass
@@ -50,11 +54,11 @@ public class PollDatastoreImplTest {
         helper.tearDown();
     }
     
-    private Event createEvent(){
+    private EventDo createEvent(){
     	String eventNameSuffix = UUID.randomUUID().toString();
-        Event testEvent = new Event("Lake Shasta "+ eventNameSuffix,
-        		new GregorianCalendar(),
-        		new GregorianCalendar(),
+        EventDo testEvent = new EventDo("Lake Shasta "+ eventNameSuffix,
+        		Calendar.getInstance(),
+        		Calendar.getInstance(),
                 false,
                 new ExpenseGroup("Lake Shasta", "shasta123"),
                 new Location("Lake Shasta"));
@@ -76,18 +80,19 @@ public class PollDatastoreImplTest {
     }
 
     @Test
-    public void testPollLoadStore() throws DataNotFoundException{
-        Event event = createEvent();
+    public void testPollLoadStore() throws DataNotFoundException, JsonGenerationException, JsonMappingException, IOException{
+        EventDo event = createEvent();
         Poll dummyPoll = createPollObjectForEventId(event.getEventId());
         PollDatastoreImpl.storePoll(dummyPoll);
         Poll retPoll = PollDatastoreImpl.loadPollById(dummyPoll.getId(), event.getEventId());
         Assert.assertNotNull(retPoll);
         Assert.assertEquals(retPoll.getEventId(), event.getEventId());
+        
     }
 
     @Test
     public void testLoadPollsForEvent() throws DataNotFoundException{
-    	Event event = createEvent();
+    	EventDo event = createEvent();
     	String eventId = event.getEventId();
         Poll poll1 = createPollObjectForEventId(eventId);
         PollDatastoreImpl.storePoll(poll1);
@@ -100,7 +105,7 @@ public class PollDatastoreImplTest {
     
     @Test
     public void testCountOfUnvotedPolls() throws DataNotFoundException{
-    	Event event = createEvent();
+    	EventDo event = createEvent();
     	String eventId = event.getEventId();
         Poll poll1 = createPollObjectForEventId(eventId);
         PollDatastoreImpl.storePoll(poll1);
@@ -126,7 +131,7 @@ public class PollDatastoreImplTest {
     
     @Test
     public void testCastVote() throws DataNotFoundException, DatastoreException{
-    	Event event = createEvent();
+    	EventDo event = createEvent();
     	String eventId = event.getEventId();
         Poll poll1 = createPollObjectForEventId(eventId);
         PollDatastoreImpl.storePoll(poll1);
@@ -142,7 +147,7 @@ public class PollDatastoreImplTest {
     
     @Test
     public void testDeletePoll() throws DataNotFoundException{
-    	Event event = createEvent();
+    	EventDo event = createEvent();
     	String eventId = event.getEventId();
         Poll poll1 = createPollObjectForEventId(eventId);
         PollDatastoreImpl.storePoll(poll1);

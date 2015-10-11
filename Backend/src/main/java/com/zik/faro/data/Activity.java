@@ -20,7 +20,7 @@ public class Activity {
     @Id
     private String id;
     @Parent
-    private Ref<Event> eventId;
+    private Ref<EventDo> eventId;
     private Assignment assignment;
     private String name;
 
@@ -38,7 +38,7 @@ public class Activity {
     public Activity(String eventId, String name, String description,
     		Location location, Calendar date, Assignment assignment) {
         this.id = UUID.randomUUID().toString();;
-        this.eventId = Ref.create(Key.create(Event.class, eventId));
+        this.eventId = Ref.create(Key.create(EventDo.class, eventId));
         this.name = name;
         this.description = description;
         this.location = location;

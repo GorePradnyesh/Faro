@@ -19,7 +19,7 @@ import java.util.UUID;
 /**
  * Created by granganathan on 3/2/15.
  */
-@Ignore
+//@Ignore
 public class FunctionalLoginHandlerTest {
     private static URL endpoint;
 
@@ -45,7 +45,7 @@ public class FunctionalLoginHandlerTest {
         // Create a user first
         FaroSignupDetails userSignupDetails = createNewTestUser();
 
-        ClientResponse response = TestHelper.login(userSignupDetails.getFaroUser().getId(), userSignupDetails.getPassword());
+        ClientResponse response = TestHelper.login(userSignupDetails.getFaroUser().getEmail(), userSignupDetails.getPassword());
 
         System.out.println("response = " + response);
         Assert.assertEquals(ClientResponse.Status.OK.getStatusCode(), response.getStatus());

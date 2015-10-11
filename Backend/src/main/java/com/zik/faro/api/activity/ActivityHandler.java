@@ -69,6 +69,7 @@ public class ActivityHandler {
     public JResponse<String> createActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                  Activity activity){
     	ActivityManagement.createActivity(activity);
+    	// TODO: Return id
     	return JResponse.ok(Constants.HTTP_OK).build();
     }
 

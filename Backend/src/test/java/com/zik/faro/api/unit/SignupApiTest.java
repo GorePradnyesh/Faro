@@ -64,12 +64,12 @@ public class SignupApiTest {
         Assert.assertNotNull(token);
 
         // Verify the user exists and credentials have been entered
-        Assert.assertTrue(UserManagement.isExistingUser(user.getId()));
-        UserCredentials userCredentials = UserCredentialsDatastoreImpl.loadUserCreds(user.getId());
+        Assert.assertTrue(UserManagement.isExistingUser(user.getEmail()));
+        UserCredentials userCredentials = UserCredentialsDatastoreImpl.loadUserCreds(user.getEmail());
         Assert.assertNotNull(userCredentials);
         userCredentials.getEmail();
         userCredentials.getEncryptedPassword();
-        Assert.assertEquals(user.getId(), userCredentials.getEmail());
+        Assert.assertEquals(user.getEmail(), userCredentials.getEmail());
         Assert.assertNotNull(userCredentials.getEncryptedPassword());
     }
 

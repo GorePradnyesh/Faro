@@ -20,7 +20,7 @@ import com.zik.faro.commons.exceptions.IllegalDataOperation;
 import com.zik.faro.data.ActionStatus;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Assignment;
-import com.zik.faro.data.Event;
+import com.zik.faro.data.EventDo;
 import com.zik.faro.data.Item;
 import com.zik.faro.data.Location;
 import com.zik.faro.data.Unit;
@@ -34,7 +34,7 @@ public class ActivityDatastoreImplTest {
 	
     static{
     	ObjectifyService.register(Activity.class);
-        ObjectifyService.register(Event.class);
+        ObjectifyService.register(EventDo.class);
         
     }
 
@@ -129,7 +129,7 @@ public class ActivityDatastoreImplTest {
     @Test
     public void testUpdateActivity() throws IllegalDataOperation, DataNotFoundException{
     	// Create activity
-    	Event event = new Event("TestEvent");
+    	EventDo event = new EventDo("TestEvent");
     	String eventId = event.getEventId();
     	EventDatastoreImpl.storeEventOnly(event);
     	

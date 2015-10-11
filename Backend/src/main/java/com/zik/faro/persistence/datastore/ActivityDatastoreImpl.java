@@ -6,7 +6,7 @@ import java.util.List;
 import com.googlecode.objectify.Work;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.data.Activity;
-import com.zik.faro.data.Event;
+import com.zik.faro.data.EventDo;
 
 public class ActivityDatastoreImpl {
     private static final String EVENTID_FIELD_NAME = "eventId";
@@ -18,7 +18,7 @@ public class ActivityDatastoreImpl {
 
     public static Activity loadActivityById(final String activityId, final String eventId) throws DataNotFoundException{
         Activity activity
-                = DatastoreObjectifyDAL.loadObjectWithParentId(Event.class, eventId, Activity.class, activityId);
+                = DatastoreObjectifyDAL.loadObjectWithParentId(EventDo.class, eventId, Activity.class, activityId);
         return activity;
     }
 
@@ -26,12 +26,12 @@ public class ActivityDatastoreImpl {
     //NOTE: Since the activities contain the INDEXED event id this function is placed in the ActivityDatastoreImpl
     public static List<Activity> loadActivitiesByEventId(final String eventId){
         List<Activity> activityList =
-                DatastoreObjectifyDAL.loadObjectsByAncestorRef(Event.class, eventId, Activity.class);
+                DatastoreObjectifyDAL.loadObjectsByAncestorRef(EventDo.class, eventId, Activity.class);
         return activityList;
     }
     
     public static void delelteActivityById(final String activityId, final String eventId){
-    	DatastoreObjectifyDAL.deleteObjectByIdWithParentId(activityId, Activity.class, eventId, Event.class);
+    	DatastoreObjectifyDAL.deleteObjectByIdWithParentId(activityId, Activity.class, eventId, EventDo.class);
     }
     
 	public static void updateActivity(final Activity updateActivity, final String eventId) throws DataNotFoundException{

@@ -5,8 +5,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class Location {
-    public final String locationName;
-    public final GeoPosition position;
+    public String locationName;
+    public GeoPosition position;
 
     public Location(String locationName, GeoPosition position) {
         this.locationName = locationName;
@@ -24,6 +24,6 @@ public class Location {
     }
 
     private Location() {
-        this(null, null); // to satisfy JAXB
+        //this(null, null); // to satisfy JAXB
     }
 }

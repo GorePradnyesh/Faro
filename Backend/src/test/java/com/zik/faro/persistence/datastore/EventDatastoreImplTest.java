@@ -1,7 +1,6 @@
 package com.zik.faro.persistence.datastore;
 
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.UUID;
 
 import org.junit.After;
@@ -14,7 +13,7 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
-import com.zik.faro.data.Event;
+import com.zik.faro.data.EventDo;
 import com.zik.faro.data.Location;
 import com.zik.faro.data.expense.ExpenseGroup;
 
@@ -25,7 +24,7 @@ public class EventDatastoreImplTest {
     
 
     static{
-        ObjectifyService.register(Event.class);
+        ObjectifyService.register(EventDo.class);
     }
 
     @BeforeClass
@@ -46,16 +45,26 @@ public class EventDatastoreImplTest {
     @Test
     public void testSimpleStoreLoad() throws DataNotFoundException{
         String eventNameSuffix = UUID.randomUUID().toString();
-        Event testEvent = new Event("Lake Shasta "+ eventNameSuffix,
-        		new GregorianCalendar(),
-        		new GregorianCalendar(),
+        EventDo testEvent = new EventDo("Lake Shasta "+ eventNameSuffix,
+        		Calendar.getInstance(),
+        		Calendar.getInstance(),
                 false,
                 new ExpenseGroup("Lake Shasta", "shasta123"),
                 new Location("Lake Shasta"));
 
         EventDatastoreImpl.storeEventOnly(testEvent);
-        Event loadedEvent = EventDatastoreImpl.loadEventByID(testEvent.getEventId());
+        EventDo loadedEvent = EventDatastoreImpl.loadEventByID(testEvent.getEventId());
         Assert.assertNotNull(loadedEvent);
         Assert.assertEquals(loadedEvent.getEventName(), testEvent.getEventName());
+        Assert.assertEquals(loadedEvent.getEventId(), testEvent.getEventId());
+        Assert.assertEquals(loadedEvent.getAssignment(), testEvent.getAssignment());
+        Assert.assertEquals(loadedEvent.getEndDate(), testEvent.getEndDate());
+        Assert.assertEquals(loadedEvent.getStartDate(), testEvent.getStartDate());
+        Assert.assertEquals(loadedEvent.getStatus(), testEvent.getStatus());
+        Assert.assertEquals(loadedEvent.getLocation().locationName, testEvent.getLocation().locationName);
+        Assert.assertEquals(loadedEvent.getExpenseGroup().groupId, testEvent.getExpenseGroup().groupId);
+        Assert.assertEquals(loadedEvent.getExpenseGroup().groupName, testEvent.getExpenseGroup().groupName);
+        Assert.assertEquals(loadedEvent.isControlFlag(), testEvent.isControlFlag());
+        
     }
 }

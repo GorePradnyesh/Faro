@@ -4,8 +4,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class ExpenseGroup {
-    public final String groupName;
-    public final String groupId;
+    public String groupName;
+    public String groupId;
 
     public ExpenseGroup(String groupName, String groupId) {
         this.groupName = groupName;
@@ -13,6 +13,6 @@ public class ExpenseGroup {
     }
 
     public ExpenseGroup() {
-        this(null, null);
+        //this(null, null);
     }
 }

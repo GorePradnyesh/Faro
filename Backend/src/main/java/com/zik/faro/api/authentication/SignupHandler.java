@@ -63,7 +63,7 @@ public class SignupHandler {
         }
         
         // Lookup to sees if an user exists with the same id
-        if (UserManagement.isExistingUser(newFaroUser.getId())) {
+        if (UserManagement.isExistingUser(newFaroUser.getEmail())) {
             // Return  error code indicating user exists
             logger.info("User already exists");
             // TODO (Code Review) : throw only WebApplicationException . Keep an emum of Faro status codes
@@ -81,7 +81,7 @@ public class SignupHandler {
             logger.error("Password could not be encrypted", e);
         }
 
-        return JResponse.ok(FaroJwtTokenManager.createToken(newFaroUser.getId()))
+        return JResponse.ok(FaroJwtTokenManager.createToken(newFaroUser.getEmail()))
         		.build();
     }
 

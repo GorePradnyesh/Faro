@@ -1,6 +1,7 @@
 package com.zik.faro.persistence.datastore;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +23,7 @@ import com.zik.faro.commons.exceptions.IllegalDataOperation;
 import com.zik.faro.data.ActionStatus;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Assignment;
-import com.zik.faro.data.Event;
+import com.zik.faro.data.EventDo;
 import com.zik.faro.data.Item;
 import com.zik.faro.data.Location;
 import com.zik.faro.data.Unit;
@@ -36,7 +37,7 @@ public class AssignmentDatastoreImplTest {
 
     static{
         ObjectifyService.register(Activity.class);
-        ObjectifyService.register(Event.class);
+        ObjectifyService.register(EventDo.class);
     }
 
     @BeforeClass
@@ -68,7 +69,7 @@ public class AssignmentDatastoreImplTest {
 	
 	@Test
 	public void getAllAssignmentsTest() throws IllegalDataOperation, DataNotFoundException{
-		Event event = new Event("TestEvent", new GregorianCalendar(), new GregorianCalendar(), false, null, new Location("San Jose"));
+		EventDo event = new EventDo("TestEvent", Calendar.getInstance(), Calendar.getInstance(), false, null, new Location("San Jose"));
     	EventDatastoreImpl.storeEventOnly(event);
 		Activity activity1 = createActivity(event.getEventId(), "NewYork");
     	Activity activity2 = createActivity(event.getEventId(), "SF");
@@ -84,7 +85,7 @@ public class AssignmentDatastoreImplTest {
 	
 	@Test
 	public void getAssignmentUsingEvent_Activity_Assignment_IdTest() throws DataNotFoundException, IllegalDataOperation{
-		Event event = new Event("TestEvent", new GregorianCalendar(), new GregorianCalendar(), false, null, new Location("San Jose"));
+		EventDo event = new EventDo("TestEvent", Calendar.getInstance(), Calendar.getInstance(), false, null, new Location("San Jose"));
     	EventDatastoreImpl.storeEventOnly(event);
 		Activity activity1 = createActivity(event.getEventId(), "NewYork");
 		ActivityDatastoreImpl.storeActivity(activity1);
@@ -113,7 +114,7 @@ public class AssignmentDatastoreImplTest {
 	
 	@Test
 	public void getCountOfPendingAssignmentsTest() throws IllegalDataOperation, DataNotFoundException{
-		Event event = new Event("TestEvent", new GregorianCalendar(), new GregorianCalendar(), false, null, new Location("San Jose"));
+		EventDo event = new EventDo("TestEvent", Calendar.getInstance(), Calendar.getInstance(), false, null, new Location("San Jose"));
     	EventDatastoreImpl.storeEventOnly(event);
 		Activity activity1 = createActivity(event.getEventId(), "NewYork");
     	Activity activity2 = createActivity(event.getEventId(), "SF");
@@ -130,7 +131,7 @@ public class AssignmentDatastoreImplTest {
 	
 	@Test
 	public void updateActivityLevelAssignmentItems() throws IllegalDataOperation, DataNotFoundException, DatastoreException{
-		Event event = new Event("TestEvent", new GregorianCalendar(), new GregorianCalendar(), false, null, new Location("San Jose"));
+		EventDo event = new EventDo("TestEvent", Calendar.getInstance(), Calendar.getInstance(), false, null, new Location("San Jose"));
     	EventDatastoreImpl.storeEventOnly(event);
 		Activity activity1 = createActivity(event.getEventId(), "NewYork");
 		ActivityDatastoreImpl.storeActivity(activity1);
@@ -157,7 +158,7 @@ public class AssignmentDatastoreImplTest {
 	
 	@Test
 	public void updateEventLevelAssignmentItems() throws IllegalDataOperation, DataNotFoundException, DatastoreException{
-		Event event = new Event("TestEvent", new GregorianCalendar(), new GregorianCalendar(), false, null, new Location("San Jose"));
+		EventDo event = new EventDo("TestEvent", Calendar.getInstance(), Calendar.getInstance(), false, null, new Location("San Jose"));
 		Assignment eventAssignment = new Assignment(UUID.randomUUID().toString(), ActionStatus.INCOMPLETE);
 		eventAssignment.addItem(new Item("Kaivan", "420", 3, Unit.KG));
 		event.setAssignment(eventAssignment);

@@ -6,7 +6,7 @@ import java.util.Set;
 import com.googlecode.objectify.Work;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
-import com.zik.faro.data.Event;
+import com.zik.faro.data.EventDo;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.Poll.PollOption;
 
@@ -21,12 +21,12 @@ public class PollDatastoreImpl {
     }
 
     public static Poll loadPollById(final String pollId, final String eventId) throws DataNotFoundException{
-        Poll poll = DatastoreObjectifyDAL.loadObjectWithParentId(Event.class, eventId, Poll.class, pollId);
+        Poll poll = DatastoreObjectifyDAL.loadObjectWithParentId(EventDo.class, eventId, Poll.class, pollId);
         return poll;
     }
 
     public static List<Poll> loadPollsByEventId(final String eventId){
-        List<Poll> pollList = DatastoreObjectifyDAL.loadObjectsByAncestorRef(Event.class, eventId, Poll.class);
+        List<Poll> pollList = DatastoreObjectifyDAL.loadObjectsByAncestorRef(EventDo.class, eventId, Poll.class);
         return pollList;
     }
     
@@ -82,7 +82,7 @@ public class PollDatastoreImpl {
     
     public static void deletePoll(final String eventId, final String pollId){
     	DatastoreObjectifyDAL.deleteObjectByIdWithParentId(pollId, Poll.class,
-    			eventId, Event.class);
+    			eventId, EventDo.class);
     }
     
 }

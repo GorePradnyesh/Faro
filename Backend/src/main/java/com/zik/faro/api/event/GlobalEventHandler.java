@@ -12,8 +12,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
 
 import com.sun.jersey.api.JResponse;
+import com.zik.faro.api.bean.Event;
 import com.zik.faro.applogic.EventManagement;
-import com.zik.faro.data.Event;
 
 @Path(EVENTS_PATH_CONST)
 public class GlobalEventHandler {

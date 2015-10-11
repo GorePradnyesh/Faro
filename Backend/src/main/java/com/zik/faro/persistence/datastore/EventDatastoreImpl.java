@@ -4,22 +4,22 @@ package com.zik.faro.persistence.datastore;
 import com.googlecode.objectify.Work;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
-import com.zik.faro.data.Event;
+import com.zik.faro.data.EventDo;
 
 public class EventDatastoreImpl {       
-    public static void storeEvent(final String userId, final Event event){
+    public static void storeEvent(final String userId, final EventDo event){
     	DatastoreObjectifyDAL.storeObject(event);
     	// Creating event user relation if event creation succeeds
     	EventUserDatastoreImpl.storeEventUser(event.getEventId(), userId, userId);
     }
     
     // For use cases where we do not need to store eventuser relation
-    public static void storeEventOnly(final Event event){
+    public static void storeEventOnly(final EventDo event){
     	DatastoreObjectifyDAL.storeObject(event);
     }
 
-    public static Event loadEventByID(final String eventId) throws DataNotFoundException{
-        Event event = DatastoreObjectifyDAL.loadObjectById(eventId, Event.class);
+    public static EventDo loadEventByID(final String eventId) throws DataNotFoundException{
+        EventDo event = DatastoreObjectifyDAL.loadObjectById(eventId, EventDo.class);
         return event;
     }
 
@@ -28,9 +28,9 @@ public class EventDatastoreImpl {
 			
 			@Override
 			public TransactionResult run() {
-				Event event;
+				EventDo event;
 				try {
-					event = DatastoreObjectifyDAL.loadObjectById(eventId, Event.class);
+					event = DatastoreObjectifyDAL.loadObjectById(eventId, EventDo.class);
 				} catch (DataNotFoundException e) {
 					return TransactionResult.DATANOTFOUND;
 				}

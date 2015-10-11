@@ -10,7 +10,7 @@ import com.zik.faro.persistence.datastore.EventUserDatastoreImpl;
 public class EventUserManagement {
 	public static InviteeList getEventInvitees(final String eventId){
 		List<EventUser> eventUsers = EventUserDatastoreImpl.loadEventUserByEvent(eventId);
-		InviteeList invitees = new InviteeList(eventId);
+		InviteeList invitees = new InviteeList();
 		for(EventUser user : eventUsers){
 			invitees.addUserStatus(new MinUser(user.getFaroUser().getFirstName(),
 					user.getFaroUser().getLastName(),

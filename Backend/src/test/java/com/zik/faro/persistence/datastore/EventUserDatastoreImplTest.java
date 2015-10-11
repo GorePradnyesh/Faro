@@ -1,6 +1,6 @@
 package com.zik.faro.persistence.datastore;
 
-import java.util.GregorianCalendar;
+import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,7 +13,7 @@ import org.junit.Test;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
-import com.zik.faro.data.Event;
+import com.zik.faro.data.EventDo;
 import com.zik.faro.data.EventUser;
 import com.zik.faro.data.Location;
 import com.zik.faro.data.expense.ExpenseGroup;
@@ -26,7 +26,7 @@ public class EventUserDatastoreImplTest {
 
     static{
         ObjectifyService.register(EventUser.class);
-        ObjectifyService.register(Event.class);
+        ObjectifyService.register(EventDo.class);
         ObjectifyService.register(FaroUser.class);
     }
 
@@ -48,9 +48,9 @@ public class EventUserDatastoreImplTest {
     @Test
     public void testEventUserLoadStore(){
         final String eventName = UUID.randomUUID().toString();
-        Event testEvent = new Event(eventName,
-        		new GregorianCalendar(),
-        		new GregorianCalendar(),
+        EventDo testEvent = new EventDo(eventName,
+        		Calendar.getInstance(),
+        		Calendar.getInstance(),
                 false,
                 new ExpenseGroup("Lake Shasta", "shasta123"),
                 new Location("Lake Shasta"));
@@ -65,7 +65,7 @@ public class EventUserDatastoreImplTest {
         EventUser eventUser = EventUserDatastoreImpl.loadEventUser(testEvent.getEventId(), faroUser.getEmail());
         Assert.assertNotNull(eventUser);
 
-        Event retEvent = eventUser.getEvent();
+        EventDo retEvent = eventUser.getEvent();
         Assert.assertEquals(testEvent.getEventName(), retEvent.getEventName());
 
         FaroUser retFaroUser = eventUser.getFaroUser();
@@ -74,25 +74,25 @@ public class EventUserDatastoreImplTest {
 
     @Test
     public void testEventUserLoad(){
-        Event event1 = new Event("Event1",
-        		new GregorianCalendar(),
-        		new GregorianCalendar(),
+        EventDo event1 = new EventDo("Event1",
+        		Calendar.getInstance(),
+        		Calendar.getInstance(),
                 false,
                 new ExpenseGroup("ExpenseGroupName1", "ExpenseGroupId1"),
                 new Location("Location1"));
         DatastoreObjectifyDAL.storeObject(event1);
 
-        Event event2 = new Event("Event2",
-        		new GregorianCalendar(),
-        		new GregorianCalendar(),
+        EventDo event2 = new EventDo("Event2",
+        		Calendar.getInstance(),
+        		Calendar.getInstance(),
                 false,
                 new ExpenseGroup("ExpenseGroupName2", "ExpenseGroupId2"),
                 new Location("Location2"));
         DatastoreObjectifyDAL.storeObject(event2);
 
-        Event event3 = new Event("Event3",
-        		new GregorianCalendar(),
-        		new GregorianCalendar(),
+        EventDo event3 = new EventDo("Event3",
+        		Calendar.getInstance(),
+        		Calendar.getInstance(),
                 false,
                 new ExpenseGroup("ExpenseGroupName3", "ExpenseGroupId3"),
                 new Location("Location3"));
@@ -124,9 +124,9 @@ public class EventUserDatastoreImplTest {
 
     @Test
     public void testEventUserIdempotency(){
-        Event event1 = new Event("Event1",
-        		new GregorianCalendar(),
-        		new GregorianCalendar(),
+        EventDo event1 = new EventDo("Event1",
+        		Calendar.getInstance(),
+        		Calendar.getInstance(),
                 false,
                 new ExpenseGroup("ExpenseGroupName1", "ExpenseGroupId1"),
                 new Location("Location1"));
@@ -148,9 +148,9 @@ public class EventUserDatastoreImplTest {
     @Test
     public void testEventUserRemoval(){
     	// Create Event
-    	Event event1 = new Event("Event1",
-    			new GregorianCalendar(),
-    			new GregorianCalendar(),
+    	EventDo event1 = new EventDo("Event1",
+    			Calendar.getInstance(),
+    			Calendar.getInstance(),
                 false,
                 new ExpenseGroup("ExpenseGroupName1", "ExpenseGroupId1"),
                 new Location("Location1"));
@@ -165,17 +165,17 @@ public class EventUserDatastoreImplTest {
         
         // Verify user-event relation
         EventUser eventUser = EventUserDatastoreImpl.loadEventUser(event1.getEventId(),
-        		faroUser1.getId());
+        		faroUser1.getEmail());
         Assert.assertNotNull(eventUser);
         Assert.assertEquals(event1,eventUser.getEvent());
         Assert.assertEquals(faroUser1, eventUser.getFaroUser());
         
         // Delete user from event
-        EventUserDatastoreImpl.deleteEventUser(event1.getEventId(), faroUser1.getId());
+        EventUserDatastoreImpl.deleteEventUser(event1.getEventId(), faroUser1.getEmail());
         
         // Verify deletion
         eventUser = EventUserDatastoreImpl.loadEventUser(event1.getEventId(),
-        		faroUser1.getId());
+        		faroUser1.getEmail());
         Assert.assertNull(eventUser);
     }
 }

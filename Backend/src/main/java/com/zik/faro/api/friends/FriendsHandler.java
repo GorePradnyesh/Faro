@@ -28,14 +28,13 @@ public class FriendsHandler {
     @Path(Constants.INVITE_PATH_CONST)
     @POST
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN, MediaType.TEXT_HTML})
-    public JResponse<String> inviteFriend(@QueryParam(Constants.FARO_USER_ID_PARAM) final String userId){
-        ParamValidation.genericParamValidations(userId, "userId");
+    public JResponse<String> inviteFriend(final String friendId){
+        //ParamValidation.genericParamValidations(friendId, "userId");
 
         String requestingUserId = securityContext.getUserPrincipal().getName();
-        String inviteeUsersId = userId;
-
+       
         try {
-			FriendManagement.inviteFriend(requestingUserId, inviteeUsersId);
+			FriendManagement.inviteFriend(requestingUserId, friendId);
 		} catch (DataNotFoundException e) {
 			Response response = Response.status(Response.Status.NOT_FOUND)
 					.entity(e.getMessage())

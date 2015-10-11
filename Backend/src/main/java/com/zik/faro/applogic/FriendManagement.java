@@ -16,16 +16,19 @@ import javax.ws.rs.core.Response;
 
 public class FriendManagement {
 	
-	public static void inviteFriend(final String existingUserId, final String friendId) throws DataNotFoundException, IllegalDataOperation{
+	public static void inviteFriend(final String existingUserId, final String friendId) throws IllegalDataOperation, DataNotFoundException{
 		
         
         // Create friend relation between user and new friend
     	// Create relation only if it does not exist.
     	// This method is invoked by "Invite Friend API and "Add Friend To An Event API"
-    	if(FriendRelationDatastoreImpl.loadFriendRelation(existingUserId,
-    			friendId) == null){
-    		storeFriendRelation(existingUserId,	friendId);
-    	}
+    	try {
+			FriendRelationDatastoreImpl.loadFriendRelation(existingUserId,friendId);
+		} catch (DataNotFoundException e) {
+			// If this throw DataNotFound, then the friend does not exist in the system yet.
+			// Hence cannot create friend relation
+			storeFriendRelation(existingUserId,	friendId);
+		} 
     }
 	
 	private static FaroUser getFaroUser(final String userId) throws DataNotFoundException{

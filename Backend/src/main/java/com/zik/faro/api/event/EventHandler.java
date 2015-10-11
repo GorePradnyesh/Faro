@@ -10,6 +10,9 @@ import static com.zik.faro.commons.Constants.EVENT_INVITEES_PATH_CONST;
 import static com.zik.faro.commons.Constants.EVENT_PATH_CONST;
 import static com.zik.faro.commons.Constants.EVENT_REMOVE_ATTENDEE_PATH_CONST;
 
+import java.util.Map;
+
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -23,15 +26,16 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 import com.sun.jersey.api.JResponse;
+import com.zik.faro.api.bean.Event;
 import com.zik.faro.api.responder.AddFriendRequest;
 import com.zik.faro.api.responder.InviteeList;
+import com.zik.faro.api.responder.InviteeList.Invitees;
 import com.zik.faro.applogic.EventManagement;
 import com.zik.faro.applogic.EventUserManagement;
 import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
 import com.zik.faro.commons.exceptions.IllegalDataOperation;
-import com.zik.faro.data.Event;
 
 
 @Path(EVENT_PATH_CONST + EVENT_ID_PATH_PARAM_STRING)
@@ -61,7 +65,9 @@ public class EventHandler {
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public JResponse<InviteeList> getEventInvitees(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                             @QueryParam(COUNT_PARAM) final int count){
-        return JResponse.ok(EventUserManagement.getEventInvitees(eventId)).build();
+    	// TODO: Implement count.
+        InviteeList list = EventUserManagement.getEventInvitees(eventId);
+        return JResponse.ok(list).build();
     }
 
     @Path(EVENT_DISABLE_CONTROL_PATH_CONST)
@@ -86,9 +92,10 @@ public class EventHandler {
 
     @Path(EVENT_REMOVE_ATTENDEE_PATH_CONST)
     @POST
-    public JResponse<String> removeAttendee(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
+    public JResponse<String> removeAttendee(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    		final String attendeeToBeRemoved){
     	String userId = context.getUserPrincipal().getName();
-        EventUserManagement.removeEventUser(eventId, userId);
+        EventUserManagement.removeEventUser(eventId, attendeeToBeRemoved);
         return JResponse.ok(Constants.HTTP_OK).build();
     }
     

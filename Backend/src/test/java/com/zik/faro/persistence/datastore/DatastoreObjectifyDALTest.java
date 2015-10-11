@@ -32,7 +32,7 @@ import com.zik.faro.commons.exceptions.IllegalDataOperation;
 import com.zik.faro.data.ActionStatus;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Assignment;
-import com.zik.faro.data.Event;
+import com.zik.faro.data.EventDo;
 import com.zik.faro.data.Item;
 import com.zik.faro.data.Location;
 import com.zik.faro.data.Unit;
@@ -49,7 +49,7 @@ public class DatastoreObjectifyDALTest {
         ObjectifyService.register(A.class);
         ObjectifyService.register(B.class);
         ObjectifyService.register(Activity.class);
-        ObjectifyService.register(Event.class);
+        ObjectifyService.register(EventDo.class);
     }
 
     @XmlRootElement
@@ -395,7 +395,7 @@ public class DatastoreObjectifyDALTest {
     @Test
     public void testUpdateActivity() throws IllegalDataOperation, DataNotFoundException{
     	// Create activity
-    	Event event = new Event("TestEvent");
+    	EventDo event = new EventDo("TestEvent");
     	String eventId = event.getEventId();
     	EventDatastoreImpl.storeEventOnly(event);
     	Activity a = new Activity(event.getEventId(), "TestEvent", "Testing update",
@@ -403,7 +403,7 @@ public class DatastoreObjectifyDALTest {
     	DatastoreObjectifyDAL.storeObject(a);
     	
     	// Verify indeed created
-    	Activity retrievedActivity = DatastoreObjectifyDAL.loadObjectWithParentId(Event.class,
+    	Activity retrievedActivity = DatastoreObjectifyDAL.loadObjectWithParentId(EventDo.class,
     			event.getEventId(), Activity.class, a.getId());
     	Assert.assertNotNull(retrievedActivity);
     	// Modify
@@ -414,7 +414,7 @@ public class DatastoreObjectifyDALTest {
     	
     	// Update
     	ActivityDatastoreImpl.updateActivity(a, event.getEventId());
-    	retrievedActivity = DatastoreObjectifyDAL.loadObjectWithParentId(Event.class,
+    	retrievedActivity = DatastoreObjectifyDAL.loadObjectWithParentId(EventDo.class,
     			event.getEventId(), Activity.class, a.getId());
     	Assert.assertNotNull(retrievedActivity);
     	

@@ -3,7 +3,7 @@ package com.zik.faro.persistence.datastore;
 
 import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.cmd.Query;
-import com.zik.faro.data.Event;
+import com.zik.faro.data.EventDo;
 import com.zik.faro.data.EventUser;
 import com.zik.faro.data.user.FaroUser;
 
@@ -30,7 +30,7 @@ public class EventUserDatastoreImpl {
     }
 
     public static EventUser loadEventUser(final String eventId, final String faroUserId){
-        Ref<Event> eventRef = DatastoreObjectifyDAL.getRefForClassById(eventId, Event.class);
+        Ref<EventDo> eventRef = DatastoreObjectifyDAL.getRefForClassById(eventId, EventDo.class);
         Ref<FaroUser> faroUserRef = DatastoreObjectifyDAL.getRefForClassById(faroUserId, FaroUser.class);
         
         Query<EventUser> eventUserQuery = ofy().load().type(EventUser.class);
@@ -43,7 +43,7 @@ public class EventUserDatastoreImpl {
     public static List<EventUser> loadEventUserByEvent(final String eventId){
         List<EventUser> eventUserList =
                 DatastoreObjectifyDAL.loadObjectsByIndexedRefFieldEQ(EVENT_REF_FIELD_NAME,
-                        Event.class,
+                        EventDo.class,
                         eventId,
                         EventUser.class);
         return eventUserList;
