@@ -26,10 +26,11 @@ import javax.ws.rs.core.SecurityContext;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.sun.jersey.api.JResponse;
+import com.zik.faro.api.bean.Activity;
 import com.zik.faro.applogic.ActivityManagement;
 import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
-import com.zik.faro.data.Activity;
+import com.zik.faro.data.ActivityDo;
 import com.zik.faro.data.Location;
 
 @Path(EVENT_PATH_CONST + EVENT_ID_PATH_PARAM_STRING + ACTIVITY_PATH_CONST)
@@ -63,14 +64,12 @@ public class ActivityHandler {
         <name>hiking</name>
     </activity>
     */
-    @Path(ACTIVITY_CREATE_PATH_CONST)
     @POST
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public JResponse<String> createActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    @Path(ACTIVITY_CREATE_PATH_CONST)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public JResponse<Activity> createActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                  Activity activity){
-    	ActivityManagement.createActivity(activity);
-    	// TODO: Return id
-    	return JResponse.ok(Constants.HTTP_OK).build();
+    	return JResponse.ok(ActivityManagement.createActivity(activity)).build();
     }
 
     /*
@@ -87,24 +86,22 @@ public class ActivityHandler {
     </activityUpdateData>
     */
     
-    @Path(ACTIVITY_ID_PATH_PARAM_STRING + ACTIVITY_UPDATE_PATH_CONST)
     @POST
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public JResponse<String> updateActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    @Path(ACTIVITY_ID_PATH_PARAM_STRING + ACTIVITY_UPDATE_PATH_CONST)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public JResponse<Activity> updateActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                @PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId,
-                               ActivityUpdateData activityUpdateData){
-        Activity activity = new Activity(eventId, null, 
-        		activityUpdateData.getDescription(), activityUpdateData.getLocation(), 
-        		activityUpdateData.getDate(), null);
+                               Activity activityUpdateData){
+        activityUpdateData.setId(activityId);
+        activityUpdateData.setEventId(eventId);
         try {
-			ActivityManagement.updateActivity(activity, eventId);
+        	return JResponse.ok(ActivityManagement.updateActivity(activityUpdateData, eventId)).build();
 		} catch (DataNotFoundException e) {
 			Response response = Response.status(Response.Status.NOT_FOUND)
                     .entity(e.getMessage())
                     .build();
             throw new WebApplicationException(response);
 		}
-        return JResponse.ok(Constants.HTTP_OK).build();
     }
 
 
@@ -115,40 +112,5 @@ public class ActivityHandler {
        ActivityManagement.deteleActivity(eventId, activityId);
        return JResponse.ok(Constants.HTTP_OK).build();
     }
-
-    @XmlRootElement
-    private static class ActivityUpdateData {
-        private String description;
-        private Calendar date;
-        private Location location;
-        
-        private ActivityUpdateData(){
-        }
-        
-        public String getDescription() {
-			return description;
-		}
-
-		public void setDescription(String description) {
-			this.description = description;
-		}
-
-		public Calendar getDate() {
-			return date;
-		}
-
-		public void setDate(Calendar date) {
-			this.date = date;
-		}
-
-		public Location getLocation() {
-			return location;
-		}
-
-		public void setLocation(Location location) {
-			this.location = location;
-		}
-
-    }
-
+    
 }

@@ -30,7 +30,7 @@ import com.googlecode.objectify.annotation.Parent;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.IllegalDataOperation;
 import com.zik.faro.data.ActionStatus;
-import com.zik.faro.data.Activity;
+import com.zik.faro.data.ActivityDo;
 import com.zik.faro.data.Assignment;
 import com.zik.faro.data.EventDo;
 import com.zik.faro.data.Item;
@@ -48,7 +48,7 @@ public class DatastoreObjectifyDALTest {
         ObjectifyService.register(TestClass.class);
         ObjectifyService.register(A.class);
         ObjectifyService.register(B.class);
-        ObjectifyService.register(Activity.class);
+        ObjectifyService.register(ActivityDo.class);
         ObjectifyService.register(EventDo.class);
     }
 
@@ -398,13 +398,13 @@ public class DatastoreObjectifyDALTest {
     	EventDo event = new EventDo("TestEvent");
     	String eventId = event.getEventId();
     	EventDatastoreImpl.storeEventOnly(event);
-    	Activity a = new Activity(event.getEventId(), "TestEvent", "Testing update",
+    	ActivityDo a = new ActivityDo(event.getEventId(), "TestEvent", "Testing update",
     			new Location("San Jose"), new GregorianCalendar(), new Assignment(UUID.randomUUID().toString(), ActionStatus.INCOMPLETE));
     	DatastoreObjectifyDAL.storeObject(a);
     	
     	// Verify indeed created
-    	Activity retrievedActivity = DatastoreObjectifyDAL.loadObjectWithParentId(EventDo.class,
-    			event.getEventId(), Activity.class, a.getId());
+    	ActivityDo retrievedActivity = DatastoreObjectifyDAL.loadObjectWithParentId(EventDo.class,
+    			event.getEventId(), ActivityDo.class, a.getId());
     	Assert.assertNotNull(retrievedActivity);
     	// Modify
     	a.getAssignment().addItem(new Item("Test", "123", 1, Unit.CENTIMETER));
@@ -415,11 +415,11 @@ public class DatastoreObjectifyDALTest {
     	// Update
     	ActivityDatastoreImpl.updateActivity(a, event.getEventId());
     	retrievedActivity = DatastoreObjectifyDAL.loadObjectWithParentId(EventDo.class,
-    			event.getEventId(), Activity.class, a.getId());
+    			event.getEventId(), ActivityDo.class, a.getId());
     	Assert.assertNotNull(retrievedActivity);
     	
     	// Verify
-    	Assert.assertEquals(retrievedActivity.getAssignment().getItems().get(0).getAssigneeId(), "123");
+    	Assert.assertEquals(retrievedActivity.getAssignment().getItemsList().get(0).getAssigneeId(), "123");
     	Assert.assertEquals(retrievedActivity.getLocation().locationName, "Fremont");
     	Assert.assertEquals(retrievedActivity.getDescription(), "Description changed");
     	

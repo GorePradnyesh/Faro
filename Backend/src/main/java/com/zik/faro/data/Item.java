@@ -1,13 +1,10 @@
 package com.zik.faro.data;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import com.zik.faro.commons.exceptions.IllegalDataOperation;
 
-@XmlRootElement
 public class Item {
-    private String id;
+   
+	private String id;
     private String name;
     private String assigneeId; 
     private int count;
@@ -34,10 +31,13 @@ public class Item {
         this(name,assigneeId,count,unit,Identifier.createUniqueIdentifierString());
     }
     
-    @XmlElement
     public String getId() {
         return id;
     }
+    
+    public void setId(String id) {
+		this.id = id;
+	}
 
     public String getName() {
         return name;

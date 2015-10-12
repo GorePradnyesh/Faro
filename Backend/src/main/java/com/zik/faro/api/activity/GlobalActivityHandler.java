@@ -14,8 +14,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import com.sun.jersey.api.JResponse;
+import com.zik.faro.api.bean.Activity;
 import com.zik.faro.applogic.ActivityManagement;
-import com.zik.faro.data.Activity;
 
 @Path(EVENT_PATH_CONST + EVENT_ID_PATH_PARAM_STRING + ACTIVITIES_PATH_CONST)
 public class GlobalActivityHandler {

@@ -1,7 +1,7 @@
 package com.zik.faro.persistence.datastore;
 
 import com.googlecode.objectify.ObjectifyService;
-import com.zik.faro.data.Activity;
+import com.zik.faro.data.ActivityDo;
 import com.zik.faro.data.EventDo;
 import com.zik.faro.data.EventUser;
 import com.zik.faro.data.Poll;
@@ -13,7 +13,7 @@ public class StaticInitializer {
 
     public static void init(){
         //ObjectifyService.register();
-        ObjectifyService.register(Activity.class);
+        ObjectifyService.register(ActivityDo.class);
         ObjectifyService.register(EventDo.class);
         ObjectifyService.register(FaroUser.class);
         ObjectifyService.register(UserCredentials.class);

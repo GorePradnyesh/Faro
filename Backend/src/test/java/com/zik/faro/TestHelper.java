@@ -172,6 +172,18 @@ public class TestHelper {
     	
     }
     
+    public static ClientResponse doDELETE(String uri, String path, String authToken){
+    	Client client = RestClient.getInstance().getClient();
+        WebResource webResource = client.resource(uri);
+        ClientResponse response = webResource
+                .path(path)
+                .header("authentication", authToken)
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .delete(ClientResponse.class);
+        Assert.assertNotNull(response);
+        return response;
+    }
+    
     public static String createUserAndGetToken() throws Exception{
     	String newRandomEmail = UUID.randomUUID().toString() + "@gmail.com";
         FaroUser newUser = new FaroUser(newRandomEmail,

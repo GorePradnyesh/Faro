@@ -1,9 +1,7 @@
 package com.zik.faro.data;
 
 
-import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
 public class Location {
     public String locationName;
     public GeoPosition position;

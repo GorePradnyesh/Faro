@@ -21,7 +21,7 @@ import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
 import com.zik.faro.commons.exceptions.IllegalDataOperation;
 import com.zik.faro.data.ActionStatus;
-import com.zik.faro.data.Activity;
+import com.zik.faro.data.ActivityDo;
 import com.zik.faro.data.Assignment;
 import com.zik.faro.data.EventDo;
 import com.zik.faro.data.Item;
@@ -36,7 +36,7 @@ public class AssignmentDatastoreImplTest {
     
 
     static{
-        ObjectifyService.register(Activity.class);
+        ObjectifyService.register(ActivityDo.class);
         ObjectifyService.register(EventDo.class);
     }
 
@@ -55,8 +55,8 @@ public class AssignmentDatastoreImplTest {
         helper.tearDown();
     }
     
-	private Activity createActivity(String eventId, String name) throws IllegalDataOperation{
-    	Activity activity1 = new Activity(eventId, name, "dummyDescription",
+	private ActivityDo createActivity(String eventId, String name) throws IllegalDataOperation{
+    	ActivityDo activity1 = new ActivityDo(eventId, name, "dummyDescription",
                 new Location("Lake Shasta"),
                 new GregorianCalendar(),
                 new Assignment(UUID.randomUUID().toString(), ActionStatus.INCOMPLETE));
@@ -71,9 +71,9 @@ public class AssignmentDatastoreImplTest {
 	public void getAllAssignmentsTest() throws IllegalDataOperation, DataNotFoundException{
 		EventDo event = new EventDo("TestEvent", Calendar.getInstance(), Calendar.getInstance(), false, null, new Location("San Jose"));
     	EventDatastoreImpl.storeEventOnly(event);
-		Activity activity1 = createActivity(event.getEventId(), "NewYork");
-    	Activity activity2 = createActivity(event.getEventId(), "SF");
-    	Activity activity3 = createActivity(event.getEventId(), "Buffalo");
+		ActivityDo activity1 = createActivity(event.getEventId(), "NewYork");
+    	ActivityDo activity2 = createActivity(event.getEventId(), "SF");
+    	ActivityDo activity3 = createActivity(event.getEventId(), "Buffalo");
         
     	ActivityDatastoreImpl.storeActivity(activity1);
     	ActivityDatastoreImpl.storeActivity(activity2);
@@ -87,7 +87,7 @@ public class AssignmentDatastoreImplTest {
 	public void getAssignmentUsingEvent_Activity_Assignment_IdTest() throws DataNotFoundException, IllegalDataOperation{
 		EventDo event = new EventDo("TestEvent", Calendar.getInstance(), Calendar.getInstance(), false, null, new Location("San Jose"));
     	EventDatastoreImpl.storeEventOnly(event);
-		Activity activity1 = createActivity(event.getEventId(), "NewYork");
+		ActivityDo activity1 = createActivity(event.getEventId(), "NewYork");
 		ActivityDatastoreImpl.storeActivity(activity1);
 		Assignment assignment = AssignmentDatastoreImpl.getActivityAssignment(event.getEventId(), activity1.getId(), 
 				activity1.getAssignment().getId());
@@ -116,12 +116,12 @@ public class AssignmentDatastoreImplTest {
 	public void getCountOfPendingAssignmentsTest() throws IllegalDataOperation, DataNotFoundException{
 		EventDo event = new EventDo("TestEvent", Calendar.getInstance(), Calendar.getInstance(), false, null, new Location("San Jose"));
     	EventDatastoreImpl.storeEventOnly(event);
-		Activity activity1 = createActivity(event.getEventId(), "NewYork");
-    	Activity activity2 = createActivity(event.getEventId(), "SF");
-    	activity1.getAssignment().getItems().get(0).setStatus(ActionStatus.COMPLETE);
-    	activity1.getAssignment().getItems().get(1).setStatus(ActionStatus.INCOMPLETE);
-    	activity2.getAssignment().getItems().get(0).setStatus(ActionStatus.INCOMPLETE);
-    	activity2.getAssignment().getItems().get(1).setStatus(ActionStatus.INCOMPLETE);
+		ActivityDo activity1 = createActivity(event.getEventId(), "NewYork");
+    	ActivityDo activity2 = createActivity(event.getEventId(), "SF");
+    	activity1.getAssignment().getItemsList().get(0).setStatus(ActionStatus.COMPLETE);
+    	activity1.getAssignment().getItemsList().get(1).setStatus(ActionStatus.INCOMPLETE);
+    	activity2.getAssignment().getItemsList().get(0).setStatus(ActionStatus.INCOMPLETE);
+    	activity2.getAssignment().getItemsList().get(1).setStatus(ActionStatus.INCOMPLETE);
     	
     	ActivityDatastoreImpl.storeActivity(activity1);
     	ActivityDatastoreImpl.storeActivity(activity2);
@@ -133,7 +133,7 @@ public class AssignmentDatastoreImplTest {
 	public void updateActivityLevelAssignmentItems() throws IllegalDataOperation, DataNotFoundException, DatastoreException{
 		EventDo event = new EventDo("TestEvent", Calendar.getInstance(), Calendar.getInstance(), false, null, new Location("San Jose"));
     	EventDatastoreImpl.storeEventOnly(event);
-		Activity activity1 = createActivity(event.getEventId(), "NewYork");
+		ActivityDo activity1 = createActivity(event.getEventId(), "NewYork");
 		ActivityDatastoreImpl.storeActivity(activity1);
     	List<Item> items = getItems(activity1.getAssignment());
     	
@@ -142,7 +142,7 @@ public class AssignmentDatastoreImplTest {
     	Assignment assignment = AssignmentDatastoreImpl.getActivityAssignment(event.getEventId(),
     			activity1.getId(), activity1.getAssignment().getId());
     	// Assert size, 1 newly added and 1 updated item
-    	Assert.assertEquals(4,assignment.getItems().size());
+    	Assert.assertEquals(4,assignment.getItemsList().size());
     	Assert.assertEquals(items.get(2), assignment.getItem(items.get(2).getId()));
     	Assert.assertEquals(items.get(1), assignment.getItem(items.get(1).getId()));
     	
@@ -152,7 +152,7 @@ public class AssignmentDatastoreImplTest {
 		List<Item> items = new ArrayList<Item>();
 		items.add(new Item("Tomatoes", "12345", 1, Unit.KG));
 		items.add(new Item("Onions", "123456", 1, Unit.KG));
-		items.add(new Item("TODO name changed", "David", 4, Unit.COUNT, assignment.getItems().get(0).getId()));
+		items.add(new Item("TODO name changed", "David", 4, Unit.COUNT, assignment.getItemsList().get(0).getId()));
 		return items;
 	}
 	
@@ -168,7 +168,7 @@ public class AssignmentDatastoreImplTest {
 		AssignmentDatastoreImpl.updateItemsForEventAssignment(event.getEventId(),items);
     	Assignment assignment = AssignmentDatastoreImpl.getEventAssignment(event.getEventId());
     	// Assert size, 1 newly added and 1 updated item
-    	Assert.assertEquals(3,assignment.getItems().size());
+    	Assert.assertEquals(3,assignment.getItemsList().size());
     	Assert.assertEquals(items.get(2), assignment.getItem(items.get(2).getId()));
     	Assert.assertEquals(items.get(1), assignment.getItem(items.get(1).getId()));
 	}

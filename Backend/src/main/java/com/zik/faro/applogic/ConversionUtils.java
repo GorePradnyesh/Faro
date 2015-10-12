@@ -1,6 +1,8 @@
 package com.zik.faro.applogic;
 
+import com.zik.faro.api.bean.Activity;
 import com.zik.faro.api.bean.Event;
+import com.zik.faro.data.ActivityDo;
 import com.zik.faro.data.EventDo;
 
 public class ConversionUtils {
@@ -28,5 +30,29 @@ public class ConversionUtils {
 		eventDo.setEventId(event.getEventId());
 		eventDo.setEventName(event.getEventName());
 		return eventDo;
+	}
+	
+	public static ActivityDo toDo(Activity activity){
+		ActivityDo activityDo = new ActivityDo();
+		activityDo.setAssignment(activity.getAssignment());
+		activityDo.setDate(activity.getDate());
+		activityDo.setDescription(activity.getDescription());
+		activityDo.setLocation(activity.getLocation());
+		activityDo.setId(activity.getId());
+		activityDo.setEventId(activity.getEventId());
+		activityDo.setName(activity.getName());
+		return activityDo;
+	}
+	
+	public static Activity fromDo(ActivityDo activityDo){
+		Activity activity = new Activity();
+		activity.setAssignment(activityDo.getAssignment());
+		activity.setDate(activityDo.getDate());
+		activity.setDescription(activityDo.getDescription());
+		activity.setLocation(activityDo.getLocation());
+		activity.setId(activityDo.getId());
+		activity.setEventId(activityDo.getEventId());
+		activity.setName(activityDo.getName());
+		return activity;
 	}
 }
