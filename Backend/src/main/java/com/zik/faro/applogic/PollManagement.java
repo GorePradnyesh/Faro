@@ -1,24 +1,34 @@
 package com.zik.faro.applogic;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import com.zik.faro.api.bean.Poll;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
-import com.zik.faro.data.Poll;
+import com.zik.faro.data.PollDo;
 import com.zik.faro.persistence.datastore.PollDatastoreImpl;
 
 public class PollManagement {
-	public static void createPoll(final Poll poll) throws DataNotFoundException{
-		PollDatastoreImpl.storePoll(poll);
+	public static Poll createPoll(final Poll poll) throws DataNotFoundException{
+		PollDo pollDo = new PollDo(poll.getEventId(), poll.getCreatorId(), poll.getPollOptions(),
+				poll.getOwner(), poll.getDescription());
+		PollDatastoreImpl.storePoll(pollDo);
+		return ConversionUtils.fromDo(pollDo);
 	}
 	
 	public static List<Poll> getPolls(final String eventId){
-		return PollDatastoreImpl.loadPollsByEventId(eventId);
+		List<PollDo> pollDos = PollDatastoreImpl.loadPollsByEventId(eventId);
+		List<Poll> polls = new ArrayList<Poll>(pollDos.size());
+		for(PollDo pollDo : pollDos){
+			polls.add(ConversionUtils.fromDo(pollDo));
+		}
+		return polls;
 	}
 	
 	public static Poll getPoll(final String eventId, final String pollId) throws DataNotFoundException{
-		return PollDatastoreImpl.loadPollById(pollId, eventId);
+		return ConversionUtils.fromDo(PollDatastoreImpl.loadPollById(pollId, eventId));
 	}
 	
 	public static int getCountOfUnvotedPolls(final String userId, final String eventId){

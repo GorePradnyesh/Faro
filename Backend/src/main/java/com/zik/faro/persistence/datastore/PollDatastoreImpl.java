@@ -4,42 +4,42 @@ import java.util.List;
 import java.util.Set;
 
 import com.googlecode.objectify.Work;
+import com.zik.faro.api.bean.PollOption;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
 import com.zik.faro.data.EventDo;
-import com.zik.faro.data.Poll;
-import com.zik.faro.data.Poll.PollOption;
+import com.zik.faro.data.PollDo;
 
 public class PollDatastoreImpl {
     private static final String EVENTID_FIELD_NAME = "eventId";
 
-    public static void storePoll(final Poll poll) throws DataNotFoundException{
+    public static void storePoll(final PollDo pollDo) throws DataNotFoundException{
         // Load event. If not present it will throw Exception and hence will not proceed
     	// to create poll for absent event
-    	EventDatastoreImpl.loadEventByID(poll.getEventId());
-    	DatastoreObjectifyDAL.storeObject(poll);
+    	EventDatastoreImpl.loadEventByID(pollDo.getEventId());
+    	DatastoreObjectifyDAL.storeObject(pollDo);
     }
 
-    public static Poll loadPollById(final String pollId, final String eventId) throws DataNotFoundException{
-        Poll poll = DatastoreObjectifyDAL.loadObjectWithParentId(EventDo.class, eventId, Poll.class, pollId);
+    public static PollDo loadPollById(final String pollId, final String eventId) throws DataNotFoundException{
+        PollDo poll = DatastoreObjectifyDAL.loadObjectWithParentId(EventDo.class, eventId, PollDo.class, pollId);
         return poll;
     }
 
-    public static List<Poll> loadPollsByEventId(final String eventId){
-        List<Poll> pollList = DatastoreObjectifyDAL.loadObjectsByAncestorRef(EventDo.class, eventId, Poll.class);
+    public static List<PollDo> loadPollsByEventId(final String eventId){
+        List<PollDo> pollList = DatastoreObjectifyDAL.loadObjectsByAncestorRef(EventDo.class, eventId, PollDo.class);
         return pollList;
     }
     
     public static int getCountofUnvotedPolls(final String eventId, final String userId){
-    	List<Poll> polls = loadPollsByEventId(eventId);
+    	List<PollDo> polls = loadPollsByEventId(eventId);
     	int count = 0;
-    	for(Poll p : polls){
+    	for(PollDo p : polls){
     		List<PollOption> options = p.getPollOptions();
     		boolean found = false;
     		for(PollOption option : options){
     			// Check if user has voted for atleast one option of a poll.
     			// Dont care if he has voted for multiple options of the poll;
-    			if(option.voters.contains(userId)){
+    			if(option.getVoters().contains(userId)){
     				found = true;
     				break;
     			}
@@ -57,15 +57,15 @@ public class PollDatastoreImpl {
     		
 			@Override
 			public TransactionResult run(){
-				Poll poll;
+				PollDo poll;
 				try {
 					poll = loadPollById(pollId, eventId);
 					
 					// Iterate over all poll options. 
 					// Since it is a list I cannot get O(1) operation either ways.
 					for(PollOption pollOption : poll.getPollOptions()){
-						if(options.contains(pollOption.id)){
-							pollOption.voters.add(userId);
+						if(options.contains(pollOption.getId())){
+							pollOption.getVoters().add(userId);
 						}
 					}
 	                
@@ -81,7 +81,7 @@ public class PollDatastoreImpl {
     }
     
     public static void deletePoll(final String eventId, final String pollId){
-    	DatastoreObjectifyDAL.deleteObjectByIdWithParentId(pollId, Poll.class,
+    	DatastoreObjectifyDAL.deleteObjectByIdWithParentId(pollId, PollDo.class,
     			eventId, EventDo.class);
     }
     

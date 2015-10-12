@@ -2,8 +2,10 @@ package com.zik.faro.applogic;
 
 import com.zik.faro.api.bean.Activity;
 import com.zik.faro.api.bean.Event;
+import com.zik.faro.api.bean.Poll;
 import com.zik.faro.data.ActivityDo;
 import com.zik.faro.data.EventDo;
+import com.zik.faro.data.PollDo;
 
 public class ConversionUtils {
 	public static Event fromDo(EventDo eventDo){
@@ -54,5 +56,33 @@ public class ConversionUtils {
 		activity.setEventId(activityDo.getEventId());
 		activity.setName(activityDo.getName());
 		return activity;
+	}
+	
+	public static Poll fromDo(PollDo pollDo){
+		Poll poll = new Poll();
+		poll.setCreatorId(pollDo.getCreatorId());
+		poll.setDeadline(pollDo.getDeadline());
+		poll.setEventId(pollDo.getEventId());
+		poll.setDescription(pollDo.getDescription());
+		poll.setId(pollDo.getId());
+		poll.setOwner(pollDo.getOwner());
+		poll.setStatus(pollDo.getStatus());
+		poll.setWinnerId(pollDo.getWinnerId());
+		poll.setPollOptions(pollDo.getPollOptions());
+		return poll;
+	}
+	
+	public static PollDo toDo(Poll poll){
+		PollDo pollDo = new PollDo();
+		pollDo.setCreatorId(poll.getCreatorId());
+		pollDo.setDeadline(poll.getDeadline());
+		pollDo.setEventId(poll.getEventId());
+		pollDo.setDescription(poll.getDescription());
+		pollDo.setId(poll.getId());
+		pollDo.setOwner(poll.getOwner());
+		pollDo.setStatus(poll.getStatus());
+		pollDo.setWinnerId(poll.getWinnerId());
+		pollDo.setPollOptions(poll.getPollOptions());
+		return pollDo;
 	}
 }

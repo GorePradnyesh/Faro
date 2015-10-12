@@ -1,25 +1,19 @@
 package com.zik.faro.data;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Parent;
+import com.zik.faro.api.bean.PollOption;
 
 @Entity
-@XmlRootElement
-public class Poll {
+public class PollDo {
     @Id
     private String id;
     @Parent
@@ -33,16 +27,15 @@ public class Poll {
     private ObjectStatus status;
     private Calendar deadline;                // Will not be used in V1.
 
-    private Poll(){ //to satisfy jaxb;
-        System.out.println();
+    public PollDo(){ //to satisfy jaxb;
     }
 
-    public Poll(String eventId, String creator, List<PollOption> pollOptions, String owner, String description) {
+    public PollDo(String eventId, String creator, List<PollOption> pollOptions, String owner, String description) {
     	this(UUID.randomUUID().toString(),eventId, creator, pollOptions,
     			owner, description);
     }
     
-    public Poll(String id, String eventId, String creator, List<PollOption> pollOptions, String owner, String description){
+    public PollDo(String id, String eventId, String creator, List<PollOption> pollOptions, String owner, String description){
     	this.id = id;
     	this.eventId = Ref.create(Key.create(EventDo.class, eventId));
         this.creatorId = creator;
@@ -52,51 +45,18 @@ public class Poll {
         this.status = ObjectStatus.OPEN;
     }
 
-
-    @XmlRootElement
-    public static class PollOption{
-        public String id;                                 
-        public String option;
-        public Set<String> voters = new HashSet<String>();   
-
-        private PollOption(){
-            
-        }
-
-        public PollOption(final String option){
-            this.id = UUID.randomUUID().toString();
-            this.option = option;
-        }
-
-        public List<String> getVoters(){
-        	return Arrays.asList((String[])this.voters.toArray());                              
-        }
-
-        public void addVoters(final String voterId){
-            this.voters.add(voterId);
-        }
-        
-        public void setVoters(final Set<String> voters){
-        	this.voters = voters;
-        }
-    }
-
-    @XmlElement
     public String getId() {
         return id;
     }
-
-    @XmlElement
+    
     public String getEventId() {
         return eventId.getKey().getName();
     }
-
-    @XmlElement
+    
     public String getCreatorId() {
         return creatorId;
     }
-
-    @XmlElement
+    
     public List<PollOption> getPollOptions(){
         return this.pollOptions;
     }
@@ -107,7 +67,6 @@ public class Poll {
 
     public void setWinnerId(String winnerId) {
         this.winnerId = winnerId;
-        this.status = ObjectStatus.CLOSED;
     }
 
     public String getOwner() {
@@ -154,5 +113,11 @@ public class Poll {
     	this.eventId = Ref.create(Key.create(EventDo.class, eventId));;
     }
     
-   
+    public void setEventId(Ref<EventDo> eventId) {
+		this.eventId = eventId;
+	}
+
+	public void setPollOptions(List<PollOption> pollOptions) {
+		this.pollOptions = pollOptions;
+	}
 }

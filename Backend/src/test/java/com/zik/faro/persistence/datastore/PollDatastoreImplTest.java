@@ -11,7 +11,6 @@ import java.util.UUID;
 
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -21,11 +20,12 @@ import org.junit.Test;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
+import com.zik.faro.api.bean.PollOption;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
 import com.zik.faro.data.EventDo;
 import com.zik.faro.data.Location;
-import com.zik.faro.data.Poll;
+import com.zik.faro.data.PollDo;
 import com.zik.faro.data.expense.ExpenseGroup;
 
 public class PollDatastoreImplTest {
@@ -35,7 +35,7 @@ public class PollDatastoreImplTest {
                     .setDefaultHighRepJobPolicyUnappliedJobPercentage(50));
 
     static{
-        ObjectifyService.register(Poll.class);
+        ObjectifyService.register(PollDo.class);
         ObjectifyService.register(EventDo.class);
     }
 
@@ -67,24 +67,24 @@ public class PollDatastoreImplTest {
         return testEvent;
     }
 
-    private Poll createPollObjectForEventId(final String eventId){
-        List<Poll.PollOption> options = new ArrayList<>();
-        options.add(new Poll.PollOption("Shasta"));
-        Poll.PollOption vegasOption = new Poll.PollOption("Las Vegas");
+    private PollDo createPollObjectForEventId(final String eventId){
+        List<PollOption> options = new ArrayList<>();
+        options.add(new PollOption("Shasta"));
+        PollOption vegasOption = new PollOption("Las Vegas");
         vegasOption.addVoters("user1");
         vegasOption.addVoters("user2");
         options.add(vegasOption);
-        Poll dummyPoll = new Poll(eventId, "dummyCreator", options, "dummyOwner", "sample skeleton poll");
-        dummyPoll.setWinnerId(vegasOption.id);
+        PollDo dummyPoll = new PollDo(eventId, "dummyCreator", options, "dummyOwner", "sample skeleton poll");
+        dummyPoll.setWinnerId(vegasOption.getId());
         return dummyPoll;
     }
 
     @Test
     public void testPollLoadStore() throws DataNotFoundException, JsonGenerationException, JsonMappingException, IOException{
         EventDo event = createEvent();
-        Poll dummyPoll = createPollObjectForEventId(event.getEventId());
+        PollDo dummyPoll = createPollObjectForEventId(event.getEventId());
         PollDatastoreImpl.storePoll(dummyPoll);
-        Poll retPoll = PollDatastoreImpl.loadPollById(dummyPoll.getId(), event.getEventId());
+        PollDo retPoll = PollDatastoreImpl.loadPollById(dummyPoll.getId(), event.getEventId());
         Assert.assertNotNull(retPoll);
         Assert.assertEquals(retPoll.getEventId(), event.getEventId());
         
@@ -94,12 +94,12 @@ public class PollDatastoreImplTest {
     public void testLoadPollsForEvent() throws DataNotFoundException{
     	EventDo event = createEvent();
     	String eventId = event.getEventId();
-        Poll poll1 = createPollObjectForEventId(eventId);
+        PollDo poll1 = createPollObjectForEventId(eventId);
         PollDatastoreImpl.storePoll(poll1);
-        Poll poll2 = createPollObjectForEventId(eventId);
+        PollDo poll2 = createPollObjectForEventId(eventId);
         PollDatastoreImpl.storePoll(poll2);
 
-        List<Poll> polls = PollDatastoreImpl.loadPollsByEventId(eventId);
+        List<PollDo> polls = PollDatastoreImpl.loadPollsByEventId(eventId);
         Assert.assertEquals(2, polls.size());
     }
     
@@ -107,9 +107,9 @@ public class PollDatastoreImplTest {
     public void testCountOfUnvotedPolls() throws DataNotFoundException{
     	EventDo event = createEvent();
     	String eventId = event.getEventId();
-        Poll poll1 = createPollObjectForEventId(eventId);
+        PollDo poll1 = createPollObjectForEventId(eventId);
         PollDatastoreImpl.storePoll(poll1);
-        Poll poll2 = createPollObjectForEventId(eventId);
+        PollDo poll2 = createPollObjectForEventId(eventId);
         poll2.getPollOptions().get(0).addVoters("user4");
         poll2.getPollOptions().get(0).addVoters("user5");
         poll2.getPollOptions().get(1).addVoters("user5");
@@ -133,11 +133,11 @@ public class PollDatastoreImplTest {
     public void testCastVote() throws DataNotFoundException, DatastoreException{
     	EventDo event = createEvent();
     	String eventId = event.getEventId();
-        Poll poll1 = createPollObjectForEventId(eventId);
+        PollDo poll1 = createPollObjectForEventId(eventId);
         PollDatastoreImpl.storePoll(poll1);
         Set<String> optionIds = new HashSet<String>();
-        optionIds.add(poll1.getPollOptions().get(0).id);
-        optionIds.add(poll1.getPollOptions().get(1).id);
+        optionIds.add(poll1.getPollOptions().get(0).getId());
+        optionIds.add(poll1.getPollOptions().get(1).getId());
         // Cast user3's vote to both options of the poll(Shasta and vegas)
         PollDatastoreImpl.castVote(event.getEventId(), poll1.getId(), optionIds, "user3");
         
@@ -149,11 +149,11 @@ public class PollDatastoreImplTest {
     public void testDeletePoll() throws DataNotFoundException{
     	EventDo event = createEvent();
     	String eventId = event.getEventId();
-        Poll poll1 = createPollObjectForEventId(eventId);
+        PollDo poll1 = createPollObjectForEventId(eventId);
         PollDatastoreImpl.storePoll(poll1);
         
         // Verify indeed created
-        Poll p = PollDatastoreImpl.loadPollById(poll1.getId(), poll1.getEventId());
+        PollDo p = PollDatastoreImpl.loadPollById(poll1.getId(), poll1.getEventId());
         Assert.assertNotNull(p);
         
         // Delete
