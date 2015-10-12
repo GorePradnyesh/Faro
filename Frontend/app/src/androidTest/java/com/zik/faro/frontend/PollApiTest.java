@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -43,7 +44,7 @@ public class PollApiTest extends ApiBaseTest{
 
         // Create Event
         TestEventCreateCallback createCallback = new TestEventCreateCallback(waitSem, 200, null);
-        EventCreateData eventCreateData= new EventCreateData("MySampleEvent", new DateOffset(new Date(), 1000), null, null, null);
+        EventCreateData eventCreateData= new EventCreateData("MySampleEvent", Calendar.getInstance(), null, null, null);
         serviceHandler.getEventHandler().createEvent(createCallback, eventCreateData);
         timeout = false;
         timeout = !waitSem.tryAcquire(testTimeout, TimeUnit.MILLISECONDS);

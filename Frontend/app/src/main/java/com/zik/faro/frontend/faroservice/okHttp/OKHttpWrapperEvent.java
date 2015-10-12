@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -49,16 +50,16 @@ public class OKHttpWrapperEvent extends BaseFaroOKHttpWrapper implements EventHa
         }
     }
 
-    public void getEvent(final BaseFaroRequestCallback<Event> callback, final String eventId){
+    public void getEvent2(final BaseFaroRequestCallback<Event> callback, final String eventId){
         DateOffset startDate = new DateOffset(new Date(), 0);
         DateOffset endDate = new DateOffset(new Date(), 3600);
         Location location = new Location("location_"+UUID.randomUUID().toString());
-        Event newEvent = new Event(eventId, startDate, endDate, false, null, location);
+        Event newEvent = new Event(eventId, Calendar.getInstance(), Calendar.getInstance(), false, null, location);
         callback.onResponse(newEvent, null);
     }
     
     // TODO: Temp use this actual implementation instead of event
-    public void getEvent2(final BaseFaroRequestCallback<Event> callback, final String eventId){
+    public void getEvent(final BaseFaroRequestCallback<Event> callback, final String eventId){
         String token = TokenCache.getTokenCache().getAuthToken();
         Request request = new Request.Builder()
                 .url(baseHandlerURL.toString() + eventId)
@@ -77,7 +78,7 @@ public class OKHttpWrapperEvent extends BaseFaroOKHttpWrapper implements EventHa
                 .post(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), eventPostBody))
                 .addHeader("Authentication", token)
                 .build();
-
+        
         this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<Event>(callback, Event.class));
     }
 }

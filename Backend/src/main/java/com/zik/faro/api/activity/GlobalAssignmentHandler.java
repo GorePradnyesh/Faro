@@ -1,24 +1,16 @@
 package com.zik.faro.api.activity;
 
-import static com.zik.faro.commons.Constants.ASSIGNMENTS_PATH_CONST;
-import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM;
-import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM_STRING;
-import static com.zik.faro.commons.Constants.EVENT_PATH_CONST;
-
-import java.util.Map;
-
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import com.sun.jersey.api.JResponse;
 import com.zik.faro.applogic.AssignmentManagement;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.data.Assignment;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.Map;
+
+import static com.zik.faro.commons.Constants.*;
 
 @Path(EVENT_PATH_CONST + EVENT_ID_PATH_PARAM_STRING + ASSIGNMENTS_PATH_CONST)
 public class GlobalAssignmentHandler {

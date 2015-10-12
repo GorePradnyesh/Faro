@@ -19,6 +19,7 @@ import junit.framework.Assert;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -62,7 +63,7 @@ public class EventApiTest extends ApiBaseTest {
         
         // Create Event
         TestEventCreateCallback createCallback = new TestEventCreateCallback(waitSem, 200, null);
-        EventCreateData eventCreateData= new EventCreateData("MySampleEvent", new DateOffset(new Date(), 1000), null, null, null);
+        EventCreateData eventCreateData= new EventCreateData("MySampleEvent", Calendar.getInstance(), Calendar.getInstance(), null, null);
         serviceHandler.getEventHandler().createEvent(createCallback, eventCreateData);
         timeout = false;
         timeout = !waitSem.tryAcquire(10000, TimeUnit.MILLISECONDS);
@@ -95,7 +96,7 @@ public class EventApiTest extends ApiBaseTest {
         getTokenForNewUser(uuidEmail, password);
         
         TestEventCreateCallback callback = new TestEventCreateCallback(waitSem, 200, null);
-        EventCreateData eventCreateData= new EventCreateData("MySampleEvent", new DateOffset(new Date(), 1000), null, null, null);
+        EventCreateData eventCreateData= new EventCreateData("MySampleEvent", Calendar.getInstance(), null, null, null);
         
         // Create Event
         serviceHandler.getEventHandler().createEvent(callback, eventCreateData);

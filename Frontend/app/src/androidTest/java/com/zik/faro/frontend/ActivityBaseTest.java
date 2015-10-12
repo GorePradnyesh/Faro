@@ -17,6 +17,7 @@ import junit.framework.Assert;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
@@ -41,7 +42,7 @@ public class ActivityBaseTest extends ApiBaseTest {
 
         // Create Event
         TestEventCreateCallback createCallback = new TestEventCreateCallback(waitSem, 200, null);
-        EventCreateData eventCreateData = new EventCreateData("MySampleEvent", new DateOffset(new Date(), 1000), null, null, null);
+        EventCreateData eventCreateData = new EventCreateData("MySampleEvent", Calendar.getInstance(), null, null, null);
         serviceHandler.getEventHandler().createEvent(createCallback, eventCreateData);
         timeout = false;
         timeout = !waitSem.tryAcquire(testTimeout, TimeUnit.MILLISECONDS);
@@ -71,7 +72,7 @@ public class ActivityBaseTest extends ApiBaseTest {
         Assert.assertFalse(callback.failed);
         Assert.assertFalse(callback.unexpectedResponseCode);
         
-        // Get Activity
+        // Get Activity. TODO: Add the remaining tests here
     }
 
     static class TestActivityCreateCallback extends Utils.BaseTestCallbackHandler implements BaseFaroRequestCallback<String> {

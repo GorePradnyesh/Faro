@@ -1,13 +1,13 @@
 package com.zik.faro.api.event;
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.SerializerProvider;
 import org.codehaus.jackson.map.ser.std.SerializerBase;
+
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 public class CustomDateSerializer extends SerializerBase<Calendar> {
 
