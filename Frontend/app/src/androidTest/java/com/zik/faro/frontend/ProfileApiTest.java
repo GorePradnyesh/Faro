@@ -39,20 +39,25 @@ public class ProfileApiTest extends ApplicationTestCase<Application> {
     
     @LargeTest
     public void testCreateGetProfile() throws InterruptedException, MalformedURLException {
+        // Sign up user, so that the token cache is populated
         final Semaphore waitSem = new Semaphore(0);
         FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
+        String uuidEmail = UUID.randomUUID().toString()+ "@gmail.com";
+        String password = UUID.randomUUID().toString();
 
+        getTokenForNewUser(uuidEmail, password);
+        boolean timeout;
+        
         String uuidFName = UUID.randomUUID().toString();
         String uuidMName = UUID.randomUUID().toString();
         String uuidLName = UUID.randomUUID().toString();
         String uuidExpense = UUID.randomUUID().toString();
         String uuidTelephone = UUID.randomUUID().toString();
-        String uuidEmail = UUID.randomUUID().toString() + "@gmail.com";
+        
         FaroUser faroUser = new FaroUser(uuidEmail, uuidFName, uuidMName, uuidLName, uuidExpense, uuidTelephone, null);
 
         TestCreateProfileCallbackHandler callback = new TestCreateProfileCallbackHandler(waitSem, 200);
-        serviceHandler.getProfileHandler().createProfile(callback, faroUser);
-        boolean timeout = false;    
+        serviceHandler.getProfileHandler().createProfile(callback, faroUser);         
         timeout = !waitSem.tryAcquire(3000, TimeUnit.MILLISECONDS);
 
         Assert.assertFalse(timeout);

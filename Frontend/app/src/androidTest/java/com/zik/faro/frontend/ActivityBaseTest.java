@@ -30,7 +30,7 @@ public class ActivityBaseTest extends ApiBaseTest {
     }
 
     @LargeTest
-    public void testCreateGetPoll() throws InterruptedException, MalformedURLException {
+    public void testCreateGetActivity() throws InterruptedException, MalformedURLException {
         // Sign up user, so that the token cache is populated
         final Semaphore waitSem = new Semaphore(0);
         FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));

@@ -62,7 +62,7 @@ public class OKHttpWrapperPoll extends BaseFaroOKHttpWrapper implements PollHand
             String pollPostBody = mapper.toJson(poll);
             Request request = new Request.Builder()
                     .url(baseHandlerURL.toString() + eventId + "/poll/create/")
-                    .put(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), pollPostBody))
+                    .post(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), pollPostBody))
                     .addHeader("Authentication", token)
                     .build();
             this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<String>(callback, String.class));
