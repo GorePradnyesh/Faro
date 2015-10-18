@@ -45,16 +45,10 @@ public class LoginHandler {
 
         logger.info("username : " + username);
 
-        // Authenticate the user
-        UserCredentials userCredentials = UserCredentialsDatastoreImpl.loadUserCreds(username);
-
-        if (userCredentials == null) {
-            // username does not match
-            logger.error(MessageFormat.format("Incorrect username. User {0} does not exist", username));
-            throw new FaroWebAppException(FaroResponseStatus.INVALID_LOGIN, "Invalid username and/or password.");
-        }
-        
         try {
+            // Authenticate the user
+            UserCredentials userCredentials = UserCredentialsDatastoreImpl.loadUserCreds(username);
+
             if (!PasswordManager.checkPasswordEquality(password, userCredentials.getEncryptedPassword())) {
                 logger.error("Incorrect password");
                 throw new FaroWebAppException(FaroResponseStatus.INVALID_LOGIN, "Invalid username and/or password.");
