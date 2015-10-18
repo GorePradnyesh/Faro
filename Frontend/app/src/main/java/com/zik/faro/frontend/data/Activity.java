@@ -11,7 +11,7 @@ public class Activity {
 
     private String description;
     private Location location;
-    private DateOffset date;
+    private Calendar date;
 
     public Activity(String eventId, String name) {
         this(eventId, name, null, null, null);
@@ -21,7 +21,7 @@ public class Activity {
         this(null, null);
     }
 
-    public Activity(String eventId, String name, String description, Location location, DateOffset date) {
+    public Activity(String eventId, String name, String description, Location location, Calendar date) {
         this.id = UUID.randomUUID().toString();
         this.eventId = eventId;
         this.name = name;
@@ -60,11 +60,11 @@ public class Activity {
         this.location = location;
     }
 
-    public DateOffset getDate() {
+    public Calendar getDate() {
         return date;
     }
 
-    public void setDate(DateOffset date) {
+    public void setDate(Calendar date) {
         this.date = date;
     }
 

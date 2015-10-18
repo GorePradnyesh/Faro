@@ -1,6 +1,7 @@
 package com.zik.faro.frontend;
 
 import android.app.Application;
+import android.test.ActivityTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 
 import com.squareup.okhttp.Request;
@@ -63,23 +64,23 @@ public class ActivityBaseTest extends ApiBaseTest {
         
         // Create Activity 
         String activityName = UUID.randomUUID().toString();
-        Activity activity = new Activity(eventId, activityName, "randomDescription", new Location("Location1"), new DateOffset(new Date(), 1000));
-        TestActivityCreateCallback createActivity = new TestActivityCreateCallback(waitSem, 200);
-        serviceHandler.getActivityHandler().createActivity(createActivity, eventId, activity);
+        Activity activity = new Activity(eventId, activityName, "randomDescription", new Location("Location1"), Calendar.getInstance());
+        TestActivityCreateCallback createActivityCallback = new TestActivityCreateCallback(waitSem, 200);
+        serviceHandler.getActivityHandler().createActivity(createActivityCallback, eventId, activity);
         timeout = !waitSem.tryAcquire(testTimeout, TimeUnit.MILLISECONDS);
         Assert.assertFalse(timeout);
-        Assert.assertNotNull(callback.receivedEvent);
-        Assert.assertFalse(callback.failed);
-        Assert.assertFalse(callback.unexpectedResponseCode);
+        Assert.assertNotNull(createActivityCallback.receivedActivity);
+        Assert.assertFalse(createActivityCallback.failed);
+        Assert.assertFalse(createActivityCallback.unexpectedResponseCode);
         
         // Get Activity. TODO: Add the remaining tests here
     }
 
-    static class TestActivityCreateCallback extends Utils.BaseTestCallbackHandler implements BaseFaroRequestCallback<String> {
+    static class TestActivityCreateCallback extends Utils.BaseTestCallbackHandler implements BaseFaroRequestCallback<Activity> {
         TestActivityCreateCallback(Semaphore semaphore, int expectedCode){
             super(semaphore, expectedCode);
         }
-
+        Activity receivedActivity;
         @Override
         public void onFailure(Request request, IOException e) {
             waitSem.release();
@@ -87,9 +88,13 @@ public class ActivityBaseTest extends ApiBaseTest {
         }
 
         @Override
-        public void onResponse(String s, HttpError error) {
+        public void onResponse(Activity activity, HttpError error) {
             if(error != null){
                 this.failed = true;
+            }
+            else
+            {
+                this.receivedActivity = activity;
             }
             waitSem.release();
         }
