@@ -16,8 +16,10 @@ import com.googlecode.objectify.annotation.Serialize;
 
 @XmlRootElement
 @Entity
-public class Activity {
-    @Id
+public class ActivityDo {
+    
+
+	@Id
     private String id;
     @Parent
     private Ref<EventDo> eventId;
@@ -28,14 +30,14 @@ public class Activity {
     private Location location;
     @Serialize private Calendar date;
     
-    public Activity(String eventId, String name) {
+    public ActivityDo(String eventId, String name) {
         this(eventId, name, null, null, null, null);
     }
 
-    private Activity() {    // TO Satisfy JaxB
+    public ActivityDo() {    // TO Satisfy JaxB
     }
 
-    public Activity(String eventId, String name, String description,
+    public ActivityDo(String eventId, String name, String description,
     		Location location, Calendar date, Assignment assignment) {
         this.id = UUID.randomUUID().toString();;
         this.eventId = Ref.create(Key.create(EventDo.class, eventId));
@@ -91,4 +93,16 @@ public class Activity {
     public Assignment getAssignment(){
         return this.assignment;
     }
+    
+    public void setId(String id) {
+		this.id = id;
+	}
+
+	public void setEventId(String eventId) {
+		this.eventId = Ref.create(Key.create(EventDo.class, eventId));;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 }

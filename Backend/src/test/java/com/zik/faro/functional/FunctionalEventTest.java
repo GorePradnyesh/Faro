@@ -13,6 +13,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import com.zik.faro.TestHelper;
 import com.zik.faro.api.bean.Event;
@@ -155,12 +156,12 @@ public class FunctionalEventTest {
     	ClientResponse eventsResponse = TestHelper.doGET(endpoint.toString(), "v1/events", new MultivaluedMapImpl(), token);
     	eventsResponse = TestHelper.doGET(endpoint.toString(), "v1/events", new MultivaluedMapImpl(), token);
     	eventsResponse = TestHelper.doGET(endpoint.toString(), "v1/events", new MultivaluedMapImpl(), token);
-    	List<Event> events = eventsResponse.getEntity(List.class);
+    	List<Event> events = eventsResponse.getEntity(new GenericType<List<Event>>(){});
     	Assert.assertEquals(6, events.size());
     }
     
     @Test
-    public void allTests() throws Exception{
+    public void allTest() throws Exception{
     	createEventTest();
     	getEventDetails();
     	disableEventControl();
@@ -169,7 +170,7 @@ public class FunctionalEventTest {
     }
 
     
-    private void assertEntity(EventCreateData expected, Event actual){
+    public static void assertEntity(EventCreateData expected, Event actual){
     	Assert.assertEquals(expected.getEventName(), actual.getEventName());
         Assert.assertEquals(expected.getEndDate(), actual.getEndDate());
         Assert.assertEquals(expected.getStartDate(), actual.getStartDate());

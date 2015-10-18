@@ -4,10 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 
 import com.zik.faro.commons.exceptions.IllegalDataOperation;
 
@@ -17,7 +13,6 @@ import com.zik.faro.commons.exceptions.IllegalDataOperation;
  * need to be a storage @Entity by itself.
 */
 
-@XmlRootElement
 public class Assignment {
     private String id;
     private ActionStatus status;
@@ -36,8 +31,11 @@ public class Assignment {
     	this.status = status;
     }
     
-    @XmlElement
-    public List<Item> getItems(){
+    public Map<String,Item> getItems(){
+    	return this.items;
+    }
+    
+    public List<Item> getItemsList(){
         return new ArrayList<Item>(this.items.values());     
     }
 

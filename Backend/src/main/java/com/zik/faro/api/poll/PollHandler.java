@@ -19,7 +19,6 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -28,14 +27,13 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import javax.xml.bind.annotation.XmlRootElement;
 
 import com.sun.jersey.api.JResponse;
+import com.zik.faro.api.bean.Poll;
 import com.zik.faro.applogic.PollManagement;
 import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
-import com.zik.faro.data.Poll;
 
 @Path(EVENT_PATH_CONST + EVENT_ID_PATH_PARAM_STRING + POLL_PATH_CONST)
 public class PollHandler {
@@ -58,12 +56,12 @@ public class PollHandler {
     }
 
     @Path(POLL_CREATE_PATH_CONST)
-    @PUT
+    @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public JResponse<String> createPoll(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public JResponse<Poll> createPoll(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                              Poll poll){
         try {
-			PollManagement.createPoll(poll);
+        	 return JResponse.ok(PollManagement.createPoll(poll)).build();
 		} catch (DataNotFoundException e) {
 			// If event not present exception thrown.
 			Response response = Response.status(Response.Status.NOT_FOUND)
@@ -71,7 +69,6 @@ public class PollHandler {
 					.build();
             throw new WebApplicationException(response);
 		}
-        return JResponse.ok(Constants.HTTP_OK).build();
     }
 
     @Path(POLL_ID_PATH_PARAM_STRING + POLL_UNVOTED_COUNT_CONST)
@@ -134,19 +131,4 @@ public class PollHandler {
         PollManagement.deletePoll(eventId, pollId);
         return JResponse.ok(Constants.HTTP_OK).build();
     }
-
-    @XmlRootElement
-    private static class VoteCount{
-        public String eventId;
-        public String pollId;
-        public Integer pollCount;
-
-        private VoteCount(){}
-        VoteCount(final String eventId, final String pollId, final Integer pollCount) {
-            this.pollCount = pollCount;
-            this.eventId = eventId;
-            this.pollId = pollId;
-        }
-    }
-
 }

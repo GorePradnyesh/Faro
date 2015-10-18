@@ -5,40 +5,40 @@ import java.util.List;
 
 import com.googlecode.objectify.Work;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
-import com.zik.faro.data.Activity;
+import com.zik.faro.data.ActivityDo;
 import com.zik.faro.data.EventDo;
 
 public class ActivityDatastoreImpl {
     private static final String EVENTID_FIELD_NAME = "eventId";
 
-    public static void storeActivity(final Activity activity){
+    public static void storeActivity(final ActivityDo activity){
         //TODO: Ensure that eventId exists before storing the Activity for that EventID
         DatastoreObjectifyDAL.storeObject(activity);
     }
 
-    public static Activity loadActivityById(final String activityId, final String eventId) throws DataNotFoundException{
-        Activity activity
-                = DatastoreObjectifyDAL.loadObjectWithParentId(EventDo.class, eventId, Activity.class, activityId);
+    public static ActivityDo loadActivityById(final String activityId, final String eventId) throws DataNotFoundException{
+        ActivityDo activity
+                = DatastoreObjectifyDAL.loadObjectWithParentId(EventDo.class, eventId, ActivityDo.class, activityId);
         return activity;
     }
 
 
     //NOTE: Since the activities contain the INDEXED event id this function is placed in the ActivityDatastoreImpl
-    public static List<Activity> loadActivitiesByEventId(final String eventId){
-        List<Activity> activityList =
-                DatastoreObjectifyDAL.loadObjectsByAncestorRef(EventDo.class, eventId, Activity.class);
+    public static List<ActivityDo> loadActivitiesByEventId(final String eventId){
+        List<ActivityDo> activityList =
+                DatastoreObjectifyDAL.loadObjectsByAncestorRef(EventDo.class, eventId, ActivityDo.class);
         return activityList;
     }
     
     public static void delelteActivityById(final String activityId, final String eventId){
-    	DatastoreObjectifyDAL.deleteObjectByIdWithParentId(activityId, Activity.class, eventId, EventDo.class);
+    	DatastoreObjectifyDAL.deleteObjectByIdWithParentId(activityId, ActivityDo.class, eventId, EventDo.class);
     }
     
-	public static void updateActivity(final Activity updateActivity, final String eventId) throws DataNotFoundException{
+	public static ActivityDo updateActivity(final ActivityDo updateActivity, final String eventId) throws DataNotFoundException{
     	Work w = new Work<TransactionResult>() {
 	        public TransactionResult run() {
 	        	// Read from datastore
-	        	Activity activity = null;
+	        	ActivityDo activity = null;
 				try {
 					activity = loadActivityById(updateActivity.getId(), eventId);
 				} catch (DataNotFoundException e) {
@@ -69,6 +69,7 @@ public class ActivityDatastoreImpl {
     	if(result.equals(TransactionResult.DATANOTFOUND)){
     		throw new DataNotFoundException("Activity not found");
     	}
+    	return updateActivity;
     }
 	
 	

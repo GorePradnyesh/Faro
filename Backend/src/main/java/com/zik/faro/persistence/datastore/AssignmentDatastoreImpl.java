@@ -9,7 +9,7 @@ import com.googlecode.objectify.Work;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
 import com.zik.faro.data.ActionStatus;
-import com.zik.faro.data.Activity;
+import com.zik.faro.data.ActivityDo;
 import com.zik.faro.data.Assignment;
 import com.zik.faro.data.EventDo;
 import com.zik.faro.data.Item;
@@ -21,10 +21,10 @@ public class AssignmentDatastoreImpl {
 	// and identifier is eventId for event assignment
 	public static Map<String,Assignment> getAllAssignments(final String eventId) throws DataNotFoundException{
 		// Returns assignments of all activities in an event
-		List<Activity> activities = ActivityDatastoreImpl.loadActivitiesByEventId(eventId);
+		List<ActivityDo> activities = ActivityDatastoreImpl.loadActivitiesByEventId(eventId);
 		Map<String,Assignment> assignmentMap = new HashMap<String, Assignment>();
 		List<Assignment> assignments = new ArrayList<Assignment>();
-		for(Activity activity : activities){
+		for(ActivityDo activity : activities){
 			assignmentMap.put(activity.getId(), activity.getAssignment());
 		}
 		// Add Event level assignment as well.
@@ -38,7 +38,7 @@ public class AssignmentDatastoreImpl {
 	
 	public static Assignment getActivityAssignment(final String eventId, final String activityId, 
 			String assignmentId) throws DataNotFoundException{
-		Activity activity = ActivityDatastoreImpl.loadActivityById(activityId, eventId);
+		ActivityDo activity = ActivityDatastoreImpl.loadActivityById(activityId, eventId);
 		if(activity.getAssignment().getId().equals(assignmentId)){
 			return activity.getAssignment();
 		}
@@ -46,9 +46,9 @@ public class AssignmentDatastoreImpl {
 	}
 	
 	public static int getCountOfPendingAssignments(String eventId) throws DataNotFoundException{
-		List<Activity> activities = ActivityDatastoreImpl.loadActivitiesByEventId(eventId);
+		List<ActivityDo> activities = ActivityDatastoreImpl.loadActivitiesByEventId(eventId);
 		int count = 0;
-		for(Activity activity : activities){
+		for(ActivityDo activity : activities){
 			count += getPendingCount(activity.getAssignment());
 		}
 		// Add event level assignment tasks as well
@@ -60,7 +60,7 @@ public class AssignmentDatastoreImpl {
 		if(assignment == null){
 			return 0;
 		}
-		List<Item> items = assignment.getItems();
+		List<Item> items = assignment.getItemsList();
 		int count = 0;
 		for(Item item : items){
 			if(item.getStatus().equals(ActionStatus.INCOMPLETE)){
@@ -76,7 +76,7 @@ public class AssignmentDatastoreImpl {
 			@Override
 			public TransactionResult run() {
 				// Read from datastore
-	        	Activity activity;
+	        	ActivityDo activity;
 				try {
 					activity = ActivityDatastoreImpl.loadActivityById(activityId, eventId);
 				} catch (DataNotFoundException e) {

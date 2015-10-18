@@ -18,7 +18,7 @@ import com.googlecode.objectify.impl.translate.opt.joda.JodaTimeTranslators;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.IllegalDataOperation;
 import com.zik.faro.data.ActionStatus;
-import com.zik.faro.data.Activity;
+import com.zik.faro.data.ActivityDo;
 import com.zik.faro.data.Assignment;
 import com.zik.faro.data.EventDo;
 import com.zik.faro.data.Item;
@@ -33,7 +33,7 @@ public class ActivityDatastoreImplTest {
                     .setDefaultHighRepJobPolicyUnappliedJobPercentage(50));
 	
     static{
-    	ObjectifyService.register(Activity.class);
+    	ObjectifyService.register(ActivityDo.class);
         ObjectifyService.register(EventDo.class);
         
     }
@@ -59,25 +59,25 @@ public class ActivityDatastoreImplTest {
         final String testEventId = "Event1";
 
         /*Create and store test activity 1*/
-        Activity activity1 = createActivity("123", "dummy1");
+        ActivityDo activity1 = createActivity("123", "dummy1");
         
         ActivityDatastoreImpl.storeActivity(activity1);
 
-        Activity retrievedActivity = ActivityDatastoreImpl.loadActivityById(activity1.getId(), activity1.getEventId());
+        ActivityDo retrievedActivity = ActivityDatastoreImpl.loadActivityById(activity1.getId(), activity1.getEventId());
         Assert.assertEquals(activity1.getId(), retrievedActivity.getId());
         Assert.assertEquals(activity1.getAssignment().getId(), retrievedActivity.getAssignment().getId());
 
         /*Create and store new Activity for the same event ( but of course with different ID) */
-        Activity activity2 = createActivity("123", "dummy2");
+        ActivityDo activity2 = createActivity("123", "dummy2");
         ActivityDatastoreImpl.storeActivity(activity2);
 
         /*Load the activities for testEventID and verify that both activities are retrieved*/
-        List<Activity> activityList = ActivityDatastoreImpl.loadActivitiesByEventId(activity1.getEventId());
+        List<ActivityDo> activityList = ActivityDatastoreImpl.loadActivitiesByEventId(activity1.getEventId());
         Assert.assertEquals(2, activityList.size());
     }
     
-    private Activity createActivity(String eventId, String name) throws IllegalDataOperation{
-    	Activity activity1 = new Activity(eventId, name, "dummyDescription",
+    private ActivityDo createActivity(String eventId, String name) throws IllegalDataOperation{
+    	ActivityDo activity1 = new ActivityDo(eventId, name, "dummyDescription",
                 new Location("Lake Shasta"),
                 new GregorianCalendar(),
                 new Assignment("1234",ActionStatus.INCOMPLETE));
@@ -91,15 +91,15 @@ public class ActivityDatastoreImplTest {
     @Test
     public void loadActivitiesByEventIdTest() throws IllegalDataOperation{
     	/*Create and store test activity 1*/
-    	Activity activity1 = createActivity("345", "NewYork");
-    	Activity activity2 = createActivity("345", "SF");
-    	Activity activity3 = createActivity("345", "Buffalo");
+    	ActivityDo activity1 = createActivity("345", "NewYork");
+    	ActivityDo activity2 = createActivity("345", "SF");
+    	ActivityDo activity3 = createActivity("345", "Buffalo");
         
     	ActivityDatastoreImpl.storeActivity(activity1);
     	ActivityDatastoreImpl.storeActivity(activity2);
     	ActivityDatastoreImpl.storeActivity(activity3);
     	
-    	List<Activity> list = ActivityDatastoreImpl.loadActivitiesByEventId(activity1.getEventId());
+    	List<ActivityDo> list = ActivityDatastoreImpl.loadActivitiesByEventId(activity1.getEventId());
     	Assert.assertEquals(list.size(), 3);
     	
     }
@@ -107,11 +107,11 @@ public class ActivityDatastoreImplTest {
     @Test
     public void deleteActivityById() throws IllegalDataOperation, DataNotFoundException{
     	// First create
-    	Activity a = createActivity("12345", "Snowboarding");
+    	ActivityDo a = createActivity("12345", "Snowboarding");
     	ActivityDatastoreImpl.storeActivity(a);
     	
     	// Verify indeed created
-    	Activity retrievedActivity = ActivityDatastoreImpl.loadActivityById(a.getId(), a.getEventId());
+    	ActivityDo retrievedActivity = ActivityDatastoreImpl.loadActivityById(a.getId(), a.getEventId());
     	Assert.assertNotNull(retrievedActivity);
     	
     	//ActivityDatastoreImpl
@@ -133,12 +133,12 @@ public class ActivityDatastoreImplTest {
     	String eventId = event.getEventId();
     	EventDatastoreImpl.storeEventOnly(event);
     	
-    	Activity a = new Activity(eventId, "TestEvent", "Testing update",
+    	ActivityDo a = new ActivityDo(eventId, "TestEvent", "Testing update",
     			new Location("San Jose"),new GregorianCalendar(), new Assignment("12", ActionStatus.INCOMPLETE));
     	ActivityDatastoreImpl.storeActivity(a);
     	
     	// Verify indeed created
-    	Activity retrievedActivity = ActivityDatastoreImpl.loadActivityById(a.getId(), eventId);
+    	ActivityDo retrievedActivity = ActivityDatastoreImpl.loadActivityById(a.getId(), eventId);
     	Assert.assertNotNull(retrievedActivity);
     	// Modify
     	a.getAssignment().addItem(new Item("Test", "123", 1, Unit.CENTIMETER));
@@ -152,7 +152,7 @@ public class ActivityDatastoreImplTest {
     	Assert.assertNotNull(retrievedActivity);
     	
     	// Verify
-    	Assert.assertEquals(retrievedActivity.getAssignment().getItems().get(0).getAssigneeId(), "123");
+    	Assert.assertEquals(retrievedActivity.getAssignment().getItemsList().get(0).getAssigneeId(), "123");
     	Assert.assertEquals(retrievedActivity.getLocation().locationName, "Fremont");
     	Assert.assertEquals(retrievedActivity.getDescription(), "Description changed");
     	

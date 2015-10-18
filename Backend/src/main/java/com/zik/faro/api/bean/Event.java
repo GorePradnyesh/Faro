@@ -1,17 +1,13 @@
 package com.zik.faro.api.bean;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.UUID;
-
-import javax.xml.bind.annotation.XmlRootElement;
 
 import com.zik.faro.data.Assignment;
 import com.zik.faro.data.Location;
 import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.expense.ExpenseGroup;
 
-@XmlRootElement
 public class Event {
     private String eventId;           
     private String eventName;         
