@@ -66,7 +66,7 @@ public class EventApiTest extends ApiBaseTest {
         EventCreateData eventCreateData= new EventCreateData("MySampleEvent", Calendar.getInstance(), Calendar.getInstance(), null, null);
         serviceHandler.getEventHandler().createEvent(createCallback, eventCreateData);
         timeout = false;
-        timeout = !waitSem.tryAcquire(10000, TimeUnit.MILLISECONDS);
+        timeout = !waitSem.tryAcquire(3000, TimeUnit.SECONDS);
 
         Assert.assertFalse(timeout);
         Assert.assertFalse(createCallback.failed);
@@ -76,7 +76,7 @@ public class EventApiTest extends ApiBaseTest {
         String eventId = createCallback.receivedEvent.getEventId();
         TestGetEventCallbackHandler callback = new TestGetEventCallbackHandler(waitSem, 200);
         serviceHandler.getEventHandler().getEvent(callback, eventId);
-        timeout = !waitSem.tryAcquire(3000, TimeUnit.MILLISECONDS);
+        timeout = !waitSem.tryAcquire(3000, TimeUnit.SECONDS);
 
         Assert.assertFalse(timeout);
         // TODO: check why start date is null for received event

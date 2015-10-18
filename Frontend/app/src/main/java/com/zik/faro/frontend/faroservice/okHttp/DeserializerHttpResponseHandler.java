@@ -1,19 +1,30 @@
 package com.zik.faro.frontend.faroservice.okHttp;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
+import com.zik.faro.frontend.request.CustomCalendarDeserializer;
+import com.zik.faro.frontend.request.CustomCalendarSerializer;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.Calendar;
 
 public class DeserializerHttpResponseHandler<T> implements Callback {
     private BaseFaroRequestCallback callback;
     private Class<T> responseClass;
-    protected final static Gson mapper = new Gson();
+    private final static Gson mapper  = gsonBuilder();
+
+    private static Gson gsonBuilder(){
+        GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeHierarchyAdapter(Calendar.class, new CustomCalendarSerializer());
+        builder.registerTypeHierarchyAdapter(Calendar.class, new CustomCalendarDeserializer());
+        return builder.create();
+    }
     private Type type;
 
     DeserializerHttpResponseHandler(final BaseFaroRequestCallback<T> callback, final Class<T> clazz) {

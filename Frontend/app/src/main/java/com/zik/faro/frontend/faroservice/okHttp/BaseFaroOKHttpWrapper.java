@@ -1,16 +1,27 @@
 package com.zik.faro.frontend.faroservice.okHttp;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.squareup.okhttp.OkHttpClient;
+import com.zik.faro.frontend.request.CustomCalendarDeserializer;
+import com.zik.faro.frontend.request.CustomCalendarSerializer;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Calendar;
 
 public class BaseFaroOKHttpWrapper {
     private static OkHttpClient client_s;
 
-    protected final static String DEFAULT_CONTENT_TYPE = "application/json";
-    protected final static Gson mapper = new Gson();
+    protected final String DEFAULT_CONTENT_TYPE = "application/json";
+    protected final static Gson mapper  = gsonBuilder();
+    
+    private static Gson gsonBuilder(){
+        GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeHierarchyAdapter(Calendar.class, new CustomCalendarSerializer());
+        builder.registerTypeHierarchyAdapter(Calendar.class, new CustomCalendarDeserializer());
+        return builder.create();
+    } 
 
     protected final OkHttpClient httpClient;
     protected URL baseUrl;

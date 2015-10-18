@@ -62,7 +62,7 @@ public class OKHttpWrapperEvent extends BaseFaroOKHttpWrapper implements EventHa
     public void getEvent(final BaseFaroRequestCallback<Event> callback, final String eventId){
         String token = TokenCache.getTokenCache().getAuthToken();
         Request request = new Request.Builder()
-                .url(baseHandlerURL.toString() + eventId)
+                .url(baseHandlerURL.toString() + eventId + "/details/")
                 .addHeader("Authentication", token)
                 .build();
 
