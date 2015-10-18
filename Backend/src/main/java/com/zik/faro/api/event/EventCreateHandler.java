@@ -1,18 +1,21 @@
 package com.zik.faro.api.event;
 
 
-import com.zik.faro.api.responder.EventCreateData;
-import com.zik.faro.applogic.EventManagement;
-import com.zik.faro.commons.ParamValidation;
+import static com.zik.faro.commons.Constants.EVENT_CREATE_PATH_CONST;
+import static com.zik.faro.commons.Constants.EVENT_PATH_CONST;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
 
-import static com.zik.faro.commons.Constants.*;
-
-
+import com.sun.jersey.api.JResponse;
+import com.zik.faro.api.bean.Event;
+import com.zik.faro.api.responder.EventCreateData;
+import com.zik.faro.applogic.EventManagement;
 
 @Path(EVENT_PATH_CONST + EVENT_CREATE_PATH_CONST)
 public class EventCreateHandler {
@@ -41,13 +44,11 @@ public class EventCreateHandler {
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public EventManagement.MinEvent createEvent(EventCreateData eventCreateData){
-        ParamValidation.genericParamValidations(eventCreateData,"eventCreateData");
-
+    public JResponse<Event> createEvent(EventCreateData eventCreateData){
         final String userId = context.getUserPrincipal().getName();
 
-        EventManagement.MinEvent minEvent = EventManagement.createEvent(userId, eventCreateData);
-        return minEvent;
+        Event event = EventManagement.createEvent(userId, eventCreateData);
+        return JResponse.ok(event).build();
     }
 
 }

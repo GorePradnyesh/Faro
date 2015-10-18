@@ -8,6 +8,7 @@ import com.zik.faro.auth.jwt.FaroJwtTokenManager;
 import com.zik.faro.auth.jwt.JwtTokenValidationException;
 import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.FaroResponseStatus;
+import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.FaroWebAppException;
 import com.zik.faro.data.user.UserCredentials;
 import com.zik.faro.persistence.datastore.UserCredentialsDatastoreImpl;
@@ -46,8 +47,8 @@ public class AuthFilter implements ContainerRequestFilter {
     public ContainerRequest filter(ContainerRequest containerRequest) {
         logger.info("---- Auth filter invoked. ----");
 
-        String nativeLoginPath = Constants.AUTH_PATH_CONST + Constants.AUTH_LOGIN_PATH_CONST;
-        String nativeSignupPath = Constants.AUTH_PATH_CONST + Constants.AUTH_SIGN_UP_PATH_CONST;
+        String nativeLoginPath = Constants.AUTH_PATH_CONST + Constants.AUTH_LOGIN_PATH_CONST + "/";
+        String nativeSignupPath = Constants.AUTH_PATH_CONST + Constants.AUTH_SIGN_UP_PATH_CONST + "/";
         String forgotPasswordPath = Constants.AUTH_PATH_CONST + Constants.AUTH_PASSWORD_PATH_CONST
                                     + Constants.AUTH_FORGOT_PASSWORD_PATH_CONST;
         String forgotPasswordFormPath = Constants.AUTH_PATH_CONST + Constants.AUTH_PASSWORD_PATH_CONST
@@ -55,6 +56,10 @@ public class AuthFilter implements ContainerRequestFilter {
         String newPasswordPath = Constants.AUTH_PATH_CONST + Constants.AUTH_PASSWORD_PATH_CONST
                                  + Constants.AUTH_NEW_PASSWORD_PATH_CONST;
         String requestPath = "/" + containerRequest.getPath();
+
+        if(!requestPath.endsWith("/")){
+            requestPath += "/";
+        }
 
         logger.info("request path : " + requestPath);
 
@@ -125,7 +130,11 @@ public class AuthFilter implements ContainerRequestFilter {
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             // Add logging
             throw new IllegalStateException("Unable to authenticate the request");
+        } catch (DataNotFoundException e) {
+            throw new FaroWebAppException(FaroResponseStatus.UNAUTHORIZED, "Invalid token. User not found");
         }
+
+
     }
 }
 

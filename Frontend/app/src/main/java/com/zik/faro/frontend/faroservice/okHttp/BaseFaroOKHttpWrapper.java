@@ -1,24 +1,44 @@
 package com.zik.faro.frontend.faroservice.okHttp;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.squareup.okhttp.OkHttpClient;
+import com.zik.faro.frontend.request.CustomCalendarDeserializer;
+import com.zik.faro.frontend.request.CustomCalendarSerializer;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Calendar;
 
 public class BaseFaroOKHttpWrapper {
     private static OkHttpClient client_s;
 
-    protected final static String DEFAULT_CONTENT_TYPE = "application/json";
-    protected final static Gson mapper = new Gson();
+    protected final String DEFAULT_CONTENT_TYPE = "application/json";
+    protected final static Gson mapper  = gsonBuilder();
+    
+    private static Gson gsonBuilder(){
+        GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeHierarchyAdapter(Calendar.class, new CustomCalendarSerializer());
+        builder.registerTypeHierarchyAdapter(Calendar.class, new CustomCalendarDeserializer());
+        return builder.create();
+    } 
 
     protected final OkHttpClient httpClient;
     protected URL baseUrl;
     protected URL baseHandlerURL;
 
+    protected final String authHeaderName = "Authentication";
+    
     BaseFaroOKHttpWrapper(final URL baseUrl, final String pathPrefix){
         this.baseUrl = baseUrl;
+        this.baseHandlerURL = this.constructUrl(this.baseUrl, pathPrefix);
+        this.httpClient = getOkHttpClient();
+    }
+    
+    public URL constructUrl(final URL baseUrl, final String pathPrefix)
+    {
         String prefix = "";
+        URL outUrl = baseUrl;
         // Adjust slashes at the beginning of prefix
         if(pathPrefix.startsWith("/")){
             prefix = pathPrefix.substring(1, pathPrefix.length() -1);
@@ -30,14 +50,13 @@ public class BaseFaroOKHttpWrapper {
             prefix = prefix + "/";
         }
         try {
-            if(!this.baseUrl.toString().endsWith("/")){
-                this.baseUrl = new URL(this.baseUrl.toString() + "/");
+            if(!outUrl.toString().endsWith("/")){
+                outUrl = new URL(outUrl.toString() + "/");
             }
-            this.baseHandlerURL = new URL(this.baseUrl.toString() + prefix);
+            return new URL(outUrl.toString() + prefix);
         } catch (MalformedURLException e) {
             throw new RuntimeException("unexpected exception while normalizing url:" + this.baseUrl);
         }
-        this.httpClient = getOkHttpClient();
     }
 
     private static OkHttpClient getOkHttpClient(){

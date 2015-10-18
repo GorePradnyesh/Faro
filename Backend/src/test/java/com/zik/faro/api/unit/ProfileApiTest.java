@@ -50,7 +50,7 @@ public class ProfileApiTest {
         Whitebox.setInternalState(profileHandler, TestHelper.setupMockSecurityContext("rwaters@gmail.com"));
         profileHandler.createProfile(user);
 
-        FaroUser retrievedUser = profileHandler.getProfile();
+        FaroUser retrievedUser = profileHandler.getProfile().getEntity();
         Assert.assertEquals(user.getFirstName(), retrievedUser.getFirstName());
     }
 }

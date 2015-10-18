@@ -1,23 +1,25 @@
 package com.zik.faro.data;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import com.zik.faro.commons.exceptions.IllegalDataOperation;
 
-@XmlRootElement
 public class Item {
-    private final String id;
+   
+	private String id;
     private String name;
-    private String assigneeId; //TODO: change to type Id;
+    private String assigneeId; 
     private int count;
     private Unit unit;
     private ActionStatus status;
 
     private Item(){ // To satisfy JAXB
-        this.id = null;
     }
-
-    public Item(String name, String assigneeId, int count, Unit unit) {
-        this.id = Identifier.createUniqueIdentifierString();
+    
+    
+    public Item(String name, String assigneeId, int count, Unit unit, String id) throws IllegalDataOperation {
+    	if(id == null || id.isEmpty() || name == null || name.isEmpty()){
+        	throw new IllegalDataOperation("TODO item name or id cannot be null");
+        }
+    	this.id = id;
         this.name = name;
         this.assigneeId = assigneeId;
         this.count = count;
@@ -25,10 +27,17 @@ public class Item {
         this.status = ActionStatus.INCOMPLETE;
     }
 
-    @XmlElement
+    public Item(String name, String assigneeId, int count, Unit unit) throws IllegalDataOperation {
+        this(name,assigneeId,count,unit,Identifier.createUniqueIdentifierString());
+    }
+    
     public String getId() {
         return id;
     }
+    
+    public void setId(String id) {
+		this.id = id;
+	}
 
     public String getName() {
         return name;

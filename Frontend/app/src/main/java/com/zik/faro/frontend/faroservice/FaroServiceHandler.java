@@ -1,15 +1,24 @@
 package com.zik.faro.frontend.faroservice;
 
+import com.zik.faro.frontend.faroservice.okHttp.OKHttpWrapperActivity;
 import com.zik.faro.frontend.faroservice.okHttp.OKHttpWrapperEvent;
+import com.zik.faro.frontend.faroservice.okHttp.OKHttpWrapperPoll;
+import com.zik.faro.frontend.faroservice.okHttp.OKHttpWrapperSignup;
 import com.zik.faro.frontend.faroservice.okHttp.OkHttpWrapperProfile;
+import com.zik.faro.frontend.faroservice.spec.ActivityHandler;
 import com.zik.faro.frontend.faroservice.spec.EventHandler;
+import com.zik.faro.frontend.faroservice.spec.PollHandler;
 import com.zik.faro.frontend.faroservice.spec.ProfileHandler;
+import com.zik.faro.frontend.faroservice.spec.SignupHandler;
 
 import java.net.URL;
 
 public class FaroServiceHandler {
-    private EventHandler eventHandler;
-    private ProfileHandler profileHandler;
+    private EventHandler        eventHandler;
+    private ProfileHandler      profileHandler;
+    private SignupHandler       signupHandler;
+    private ActivityHandler     activityHandler;
+    private PollHandler         pollHandler;
 
     private FaroServiceHandler(){}
 
@@ -17,6 +26,9 @@ public class FaroServiceHandler {
         FaroServiceHandler serviceHandler = new FaroServiceHandler();
         serviceHandler.eventHandler = new OKHttpWrapperEvent(baseUrl);
         serviceHandler.profileHandler = new OkHttpWrapperProfile(baseUrl);
+        serviceHandler.signupHandler = new OKHttpWrapperSignup(baseUrl);
+        serviceHandler.pollHandler = new OKHttpWrapperPoll(baseUrl);
+        serviceHandler.activityHandler = new OKHttpWrapperActivity(baseUrl);
         return serviceHandler;
     }
 
@@ -26,5 +38,17 @@ public class FaroServiceHandler {
 
     public ProfileHandler getProfileHandler() {
         return profileHandler;
+    }
+
+    public SignupHandler getSignupHandler() {
+        return signupHandler;
+    }
+    
+    public PollHandler getPollHandler() {
+        return pollHandler;
+    }
+
+    public ActivityHandler getActivityHandler() {
+        return activityHandler;
     }
 }

@@ -1,5 +1,6 @@
 package com.zik.faro.persistence.datastore;
 
+import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.data.user.UserCredentials;
 
 import javax.jws.soap.SOAPBinding;
@@ -13,7 +14,7 @@ public class UserCredentialsDatastoreImpl {
         DatastoreObjectifyDAL.storeObject(userCredentials);
     }
 
-    public static UserCredentials loadUserCreds(final String userId) {
+    public static UserCredentials loadUserCreds(final String userId) throws DataNotFoundException {
         return DatastoreObjectifyDAL.loadObjectById(userId, UserCredentials.class);
     }
 }

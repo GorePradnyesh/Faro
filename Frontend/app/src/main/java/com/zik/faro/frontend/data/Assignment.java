@@ -40,4 +40,5 @@ public class Assignment {
     public void setStatus(ActionStatus status) {
         this.status = status;
     }
+    
 }
