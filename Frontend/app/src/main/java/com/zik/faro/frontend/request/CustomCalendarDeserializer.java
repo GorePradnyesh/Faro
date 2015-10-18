@@ -15,9 +15,10 @@ public class CustomCalendarDeserializer implements JsonDeserializer<Calendar> {
     public Calendar deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException{
         Calendar cal = Calendar.getInstance();
         String content = json.getAsJsonPrimitive().getAsString();
-        SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
+        //2015-10-18T21:58:39.283+0000
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         try {
-            cal.setTime(sdf.parse("Mon Mar 14 16:02:37 GMT 2011"));// all done
+            cal.setTime(sdf.parse(content));// all done
         } catch (ParseException e) {
             throw new JsonParseException(e);
         }

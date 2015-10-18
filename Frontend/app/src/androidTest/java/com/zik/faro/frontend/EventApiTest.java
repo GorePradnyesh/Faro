@@ -36,10 +36,13 @@ public class EventApiTest extends ApiBaseTest {
         
     @LargeTest
     public void testGetEvent() throws InterruptedException, MalformedURLException {
+        // Sign up user, so that the token cache is populated
         final Semaphore waitSem = new Semaphore(0);
         FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
+        String uuidEmail = UUID.randomUUID().toString()+ "@gmail.com";
+        String password = UUID.randomUUID().toString();
 
-
+        getTokenForNewUser(uuidEmail, password);
         TestGetEventCallbackHandler callback = new TestGetEventCallbackHandler(waitSem, 404);
         serviceHandler.getEventHandler().getEvent(callback, "randomEventId");
         boolean timeout = false;
@@ -107,6 +110,15 @@ public class EventApiTest extends ApiBaseTest {
         Assert.assertFalse(callback.failed);
         Assert.assertFalse(callback.unexpectedResponseCode);
         Assert.assertNotNull(callback.receivedEvent.getEventId());
+
+        // Get Event
+        String eventId = callback.receivedEvent.getEventId();
+        TestGetEventCallbackHandler getEventCallback = new TestGetEventCallbackHandler(waitSem, 200);
+        serviceHandler.getEventHandler().getEvent(getEventCallback, eventId);
+        timeout = !waitSem.tryAcquire(3000, TimeUnit.SECONDS);
+        Assert.assertNotNull(getEventCallback.receivedEvent);
+        Assert.assertFalse(getEventCallback.failed);
+        Assert.assertFalse(getEventCallback.unexpectedResponseCode);
         
         timeout = false;
         // Get event list
