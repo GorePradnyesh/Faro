@@ -20,6 +20,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -73,7 +74,46 @@ public class ActivityBaseTest extends ApiBaseTest {
         Assert.assertFalse(createActivityCallback.failed);
         Assert.assertFalse(createActivityCallback.unexpectedResponseCode);
         
-        // Get Activity. TODO: Add the remaining tests here
+        // Get Activity. 
+        String activityId = createActivityCallback.receivedActivity.getId();
+        createActivityCallback = new TestActivityCreateCallback(waitSem, 200);
+        serviceHandler.getActivityHandler().getActivity(createActivityCallback, eventId, activityId);
+        timeout = !waitSem.tryAcquire(testTimeout, TimeUnit.MILLISECONDS);
+        Assert.assertFalse(timeout);
+        Assert.assertEquals(activityName, createActivityCallback.receivedActivity.getName());
+        Assert.assertNotNull(createActivityCallback.receivedActivity);
+        Assert.assertFalse(createActivityCallback.failed);
+        Assert.assertFalse(createActivityCallback.unexpectedResponseCode);
+        
+        // Create Activity 
+        String activityName2 = UUID.randomUUID().toString();
+        Activity activity2 = new Activity(eventId, activityName, "randomDescription", new Location("Location1"), Calendar.getInstance());
+        TestActivityCreateCallback createActivityCallback2 = new TestActivityCreateCallback(waitSem, 200);
+        serviceHandler.getActivityHandler().createActivity(createActivityCallback2, eventId, activity);
+        timeout = !waitSem.tryAcquire(testTimeout, TimeUnit.MILLISECONDS);
+        Assert.assertFalse(timeout);
+        Assert.assertNotNull(createActivityCallback2.receivedActivity);
+        Assert.assertFalse(createActivityCallback2.failed);
+        Assert.assertFalse(createActivityCallback2.unexpectedResponseCode);
+        
+        // Get Activities
+        TestGetActivitiesCallback getActivitiesCallback = new TestGetActivitiesCallback(waitSem, 200);
+        serviceHandler.getActivityHandler().getActivities(getActivitiesCallback, eventId);
+        timeout = !waitSem.tryAcquire(testTimeout, TimeUnit.MILLISECONDS);
+        Assert.assertFalse(timeout);
+        Assert.assertNotNull(getActivitiesCallback.receivedActivities);
+        Assert.assertTrue(getActivitiesCallback.receivedActivities.size() > 1);
+        Assert.assertFalse(getActivitiesCallback.failed);
+        Assert.assertFalse(getActivitiesCallback.unexpectedResponseCode);
+        
+        // Delete
+        TestOKActionCallbackHandler deleteCallback = new TestOKActionCallbackHandler(waitSem, 200);
+        serviceHandler.getActivityHandler().deleteActivity(deleteCallback, eventId, activity.getId());
+        timeout = !waitSem.tryAcquire(testTimeout, TimeUnit.MILLISECONDS);
+        Assert.assertFalse(timeout);
+        Assert.assertFalse(deleteCallback.failed);
+        Assert.assertFalse(deleteCallback.unexpectedResponseCode);
+        
     }
 
     static class TestActivityCreateCallback extends Utils.BaseTestCallbackHandler implements BaseFaroRequestCallback<Activity> {
@@ -99,4 +139,31 @@ public class ActivityBaseTest extends ApiBaseTest {
             waitSem.release();
         }
     }
+
+    static class TestGetActivitiesCallback extends Utils.BaseTestCallbackHandler implements BaseFaroRequestCallback<List<Activity>> {
+        TestGetActivitiesCallback(Semaphore semaphore, int expectedCode){
+            super(semaphore, expectedCode);
+        }
+        List<Activity> receivedActivities;
+        @Override
+        public void onFailure(Request request, IOException e) {
+            waitSem.release();
+            this.failed = true;
+        }
+
+        @Override
+        public void onResponse(List<Activity> activities, HttpError error) {
+            if(error != null){
+                this.failed = true;
+            }
+            else
+            {
+                this.receivedActivities = activities;
+            }
+            waitSem.release();   
+        }
+    }
+
+
+    
 }

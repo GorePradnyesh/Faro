@@ -116,4 +116,32 @@ public class ApiBaseTest extends ApplicationTestCase<Application> {
             waitSem.release();
         }
     }
+
+
+    final static class TestOKActionCallbackHandler<String>
+            extends Utils.BaseTestCallbackHandler implements BaseFaroRequestCallback<String>{
+        TestOKActionCallbackHandler(final Semaphore sem, int expectedCode){
+            super(sem, expectedCode);
+        }
+
+        @Override
+        public void onFailure(Request request, IOException e) {
+            Log.v("Get Event", "Failed");
+            failed = true;
+            waitSem.release();
+        }
+
+        @Override
+        public void onResponse(String s, HttpError error){
+            if(error != null){
+                this.failed = true;
+            }
+            else
+            {
+                this.failed = false;
+            }
+            Log.v("Get Event", "Success");
+            waitSem.release();
+        }
+    }
 }
