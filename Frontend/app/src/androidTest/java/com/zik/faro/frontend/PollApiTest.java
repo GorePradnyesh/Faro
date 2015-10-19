@@ -78,13 +78,14 @@ public class PollApiTest extends ApiBaseTest{
         serviceHandler.getPollHandler().createPoll(pollCreateCallback, eventId, poll1);
         timeout = !waitSem.tryAcquire(testTimeout, TimeUnit.MILLISECONDS);
         Assert.assertFalse(timeout);
+        Assert.assertNotNull(pollCreateCallback.receivedPoll);
         Assert.assertFalse(pollCreateCallback.failed);
         Assert.assertFalse(pollCreateCallback.unexpectedResponseCode);
         
-        
+        Poll createdPoll = pollCreateCallback.receivedPoll;
         // Get Poll
         TestPollGetCallback getPollCallback = new TestPollGetCallback(waitSem, 200);
-        serviceHandler.getPollHandler().getPoll(getPollCallback, eventId, poll1.getId());
+        serviceHandler.getPollHandler().getPoll(getPollCallback, eventId, createdPoll.getId());
         timeout = !waitSem.tryAcquire(testTimeout, TimeUnit.MILLISECONDS);
         Assert.assertFalse(timeout);
         Assert.assertFalse(getPollCallback.failed);
@@ -129,7 +130,7 @@ public class PollApiTest extends ApiBaseTest{
         */
         
         // Delete Poll
-        TestPollDeleteCallback deletePollCallBack = new TestPollDeleteCallback(waitSem, 200);
+        TestOKActionCallbackHandler deletePollCallBack = new TestOKActionCallbackHandler(waitSem, 200);
         serviceHandler.getPollHandler().deletePoll(deletePollCallBack, eventId, poll1.getId());
         timeout = !waitSem.tryAcquire(testTimeout, TimeUnit.MILLISECONDS);
         Assert.assertFalse(timeout);
@@ -199,11 +200,12 @@ public class PollApiTest extends ApiBaseTest{
     }
     
     
-    static class TestPollCreateCallback extends Utils.BaseTestCallbackHandler implements BaseFaroRequestCallback<String> {
+    static class TestPollCreateCallback extends Utils.BaseTestCallbackHandler implements BaseFaroRequestCallback<Poll> {
+        Poll receivedPoll;
         TestPollCreateCallback(Semaphore semaphore, int expectedCode){
             super(semaphore, expectedCode);
         }
-
+    
         @Override
         public void onFailure(Request request, IOException e) {
             waitSem.release();
@@ -211,9 +213,12 @@ public class PollApiTest extends ApiBaseTest{
         }
 
         @Override
-        public void onResponse(String s, HttpError error) {
+        public void onResponse(Poll poll, HttpError error) {
             if(error != null){
                 this.failed = true;
+            }
+            else{
+                this.receivedPoll = poll;
             }
             waitSem.release();    
         }
@@ -222,12 +227,6 @@ public class PollApiTest extends ApiBaseTest{
     
     static class TestPollCastVoteCallback extends TestPollCreateCallback{
         TestPollCastVoteCallback(Semaphore semaphore, int expectedCode) {
-            super(semaphore, expectedCode);
-        }
-    }
-
-    static class TestPollDeleteCallback extends TestPollCreateCallback{
-        TestPollDeleteCallback(Semaphore semaphore, int expectedCode) {
             super(semaphore, expectedCode);
         }
     }
