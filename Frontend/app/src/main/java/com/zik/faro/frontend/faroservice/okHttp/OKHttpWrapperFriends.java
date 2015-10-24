@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OKHttpWrapperFriends extends BaseFaroOKHttpWrapper implements FriendsHandler{
-    OKHttpWrapperFriends(URL baseUrl, String pathPrefix) {
+    public OKHttpWrapperFriends(URL baseUrl) {
         super(baseUrl, "friends");
     }
 
@@ -26,7 +26,7 @@ public class OKHttpWrapperFriends extends BaseFaroOKHttpWrapper implements Frien
         String token = TokenCache.getTokenCache().getAuthToken();
         if(token != null){
             Request request = new Request.Builder()
-                    .url(this.baseHandlerURL.toString() + "/invite/")
+                    .url(this.baseHandlerURL.toString() + "invite/")
                     .post(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), userId))
                     .addHeader(authHeaderName, token)
                     .addHeader("Accept",DEFAULT_CONTENT_TYPE)
@@ -42,7 +42,7 @@ public class OKHttpWrapperFriends extends BaseFaroOKHttpWrapper implements Frien
         String token = TokenCache.getTokenCache().getAuthToken();
         if(token != null){
             Request request = new Request.Builder()
-                    .url(this.baseHandlerURL.toString() + "/invite/")
+                    .url(this.baseHandlerURL.toString())
                     .addHeader(authHeaderName, token)
                     .addHeader("Accept",DEFAULT_CONTENT_TYPE)
                     .build();
@@ -58,7 +58,7 @@ public class OKHttpWrapperFriends extends BaseFaroOKHttpWrapper implements Frien
         String token = TokenCache.getTokenCache().getAuthToken();
         if(token != null){
             Request request = new Request.Builder()
-                    .url(this.baseHandlerURL.toString() + "/remove?userId=" + userId)
+                    .url(this.baseHandlerURL.toString() + "remove?userId=" + userId)
                     .post(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), userId))
                     .addHeader(authHeaderName, token)
                     .addHeader("Accept",DEFAULT_CONTENT_TYPE)
