@@ -1,8 +1,15 @@
 package com.zik.faro.frontend;
 
+import com.squareup.okhttp.Request;
+import com.zik.faro.frontend.data.EventCreateData;
+import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
+import com.zik.faro.frontend.faroservice.HttpError;
+
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
 
 public class EventListHandler {
 
@@ -48,6 +55,30 @@ public class EventListHandler {
         return eventIDStr;
     }
 
+    final static class TestEventCreateCallback
+            implements BaseFaroRequestCallback<com.zik.faro.frontend.data.Event> {
+        com.zik.faro.frontend.data.Event receivedEvent;
+
+        @Override
+        public void onFailure(Request request, IOException e) {
+            //Handle failure
+        }
+
+        @Override
+        public void onResponse(com.zik.faro.frontend.data.Event event, HttpError error){
+            if(error != null){
+            }
+            // Assert that event == min event
+            this.receivedEvent = event;
+            String eventID = event.getEventId();
+            if(eventID != null) {
+                //eventListHandler.conditionallyAddNewEventToList(event);
+                //eventListHandler.eventMap.put(eventID, event);
+            }
+
+        }
+    }
+
     /*
     * Based on the start Date add new event to the list and Map only if it lies between the first
     * and last event retrieved in the list from the server. If it does not lie in between then
@@ -60,15 +91,14 @@ public class EventListHandler {
     public ErrorCodes addNewEvent(Event event) {
         //TODO: send update to server and if successful then add event to List and Map below and
         // update the eventID in the Event.
-        String eventID = getEventID();
 
-        if(eventID != null) {
-            event.setEventId(eventID);
-            conditionallyAddNewEventToList(event);
-            this.eventMap.put(eventID, event);
-            return ErrorCodes.SUCCESS;
-        }
-        return ErrorCodes.FAILURE;
+        TestEventCreateCallback createCallback = new TestEventCreateCallback();
+        EventCreateData eventCreateData= new EventCreateData(event.getEventName(),
+                event.getStartDateCalendar(), event.getEndDateCalendar(), null, null);
+        MainActivity.serviceHandler.getEventHandler().createEvent(createCallback, eventCreateData);
+
+
+        return ErrorCodes.SUCCESS;
     }
 
     private void conditionallyAddNewEventToList(Event event) {

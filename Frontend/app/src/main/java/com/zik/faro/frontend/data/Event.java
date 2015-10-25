@@ -13,6 +13,14 @@ public class Event {
     private Location location;
     private ObjectStatus status;
     private Assignment assignment;
+    private String eventDescription;
+
+    /*TODO change eventCreator boolean to be set based on a check to compare userID to eventCreatorID.
+    eventCreator boolean is not stored or updated to the server. It should not be part of the event
+    This is only to see whether the user gets to see the control flag option on eventEdit Page.
+    That can be determined by comparing the eventCreator userID and my own userID.
+    */
+    private boolean eventCreator;
 
     public Event(final String eventName, final Calendar startDate, final Calendar endDate,
                  final boolean controlFlag, final ExpenseGroup expenseGroup, final Location location) {
