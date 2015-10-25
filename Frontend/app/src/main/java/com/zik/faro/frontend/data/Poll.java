@@ -1,31 +1,30 @@
 package com.zik.faro.frontend.data;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
 public class Poll {
     private String id;
     private String eventId;
-    private String creator;
+    private String creatorId;
 
     private List<PollOption> pollOptions = new ArrayList<>();
     private String winnerId;
     private String owner;
     private String description;
     private ObjectStatus status;
-    private DateOffset deadline;                // Will not be used in V1.
+    private Calendar deadline;                // Will not be used in V1.
 
-    public Poll(String eventId, String creator, List<PollOption> pollOptions, String owner, String description) {
-        this.id = UUID.randomUUID().toString();
+    public Poll(String eventId, String creatorId, List<PollOption> pollOptions, String owner, String description) {
         this.eventId = eventId;
-        this.creator = creator;
+        this.creatorId = creatorId;
         this.pollOptions = pollOptions;
         this.owner = owner;
         this.description = description;
         this.status = ObjectStatus.OPEN;
     }
-
 
     public static class PollOption{
         public final String id;                                 //TODO: Change type to Id
@@ -58,8 +57,8 @@ public class Poll {
         return eventId;
     }
 
-    public String getCreator() {
-        return creator;
+    public String getCreatorId() {
+        return creatorId;
     }
 
     public List<PollOption> getPollOptions(){
@@ -99,11 +98,25 @@ public class Poll {
         this.status = status;
     }
 
-    public DateOffset getDeadline() {
+    public Calendar getDeadline() {
         return deadline;
     }
 
-    public void setDeadline(DateOffset deadline) {
+    public void setDeadline(Calendar deadline) {
         this.deadline = deadline;
+    }
+
+
+    public static class VoteCount{
+        public String eventId;
+        public String pollId;
+        public Integer pollCount;
+
+        private VoteCount(){}
+        VoteCount(final String eventId, final String pollId, final Integer pollCount) {
+            this.pollCount = pollCount;
+            this.eventId = eventId;
+            this.pollId = pollId;
+        }
     }
 }

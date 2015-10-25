@@ -7,14 +7,17 @@ import com.zik.faro.api.authentication.SignupHandler;
 import com.zik.faro.api.responder.FaroSignupDetails;
 import com.zik.faro.applogic.UserManagement;
 import com.zik.faro.commons.FaroResponseStatus;
+import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.FaroWebAppException;
 import com.zik.faro.data.user.Address;
 import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.data.user.UserCredentials;
 import com.zik.faro.persistence.datastore.UserCredentialsDatastoreImpl;
+
 import org.junit.*;
 
 import javax.ws.rs.core.Response;
+
 import java.util.UUID;
 
 /**
@@ -46,7 +49,7 @@ public class SignupApiTest {
     }
 
     @Test
-    public void testSignupUser() {
+    public void testSignupUser() throws DataNotFoundException {
         final String fName = UUID.randomUUID().toString();
         FaroUser user = new FaroUser("rwaters@gmail.com",
                 fName, null, "waters",
@@ -61,12 +64,12 @@ public class SignupApiTest {
         Assert.assertNotNull(token);
 
         // Verify the user exists and credentials have been entered
-        Assert.assertTrue(UserManagement.isExistingUser(user.getId()));
-        UserCredentials userCredentials = UserCredentialsDatastoreImpl.loadUserCreds(user.getId());
+        Assert.assertTrue(UserManagement.isExistingUser(user.getEmail()));
+        UserCredentials userCredentials = UserCredentialsDatastoreImpl.loadUserCreds(user.getEmail());
         Assert.assertNotNull(userCredentials);
         userCredentials.getEmail();
         userCredentials.getEncryptedPassword();
-        Assert.assertEquals(user.getId(), userCredentials.getEmail());
+        Assert.assertEquals(user.getEmail(), userCredentials.getEmail());
         Assert.assertNotNull(userCredentials.getEncryptedPassword());
     }
 
@@ -132,7 +135,7 @@ public class SignupApiTest {
     }
 
     public static String createNewUser(FaroUser user, String password) {
-        return new SignupHandler().signupUser(new FaroSignupDetails(user, password));
+        return new SignupHandler().signupUser(new FaroSignupDetails(user, password)).getEntity();
     }
 
 }

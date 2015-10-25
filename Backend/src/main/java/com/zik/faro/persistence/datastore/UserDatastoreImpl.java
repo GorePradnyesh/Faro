@@ -1,5 +1,6 @@
 package com.zik.faro.persistence.datastore;
 
+import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.data.user.FaroUser;
 
 import java.util.List;
@@ -12,7 +13,7 @@ public class UserDatastoreImpl {
         DatastoreObjectifyDAL.storeObject(user);
     }
 
-    public static FaroUser loadFaroUserById(final String userId){
+    public static FaroUser loadFaroUserById(final String userId) throws DataNotFoundException{
         FaroUser user = DatastoreObjectifyDAL.loadObjectById(userId, FaroUser.class);
         return user;
     }
@@ -22,5 +23,4 @@ public class UserDatastoreImpl {
         List<FaroUser> faroUsers = DatastoreObjectifyDAL.loadObjectsByIndexedStringFieldEQ(FIRST_NAME_FIELD_NAME, firstName, FaroUser.class);
         return faroUsers;
     }
-
 }

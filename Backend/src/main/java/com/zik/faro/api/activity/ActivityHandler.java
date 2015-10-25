@@ -1,29 +1,59 @@
 package com.zik.faro.api.activity;
 
-import com.zik.faro.commons.ParamValidation;
-import com.zik.faro.data.Activity;
-import com.zik.faro.data.DateOffset;
-import com.zik.faro.data.Location;
+import static com.zik.faro.commons.Constants.ACTIVITY_CREATE_PATH_CONST;
+import static com.zik.faro.commons.Constants.ACTIVITY_ID_PATH_PARAM;
+import static com.zik.faro.commons.Constants.ACTIVITY_ID_PATH_PARAM_STRING;
+import static com.zik.faro.commons.Constants.ACTIVITY_PATH_CONST;
+import static com.zik.faro.commons.Constants.ACTIVITY_UPDATE_PATH_CONST;
+import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM;
+import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM_STRING;
+import static com.zik.faro.commons.Constants.EVENT_PATH_CONST;
 
-import static com.zik.faro.commons.Constants.*;
+import java.util.Calendar;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Date;
+
+import com.sun.jersey.api.JResponse;
+import com.zik.faro.api.bean.Activity;
+import com.zik.faro.applogic.ActivityManagement;
+import com.zik.faro.commons.Constants;
+import com.zik.faro.commons.exceptions.DataNotFoundException;
+import com.zik.faro.data.ActivityDo;
+import com.zik.faro.data.Location;
 
 @Path(EVENT_PATH_CONST + EVENT_ID_PATH_PARAM_STRING + ACTIVITY_PATH_CONST)
 public class ActivityHandler {
-
+	@Context
+	SecurityContext context;
+	
     @Path(ACTIVITY_ID_PATH_PARAM_STRING)
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Activity getActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public JResponse<Activity> getActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                 @PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId){
-        //TODO: replace the dummy static code below with the actual calls
-        return new Activity(eventId, "dummyname", "dummyDescription",
-                new Location("Lake Shasta"),
-                new DateOffset(new Date(), 60 * 1000));
+    	try{
+    		Activity activity = ActivityManagement.getActivity(eventId, activityId);
+    		return JResponse.ok(activity).build();
+    		
+        } catch (DataNotFoundException e) {
+        	
+            Response response = Response.status(Response.Status.NOT_FOUND)
+                    .entity(e.getMessage())
+                    .build();
+            throw new WebApplicationException(response);
+        }
     }
 
     /*
@@ -34,16 +64,12 @@ public class ActivityHandler {
         <name>hiking</name>
     </activity>
     */
-    @Path(ACTIVITY_CREATE_PATH_CONST)
     @POST
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public String createActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    @Path(ACTIVITY_CREATE_PATH_CONST)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public JResponse<Activity> createActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                  Activity activity){
-        ParamValidation.genericParamValidations(activity, "activity");
-        //TODO: validate event_id and activity information
-
-        //TODO: replace the dummy static code below with the actual calls
-        return HTTP_OK;
+    	return JResponse.ok(ActivityManagement.createActivity(activity)).build();
     }
 
     /*
@@ -59,37 +85,32 @@ public class ActivityHandler {
         </location>
     </activityUpdateData>
     */
-
-    @Path(ACTIVITY_ID_PATH_PARAM_STRING + ACTIVITY_UPDATE_PATH_CONST)
+    
     @POST
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public String updateActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
-                                 @PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId,
-                               activityUpdateData activityUpdateData){
-        ParamValidation.genericParamValidations(activityUpdateData, "activityUpdateData");
-        ParamValidation.genericParamValidations(eventId, "eventId");
-        ParamValidation.genericParamValidations(activityId, "actvityId");
-        //TODO: Validate the eventID and activityID permissions
-        return HTTP_OK;
+    @Path(ACTIVITY_ID_PATH_PARAM_STRING + ACTIVITY_UPDATE_PATH_CONST)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public JResponse<Activity> updateActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+                               @PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId,
+                               Activity activityUpdateData){
+        activityUpdateData.setId(activityId);
+        activityUpdateData.setEventId(eventId);
+        try {
+        	return JResponse.ok(ActivityManagement.updateActivity(activityUpdateData, eventId)).build();
+		} catch (DataNotFoundException e) {
+			Response response = Response.status(Response.Status.NOT_FOUND)
+                    .entity(e.getMessage())
+                    .build();
+            throw new WebApplicationException(response);
+		}
     }
 
 
     @Path(ACTIVITY_ID_PATH_PARAM_STRING)
     @DELETE
-    public String deleteActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public JResponse<String> deleteActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                  @PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId){
-        ParamValidation.genericParamValidations(eventId, "eventId");
-        ParamValidation.genericParamValidations(activityId, "activityId");
-        //TODO: Validate the eventID and activityID permissions
-        return HTTP_OK;
+       ActivityManagement.deteleActivity(eventId, activityId);
+       return JResponse.ok(Constants.HTTP_OK).build();
     }
-
-
-    @XmlRootElement
-    private static class activityUpdateData {
-        public String description;
-        public DateOffset date;
-        public Location location;
-    }
-
+    
 }

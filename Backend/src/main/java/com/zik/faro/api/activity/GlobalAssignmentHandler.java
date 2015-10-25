@@ -1,16 +1,14 @@
 package com.zik.faro.api.activity;
 
 import com.sun.jersey.api.JResponse;
-import com.zik.faro.commons.ParamValidation;
+import com.zik.faro.applogic.AssignmentManagement;
+import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.data.Assignment;
-import com.zik.faro.data.Item;
-import com.zik.faro.data.Unit;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-
-import java.util.ArrayList;
-import java.util.List;
+import javax.ws.rs.core.Response;
+import java.util.Map;
 
 import static com.zik.faro.commons.Constants.*;
 
@@ -18,20 +16,16 @@ import static com.zik.faro.commons.Constants.*;
 public class GlobalAssignmentHandler {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public JResponse<List<Assignment>> getAssignments(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
-        ParamValidation.genericParamValidations(eventId, "eventId");
-        //TODO: Validate the eventID, userId permissions
-
-        List<Assignment> assignments = new ArrayList<>();
-        Assignment tempAssignment = new Assignment();
-        tempAssignment.addItem(new Item("blankets", "David", 4, Unit.COUNT));
-        tempAssignment.addItem(new Item("rice", "Roger", 10, Unit.LB));
-
-        Assignment assignment2 = new Assignment();
-        assignment2.addItem(new Item("rope", "David", 10, Unit.METER));
-
-        assignments.add(tempAssignment);
-        assignments.add(assignment2);
-        return JResponse.ok(assignments).build();
+    public JResponse<Map<String,Assignment>> getAssignments(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
+        Map<String,Assignment> assignments = null;
+		try {
+			assignments = AssignmentManagement.getAllAssignments(eventId);
+		} catch (DataNotFoundException e) {
+			Response response = Response.status(Response.Status.NOT_FOUND)
+                    .entity(e.getMessage())
+                    .build();
+            throw new WebApplicationException(response);
+		}
+		return JResponse.ok(assignments).build();
     }
 }

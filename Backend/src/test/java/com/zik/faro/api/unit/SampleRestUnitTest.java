@@ -3,7 +3,7 @@ package com.zik.faro.api.unit;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.test.framework.JerseyTest;
 
-import com.zik.faro.data.Event;
+import com.zik.faro.data.EventDo;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.*;
@@ -44,7 +44,7 @@ public class SampleRestUnitTest extends JerseyTest {
         Assert.assertNotNull(responseMessage);
 
         ObjectMapper mapper = new ObjectMapper();
-        Event testEvent = mapper.readValue(responseMessage, Event.class);
+        EventDo testEvent = mapper.readValue(responseMessage, EventDo.class);
         Assert.assertNotNull(testEvent.getEventId());
         Assert.assertNotNull(testEvent.getEventName());
     }

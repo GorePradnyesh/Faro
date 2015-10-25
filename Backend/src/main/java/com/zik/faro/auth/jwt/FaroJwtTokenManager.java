@@ -42,7 +42,7 @@ public class FaroJwtTokenManager {
      * @throws InvalidKeyException
      */
     public static FaroJwtClaims validateToken(String token) throws JwtTokenValidationException, SignatureException, NoSuchAlgorithmException, InvalidKeyException {
-        JWTVerifier verifier = new JWTVerifier(JWT_SIGNATURE_SECRET, null, FARO_JWT_ISSUER_VALUE);
+        JWTVerifier verifier = new FaroJwtVerifier(JWT_SIGNATURE_SECRET, null, FARO_JWT_ISSUER_VALUE);
         try {
             Map<String, Object> claimsMap = verifier.verify(token);
             return getClaims(claimsMap);

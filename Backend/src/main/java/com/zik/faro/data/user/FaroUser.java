@@ -1,15 +1,16 @@
 package com.zik.faro.data.user;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.google.common.base.Strings;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Ignore;
 import com.googlecode.objectify.annotation.Index;
 import com.zik.faro.commons.exceptions.IllegalDataOperation;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
-// TODO: Add data validations
 @Entity
 @XmlRootElement
 public class FaroUser {
@@ -20,7 +21,7 @@ public class FaroUser {
     private String             middleName;
     private String             lastName;
     private String             externalExpenseID;
-    private String             telephone;   //TODO: type tel number
+    private String             telephone;   
     private Address            address;
 
     public FaroUser(final String email) {
@@ -62,12 +63,12 @@ public class FaroUser {
     }
 
     /*Getters*/
+    
+    public String getEmail() { return this.email; }
 
-    public String getId() { return this.email; }
-
-    public String getEmail() {
-        return email;
-    }
+//    public String getEmail() {
+//        return email;
+//    }
 
     public String getFirstName() {
         return firstName;
@@ -93,7 +94,6 @@ public class FaroUser {
         return address;
     }
 
-    // TODO : Will have to make the setters private and still have jaxb working fine
     public void setEmail(String email) {
         this.email = email;
     }

@@ -1,6 +1,8 @@
 package com.zik.faro.persistence.datastore;
 
 import com.zik.faro.api.responder.MinUser;
+import com.zik.faro.applogic.UserManagement;
+import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.IllegalDataOperation;
 import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.data.user.FriendRelation;
@@ -23,12 +25,12 @@ public class FriendRelationDatastoreImpl {
 
         Also data is de-normalized and duplicated to reduce the queries needed to load entities in the future.
         */
-        FriendRelation friendRelation = new FriendRelation(bob.email, alice.email,
-                                                alice.firstName, alice.lastName, alice.expenseUserId);
+        FriendRelation friendRelation = new FriendRelation(bob.getEmail(), alice.getEmail(),
+                                                alice.getFirstName(), alice.getLastName(), alice.getExpenseUserId());
         DatastoreObjectifyDAL.storeObject(friendRelation);
 
-        friendRelation = new FriendRelation(alice.email, bob.email,
-                                                bob.firstName, bob.lastName, bob.expenseUserId);
+        friendRelation = new FriendRelation(alice.getEmail(), bob.getEmail(),
+                                                bob.getFirstName(), bob.getLastName(), bob.getExpenseUserId());
         DatastoreObjectifyDAL.storeObject(friendRelation);
     }
 
@@ -38,10 +40,7 @@ public class FriendRelationDatastoreImpl {
         return friendRelationList;
     }
 
-
-    //TODO: toUser - fromUser asymmmetric Nature of the FriendRelation should be taken. The to part of the relation
-    // has more info. So refactor the function accordingly.
-    public static FriendRelation loadFriendRelation(final String faroUserId1, final String faroUserId2){
+    public static FriendRelation loadFriendRelation(final String faroUserId1, final String faroUserId2) throws DataNotFoundException{
         /* Because of the symmetrical nature of the relation, one could very well switch the faroUserId1,2 args to
         get the same result.*/
         FriendRelation relation =
@@ -51,11 +50,16 @@ public class FriendRelationDatastoreImpl {
                                                                 faroUserId2);
         return relation;
     }
+    
+    public static void removeFriendRelation(final FaroUser faroUser1, final FaroUser faroUser2) throws IllegalDataOperation{
+    	
+    	// Remove both sides of the relation. Similar to how we create a friend relation
+    	FriendRelation friendRelation = new FriendRelation(faroUser1.getEmail(), faroUser2.getEmail(),
+                faroUser2.getFirstName(), faroUser2.getLastName(), faroUser2.getExternalExpenseID());
+    	DatastoreObjectifyDAL.deleteEntity(friendRelation);
 
-    public static void deleteFriendRelation(final String faroUserId1, final String faroUserId2){
-        DatastoreObjectifyDAL.deleteObjectWithParentId(FaroUser.class, faroUserId2, FriendRelation.class, faroUserId1);
-        DatastoreObjectifyDAL.deleteObjectWithParentId(FaroUser.class, faroUserId1, FriendRelation.class, faroUserId2);
+    	friendRelation = new FriendRelation(faroUser2.getEmail(), faroUser1.getEmail(),
+                faroUser1.getFirstName(), faroUser1.getLastName(), faroUser1.getExternalExpenseID());
+    	DatastoreObjectifyDAL.deleteEntity(friendRelation);
     }
-
-
 }

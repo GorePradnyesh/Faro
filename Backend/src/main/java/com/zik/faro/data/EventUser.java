@@ -14,29 +14,30 @@ import java.util.UUID;
 @XmlRootElement
 @Entity
 public class EventUser {
-    //TODO: De-normalize this to include more data about the user and the Event to prevent extra queries. See below
     //https://code.google.com/p/gwt-gae-book/wiki/StoringData#Many-to-Many_relationships
-
-    @Id
+	@Id
     private String id;
     @Index
-    private Ref<Event> eventRef;
+    private Ref<EventDo> eventRef;
     @Index
     private Ref<FaroUser> faroUserRef;
     private InviteStatus inviteStatus;
+    private String ownerId;
 
     private EventUser(){    // To satisfy JAXB
-        this.id = null;
-        this.eventRef = null;
-        this.faroUserRef = null;
-        this.inviteStatus = null;
+        
     }
 
     public EventUser(final String eventId, final String faroUserId){
         this.id = generateEventUserId(eventId, faroUserId);
-        this.eventRef = Ref.create(Key.create(Event.class, eventId));
+        this.eventRef = Ref.create(Key.create(EventDo.class, eventId));
         this.faroUserRef = Ref.create(Key.create(FaroUser.class, faroUserId));
         this.inviteStatus = InviteStatus.INVITED;
+    }
+    
+    public EventUser(final String eventId, final String faroUserId, final String ownerId){
+    	this(eventId,faroUserId);
+    	this.ownerId = ownerId;
     }
 
     private String generateEventUserId(final String eventId, final String faroUserId){
@@ -54,7 +55,7 @@ public class EventUser {
         this.id = id;
     }
 
-    public Ref<Event> getEventRef() {
+    public Ref<EventDo> getEventRef() {
         return eventRef;
     }
 
@@ -62,7 +63,7 @@ public class EventUser {
         return faroUserRef;
     }
 
-    public Event getEvent(){
+    public EventDo getEvent(){
         return this.eventRef.get();
     }
 
@@ -77,4 +78,12 @@ public class EventUser {
     public void setAccepted(){
         this.inviteStatus = InviteStatus.ACCEPTED;
     }
+
+	public String getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(String ownerId) {
+		this.ownerId = ownerId;
+	}
 }

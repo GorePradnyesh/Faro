@@ -3,7 +3,7 @@ package com.zik.faro.persistence.datastore;
 
 import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.cmd.Query;
-import com.zik.faro.data.Event;
+import com.zik.faro.data.EventDo;
 import com.zik.faro.data.EventUser;
 import com.zik.faro.data.user.FaroUser;
 
@@ -20,30 +20,34 @@ public class EventUserDatastoreImpl {
         EventUser eventUserRelation = new EventUser(eventId, faroUserId);
         DatastoreObjectifyDAL.storeObject(eventUserRelation);
     }
+    
+    // overloaded method to store ownerId in the the relation.
+    // should only be called while new event is being created since that is the time
+    // we need to save user creating event as owner
+    public static void storeEventUser(final String eventId, final String faroUserId, String ownerId){
+    	EventUser eventUserRelation = new EventUser(eventId, faroUserId, ownerId);
+    	DatastoreObjectifyDAL.storeObject(eventUserRelation);
+    }
 
     public static EventUser loadEventUser(final String eventId, final String faroUserId){
-        Ref<Event> eventRef = DatastoreObjectifyDAL.getRefForClassById(eventId, Event.class);
+        Ref<EventDo> eventRef = DatastoreObjectifyDAL.getRefForClassById(eventId, EventDo.class);
         Ref<FaroUser> faroUserRef = DatastoreObjectifyDAL.getRefForClassById(faroUserId, FaroUser.class);
-
+        
         Query<EventUser> eventUserQuery = ofy().load().type(EventUser.class);
         eventUserQuery = eventUserQuery.filter(EVENT_REF_FIELD_NAME, eventRef);
         eventUserQuery = eventUserQuery.filter(FARO_USER_REF_FIELD_NAME, faroUserRef);
-        List<EventUser> eventUserList = eventUserQuery.list();
-        if(eventUserList.size() > 1){
-            //logger.warn("Got more than one result for eventId and farouserID");
-        }
-        return eventUserList.get(0);
-    }
-
+        // Return the first result since there should be another record with same key.
+        return eventUserQuery.first().now();
+     }
+    
     public static List<EventUser> loadEventUserByEvent(final String eventId){
         List<EventUser> eventUserList =
                 DatastoreObjectifyDAL.loadObjectsByIndexedRefFieldEQ(EVENT_REF_FIELD_NAME,
-                        Event.class,
+                        EventDo.class,
                         eventId,
                         EventUser.class);
         return eventUserList;
     }
-
 
     public static List<EventUser> loadEventUserByFaroUser(final String faroUserId){
         List<EventUser> eventUserList =
@@ -52,5 +56,10 @@ public class EventUserDatastoreImpl {
                         faroUserId,
                         EventUser.class);
         return eventUserList;
+    }
+    
+    public static void deleteEventUser(final String eventId, final String faroUserId){
+    	EventUser user = new EventUser(eventId, faroUserId);
+    	DatastoreObjectifyDAL.delelteObjectById(user.getId(), EventUser.class);
     }
 }

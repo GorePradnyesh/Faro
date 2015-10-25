@@ -67,4 +67,32 @@ public class FaroUser {
     public Address getAddress() {
         return address;
     }
+    
+    public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public void setMiddleName(String middleName) {
+		this.middleName = middleName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	public void setExternalExpenseID(String externalExpenseID) {
+		this.externalExpenseID = externalExpenseID;
+	}
+
+	public void setTelephone(String telephone) {
+		this.telephone = telephone;
+	}
+
+	public void setAddress(Address address) {
+		this.address = address;
+	}
 }
