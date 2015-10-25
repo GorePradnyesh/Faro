@@ -17,9 +17,9 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import com.zik.faro.TestHelper;
-import com.zik.faro.api.bean.Event;
-import com.zik.faro.api.bean.Poll;
-import com.zik.faro.api.bean.PollOption;
+import com.zik.faro.data.Event;
+import com.zik.faro.data.Poll;
+import com.zik.faro.data.PollOption;
 import com.zik.faro.api.responder.EventCreateData;
 import com.zik.faro.data.Location;
 

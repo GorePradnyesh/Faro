@@ -29,7 +29,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 import com.sun.jersey.api.JResponse;
-import com.zik.faro.api.bean.Poll;
+import com.zik.faro.data.Poll;
 import com.zik.faro.applogic.PollManagement;
 import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.exceptions.DataNotFoundException;

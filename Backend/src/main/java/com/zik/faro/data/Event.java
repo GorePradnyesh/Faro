@@ -1,4 +1,4 @@
-package com.zik.faro.api.bean;
+package com.zik.faro.data;
 
 import java.util.Calendar;
 import java.util.UUID;

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.googlecode.objectify.Work;
-import com.zik.faro.api.bean.PollOption;
+import com.zik.faro.data.PollOption;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
 import com.zik.faro.data.EventDo;

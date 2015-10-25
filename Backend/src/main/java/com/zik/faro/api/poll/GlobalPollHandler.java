@@ -17,7 +17,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
 
 import com.sun.jersey.api.JResponse;
-import com.zik.faro.api.bean.Poll;
+import com.zik.faro.data.Poll;
 import com.zik.faro.applogic.PollManagement;
 
 

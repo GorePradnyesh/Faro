@@ -19,10 +19,32 @@ android {
     }
 }
 
+task invokeCommonsBuild(type:Exec) {
+    workingDir '../../Commons'
+    commandLine 'mvn', 'clean', 'package'
+}
+
+task copyCommonsLib(type:Copy) {
+    from "../../Commons/target/faro-commons-1.0-SNAPSHOT.jar"
+    into "$libsDir"
+}
+
+/*task setupDependencies () {
+    dependencies {
+        dependsOn invokeCommonsBuild, copyCommonsLib
+
+        compile fileTree(dir: 'libs', include: ['*.jar'])
+        compile 'com.android.support:appcompat-v7:21.0.3'
+        compile 'com.squareup.okhttp:okhttp:2.5.0'
+        compile 'com.google.code.gson:gson:2.3.1'
+        compile 'com.auth0:java-jwt:2.1.0'
+    }
+}*/
+
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:21.0.3'
     compile 'com.squareup.okhttp:okhttp:2.5.0'
     compile 'com.google.code.gson:gson:2.3.1'
     compile 'com.auth0:java-jwt:2.1.0'
+    compile files('build/libs/faro-commons-1.0-SNAPSHOT.jar')
 }

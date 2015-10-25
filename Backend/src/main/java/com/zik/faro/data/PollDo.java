@@ -10,7 +10,6 @@ import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Parent;
-import com.zik.faro.api.bean.PollOption;
 
 @Entity
 public class PollDo {

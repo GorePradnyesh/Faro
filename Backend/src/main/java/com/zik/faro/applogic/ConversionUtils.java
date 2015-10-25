@@ -1,8 +1,8 @@
 package com.zik.faro.applogic;
 
-import com.zik.faro.api.bean.Activity;
-import com.zik.faro.api.bean.Event;
-import com.zik.faro.api.bean.Poll;
+import com.zik.faro.data.Activity;
+import com.zik.faro.data.Event;
+import com.zik.faro.data.Poll;
 import com.zik.faro.data.ActivityDo;
 import com.zik.faro.data.EventDo;
 import com.zik.faro.data.PollDo;

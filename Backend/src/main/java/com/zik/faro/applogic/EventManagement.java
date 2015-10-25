@@ -6,7 +6,7 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.zik.faro.api.bean.Event;
+import com.zik.faro.data.Event;
 import com.zik.faro.api.responder.AddFriendRequest;
 import com.zik.faro.api.responder.EventCreateData;
 import com.zik.faro.commons.exceptions.DataNotFoundException;

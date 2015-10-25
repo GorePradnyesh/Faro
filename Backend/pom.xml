@@ -5,8 +5,14 @@
     <packaging>war</packaging>
     <version>1.0-SNAPSHOT</version>
 
-    <groupId>com.zik</groupId>
-    <artifactId>faro</artifactId>
+    <!--groupId>com.zik</groupId -->
+    <artifactId>faro-backend</artifactId>
+
+    <parent>
+        <groupId>com.zik</groupId>
+        <artifactId>faro</artifactId>
+        <version>1.0</version>
+    </parent>
 
     <properties>
         <appengine.app.version>1</appengine.app.version>
@@ -22,6 +28,11 @@
 
     <dependencies>
         <!-- Compile/runtime dependencies -->
+        <!-- dependency>
+            <groupId>com.zik</groupId>
+            <artifactId>faro-commons</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency -->
         <!-- Logging dependencies
           In addition to slf4j-log4j12-1.7.10.jar, this will pull slf4j-api-1.7.10.jar
           as well as log4j-1.2.17.jar into the project. -->
@@ -194,6 +205,7 @@
                     </jvmFlags>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 </project>

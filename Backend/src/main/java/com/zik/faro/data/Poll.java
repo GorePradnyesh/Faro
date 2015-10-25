@@ -1,11 +1,8 @@
-package com.zik.faro.api.bean;
+package com.zik.faro.data;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.UUID;
-
-import com.zik.faro.data.ObjectStatus;
 
 public class Poll {
     private String id;
