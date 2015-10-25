@@ -72,14 +72,6 @@ public class FriendsApiTest extends ApiBaseTest{
         Assert.assertFalse(getFriendsCallback.unexpectedResponseCode);
         Assert.assertTrue(getFriendsCallback.friends.size() == 1);
         
-        // unfriend user
-        TestOKActionCallbackHandler unfriendCallback = new TestOKActionCallbackHandler(waitSem, 200);
-        serviceHandler.getFriendsHandler().unFriend(unfriendCallback, uuidEmail2);
-        timeout = !waitSem.tryAcquire(testTimeout, TimeUnit.MILLISECONDS);
-        Assert.assertFalse(timeout);
-        Assert.assertFalse(unfriendCallback.failed);
-        Assert.assertFalse(unfriendCallback.unexpectedResponseCode);
-
         // invite another friend
         inviteUser = new TestOKActionCallbackHandler(waitSem, 200);
         serviceHandler.getFriendsHandler().inviteFriend(inviteUser, uuidEmail3);
@@ -96,8 +88,33 @@ public class FriendsApiTest extends ApiBaseTest{
         Assert.assertFalse(getFriendsCallback.failed);
         Assert.assertFalse(getFriendsCallback.unexpectedResponseCode);
         Assert.assertTrue(getFriendsCallback.friends.size() == 2);
+    
+        // unfriend user
+        TestOKActionCallbackHandler unfriendCallback = new TestOKActionCallbackHandler(waitSem, 200);
+        serviceHandler.getFriendsHandler().unFriend(unfriendCallback, uuidEmail2);
+        timeout = !waitSem.tryAcquire(testTimeout, TimeUnit.MILLISECONDS);
+        Assert.assertFalse(timeout);
+        Assert.assertFalse(unfriendCallback.failed);
+        Assert.assertFalse(unfriendCallback.unexpectedResponseCode);
 
+        
         // get list and verify that the friend has been removed
+        getFriendsCallback = new TestGetFriendsCallback(waitSem, 200);
+        serviceHandler.getFriendsHandler().getFriends(getFriendsCallback);
+        timeout = !waitSem.tryAcquire(testTimeout, TimeUnit.MILLISECONDS);
+        Assert.assertFalse(timeout);
+        Assert.assertFalse(getFriendsCallback.failed);
+        Assert.assertFalse(getFriendsCallback.unexpectedResponseCode);
+        Assert.assertTrue(getFriendsCallback.friends.size() == 1);
+
+        // invite the same friend and make sure its a no-op
+        inviteUser = new TestOKActionCallbackHandler(waitSem, 200);
+        serviceHandler.getFriendsHandler().inviteFriend(inviteUser, uuidEmail3);
+        timeout = !waitSem.tryAcquire(testTimeout, TimeUnit.MILLISECONDS);
+        Assert.assertFalse(timeout);
+        Assert.assertFalse(inviteUser.failed);
+        Assert.assertFalse(inviteUser.unexpectedResponseCode);
+
         getFriendsCallback = new TestGetFriendsCallback(waitSem, 200);
         serviceHandler.getFriendsHandler().getFriends(getFriendsCallback);
         timeout = !waitSem.tryAcquire(testTimeout, TimeUnit.MILLISECONDS);
