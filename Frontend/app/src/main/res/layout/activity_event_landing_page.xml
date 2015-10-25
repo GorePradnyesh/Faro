@@ -1,7 +1,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-android:layout_height="match_parent"
-tools:context="com.zik.faro.frontend.EventLandingPage">
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.zik.faro.frontend.EventLandingPage">
 
     <TextView
         android:layout_width="wrap_content"
@@ -97,6 +97,30 @@ tools:context="com.zik.faro.frontend.EventLandingPage">
         android:paddingTop="0dp"
         android:paddingRight="0dp"
         android:paddingBottom="0dp" />
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/eventAssignmentImageButton"
+        android:clickable="true"
+        android:paddingLeft="0dp"
+        android:paddingTop="0dp"
+        android:paddingRight="0dp"
+        android:paddingBottom="0dp"
+        android:layout_toRightOf="@+id/pollImageButton"
+        android:layout_below="@+id/endDateTimeLayout" />
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/activityImageButton"
+        android:clickable="true"
+        android:paddingLeft="0dp"
+        android:paddingTop="0dp"
+        android:paddingRight="0dp"
+        android:paddingBottom="0dp"
+        android:layout_toRightOf="@+id/eventAssignmentImageButton"
+        android:layout_below="@+id/endDateTimeLayout" />
 
     <RelativeLayout
         android:layout_width="fill_parent"

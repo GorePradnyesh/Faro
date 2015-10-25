@@ -16,9 +16,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- * Created by nakulshah on 1/8/15.
- */
 public class EventAdapter extends ArrayAdapter {
     //TODO (Code Review) Implement sorted list instead of Linkedlist
     public List<Event> list = new LinkedList<>();

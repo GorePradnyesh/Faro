@@ -25,6 +25,8 @@ public class EventLandingPage extends Activity {
     private Button statusNo = null;
     private Button statusMaybe = null;
     private ImageButton pollButton = null;
+    private ImageButton eventAssignmentbutton = null;
+    private ImageButton activitybutton = null;
     private ImageButton editButton = null;
     private TextView event_status = null;
 
@@ -43,6 +45,10 @@ public class EventLandingPage extends Activity {
 
         pollButton = (ImageButton)findViewById(R.id.pollImageButton);
         pollButton.setImageResource(R.drawable.poll_icon);
+        eventAssignmentbutton = (ImageButton)findViewById(R.id.eventAssignmentImageButton);
+        eventAssignmentbutton.setImageResource(R.drawable.assignment_icon);
+        activitybutton = (ImageButton)findViewById(R.id.activityImageButton);
+        activitybutton.setImageResource(R.drawable.activity);
         editButton = (ImageButton)findViewById(R.id.editButton);
         editButton.setImageResource(R.drawable.edit);
 
@@ -51,7 +57,7 @@ public class EventLandingPage extends Activity {
         statusNo = (Button)findViewById(R.id.statusNo);
         statusMaybe = (Button)findViewById(R.id.statusMaybe);
 
-        final Intent PollLandingPage = new Intent(EventLandingPage.this, PollListPage.class);
+        final Intent PollListPage = new Intent(EventLandingPage.this, PollListPage.class);
         final Intent EditEvent = new Intent(EventLandingPage.this, EditEvent.class);
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
@@ -102,8 +108,16 @@ public class EventLandingPage extends Activity {
         pollButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setResult(NO_CHANGES);
-                startActivity(PollLandingPage);
+                PollListPage.putExtra("eventID", E.getEventId());
+                startActivity(PollListPage);
+                finish();
+            }
+        });
+
+        eventAssignmentbutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
             }
         });
 

@@ -44,8 +44,8 @@ public class EventListPage extends Activity{
         setContentView(R.layout.activity_event_list_page);
 
         TabHost eventTabHost = (TabHost)findViewById(R.id.eventTabHost);
-
         eventTabHost.setup();
+
         TabHost.TabSpec acceptedTabSpec = eventTabHost.newTabSpec("accepted");
         acceptedTabSpec.setContent(R.id.acceptedTab);
         acceptedTabSpec.setIndicator("Accepted");
@@ -101,7 +101,7 @@ public class EventListPage extends Activity{
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                if(eventListHandler.getAcceptedEventListSize() > EventListHandler.MIN_EVENTS_PAGE_SIZE) {
+                if(eventListHandler.getAcceptedEventListSize() > EventListHandler.MAX_EVENTS_PAGE_SIZE) {
                     final int lastItem = firstVisibleItem + visibleItemCount;
                     if (lastItem == totalItemCount) {
                         /*TODO Make call to server to get events after the last event. Send the date

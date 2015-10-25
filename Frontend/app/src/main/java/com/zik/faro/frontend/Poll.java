@@ -7,7 +7,7 @@ import java.util.Calendar;
 import java.util.List;
 
 public class Poll {
-    private String id;
+    private String pollId;
     private String eventId;
     private String creator;
     private boolean multiChoice = false;
@@ -19,26 +19,134 @@ public class Poll {
     private ObjectStatus status;
     private Calendar deadline;                // Will not be used in V1.
 
-
-    public static class PollOption{
-/*        private final String id;                                 //TODO: Change type to Id
-        public final String option;
-        public final List<String> voters = new ArrayList<>();   //TODO: Change type to List<Id>/List<MinUser>?
-*/
+    /* Getters and setters*/
+    public String getPollId() {
+        return pollId;
     }
 
-    public Poll(String id, String eventId, String creator, boolean multiChoice,
-                List<PollOption> pollOptions, String winnerId, String owner, String description,
-                ObjectStatus status, Calendar deadline) {
-        this.id = id;
+    public void setPollId(String pollId) {
+        this.pollId = pollId;
+    }
+
+    public String getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(String eventId) {
+        this.eventId = eventId;
+    }
+
+    public String getCreator() {
+        return creator;
+    }
+
+    public void setCreator(String creator) {
+        this.creator = creator;
+    }
+
+    public boolean isMultiChoice() {
+        return multiChoice;
+    }
+
+    public void setMultiChoice(boolean multiChoice) {
+        this.multiChoice = multiChoice;
+    }
+
+    public List<PollOption> getPollOptions() {
+        return pollOptions;
+    }
+
+    public void setPollOptions(List<PollOption> pollOptions) {
+        this.pollOptions = pollOptions;
+    }
+
+    public String getWinnerId() {
+        return winnerId;
+    }
+
+    public void setWinnerId(String winnerId) {
+        this.winnerId = winnerId;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public ObjectStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ObjectStatus status) {
+        this.status = status;
+    }
+
+    public Calendar getDeadline() {
+        return deadline;
+    }
+
+    public void setDeadline(Calendar deadline) {
+        this.deadline = deadline;
+    }
+
+
+
+
+    public static class PollOption{
+        private String id;                                 //TODO: Change type to Id
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getOptionDescription() {
+            return optionDescription;
+        }
+
+        public void setOptionDescription(String optionDescription) {
+            this.optionDescription = optionDescription;
+        }
+
+        public List<String> getVoters() {
+            return voters;
+        }
+
+        public void setVoters(List<String> voters) {
+            this.voters = voters;
+        }
+
+        public String optionDescription;
+        public List<String> voters = new ArrayList<>();   //TODO: Change type to List<Id>/List<MinUser>?
+
+        public PollOption(String option) {
+            this.optionDescription = option;
+        }
+    }
+
+    public Poll(String eventId, String creator, boolean multiChoice,
+                List<PollOption> pollOptions, String owner, String description,
+                ObjectStatus status) {
         this.eventId = eventId;
         this.creator = creator;
         this.multiChoice = multiChoice;
         this.pollOptions = pollOptions;
-        this.winnerId = winnerId;
         this.owner = owner;
         this.description = description;
         this.status = status;
-        this.deadline = deadline;
     }
 }

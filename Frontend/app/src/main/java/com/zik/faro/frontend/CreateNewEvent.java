@@ -54,7 +54,7 @@ public class CreateNewEvent extends Activity {
         final EditText eventName = (EditText) findViewById(R.id.eventNameTextEdit);
         final EditText eventDescription = (EditText) findViewById(R.id.eventDescriptionEditText);
 
-        //TODO Remove the below added just to test creator EventLanding Page vs Friend eventLandingPage
+        //TODO Remove the below added just to test creator EventLanding Page vs Friend eventLanding
         final CheckBox eventCreator = (CheckBox) findViewById(R.id.eventCreatorCheckBox);
         final CheckBox ifAcceptedCheckBox = (CheckBox) findViewById(R.id.ifAcceptedCheckBox);
         final CheckBox noResponseCheckBox = (CheckBox) findViewById(R.id.noResponseCheckBox);
@@ -133,7 +133,6 @@ public class CreateNewEvent extends Activity {
                                           EventStatus.ACCEPTED,
                                           eventDesc,
                                           controlFlag);
-                //TODO: instead of setting a boolean save the userID of the creator
                 event.setEventCreator(false);
                 if(eventCreator.isChecked()){
                     event.setEventCreator(true);

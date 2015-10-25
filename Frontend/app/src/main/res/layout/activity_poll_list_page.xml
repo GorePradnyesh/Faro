@@ -4,98 +4,92 @@ android:layout_width="match_parent"
 android:layout_height="match_parent"
 tools:context="com.zik.faro.frontend.PollListPage">
 
-<TextView
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:textAppearance="?android:attr/textAppearanceLarge"
-    android:text="@string/Polls"
-    android:id="@+id/polls"
-    android:layout_alignParentTop="true"
-    android:layout_centerHorizontal="true"
-    android:textAlignment="center"
-    android:textColor="@android:color/white"
-    android:background="#ff000000" />
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/Polls"
+        android:id="@+id/polls"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/polltabHost"
+        android:textAlignment="center"
+        android:textColor="@android:color/white"
+        android:background="#ff000000" />
 
-<TabHost
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:id="@+id/polltabHost"
-    android:layout_below="@+id/polls"
-    android:layout_centerHorizontal="true"
-    android:layout_above="@+id/bottomLayout">
-
-    <LinearLayout
+    <TabHost
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:orientation="vertical">
+        android:id="@+id/polltabHost"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/bottomLayout">
 
-        <TabWidget
-            android:id="@android:id/tabs"
+        <LinearLayout
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"></TabWidget>
-
-        <FrameLayout
-            android:id="@android:id/tabcontent"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
-
-            <LinearLayout
-                android:id="@+id/open"
+            android:layout_height="fill_parent"
+            android:orientation="vertical">
+            <TabWidget
+                android:id="@android:id/tabs"
                 android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:orientation="vertical"
-                android:clickable="true">
-
-                <ListView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="0dp"
-                    android:layout_marginBottom="0dp"
-                    android:id="@+id/openPolls" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/closed"
+                android:layout_height="wrap_content"></TabWidget>
+            <FrameLayout
+                android:id="@android:id/tabcontent"
                 android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:orientation="vertical"
-                android:clickable="true">
-                <ListView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="0dp"
-                    android:layout_marginBottom="0dp"
-                    android:id="@+id/closedPolls"/>
-            </LinearLayout>
+                android:layout_height="fill_parent">
+                <LinearLayout
+                    android:id="@+id/openTab"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:orientation="vertical"
+                    android:clickable="true">
+                    <ListView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="0dp"
+                        android:layout_marginBottom="0dp"
+                        android:id="@+id/openPollsList" />
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/closedTab"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:orientation="vertical"
+                    android:clickable="true">
+                    <ListView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="0dp"
+                        android:layout_marginBottom="0dp"
+                        android:id="@+id/closedPollsList"/>
+                </LinearLayout>
+            </FrameLayout>
+        </LinearLayout>
+    </TabHost>
 
-        </FrameLayout>
-    </LinearLayout>
-</TabHost>
-
-<RelativeLayout
-    android:layout_width="match_parent"
-    android:layout_height="30dp"
-    android:layout_alignParentBottom="true"
-    android:layout_centerInParent="true"
-    android:padding="0dp"
-    android:paddingLeft="0dp"
-    android:paddingTop="0dp"
-    android:paddingRight="0dp"
-    android:paddingBottom="0dp"
-    android:background="@android:color/black"
-    android:id="@+id/bottomLayout">
-    <ImageButton
-        android:layout_width="30dp"
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="30dp"
-        android:id="@+id/add_new_poll"
-        android:clickable="true"
-        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_centerInParent="true"
+        android:padding="0dp"
         android:paddingLeft="0dp"
         android:paddingTop="0dp"
         android:paddingRight="0dp"
-        android:paddingBottom="0dp"/>
-</RelativeLayout>
+        android:paddingBottom="0dp"
+        android:background="@android:color/black"
+        android:id="@+id/bottomLayout">
+        <ImageButton
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:id="@+id/add_new_poll"
+            android:clickable="true"
+            android:layout_alignParentEnd="true"
+            android:paddingLeft="0dp"
+            android:paddingTop="0dp"
+            android:paddingRight="0dp"
+            android:paddingBottom="0dp"/>
+    </RelativeLayout>
 
 </RelativeLayout>
 
