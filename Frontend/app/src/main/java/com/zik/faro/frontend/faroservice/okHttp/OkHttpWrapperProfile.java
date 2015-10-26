@@ -3,7 +3,7 @@ package com.zik.faro.frontend.faroservice.okHttp;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
-import com.zik.faro.frontend.data.user.FaroUser;
+import data.user.FaroUser;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.auth.TokenCache;
 import com.zik.faro.frontend.faroservice.spec.ProfileHandler;

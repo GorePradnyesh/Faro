@@ -1,4 +1,4 @@
-package com.zik.faro.frontend.data;
+package data;
 
 import java.util.ArrayList;
 import java.util.List;

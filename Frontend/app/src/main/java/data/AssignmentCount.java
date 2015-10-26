@@ -1,4 +1,4 @@
-package com.zik.faro.frontend.data;
+package data;
 
 /**
  * Created by pgore on 10/11/15.

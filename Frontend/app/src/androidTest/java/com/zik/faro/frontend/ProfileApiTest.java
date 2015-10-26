@@ -6,7 +6,7 @@ import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 
 import com.squareup.okhttp.Request;
-import com.zik.faro.frontend.data.user.FaroUser;
+import data.user.FaroUser;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;

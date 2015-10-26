@@ -1,4 +1,4 @@
-package com.zik.faro.frontend.data.user;
+package data.user;
 
 public class FaroUser {
     private String             email;

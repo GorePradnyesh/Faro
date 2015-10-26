@@ -1,4 +1,4 @@
-package com.zik.faro.frontend.data.user;
+package data.user;
 
 public enum InviteStatus {
     ACCEPTED, INVITED;

@@ -4,8 +4,8 @@ import com.google.gson.reflect.TypeToken;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
-import com.zik.faro.frontend.data.Activity;
-import com.zik.faro.frontend.data.Poll;
+import data.Activity;
+
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.auth.TokenCache;
 import com.zik.faro.frontend.faroservice.spec.ActivityHandler;

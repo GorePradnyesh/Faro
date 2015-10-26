@@ -1,4 +1,4 @@
-package com.zik.faro.frontend.data;
+package data;
 
 public class MinEvent {
     public String id;

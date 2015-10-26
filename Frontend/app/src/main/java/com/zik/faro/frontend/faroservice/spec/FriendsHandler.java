@@ -1,6 +1,6 @@
 package com.zik.faro.frontend.faroservice.spec;
 
-import com.zik.faro.frontend.data.MinUser;
+import data.MinUser;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 
 import java.util.List;

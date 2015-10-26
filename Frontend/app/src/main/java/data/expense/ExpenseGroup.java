@@ -1,4 +1,4 @@
-package com.zik.faro.frontend.data.expense;
+package data.expense;
 
 public class ExpenseGroup {
     public final String groupName;

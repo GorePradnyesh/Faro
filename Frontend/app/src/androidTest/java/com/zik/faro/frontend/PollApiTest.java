@@ -5,10 +5,10 @@ import android.app.Application;
 import android.test.suitebuilder.annotation.LargeTest;
 
 import com.squareup.okhttp.Request;
-import com.zik.faro.frontend.data.DateOffset;
-import com.zik.faro.frontend.data.EventCreateData;
-import com.zik.faro.frontend.data.ObjectStatus;
-import com.zik.faro.frontend.data.Poll;
+
+import data.EventCreateData;
+import data.ObjectStatus;
+import data.Poll;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
@@ -20,7 +20,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;

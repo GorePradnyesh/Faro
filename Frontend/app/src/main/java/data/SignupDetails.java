@@ -1,6 +1,6 @@
-package com.zik.faro.frontend.data;
+package data;
 
-import com.zik.faro.frontend.data.user.FaroUser;
+import data.user.FaroUser;
 
 public class SignupDetails {
     private FaroUser faroUser;
