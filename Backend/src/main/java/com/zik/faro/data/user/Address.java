@@ -1,6 +1,6 @@
 package com.zik.faro.data.user;
 
-import com.google.appengine.repackaged.com.google.common.base.MoreObjects;
+import com.google.common.base.MoreObjects;
 
 public class Address {
     public final int addressNumber;
