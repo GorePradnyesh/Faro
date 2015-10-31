@@ -13,12 +13,12 @@ import org.junit.Test;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
-import com.zik.faro.data.EventDo;
+import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.data.EventUser;
 import com.zik.faro.data.Location;
 import com.zik.faro.data.expense.ExpenseGroup;
 import com.zik.faro.data.user.Address;
-import com.zik.faro.data.user.FaroUser;
+import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 
 public class EventUserDatastoreImplTest {
     private static final LocalServiceTestHelper helper =
@@ -27,7 +27,7 @@ public class EventUserDatastoreImplTest {
     static{
         ObjectifyService.register(EventUser.class);
         ObjectifyService.register(EventDo.class);
-        ObjectifyService.register(FaroUser.class);
+        ObjectifyService.register(FaroUserDo.class);
     }
 
     @BeforeClass
@@ -57,7 +57,7 @@ public class EventUserDatastoreImplTest {
         DatastoreObjectifyDAL.storeObject(testEvent);
 
 
-        FaroUser faroUser = new FaroUser("user@gmail.com", "SampleUser", null, "Gilmour", "dg@splitwise.com",
+        FaroUserDo faroUser = new FaroUserDo("user@gmail.com", "SampleUser", null, "Gilmour", "dg@splitwise.com",
                 "2323", new Address(123, "Palm Avenue", "Stanford", "CA", 94332));
         DatastoreObjectifyDAL.storeObject(faroUser);
 
@@ -68,7 +68,7 @@ public class EventUserDatastoreImplTest {
         EventDo retEvent = eventUser.getEvent();
         Assert.assertEquals(testEvent.getEventName(), retEvent.getEventName());
 
-        FaroUser retFaroUser = eventUser.getFaroUser();
+        FaroUserDo retFaroUser = eventUser.getFaroUser();
         Assert.assertEquals(faroUser.getFirstName(), retFaroUser.getFirstName());
     }
 
@@ -98,11 +98,11 @@ public class EventUserDatastoreImplTest {
                 new Location("Location3"));
         DatastoreObjectifyDAL.storeObject(event3);
 
-        FaroUser faroUser1 = new FaroUser("user1@gmail.com", "FirstNAme1", null, "LastName1", "expenseid1@splitwise.com",
+        FaroUserDo faroUser1 = new FaroUserDo("user1@gmail.com", "FirstNAme1", null, "LastName1", "expenseid1@splitwise.com",
                 "0000001", new Address(1, "Palm Avenue1", "Stanford1", "CA", 94332));
         DatastoreObjectifyDAL.storeObject(faroUser1);
 
-        FaroUser faroUser2 = new FaroUser("user2@gmail.com", "FirstNAme2", null, "LastName2", "expenseid2@splitwise.com",
+        FaroUserDo faroUser2 = new FaroUserDo("user2@gmail.com", "FirstNAme2", null, "LastName2", "expenseid2@splitwise.com",
                 "0000002", new Address(2, "Palm Avenue2", "Stanford2", "CA", 94332));
         DatastoreObjectifyDAL.storeObject(faroUser2);
 
@@ -132,7 +132,7 @@ public class EventUserDatastoreImplTest {
                 new Location("Location1"));
         DatastoreObjectifyDAL.storeObject(event1);
 
-        FaroUser faroUser1 = new FaroUser("user1@gmail.com", "FirstNAme1", null, "LastName1", "expenseid1@splitwise.com",
+        FaroUserDo faroUser1 = new FaroUserDo("user1@gmail.com", "FirstNAme1", null, "LastName1", "expenseid1@splitwise.com",
                 "0000001", new Address(1, "Palm Avenue1", "Stanford1", "CA", 94332));
         DatastoreObjectifyDAL.storeObject(faroUser1);
 
@@ -156,7 +156,7 @@ public class EventUserDatastoreImplTest {
                 new Location("Location1"));
         DatastoreObjectifyDAL.storeObject(event1);
         // Create FaroUser
-        FaroUser faroUser1 = new FaroUser("user1@gmail.com", "FirstNAme1", null, "LastName1", "expenseid1@splitwise.com",
+        FaroUserDo faroUser1 = new FaroUserDo("user1@gmail.com", "FirstNAme1", null, "LastName1", "expenseid1@splitwise.com",
                 "0000001", new Address(1, "Palm Avenue1", "Stanford1", "CA", 94332));
         DatastoreObjectifyDAL.storeObject(faroUser1);
         

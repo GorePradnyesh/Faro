@@ -3,7 +3,7 @@ package com.zik.faro.api.unit;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.test.framework.JerseyTest;
 
-import com.zik.faro.data.EventDo;
+import com.zik.faro.persistence.datastore.data.EventDo;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.*;

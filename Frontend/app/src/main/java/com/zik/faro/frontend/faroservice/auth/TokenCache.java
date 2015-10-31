@@ -2,7 +2,6 @@ package com.zik.faro.frontend.faroservice.auth;
 
 import android.util.Base64;
 
-import com.auth0.jwt.JWTSigner;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -99,18 +98,4 @@ public class TokenCache {
        }
    }
 
-    // TODO: temporary method
-    public static String createToken(FaroJwtClaims jwtClaims) {
-        // TODO : Make sure expiration and issuedat are valid values
-        Map<String, Object> claimsMap = new HashMap<>();
-        claimsMap.put(JwtClaimConstants.ISSUER_KEY, jwtClaims.getIssuer());
-        claimsMap.put(JwtClaimConstants.USERNAME, jwtClaims.getUsername());
-        claimsMap.put(JwtClaimConstants.EMAIL, jwtClaims.getEmail());
-        claimsMap.put(JwtClaimConstants.ISSUED_AT_KEY, jwtClaims.getIssuedAtInMilliSecs());
-        claimsMap.put(JwtClaimConstants.EXPIRATION_KEY, jwtClaims.getExpirationInSecs());
-
-        JWTSigner signer = new JWTSigner(JWT_SIGNATURE_SECRET);
-
-        return  signer.sign(claimsMap);
-    }
 }

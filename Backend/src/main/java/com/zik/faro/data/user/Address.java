@@ -1,6 +1,6 @@
 package com.zik.faro.data.user;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import com.google.appengine.repackaged.com.google.common.base.MoreObjects;
 
 public class Address {
     public final int addressNumber;
@@ -23,6 +23,12 @@ public class Address {
 
     @Override
     public String toString() {
-        return ToStringBuilder.reflectionToString(this);
+        return MoreObjects.toStringHelper(this)
+                .add("addressNumber", addressNumber)
+                .add("line1", line1)
+                .add("line2", line2)
+                .add("State", State)
+                .add("zip", zip)
+                .toString();
     }
 }

@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.zik.faro.data.Activity;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
-import com.zik.faro.data.ActivityDo;
+import com.zik.faro.persistence.datastore.data.ActivityDo;
 import com.zik.faro.persistence.datastore.ActivityDatastoreImpl;
 
 public class ActivityManagement {

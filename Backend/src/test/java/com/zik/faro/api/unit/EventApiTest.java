@@ -22,7 +22,7 @@ import com.zik.faro.data.Event;
 import com.zik.faro.api.event.EventCreateHandler;
 import com.zik.faro.api.event.EventHandler;
 import com.zik.faro.api.responder.EventCreateData;
-import com.zik.faro.data.EventDo;
+import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.data.EventUser;
 import com.zik.faro.data.Location;
 

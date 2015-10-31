@@ -25,7 +25,7 @@ import com.zik.faro.commons.FaroResponseStatus;
 import com.zik.faro.commons.ParamValidation;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.FaroWebAppException;
-import com.zik.faro.data.user.UserCredentials;
+import com.zik.faro.persistence.datastore.data.user.UserCredentialsDo;
 import com.zik.faro.persistence.datastore.UserCredentialsDatastoreImpl;
 
 /**
@@ -55,7 +55,7 @@ public class LoginHandler {
         logger.info("password : " + password);
 
         try {
-        	UserCredentials userCredentials = UserCredentialsDatastoreImpl.loadUserCreds(username);
+        	UserCredentialsDo userCredentials = UserCredentialsDatastoreImpl.loadUserCreds(username);
 
             if (!PasswordManager.checkPasswordEquality(password, userCredentials.getEncryptedPassword())) {
                 logger.error("Incorrect password");

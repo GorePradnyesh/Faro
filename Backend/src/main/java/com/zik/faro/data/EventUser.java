@@ -5,11 +5,11 @@ import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
-import com.zik.faro.data.user.FaroUser;
+import com.zik.faro.persistence.datastore.data.EventDo;
+import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 import com.zik.faro.data.user.InviteStatus;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.UUID;
 
 @XmlRootElement
 @Entity
@@ -20,7 +20,7 @@ public class EventUser {
     @Index
     private Ref<EventDo> eventRef;
     @Index
-    private Ref<FaroUser> faroUserRef;
+    private Ref<FaroUserDo> faroUserRef;
     private InviteStatus inviteStatus;
     private String ownerId;
 
@@ -31,7 +31,7 @@ public class EventUser {
     public EventUser(final String eventId, final String faroUserId){
         this.id = generateEventUserId(eventId, faroUserId);
         this.eventRef = Ref.create(Key.create(EventDo.class, eventId));
-        this.faroUserRef = Ref.create(Key.create(FaroUser.class, faroUserId));
+        this.faroUserRef = Ref.create(Key.create(FaroUserDo.class, faroUserId));
         this.inviteStatus = InviteStatus.INVITED;
     }
     
@@ -59,7 +59,7 @@ public class EventUser {
         return eventRef;
     }
 
-    public Ref<FaroUser> getFaroUserRef() {
+    public Ref<FaroUserDo> getFaroUserRef() {
         return faroUserRef;
     }
 
@@ -67,7 +67,7 @@ public class EventUser {
         return this.eventRef.get();
     }
 
-    public FaroUser getFaroUser(){
+    public FaroUserDo getFaroUser(){
         return this.faroUserRef.get();
     }
 

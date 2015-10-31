@@ -1,16 +1,12 @@
 package com.zik.faro.functional;
 
-import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
 import com.zik.faro.TestHelper;
 import com.zik.faro.api.responder.FaroSignupDetails;
-import com.zik.faro.data.user.FaroUser;
+import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -25,7 +21,7 @@ public class FunctionalLoginHandlerTest {
 
     public FaroSignupDetails createNewTestUser() throws IOException, URISyntaxException {
         String newRandomEmail = UUID.randomUUID().toString() + "@gmail.com";
-        FaroUser newUser = new FaroUser(newRandomEmail,
+        FaroUserDo newUser = new FaroUserDo(newRandomEmail,
                                         "sachin",
                                         "ramesh",
                                         "tendulkar",

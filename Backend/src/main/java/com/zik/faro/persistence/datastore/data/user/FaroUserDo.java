@@ -1,28 +1,34 @@
-package com.zik.faro.data.user;
+package com.zik.faro.persistence.datastore.data.user;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.google.appengine.repackaged.com.google.common.base.MoreObjects;
 
 import com.google.common.base.Strings;
+import com.googlecode.objectify.annotation.Entity;
+import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Index;
 import com.zik.faro.commons.exceptions.IllegalDataOperation;
 import com.zik.faro.data.user.Address;
 
+@Entity
 @XmlRootElement
-public class FaroUser {
+public class FaroUserDo {
+    @Id @Index
     private String             email;
+    @Index
     private String             firstName;
     private String             middleName;
     private String             lastName;
     private String             externalExpenseID;
-    private String             telephone;
+    private String             telephone;   
     private Address address;
 
-    public FaroUser(final String email) {
+    public FaroUserDo(final String email) {
         this(email, null, null, null, null, null, null);
     }
 
-    public FaroUser(final String email,
+    public FaroUserDo(final String email,
                       final String firstName,
                       final String middleName,
                       final String lastName,
@@ -52,12 +58,12 @@ public class FaroUser {
     }
 
     // To Satisfy the JAXB no-arg constructor requirement
-    private FaroUser(){
+    private FaroUserDo(){
 
     }
 
     /*Getters*/
-
+    
     public String getEmail() { return this.email; }
 
 //    public String getEmail() {
@@ -116,16 +122,16 @@ public class FaroUser {
         this.address = address;
     }
 
-    @Override
+   @Override
     public String toString() {
 
-        return MoreObjects.toStringHelper(this).add("email", getEmail())
-                .add("firstName", getFirstName())
-                .add("middleName", getMiddleName())
-                .add("lastName", getLastName())
-                .add("externalExpenseID", getExternalExpenseID())
-                .add("telephone", getTelephone())
-                .add("address", getAddress())
-                .toString();
+       return MoreObjects.toStringHelper(this).add("email", getEmail())
+               .add("firstName", getFirstName())
+               .add("middleName", getMiddleName())
+               .add("lastName", getLastName())
+               .add("externalExpenseID", getExternalExpenseID())
+               .add("telephone", getTelephone())
+               .add("address", getAddress())
+               .toString();
     }
 }

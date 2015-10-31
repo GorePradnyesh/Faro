@@ -22,10 +22,9 @@ import com.zik.faro.auth.PasswordManager;
 import com.zik.faro.auth.PasswordManagerException;
 import com.zik.faro.auth.jwt.FaroJwtTokenManager;
 import com.zik.faro.commons.FaroResponseStatus;
-import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.FaroWebAppException;
-import com.zik.faro.data.user.FaroUser;
-import com.zik.faro.data.user.UserCredentials;
+import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
+import com.zik.faro.persistence.datastore.data.user.UserCredentialsDo;
 import com.zik.faro.persistence.datastore.UserCredentialsDatastoreImpl;
 import com.zik.faro.persistence.datastore.UserDatastoreImpl;
 
@@ -47,7 +46,7 @@ public class SignupHandler {
 
         logger.info("faro user = " + faroSignupDetails.getFaroUser());
 
-        FaroUser newFaroUser = faroSignupDetails.getFaroUser();
+        FaroUserDo newFaroUser = faroSignupDetails.getFaroUser();
         String password = faroSignupDetails.getPassword();
 
         // Validate Faro user details specified and password
@@ -73,7 +72,7 @@ public class SignupHandler {
 
         try {
         	// Store the New user's credentials and user details
-            UserCredentials userCreds = new UserCredentials(newFaroUser.getEmail(),
+            UserCredentialsDo userCreds = new UserCredentialsDo(newFaroUser.getEmail(),
                                                             PasswordManager.getEncryptedPassword(password));
             UserCredentialsDatastoreImpl.storeUserCreds(userCreds);
             UserDatastoreImpl.storeUser(newFaroUser);

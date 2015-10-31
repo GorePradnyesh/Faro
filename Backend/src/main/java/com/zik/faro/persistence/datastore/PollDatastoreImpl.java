@@ -7,8 +7,8 @@ import com.googlecode.objectify.Work;
 import com.zik.faro.data.PollOption;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
-import com.zik.faro.data.EventDo;
-import com.zik.faro.data.PollDo;
+import com.zik.faro.persistence.datastore.data.EventDo;
+import com.zik.faro.persistence.datastore.data.PollDo;
 
 public class PollDatastoreImpl {
     private static final String EVENTID_FIELD_NAME = "eventId";

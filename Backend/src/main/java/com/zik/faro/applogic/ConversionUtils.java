@@ -3,9 +3,9 @@ package com.zik.faro.applogic;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.Poll;
-import com.zik.faro.data.ActivityDo;
-import com.zik.faro.data.EventDo;
-import com.zik.faro.data.PollDo;
+import com.zik.faro.persistence.datastore.data.ActivityDo;
+import com.zik.faro.persistence.datastore.data.EventDo;
+import com.zik.faro.persistence.datastore.data.PollDo;
 
 public class ConversionUtils {
 	public static Event fromDo(EventDo eventDo){

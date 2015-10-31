@@ -12,9 +12,9 @@ import com.zik.faro.api.responder.EventCreateData;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
 import com.zik.faro.commons.exceptions.IllegalDataOperation;
-import com.zik.faro.data.EventDo;
+import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.data.EventUser;
-import com.zik.faro.data.user.FaroUser;
+import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 import com.zik.faro.persistence.datastore.DatastoreObjectifyDAL;
 import com.zik.faro.persistence.datastore.EventDatastoreImpl;
 
@@ -43,7 +43,7 @@ public class EventManagement {
     
     public static void addFriendToEvent(final String eventId, final String userId, 
     		final AddFriendRequest friendRequest) throws DataNotFoundException, IllegalDataOperation{
-    	FaroUser existingUser = UserManagement.loadFaroUser(userId);
+    	FaroUserDo existingUser = UserManagement.loadFaroUser(userId);
     	
     	for(String friendId : friendRequest.getFriendIds()){
     		// Create friend if not present and establish friend relation if not present

@@ -8,7 +8,7 @@ import com.zik.faro.TestHelper;
 import com.zik.faro.api.profile.ProfileHandler;
 
 import com.zik.faro.data.user.Address;
-import com.zik.faro.data.user.FaroUser;
+import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 import org.junit.*;
 import org.powermock.reflect.Whitebox;
 
@@ -19,7 +19,7 @@ public class ProfileApiTest {
             new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 
     static{
-        ObjectifyService.register(FaroUser.class);
+        ObjectifyService.register(FaroUserDo.class);
     }
 
     @BeforeClass
@@ -40,7 +40,7 @@ public class ProfileApiTest {
     @Test
     public void testCreateUser(){
         final String fName = UUID.randomUUID().toString();
-        FaroUser user = new FaroUser("rwaters@gmail.com",
+        FaroUserDo user = new FaroUserDo("rwaters@gmail.com",
                 fName, null, "waters",
                 "rwaters@splitwise.com",
                 "4085393212",
@@ -50,7 +50,7 @@ public class ProfileApiTest {
         Whitebox.setInternalState(profileHandler, TestHelper.setupMockSecurityContext("rwaters@gmail.com"));
         profileHandler.createProfile(user);
 
-        FaroUser retrievedUser = profileHandler.getProfile().getEntity();
+        FaroUserDo retrievedUser = profileHandler.getProfile().getEntity();
         Assert.assertEquals(user.getFirstName(), retrievedUser.getFirstName());
     }
 }

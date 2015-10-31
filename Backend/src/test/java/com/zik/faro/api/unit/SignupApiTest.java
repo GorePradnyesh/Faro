@@ -10,13 +10,11 @@ import com.zik.faro.commons.FaroResponseStatus;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.FaroWebAppException;
 import com.zik.faro.data.user.Address;
-import com.zik.faro.data.user.FaroUser;
-import com.zik.faro.data.user.UserCredentials;
+import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
+import com.zik.faro.persistence.datastore.data.user.UserCredentialsDo;
 import com.zik.faro.persistence.datastore.UserCredentialsDatastoreImpl;
 
 import org.junit.*;
-
-import javax.ws.rs.core.Response;
 
 import java.util.UUID;
 
@@ -29,8 +27,8 @@ public class SignupApiTest {
             new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 
     static {
-        ObjectifyService.register(FaroUser.class);
-        ObjectifyService.register(UserCredentials.class);
+        ObjectifyService.register(FaroUserDo.class);
+        ObjectifyService.register(UserCredentialsDo.class);
     }
 
     @BeforeClass
@@ -51,7 +49,7 @@ public class SignupApiTest {
     @Test
     public void testSignupUser() throws DataNotFoundException {
         final String fName = UUID.randomUUID().toString();
-        FaroUser user = new FaroUser("rwaters@gmail.com",
+        FaroUserDo user = new FaroUserDo("rwaters@gmail.com",
                 fName, null, "waters",
                 "rwaters@splitwise.com",
                 "4085393212",
@@ -65,7 +63,7 @@ public class SignupApiTest {
 
         // Verify the user exists and credentials have been entered
         Assert.assertTrue(UserManagement.isExistingUser(user.getEmail()));
-        UserCredentials userCredentials = UserCredentialsDatastoreImpl.loadUserCreds(user.getEmail());
+        UserCredentialsDo userCredentials = UserCredentialsDatastoreImpl.loadUserCreds(user.getEmail());
         Assert.assertNotNull(userCredentials);
         userCredentials.getEmail();
         userCredentials.getEncryptedPassword();
@@ -76,7 +74,7 @@ public class SignupApiTest {
     @Test
     public void testSignupExistingUser() {
         final String fName = UUID.randomUUID().toString();
-        FaroUser user = new FaroUser(fName+ "@gmail.com",
+        FaroUserDo user = new FaroUserDo(fName+ "@gmail.com",
                 fName, null, "waters",
                 fName + "@splitwise.com",
                 "4085393212",
@@ -120,7 +118,7 @@ public class SignupApiTest {
     @Test
     public void testInvalidArgsNullPassword() {
         final String fName = UUID.randomUUID().toString();
-        FaroUser user = new FaroUser("rwaters@gmail.com",
+        FaroUserDo user = new FaroUserDo("rwaters@gmail.com",
                 fName, null, "waters",
                 "rwaters@splitwise.com",
                 "4085393212",
@@ -134,7 +132,7 @@ public class SignupApiTest {
         }
     }
 
-    public static String createNewUser(FaroUser user, String password) {
+    public static String createNewUser(FaroUserDo user, String password) {
         return new SignupHandler().signupUser(new FaroSignupDetails(user, password)).getEntity();
     }
 

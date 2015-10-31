@@ -3,16 +3,13 @@ package com.zik.faro.applogic;
 import com.zik.faro.api.responder.MinUser;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.IllegalDataOperation;
-import com.zik.faro.data.user.FaroUser;
-import com.zik.faro.data.user.FriendRelation;
+import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
+import com.zik.faro.persistence.datastore.data.user.FriendRelationDo;
 import com.zik.faro.persistence.datastore.FriendRelationDatastoreImpl;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 
 public class FriendManagement {
 	
@@ -31,8 +28,8 @@ public class FriendManagement {
 		} 
     }
 	
-	private static FaroUser getFaroUser(final String userId) throws DataNotFoundException{
-    	FaroUser faroUser = UserManagement.loadFaroUser(userId);
+	private static FaroUserDo getFaroUser(final String userId) throws DataNotFoundException{
+    	FaroUserDo faroUser = UserManagement.loadFaroUser(userId);
     	return faroUser;
     }
 
@@ -40,7 +37,7 @@ public class FriendManagement {
         List<String> userIdsToLoad = new ArrayList<>();
         userIdsToLoad.add(requestingUserId);
         userIdsToLoad.add(invitedUserId);
-        Map<String, FaroUser> users = UserManagement.loadFaroUsers(userIdsToLoad);
+        Map<String, FaroUserDo> users = UserManagement.loadFaroUsers(userIdsToLoad);
 
         if(users.get(requestingUserId) ==null){
             throw new DataNotFoundException("User Not found : " + requestingUserId);
@@ -49,8 +46,8 @@ public class FriendManagement {
             throw new DataNotFoundException("User Not found : " + invitedUserId);
         }
 
-        FaroUser requestingUser = users.get(requestingUserId);
-        FaroUser invitedUser = users.get(invitedUserId);
+        FaroUserDo requestingUser = users.get(requestingUserId);
+        FaroUserDo invitedUser = users.get(invitedUserId);
 
         FriendRelationDatastoreImpl.storeFriendRelation(
                 new MinUser(requestingUser.getFirstName(), requestingUser.getLastName(), requestingUser.getEmail(), requestingUser.getExternalExpenseID()),
@@ -60,9 +57,9 @@ public class FriendManagement {
 
     public static List<MinUser> getFriendList(final String faroUserId){
         // A valid signature implies that the faroUserId is a valid existing user. Hence no need to validate faroUserId
-        List<FriendRelation> friendRelations = FriendRelationDatastoreImpl.loadFriendsForUserId(faroUserId);
+        List<FriendRelationDo> friendRelations = FriendRelationDatastoreImpl.loadFriendsForUserId(faroUserId);
         List<MinUser> friendList = new ArrayList<>();
-        for(FriendRelation friendRelation : friendRelations){
+        for(FriendRelationDo friendRelation : friendRelations){
             MinUser friend = new MinUser(friendRelation.getToFName(), friendRelation.getToLName(),
                     friendRelation.getToId(), friendRelation.getToExternalExpenseId());
             friendList.add(friend);
@@ -73,7 +70,7 @@ public class FriendManagement {
     
     public static void removeFriend(final String requestingUserId, 
     		final String toBeRemovedUserId) throws DataNotFoundException, IllegalDataOperation{
-    	FaroUser faroUser1, faroUser2;
+    	FaroUserDo faroUser1, faroUser2;
     	//TODO: No need to load the the faro user as long as remove doesnt care about non existent ids
 		faroUser1 = UserManagement.loadFaroUser(requestingUserId);
 		faroUser2 = UserManagement.loadFaroUser(toBeRemovedUserId);
