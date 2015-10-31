@@ -5,7 +5,7 @@ import android.test.ApplicationTestCase;
 import android.util.Log;
 
 import com.squareup.okhttp.Request;
-import com.zik.faro.frontend.data.user.FaroUser;
+import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import com.zik.faro.frontend.data.Event;
+import com.zik.faro.data.Event;
 
 
 public class ApiBaseTest extends ApplicationTestCase<Application> {
@@ -47,7 +47,7 @@ public class ApiBaseTest extends ApplicationTestCase<Application> {
 
     final static class TestGetEventsCallback
             extends Utils.BaseTestCallbackHandler
-            implements BaseFaroRequestCallback<List<com.zik.faro.frontend.data.Event>> {
+            implements BaseFaroRequestCallback<List<Event>> {
         List<Event> eventList;
         TestGetEventsCallback(Semaphore semaphore){
             super(semaphore, 0);

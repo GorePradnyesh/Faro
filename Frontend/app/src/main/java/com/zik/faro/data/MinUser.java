@@ -1,4 +1,4 @@
-package com.zik.faro.frontend.data;
+package com.zik.faro.data;
 
 public class MinUser {
 

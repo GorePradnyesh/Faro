@@ -4,7 +4,7 @@ import android.app.Application;
 import android.test.ApplicationTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 
-import com.zik.faro.frontend.data.user.FaroUser;
+import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.auth.TokenCache;
 

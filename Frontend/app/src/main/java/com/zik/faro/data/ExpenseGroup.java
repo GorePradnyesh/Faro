@@ -1,4 +1,4 @@
-package com.zik.faro.frontend.data.expense;
+package com.zik.faro.data;
 
 public class ExpenseGroup {
     public final String groupName;
@@ -7,9 +7,5 @@ public class ExpenseGroup {
     public ExpenseGroup(String groupName, String groupId) {
         this.groupName = groupName;
         this.groupId = groupId;
-    }
-
-    public ExpenseGroup() {
-        this(null, null);
     }
 }
