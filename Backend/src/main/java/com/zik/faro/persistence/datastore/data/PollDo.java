@@ -1,4 +1,4 @@
-package com.zik.faro.data;
+package com.zik.faro.persistence.datastore.data;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -10,7 +10,8 @@ import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Parent;
-import com.zik.faro.api.bean.PollOption;
+import com.zik.faro.data.ObjectStatus;
+import com.zik.faro.data.PollOption;
 
 @Entity
 public class PollDo {

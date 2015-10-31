@@ -1,4 +1,4 @@
-package com.zik.faro.data.user;
+package com.zik.faro.persistence.datastore.data.user;
 
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
@@ -11,15 +11,15 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @Entity
 @XmlRootElement
-public class UserCredentials {
+public class UserCredentialsDo {
     @Id
     @Index
     private String             email;
     private String encryptedPassword;
 
-    private UserCredentials() {}
+    private UserCredentialsDo() {}
 
-    public UserCredentials(String email, String encryptedPassword) {
+    public UserCredentialsDo(String email, String encryptedPassword) {
         this.email = email;
 
         // Store the encrypted encryptedPassword

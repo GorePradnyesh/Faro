@@ -5,21 +5,17 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.zik.faro.RestClient;
 import com.zik.faro.TestHelper;
-import com.zik.faro.api.responder.FaroSignupDetails;
 import com.zik.faro.auth.jwt.FaroJwtClaims;
 import com.zik.faro.auth.jwt.FaroJwtTokenManager;
-import com.zik.faro.data.user.FaroUser;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.UUID;
 
 /**
  * Created by granganathan on 3/24/15.

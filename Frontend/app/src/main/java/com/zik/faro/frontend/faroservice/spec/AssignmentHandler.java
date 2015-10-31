@@ -1,8 +1,8 @@
 package com.zik.faro.frontend.faroservice.spec;
 
-import com.zik.faro.frontend.data.Assignment;
-import com.zik.faro.frontend.data.AssignmentCount;
-import com.zik.faro.frontend.data.Item;
+import com.zik.faro.data.Assignment;
+import com.zik.faro.data.AssignmentCount;
+import com.zik.faro.data.Item;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 
 import java.util.List;

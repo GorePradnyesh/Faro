@@ -1,7 +1,5 @@
 package com.zik.faro.data;
 
-import com.zik.faro.commons.exceptions.IllegalDataOperation;
-
 public class Item {
    
 	private String id;

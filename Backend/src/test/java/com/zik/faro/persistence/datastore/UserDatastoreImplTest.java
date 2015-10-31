@@ -5,7 +5,7 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.data.user.Address;
-import com.zik.faro.data.user.FaroUser;
+import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 
 import org.junit.*;
 
@@ -18,7 +18,7 @@ public class UserDatastoreImplTest {
             new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 
     static{
-        ObjectifyService.register(FaroUser.class);
+        ObjectifyService.register(FaroUserDo.class);
     }
 
     @BeforeClass
@@ -40,20 +40,20 @@ public class UserDatastoreImplTest {
     public void testLoadUser() throws DataNotFoundException{
         final String email = "dg@gmail.com";
         final String firstName = "David";
-        FaroUser faroUser = new FaroUser(email, firstName, null, "Gilmour", "dg@splitwise.com",
+        FaroUserDo faroUser = new FaroUserDo(email, firstName, null, "Gilmour", "dg@splitwise.com",
                 "2323", new Address(123, "Palm Avenue", "Stanford", "CA", 94332));
         UserDatastoreImpl.storeUser(faroUser);
 
         /*Test Load User by ID*/
-        FaroUser retrievedUser = UserDatastoreImpl.loadFaroUserById(email);
+        FaroUserDo retrievedUser = UserDatastoreImpl.loadFaroUserById(email);
         Assert.assertNotNull(retrievedUser);
 
         /*Test load users by index field*/
-        List<FaroUser> userList = UserDatastoreImpl.loadFaroUsersByName(firstName);
+        List<FaroUserDo> userList = UserDatastoreImpl.loadFaroUsersByName(firstName);
         Assert.assertEquals(1, userList.size());
 
         /*Store another user with the same fist name*/
-        FaroUser faroUser2 = new FaroUser("dguetta@gmail.com", firstName, null, "Gilmour", "dguetta@splitwise.com",
+        FaroUserDo faroUser2 = new FaroUserDo("dguetta@gmail.com", firstName, null, "Gilmour", "dguetta@splitwise.com",
                 "1323", new Address(456, "Venice Beach", "Los Angeles", "CA", 93411));
         UserDatastoreImpl.storeUser(faroUser2);
 

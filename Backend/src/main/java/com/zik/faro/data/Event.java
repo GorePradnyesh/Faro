@@ -1,14 +1,16 @@
-package com.zik.faro.frontend.data;
+package com.zik.faro.data;
 
 import java.util.Calendar;
 import java.util.UUID;
 
+import com.zik.faro.data.expense.ExpenseGroup;
+
 public class Event {
-    private String eventId;
-    private String eventName;
-    private Calendar startDate;
+    private String eventId;           
+    private String eventName;         
+    private Calendar startDate;     
     private Calendar endDate;
-    private boolean controlFlag;
+    private boolean controlFlag;      
     private ExpenseGroup expenseGroup;
     private Location location;
     private ObjectStatus status;
@@ -33,15 +35,15 @@ public class Event {
     }
 
     public Event(){
-
+       
     }
 
     public String getEventName() {
-        return eventName;
+    	return eventName;
     }
-
+    
     public void setEventName(String eventName){
-        this.eventName = eventName;
+    	this.eventName = eventName;
     }
 
     public Calendar getStartDate() {
@@ -53,7 +55,7 @@ public class Event {
     }
 
     public Calendar getEndDate() {
-        return endDate;
+    	return endDate;
     }
 
     public void setEndDate(Calendar endDate) {
@@ -91,9 +93,9 @@ public class Event {
     public String getEventId() {
         return eventId;
     }
-
+    
     public void setEventId(String eventId){
-        this.eventId = eventId;
+    	this.eventId = eventId;
     }
 
     public ObjectStatus getStatus() {
@@ -104,15 +106,17 @@ public class Event {
         this.status = status;
     }
 
-    public Assignment getAssignment() {
-        return assignment;
-    }
+	public Assignment getAssignment() {
+		return assignment;
+	}
 
-    public void setAssignment(Assignment assignment) {
-        this.assignment = assignment;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(Calendar.getInstance());
-    }
+	public void setAssignment(Assignment assignment) {
+		this.assignment = assignment;
+	}
+	
+	public static void main(String[] args) {
+		System.out.println(Calendar.getInstance());
+	}
+	
 }
+

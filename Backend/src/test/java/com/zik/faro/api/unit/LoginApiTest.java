@@ -2,6 +2,8 @@ package com.zik.faro.api.unit;
 
 import java.util.UUID;
 
+import com.zik.faro.applogic.ConversionUtils;
+import com.zik.faro.data.user.FaroUser;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -14,10 +16,10 @@ import com.googlecode.objectify.ObjectifyService;
 import com.sun.jersey.api.JResponse;
 import com.zik.faro.api.authentication.LoginHandler;
 import com.zik.faro.api.authentication.SignupHandler;
-import com.zik.faro.api.responder.FaroSignupDetails;
+import com.zik.faro.data.FaroSignupDetails;
 import com.zik.faro.data.user.Address;
-import com.zik.faro.data.user.FaroUser;
-import com.zik.faro.data.user.UserCredentials;
+import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
+import com.zik.faro.persistence.datastore.data.user.UserCredentialsDo;
 
 /**
  * Created by granganathan on 3/30/15.
@@ -27,8 +29,8 @@ public class LoginApiTest {
             new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 
     static {
-        ObjectifyService.register(FaroUser.class);
-        ObjectifyService.register(UserCredentials.class);
+        ObjectifyService.register(FaroUserDo.class);
+        ObjectifyService.register(UserCredentialsDo.class);
     }
 
     @BeforeClass
@@ -47,9 +49,21 @@ public class LoginApiTest {
     }
 
     @Test
+    public void toStringTest() {
+        final String fName = UUID.randomUUID().toString();
+        FaroUserDo faroUser = new FaroUserDo("rwaters@gmail.com",
+                fName, null, "waters",
+                "rwaters@splitwise.com",
+                "4085393212",
+                new Address(44, "Abby Road","SouthEnd London","UK", 566645));
+
+        System.out.println("User = " + faroUser);
+    }
+
+    @Test
     public void testLoginApi() {
         final String fName = UUID.randomUUID().toString();
-        FaroUser faroUser = new FaroUser("rwaters@gmail.com",
+        FaroUserDo faroUser = new FaroUserDo("rwaters@gmail.com",
                 fName, null, "waters",
                 "rwaters@splitwise.com",
                 "4085393212",
@@ -62,8 +76,9 @@ public class LoginApiTest {
         Assert.assertNotNull(token.getEntity());
     }
 
-    public String createNewUser(FaroUser user, String password) {
+    public String createNewUser(FaroUserDo user, String password) {
         SignupHandler signupHandler = new SignupHandler();
-        return signupHandler.signupUser(new FaroSignupDetails(user, password)).getEntity();
+        FaroUser faroUser = ConversionUtils.fromDo(user);
+        return signupHandler.signupUser(new FaroSignupDetails(faroUser, password)).getEntity();
     }
 }

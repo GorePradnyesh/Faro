@@ -1,4 +1,4 @@
-package com.zik.faro.commons.exceptions;
+package com.zik.faro.data;
 
 public class IllegalDataOperation extends Exception {
     static final long serialVersionUID = -1000000000000000000L;

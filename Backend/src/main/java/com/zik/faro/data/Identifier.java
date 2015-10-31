@@ -1,8 +1,6 @@
 package com.zik.faro.data;
 
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.util.UUID;
 
 /**
@@ -10,7 +8,6 @@ import java.util.UUID;
  * and to provide an abstraction for generating unique identifier strings
  */
 
-@XmlRootElement
 public class Identifier {
     private String idString;
 
@@ -26,7 +23,6 @@ public class Identifier {
         return new Identifier(idString);
     }
 
-    @XmlElement
     public String getIdString(){
         return this.idString;
     }

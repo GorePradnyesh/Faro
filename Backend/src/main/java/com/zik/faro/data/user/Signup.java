@@ -1,17 +1,18 @@
-package com.zik.faro.frontend.data;
+package com.zik.faro.data.user;
 
-import com.zik.faro.frontend.data.user.FaroUser;
-
-public class SignupDetails {
+/**
+ * Created by pgore on 10/31/15.
+ */
+public class Signup {
     private FaroUser faroUser;
     private String password;
 
-    public SignupDetails(FaroUser faroUser, String password) {
+    public Signup(FaroUser faroUser, String password) {
         this.faroUser = faroUser;
         this.password = password;
     }
 
-    private SignupDetails() {}
+    private Signup() {}
 
     public FaroUser getFaroUser() {
         return faroUser;

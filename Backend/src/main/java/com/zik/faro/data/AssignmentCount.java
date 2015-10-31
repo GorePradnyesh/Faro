@@ -1,8 +1,5 @@
-package com.zik.faro.frontend.data;
+package com.zik.faro.data;
 
-/**
- * Created by pgore on 10/11/15.
- */
 public class AssignmentCount{
     public String eventId;
     public int assignmentCount;

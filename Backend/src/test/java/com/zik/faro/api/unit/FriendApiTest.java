@@ -6,18 +6,17 @@ import com.googlecode.objectify.ObjectifyService;
 import com.sun.jersey.api.JResponse;
 import com.zik.faro.TestHelper;
 import com.zik.faro.api.friends.FriendsHandler;
-import com.zik.faro.api.responder.MinUser;
+import com.zik.faro.data.MinUser;
 import com.zik.faro.commons.exceptions.FaroWebAppException;
 import com.zik.faro.data.user.Address;
-import com.zik.faro.data.user.FaroUser;
-import com.zik.faro.data.user.FriendRelation;
+import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
+import com.zik.faro.persistence.datastore.data.user.FriendRelationDo;
 import com.zik.faro.persistence.datastore.UserDatastoreImpl;
 
 import org.junit.*;
 import org.powermock.reflect.Whitebox;
 
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 import java.util.List;
 
 public class FriendApiTest {
@@ -26,8 +25,8 @@ public class FriendApiTest {
                     .setDefaultHighRepJobPolicyUnappliedJobPercentage(50));
 
     static{
-        ObjectifyService.register(FaroUser.class);
-        ObjectifyService.register(FriendRelation.class);
+        ObjectifyService.register(FaroUserDo.class);
+        ObjectifyService.register(FriendRelationDo.class);
     }
 
     @BeforeClass
@@ -49,7 +48,7 @@ public class FriendApiTest {
     public void testFriendRelation(){
         int userCount = 3;
         for(int i = 0; i< userCount; i++) {
-            FaroUser user = new FaroUser("user"+i+"@gmail.com",
+            FaroUserDo user = new FaroUserDo("user"+i+"@gmail.com",
                     "user"+i, null, "user"+i+"lname",
                     "user"+i+"@splitwise.com",
                     "0000000"+i,
@@ -95,7 +94,7 @@ public class FriendApiTest {
     public void testDeleteFriendRelation(){
         int userCount = 3;
         for(int i=0; i< userCount; i++) {
-            FaroUser user = new FaroUser("user"+i+"@gmail.com",
+            FaroUserDo user = new FaroUserDo("user"+i+"@gmail.com",
                     "user"+i, null, "user"+i+"lname",
                     "user"+i+"@splitwise.com",
                     "0000000"+i,
