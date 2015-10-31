@@ -6,7 +6,7 @@ import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
 import com.googlecode.objectify.annotation.Parent;
-import com.zik.faro.commons.exceptions.IllegalDataOperation;
+import com.zik.faro.data.IllegalDataOperation;
 
 @Entity
 public class FriendRelationDo {

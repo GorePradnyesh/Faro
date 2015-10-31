@@ -3,9 +3,6 @@ package com.zik.faro.data;
 import java.util.Calendar;
 import java.util.UUID;
 
-import com.zik.faro.data.Assignment;
-import com.zik.faro.data.Location;
-import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.expense.ExpenseGroup;
 
 public class Event {

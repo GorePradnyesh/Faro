@@ -31,7 +31,7 @@ import com.zik.faro.applogic.EventUserManagement;
 import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
-import com.zik.faro.commons.exceptions.IllegalDataOperation;
+import com.zik.faro.data.IllegalDataOperation;
 
 
 @Path(EVENT_PATH_CONST + EVENT_ID_PATH_PARAM_STRING)

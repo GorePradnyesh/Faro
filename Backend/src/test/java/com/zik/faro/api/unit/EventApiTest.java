@@ -23,7 +23,7 @@ import com.zik.faro.api.event.EventCreateHandler;
 import com.zik.faro.api.event.EventHandler;
 import com.zik.faro.api.responder.EventCreateData;
 import com.zik.faro.persistence.datastore.data.EventDo;
-import com.zik.faro.data.EventUser;
+import com.zik.faro.persistence.datastore.data.EventUserDo;
 import com.zik.faro.data.Location;
 
 public class EventApiTest {
@@ -35,7 +35,7 @@ public class EventApiTest {
 
 	static {
 		ObjectifyService.register(EventDo.class);
-		ObjectifyService.register(EventUser.class);
+		ObjectifyService.register(EventUserDo.class);
 		 
 	}
 

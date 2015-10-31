@@ -8,7 +8,7 @@ import com.google.common.base.Strings;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
-import com.zik.faro.commons.exceptions.IllegalDataOperation;
+import com.zik.faro.data.IllegalDataOperation;
 import com.zik.faro.data.user.Address;
 
 @Entity

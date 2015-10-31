@@ -2,7 +2,7 @@ package com.zik.faro.persistence.datastore;
 
 import com.zik.faro.api.responder.MinUser;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
-import com.zik.faro.commons.exceptions.IllegalDataOperation;
+import com.zik.faro.data.IllegalDataOperation;
 import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 import com.zik.faro.persistence.datastore.data.user.FriendRelationDo;
 

@@ -1,12 +1,6 @@
 package com.zik.faro.data;
 
 import java.util.Calendar;
-import java.util.UUID;
-
-import javax.xml.bind.annotation.XmlRootElement;
-
-import com.zik.faro.data.Assignment;
-import com.zik.faro.data.Location;
 
 public class Activity {
     private String id;

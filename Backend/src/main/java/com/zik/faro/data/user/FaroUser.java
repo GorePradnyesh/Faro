@@ -1,14 +1,10 @@
 package com.zik.faro.data.user;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
-import com.google.appengine.repackaged.com.google.common.base.MoreObjects;
+import com.google.common.base.MoreObjects;
 
 import com.google.common.base.Strings;
-import com.zik.faro.commons.exceptions.IllegalDataOperation;
-import com.zik.faro.data.user.Address;
+import com.zik.faro.data.IllegalDataOperation;
 
-@XmlRootElement
 public class FaroUser {
     private String             email;
     private String             firstName;
@@ -118,7 +114,6 @@ public class FaroUser {
 
     @Override
     public String toString() {
-
         return MoreObjects.toStringHelper(this).add("email", getEmail())
                 .add("firstName", getFirstName())
                 .add("middleName", getMiddleName())

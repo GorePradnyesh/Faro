@@ -11,9 +11,9 @@ import com.zik.faro.api.responder.AddFriendRequest;
 import com.zik.faro.api.responder.EventCreateData;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
-import com.zik.faro.commons.exceptions.IllegalDataOperation;
+import com.zik.faro.data.IllegalDataOperation;
 import com.zik.faro.persistence.datastore.data.EventDo;
-import com.zik.faro.data.EventUser;
+import com.zik.faro.persistence.datastore.data.EventUserDo;
 import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 import com.zik.faro.persistence.datastore.DatastoreObjectifyDAL;
 import com.zik.faro.persistence.datastore.EventDatastoreImpl;
@@ -59,9 +59,9 @@ public class EventManagement {
     
     public static List<Event> getEvents(final String faroUserId){
     	// Load first "N" event Ids for particular user
-		List<EventUser> eventUsers = EventUserManagement.getEventsByFaroUser(faroUserId);
+		List<EventUserDo> eventUsers = EventUserManagement.getEventsByFaroUser(faroUserId);
 		List<String> eventIds = new ArrayList<String>();
- 		for(EventUser eventUser : eventUsers){
+ 		for(EventUserDo eventUser : eventUsers){
 			eventIds.add(eventUser.getEvent().getEventId());
 		}
  		// Load actual events

@@ -1,6 +1,6 @@
 package com.zik.faro.data.user;
 
-import com.zik.faro.commons.exceptions.IllegalDataOperation;
+import com.zik.faro.data.IllegalDataOperation;
 
 public class FriendRelation {
     private String toId;

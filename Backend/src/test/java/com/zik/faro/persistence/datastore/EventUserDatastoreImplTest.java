@@ -14,7 +14,7 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
 import com.zik.faro.persistence.datastore.data.EventDo;
-import com.zik.faro.data.EventUser;
+import com.zik.faro.persistence.datastore.data.EventUserDo;
 import com.zik.faro.data.Location;
 import com.zik.faro.data.expense.ExpenseGroup;
 import com.zik.faro.data.user.Address;
@@ -25,7 +25,7 @@ public class EventUserDatastoreImplTest {
             new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 
     static{
-        ObjectifyService.register(EventUser.class);
+        ObjectifyService.register(EventUserDo.class);
         ObjectifyService.register(EventDo.class);
         ObjectifyService.register(FaroUserDo.class);
     }
@@ -62,7 +62,7 @@ public class EventUserDatastoreImplTest {
         DatastoreObjectifyDAL.storeObject(faroUser);
 
         EventUserDatastoreImpl.storeEventUser(testEvent.getEventId(), faroUser.getEmail());
-        EventUser eventUser = EventUserDatastoreImpl.loadEventUser(testEvent.getEventId(), faroUser.getEmail());
+        EventUserDo eventUser = EventUserDatastoreImpl.loadEventUser(testEvent.getEventId(), faroUser.getEmail());
         Assert.assertNotNull(eventUser);
 
         EventDo retEvent = eventUser.getEvent();
@@ -112,13 +112,13 @@ public class EventUserDatastoreImplTest {
         EventUserDatastoreImpl.storeEventUser(event3.getEventId(), faroUser1.getEmail());
 
 
-        List<EventUser> userList1 = EventUserDatastoreImpl.loadEventUserByEvent(event1.getEventId());
+        List<EventUserDo> userList1 = EventUserDatastoreImpl.loadEventUserByEvent(event1.getEventId());
         Assert.assertEquals(2, userList1.size());
-        List<EventUser> userList2 = EventUserDatastoreImpl.loadEventUserByEvent(event2.getEventId());
+        List<EventUserDo> userList2 = EventUserDatastoreImpl.loadEventUserByEvent(event2.getEventId());
         Assert.assertEquals(1, userList2.size());
-        List<EventUser> eventList = EventUserDatastoreImpl.loadEventUserByFaroUser(faroUser1.getEmail());
+        List<EventUserDo> eventList = EventUserDatastoreImpl.loadEventUserByFaroUser(faroUser1.getEmail());
         Assert.assertEquals(3, eventList.size());
-        List<EventUser> eventList2 = EventUserDatastoreImpl.loadEventUserByFaroUser(faroUser2.getEmail());
+        List<EventUserDo> eventList2 = EventUserDatastoreImpl.loadEventUserByFaroUser(faroUser2.getEmail());
         Assert.assertEquals(1, eventList2.size());
     }
 
@@ -141,7 +141,7 @@ public class EventUserDatastoreImplTest {
         EventUserDatastoreImpl.storeEventUser(event1.getEventId(), faroUser1.getEmail());
         EventUserDatastoreImpl.storeEventUser(event1.getEventId(), faroUser1.getEmail());
 
-        List<EventUser> userList1 = EventUserDatastoreImpl.loadEventUserByEvent(event1.getEventId());
+        List<EventUserDo> userList1 = EventUserDatastoreImpl.loadEventUserByEvent(event1.getEventId());
         Assert.assertEquals(1, userList1.size());
     }
     
@@ -164,7 +164,7 @@ public class EventUserDatastoreImplTest {
         EventUserDatastoreImpl.storeEventUser(event1.getEventId(), faroUser1.getEmail());
         
         // Verify user-event relation
-        EventUser eventUser = EventUserDatastoreImpl.loadEventUser(event1.getEventId(),
+        EventUserDo eventUser = EventUserDatastoreImpl.loadEventUser(event1.getEventId(),
         		faroUser1.getEmail());
         Assert.assertNotNull(eventUser);
         Assert.assertEquals(event1,eventUser.getEvent());

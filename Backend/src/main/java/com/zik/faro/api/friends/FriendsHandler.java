@@ -6,7 +6,7 @@ import com.zik.faro.applogic.FriendManagement;
 import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.ParamValidation;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
-import com.zik.faro.commons.exceptions.IllegalDataOperation;
+import com.zik.faro.data.IllegalDataOperation;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
