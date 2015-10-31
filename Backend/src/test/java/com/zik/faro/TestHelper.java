@@ -64,7 +64,7 @@ public class TestHelper {
     public static URL getExternalTargetEndpoint() throws MalformedURLException {
         String hostname = System.getProperty(HOSTNAME_PROPERTY);
         if(hostname == null){
-            hostname = "localhost";
+            hostname = "127.0.0.1";
         }
         String port = System.getProperty(PORT_PROPERTY);
         if(port == null){

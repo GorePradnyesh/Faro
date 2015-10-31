@@ -110,6 +110,7 @@ public class EventApiTest extends ApiBaseTest {
         Assert.assertFalse(getEventCallback.unexpectedResponseCode);
         
         timeout = false;
+        
         // Get event list
         TestGetEventsCallback getEventsCallback 
                 = new TestGetEventsCallback(waitSem);

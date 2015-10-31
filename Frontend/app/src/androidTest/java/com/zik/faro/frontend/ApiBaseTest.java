@@ -42,6 +42,16 @@ public class ApiBaseTest extends ApplicationTestCase<Application> {
         return callback.token;
     }
 
+    protected void signUpUser(final String username, final String password) throws InterruptedException, MalformedURLException {
+        final Semaphore waitSem = new Semaphore(0);
+        FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
+        Utils.TestSignupCallback callback = new Utils.TestSignupCallback(waitSem, 200);
+        serviceHandler.getSignupHandler().signup(callback, new FaroUser(username), password, false);
+        boolean timeout;
+        timeout = !waitSem.tryAcquire(30000, TimeUnit.MILLISECONDS);
+        Assert.assertFalse(timeout);
+    }
+    
     // ------------------------ Helpers 
 
 
@@ -112,6 +122,34 @@ public class ApiBaseTest extends ApplicationTestCase<Application> {
         public void onResponse(Event event, HttpError error){
             if(event != null){
                 this.receivedEvent = event;
+            }
+            Log.v("Get Event", "Success");
+            waitSem.release();
+        }
+    }
+
+
+    final static class TestOKActionCallbackHandler<String>
+            extends Utils.BaseTestCallbackHandler implements BaseFaroRequestCallback<String>{
+        TestOKActionCallbackHandler(final Semaphore sem, int expectedCode){
+            super(sem, expectedCode);
+        }
+
+        @Override
+        public void onFailure(Request request, IOException e) {
+            Log.v("Get Event", "Failed");
+            failed = true;
+            waitSem.release();
+        }
+
+        @Override
+        public void onResponse(String s, HttpError error){
+            if(error != null){
+                this.failed = true;
+            }
+            else
+            {
+                this.failed = false;
             }
             Log.v("Get Event", "Success");
             waitSem.release();

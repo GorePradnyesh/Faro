@@ -20,6 +20,8 @@ public class FriendRelationDo {
     private String toLName;
     private String toExternalExpenseId;
 
+    private FriendRelationDo(){}
+
     public FriendRelationDo(final String fromId,
                             final String toId,
                             final String toFName,
