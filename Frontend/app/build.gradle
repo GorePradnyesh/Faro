@@ -11,22 +11,17 @@ android {
         versionCode 1
         versionName "1.0"
     }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-}
 
-task invokeCommonsBuild(type:Exec) {
-    workingDir '../../Commons'
-    commandLine 'mvn', 'clean', 'package'
-}
-
-task copyCommonsLib(type:Copy) {
-    from "../../Commons/target/faro-commons-1.0-SNAPSHOT.jar"
-    into "$libsDir"
+    lintOptions {
+        abortOnError false
+    }
 }
 
 dependencies {

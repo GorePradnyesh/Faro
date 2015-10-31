@@ -4,9 +4,9 @@ import android.app.Application;
 import android.test.suitebuilder.annotation.LargeTest;
 
 import com.squareup.okhttp.Request;
-import data.Activity;
-import data.EventCreateData;
-import data.Location;
+import com.zik.faro.frontend.data.Activity;
+import com.zik.faro.frontend.data.EventCreateData;
+import com.zik.faro.frontend.data.Location;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;

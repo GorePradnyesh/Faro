@@ -1,4 +1,4 @@
-package data.user;
+package com.zik.faro.frontend.data.user;
 
 public class Address {
     private int addressNumber;

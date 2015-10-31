@@ -4,10 +4,10 @@ package com.zik.faro.frontend.faroservice.okHttp;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
-import data.DateOffset;
-import data.Event;
-import data.EventCreateData;
-import data.Location;
+import com.zik.faro.frontend.data.DateOffset;
+import com.zik.faro.frontend.data.Event;
+import com.zik.faro.frontend.data.EventCreateData;
+import com.zik.faro.frontend.data.Location;
 
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.auth.TokenCache;

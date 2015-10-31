@@ -3,7 +3,7 @@ package com.zik.faro.frontend;
 import android.app.Application;
 import android.test.suitebuilder.annotation.LargeTest;
 
-import data.EventCreateData;
+import com.zik.faro.frontend.data.EventCreateData;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 
 import junit.framework.Assert;
