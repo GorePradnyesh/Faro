@@ -16,7 +16,7 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 import com.zik.faro.TestHelper;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Event;
-import com.zik.faro.api.responder.EventCreateData;
+import com.zik.faro.data.EventCreateData;
 import com.zik.faro.data.ActionStatus;
 import com.zik.faro.data.Assignment;
 import com.zik.faro.data.Item;

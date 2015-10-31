@@ -1,8 +1,8 @@
 package com.zik.faro.api.responder;
 
+import com.zik.faro.data.MinUser;
 import com.zik.faro.data.user.InviteStatus;
 
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import java.util.HashMap;

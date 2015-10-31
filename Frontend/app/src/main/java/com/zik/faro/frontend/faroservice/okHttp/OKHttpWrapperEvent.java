@@ -4,7 +4,6 @@ package com.zik.faro.frontend.faroservice.okHttp;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
-import com.zik.faro.data.DateOffset;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.EventCreateData;
 import com.zik.faro.data.Location;
@@ -49,14 +48,7 @@ public class OKHttpWrapperEvent extends BaseFaroOKHttpWrapper implements EventHa
         }
     }
 
-    public void getEvent2(final BaseFaroRequestCallback<Event> callback, final String eventId){
-        DateOffset startDate = new DateOffset(new Date(), 0);
-        DateOffset endDate = new DateOffset(new Date(), 3600);
-        Location location = new Location("location_"+UUID.randomUUID().toString());
-        Event newEvent = new Event(eventId, Calendar.getInstance(), Calendar.getInstance(), false, null, location);
-        callback.onResponse(newEvent, null);
-    }
-    
+
     // TODO: Temp use this actual implementation instead of event
     public void getEvent(final BaseFaroRequestCallback<Event> callback, final String eventId){
         String token = TokenCache.getTokenCache().getAuthToken();

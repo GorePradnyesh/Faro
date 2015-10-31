@@ -4,7 +4,7 @@ package com.zik.faro.persistence.datastore;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
-import com.zik.faro.api.responder.MinUser;
+import com.zik.faro.data.MinUser;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.data.IllegalDataOperation;
 import com.zik.faro.data.user.Address;

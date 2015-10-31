@@ -2,6 +2,7 @@ package com.zik.faro.api.authentication;
 
 import static com.zik.faro.commons.Constants.AUTH_PATH_CONST;
 import static com.zik.faro.commons.Constants.AUTH_SIGN_UP_PATH_CONST;
+import static com.zik.faro.commons.Constants.FARO_USER_ID_PARAM;
 
 import java.text.MessageFormat;
 
@@ -11,12 +12,14 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import com.zik.faro.applogic.ConversionUtils;
+import com.zik.faro.data.user.FaroUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 import com.sun.jersey.api.JResponse;
-import com.zik.faro.api.responder.FaroSignupDetails;
+import com.zik.faro.data.FaroSignupDetails;
 import com.zik.faro.applogic.UserManagement;
 import com.zik.faro.auth.PasswordManager;
 import com.zik.faro.auth.PasswordManagerException;
@@ -29,9 +32,6 @@ import com.zik.faro.persistence.datastore.UserCredentialsDatastoreImpl;
 import com.zik.faro.persistence.datastore.UserDatastoreImpl;
 
 
-/**
- * Created by granganathan on 2/8/15.
- */
 @Path(AUTH_PATH_CONST + AUTH_SIGN_UP_PATH_CONST)
 public class SignupHandler {
     private static Logger logger = LoggerFactory.getLogger(SignupHandler.class);
@@ -46,7 +46,7 @@ public class SignupHandler {
 
         logger.info("faro user = " + faroSignupDetails.getFaroUser());
 
-        FaroUserDo newFaroUser = faroSignupDetails.getFaroUser();
+        FaroUser newFaroUser = faroSignupDetails.getFaroUser();
         String password = faroSignupDetails.getPassword();
 
         // Validate Faro user details specified and password
@@ -75,7 +75,8 @@ public class SignupHandler {
             UserCredentialsDo userCreds = new UserCredentialsDo(newFaroUser.getEmail(),
                                                             PasswordManager.getEncryptedPassword(password));
             UserCredentialsDatastoreImpl.storeUserCreds(userCreds);
-            UserDatastoreImpl.storeUser(newFaroUser);
+            FaroUserDo faroUserDo = ConversionUtils.toDo(newFaroUser);
+            UserDatastoreImpl.storeUser(faroUserDo);
         } catch (PasswordManagerException e) {
             logger.error("Password could not be encrypted", e);
         }

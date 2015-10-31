@@ -2,7 +2,8 @@ package com.zik.faro.functional;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.zik.faro.TestHelper;
-import com.zik.faro.api.responder.FaroSignupDetails;
+import com.zik.faro.data.FaroSignupDetails;
+import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 import org.junit.Assert;
 import org.junit.Test;
@@ -21,7 +22,7 @@ public class FunctionalLoginHandlerTest {
 
     public FaroSignupDetails createNewTestUser() throws IOException, URISyntaxException {
         String newRandomEmail = UUID.randomUUID().toString() + "@gmail.com";
-        FaroUserDo newUser = new FaroUserDo(newRandomEmail,
+        FaroUser newUser = new FaroUser(newRandomEmail,
                                         "sachin",
                                         "ramesh",
                                         "tendulkar",

@@ -1,7 +1,7 @@
 package com.zik.faro.api.friends;
 
 import com.sun.jersey.api.JResponse;
-import com.zik.faro.api.responder.MinUser;
+import com.zik.faro.data.MinUser;
 import com.zik.faro.applogic.FriendManagement;
 import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.ParamValidation;

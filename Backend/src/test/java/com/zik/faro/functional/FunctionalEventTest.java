@@ -18,7 +18,7 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 import com.zik.faro.TestHelper;
 import com.zik.faro.data.Event;
 import com.zik.faro.api.responder.AddFriendRequest;
-import com.zik.faro.api.responder.EventCreateData;
+import com.zik.faro.data.EventCreateData;
 import com.zik.faro.api.responder.InviteeList;
 import com.zik.faro.api.responder.InviteeList.Invitees;
 import com.zik.faro.data.Location;

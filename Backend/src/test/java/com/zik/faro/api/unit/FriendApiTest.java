@@ -6,7 +6,7 @@ import com.googlecode.objectify.ObjectifyService;
 import com.sun.jersey.api.JResponse;
 import com.zik.faro.TestHelper;
 import com.zik.faro.api.friends.FriendsHandler;
-import com.zik.faro.api.responder.MinUser;
+import com.zik.faro.data.MinUser;
 import com.zik.faro.commons.exceptions.FaroWebAppException;
 import com.zik.faro.data.user.Address;
 import com.zik.faro.persistence.datastore.data.user.FaroUserDo;

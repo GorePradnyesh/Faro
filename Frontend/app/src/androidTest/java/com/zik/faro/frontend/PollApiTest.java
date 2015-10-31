@@ -9,6 +9,7 @@ import com.squareup.okhttp.Request;
 import com.zik.faro.data.EventCreateData;
 import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.Poll;
+import com.zik.faro.data.PollOption;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
@@ -67,9 +68,9 @@ public class PollApiTest extends ApiBaseTest{
         // Create poll
         String optionValue = UUID.randomUUID().toString();
         String optionValue2 = UUID.randomUUID().toString();
-        Poll.PollOption option1 = new Poll.PollOption(optionValue);
-        Poll.PollOption option2 = new Poll.PollOption(optionValue2);        
-        List<Poll.PollOption> pollOptions = new ArrayList<>();
+        PollOption option1 = new PollOption(optionValue);
+        PollOption option2 = new PollOption(optionValue2);        
+        List<PollOption> pollOptions = new ArrayList<>();
         pollOptions.add(option1);
         pollOptions.add(option2);
         Poll poll1 = new Poll(eventId, uuidEmail, pollOptions, uuidEmail, "Desc1");

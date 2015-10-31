@@ -19,6 +19,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
+import com.zik.faro.data.user.FaroUser;
 import org.codehaus.jackson.Version;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.module.SimpleModule;
@@ -28,7 +29,7 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.zik.faro.api.event.CustomDateSerializer;
-import com.zik.faro.api.responder.FaroSignupDetails;
+import com.zik.faro.data.FaroSignupDetails;
 import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 
 public class TestHelper {
@@ -184,7 +185,7 @@ public class TestHelper {
     
     public static String createUserAndGetToken() throws Exception{
     	String newRandomEmail = UUID.randomUUID().toString() + "@gmail.com";
-        FaroUserDo newUser = new FaroUserDo(newRandomEmail,
+        FaroUser newUser = new FaroUser(newRandomEmail,
                 "sachin",
                 "ramesh",
                 "tendulkar",
@@ -197,7 +198,7 @@ public class TestHelper {
     }
     
     public static String createUser(String email, String fname, String lname, String mname) throws Exception{
-    	FaroUserDo newUser = new FaroUserDo(email,
+        FaroUser newUser = new FaroUser(email,
                 fname,
                 mname,
                 lname,

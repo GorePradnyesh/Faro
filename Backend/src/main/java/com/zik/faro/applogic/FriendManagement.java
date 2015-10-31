@@ -1,6 +1,6 @@
 package com.zik.faro.applogic;
 
-import com.zik.faro.api.responder.MinUser;
+import com.zik.faro.data.MinUser;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.data.IllegalDataOperation;
 import com.zik.faro.persistence.datastore.data.user.FaroUserDo;

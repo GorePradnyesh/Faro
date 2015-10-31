@@ -68,7 +68,7 @@ public class OKHttpWrapperActivity extends BaseFaroOKHttpWrapper implements Acti
     }
 
     @Override
-    public void updateActivity(BaseFaroRequestCallback<String> callback, String eventId, String activityId, Activity.ActivityUpdateData updateData) {
+    public void updateActivity(BaseFaroRequestCallback<String> callback, String eventId, String activityId, Activity updateData) {
         String token = TokenCache.getTokenCache().getAuthToken();
         if(token != null) {
             String pollPostBody = mapper.toJson(updateData);

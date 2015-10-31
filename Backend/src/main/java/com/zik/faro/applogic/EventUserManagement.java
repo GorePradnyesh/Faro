@@ -3,7 +3,7 @@ package com.zik.faro.applogic;
 import java.util.List;
 
 import com.zik.faro.api.responder.InviteeList;
-import com.zik.faro.api.responder.MinUser;
+import com.zik.faro.data.MinUser;
 import com.zik.faro.persistence.datastore.data.EventUserDo;
 import com.zik.faro.persistence.datastore.EventUserDatastoreImpl;
 

@@ -1,25 +1,18 @@
-package com.zik.faro.api.responder;
+package com.zik.faro.data;
 
-import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
-
-import javax.xml.bind.annotation.XmlRootElement;
-
-/**
- * Created by granganathan on 2/27/15.
- */
-@XmlRootElement
+import com.zik.faro.data.user.FaroUser;
 public class FaroSignupDetails {
-    private FaroUserDo faroUser;
-    private String password;
-
-    public FaroSignupDetails(FaroUserDo faroUser, String password) {
+    private FaroUser faroUser;
+    public FaroSignupDetails(FaroUser faroUser, String password) {
         this.faroUser = faroUser;
         this.password = password;
     }
 
+    private String password;
+
     private FaroSignupDetails() {}
 
-    public FaroUserDo getFaroUser() {
+    public FaroUser getFaroUser() {
         return faroUser;
     }
 
@@ -28,7 +21,7 @@ public class FaroSignupDetails {
     }
 
     // TODO : Will have to make the setters private and still have jaxb working fine
-    public void setFaroUser(FaroUserDo faroUser) {
+    public void setFaroUser(FaroUser faroUser) {
         this.faroUser = faroUser;
     }
 

@@ -3,9 +3,11 @@ package com.zik.faro.applogic;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.Poll;
+import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.persistence.datastore.data.ActivityDo;
 import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.persistence.datastore.data.PollDo;
+import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 
 public class ConversionUtils {
 	public static Event fromDo(EventDo eventDo){
@@ -84,5 +86,30 @@ public class ConversionUtils {
 		pollDo.setWinnerId(poll.getWinnerId());
 		pollDo.setPollOptions(poll.getPollOptions());
 		return pollDo;
+	}
+
+	public static FaroUserDo toDo(FaroUser faroUser){
+		FaroUserDo faroUserDo = new FaroUserDo();
+		faroUserDo.setEmail(faroUser.getEmail());
+		faroUserDo.setFirstName(faroUser.getFirstName());
+		faroUserDo.setLastName(faroUser.getLastName());
+		faroUserDo.setMiddleName(faroUser.getMiddleName());
+		faroUserDo.setExternalExpenseID(faroUser.getExternalExpenseID());
+		faroUserDo.setTelephone(faroUser.getExternalExpenseID());
+		faroUserDo.setAddress(faroUser.getAddress());
+		return faroUserDo;
+	}
+
+
+	public static FaroUser fromDo(FaroUserDo faroUserDo){
+		FaroUser faroUser = new FaroUser();
+		faroUser.setEmail(faroUserDo.getEmail());
+		faroUser.setFirstName(faroUserDo.getFirstName());
+		faroUser.setLastName(faroUserDo.getLastName());
+		faroUser.setMiddleName(faroUserDo.getMiddleName());
+		faroUser.setExternalExpenseID(faroUserDo.getExternalExpenseID());
+		faroUser.setTelephone(faroUserDo.getExternalExpenseID());
+		faroUser.setAddress(faroUserDo.getAddress());
+		return faroUser;
 	}
 }

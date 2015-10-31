@@ -4,12 +4,14 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
 import com.zik.faro.api.authentication.SignupHandler;
-import com.zik.faro.api.responder.FaroSignupDetails;
+import com.zik.faro.applogic.ConversionUtils;
+import com.zik.faro.data.FaroSignupDetails;
 import com.zik.faro.applogic.UserManagement;
 import com.zik.faro.commons.FaroResponseStatus;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.FaroWebAppException;
 import com.zik.faro.data.user.Address;
+import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 import com.zik.faro.persistence.datastore.data.user.UserCredentialsDo;
 import com.zik.faro.persistence.datastore.UserCredentialsDatastoreImpl;
@@ -133,7 +135,8 @@ public class SignupApiTest {
     }
 
     public static String createNewUser(FaroUserDo user, String password) {
-        return new SignupHandler().signupUser(new FaroSignupDetails(user, password)).getEntity();
+        FaroUser faroUser = ConversionUtils.fromDo(user);
+        return new SignupHandler().signupUser(new FaroSignupDetails(faroUser, password)).getEntity();
     }
 
 }

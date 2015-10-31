@@ -2,6 +2,8 @@ package com.zik.faro.api.unit;
 
 import java.util.UUID;
 
+import com.zik.faro.applogic.ConversionUtils;
+import com.zik.faro.data.user.FaroUser;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -14,7 +16,7 @@ import com.googlecode.objectify.ObjectifyService;
 import com.sun.jersey.api.JResponse;
 import com.zik.faro.api.authentication.LoginHandler;
 import com.zik.faro.api.authentication.SignupHandler;
-import com.zik.faro.api.responder.FaroSignupDetails;
+import com.zik.faro.data.FaroSignupDetails;
 import com.zik.faro.data.user.Address;
 import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 import com.zik.faro.persistence.datastore.data.user.UserCredentialsDo;
@@ -76,6 +78,7 @@ public class LoginApiTest {
 
     public String createNewUser(FaroUserDo user, String password) {
         SignupHandler signupHandler = new SignupHandler();
-        return signupHandler.signupUser(new FaroSignupDetails(user, password)).getEntity();
+        FaroUser faroUser = ConversionUtils.fromDo(user);
+        return signupHandler.signupUser(new FaroSignupDetails(faroUser, password)).getEntity();
     }
 }

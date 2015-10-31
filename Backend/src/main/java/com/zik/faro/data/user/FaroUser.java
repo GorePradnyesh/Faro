@@ -48,7 +48,7 @@ public class FaroUser {
     }
 
     // To Satisfy the JAXB no-arg constructor requirement
-    private FaroUser(){
+    public FaroUser(){
 
     }
 

@@ -14,7 +14,7 @@ import javax.ws.rs.core.SecurityContext;
 
 import com.sun.jersey.api.JResponse;
 import com.zik.faro.data.Event;
-import com.zik.faro.api.responder.EventCreateData;
+import com.zik.faro.data.EventCreateData;
 import com.zik.faro.applogic.EventManagement;
 
 @Path(EVENT_PATH_CONST + EVENT_CREATE_PATH_CONST)

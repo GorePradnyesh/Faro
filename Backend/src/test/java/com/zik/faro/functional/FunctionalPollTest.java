@@ -20,7 +20,7 @@ import com.zik.faro.TestHelper;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.PollOption;
-import com.zik.faro.api.responder.EventCreateData;
+import com.zik.faro.data.EventCreateData;
 import com.zik.faro.data.Location;
 
 public class FunctionalPollTest {

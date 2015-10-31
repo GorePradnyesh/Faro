@@ -13,7 +13,7 @@ public interface ActivityHandler {
     void updateActivity(final BaseFaroRequestCallback<String> callback, 
                         final String eventId, 
                         final String activityId, 
-                        final Activity.ActivityUpdateData updateData);
+                        final Activity updateData);
     void deleteActivity(final BaseFaroRequestCallback<String> callback, final String eventId, final String activityId);
     
 }
