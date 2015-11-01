@@ -1,7 +1,6 @@
 package com.zik.faro.api.profile;
 
 
-import static com.zik.faro.commons.Constants.HTTP_OK;
 import static com.zik.faro.commons.Constants.PROFILE_CREATE_PATH_CONST;
 import static com.zik.faro.commons.Constants.PROFILE_PATH_CONST;
 
@@ -19,7 +18,7 @@ import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.FaroResponseStatus;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.FaroWebAppException;
-import com.zik.faro.data.user.FaroUser;
+import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 
 @Path(PROFILE_PATH_CONST)
 public class ProfileHandler {
@@ -28,9 +27,9 @@ public class ProfileHandler {
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public JResponse<FaroUser> getProfile(){
+    public JResponse<FaroUserDo> getProfile(){
         String userId = securityContext.getUserPrincipal().getName();
-        FaroUser user;
+        FaroUserDo user;
 		try {
 			user = UserManagement.loadFaroUser(userId);
 		} catch (DataNotFoundException e) {
@@ -42,7 +41,7 @@ public class ProfileHandler {
 
     @Path(PROFILE_CREATE_PATH_CONST)
     @PUT
-    public JResponse<String> createProfile(final FaroUser faroUser){
+    public JResponse<String> createProfile(final FaroUserDo faroUser){
         //TODO: Verify that username in Signature and the faroUser.id is the same
         UserManagement.storeFaroUser(faroUser.getEmail(), faroUser);
         return JResponse.ok(Constants.HTTP_OK).build();

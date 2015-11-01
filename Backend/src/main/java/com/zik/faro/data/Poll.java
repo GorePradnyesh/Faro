@@ -3,21 +3,10 @@ package com.zik.faro.data;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.UUID;
 
-import com.googlecode.objectify.Key;
-import com.googlecode.objectify.Ref;
-import com.googlecode.objectify.annotation.Entity;
-import com.googlecode.objectify.annotation.Id;
-import com.googlecode.objectify.annotation.Parent;
-import com.zik.faro.api.bean.PollOption;
-
-@Entity
-public class PollDo {
-    @Id
+public class Poll {
     private String id;
-    @Parent
-    private Ref<EventDo> eventId;
+    private String eventId;
     private String creatorId;
 
     private List<PollOption> pollOptions = new ArrayList<>();
@@ -27,17 +16,17 @@ public class PollDo {
     private ObjectStatus status;
     private Calendar deadline;                // Will not be used in V1.
 
-    public PollDo(){ //to satisfy jaxb;
+    public Poll(){ //to satisfy jaxb;
     }
 
-    public PollDo(String eventId, String creator, List<PollOption> pollOptions, String owner, String description) {
-    	this(UUID.randomUUID().toString(),eventId, creator, pollOptions,
+    public Poll(String eventId, String creator, List<PollOption> pollOptions, String owner, String description) {
+    	this(null,eventId, creator, pollOptions,
     			owner, description);
     }
     
-    public PollDo(String id, String eventId, String creator, List<PollOption> pollOptions, String owner, String description){
+    public Poll(String id, String eventId, String creator, List<PollOption> pollOptions, String owner, String description){
     	this.id = id;
-    	this.eventId = Ref.create(Key.create(EventDo.class, eventId));
+    	this.eventId = eventId;
         this.creatorId = creator;
         this.pollOptions = pollOptions;
         this.owner = owner;
@@ -48,15 +37,15 @@ public class PollDo {
     public String getId() {
         return id;
     }
-    
+
     public String getEventId() {
-        return eventId.getKey().getName();
+        return eventId;
     }
-    
+
     public String getCreatorId() {
         return creatorId;
     }
-    
+
     public List<PollOption> getPollOptions(){
         return this.pollOptions;
     }
@@ -110,14 +99,10 @@ public class PollDo {
     }
     
     public void setEventId(String eventId){
-    	this.eventId = Ref.create(Key.create(EventDo.class, eventId));;
+    	this.eventId = eventId;
     }
     
-    public void setEventId(Ref<EventDo> eventId) {
-		this.eventId = eventId;
-	}
-
-	public void setPollOptions(List<PollOption> pollOptions) {
+    public void setPollOptions(List<PollOption> pollOptions) {
 		this.pollOptions = pollOptions;
 	}
 }

@@ -4,8 +4,8 @@ import com.google.gson.reflect.TypeToken;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
-import com.zik.faro.frontend.data.Activity;
-import com.zik.faro.frontend.data.Poll;
+import com.zik.faro.data.Activity;
+
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.auth.TokenCache;
 import com.zik.faro.frontend.faroservice.spec.ActivityHandler;
@@ -51,7 +51,7 @@ public class OKHttpWrapperActivity extends BaseFaroOKHttpWrapper implements Acti
     }
 
     @Override
-    public void createActivity(BaseFaroRequestCallback<String> callback, String eventId, Activity activity) {
+    public void createActivity(BaseFaroRequestCallback<Activity> callback, String eventId, Activity activity) {
         String token = TokenCache.getTokenCache().getAuthToken();
         if(token != null) {
             String pollPostBody = mapper.toJson(activity);
@@ -60,7 +60,7 @@ public class OKHttpWrapperActivity extends BaseFaroOKHttpWrapper implements Acti
                     .post(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), pollPostBody))
                     .addHeader("Authentication", token)
                     .build();
-            this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<String>(callback, String.class));
+            this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<>(callback, Activity.class));
         }
         else{
             callback.onFailure(null, new IOException("Could not fetch auth token"));
@@ -68,7 +68,7 @@ public class OKHttpWrapperActivity extends BaseFaroOKHttpWrapper implements Acti
     }
 
     @Override
-    public void updateActivity(BaseFaroRequestCallback<String> callback, String eventId, String activityId, Activity.ActivityUpdateData updateData) {
+    public void updateActivity(BaseFaroRequestCallback<String> callback, String eventId, String activityId, Activity updateData) {
         String token = TokenCache.getTokenCache().getAuthToken();
         if(token != null) {
             String pollPostBody = mapper.toJson(updateData);

@@ -1,8 +1,5 @@
 package com.zik.faro.data;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement
 public class GeoPosition {
     
 	private double latitude;

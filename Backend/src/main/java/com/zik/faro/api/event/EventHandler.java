@@ -10,9 +10,6 @@ import static com.zik.faro.commons.Constants.EVENT_INVITEES_PATH_CONST;
 import static com.zik.faro.commons.Constants.EVENT_PATH_CONST;
 import static com.zik.faro.commons.Constants.EVENT_REMOVE_ATTENDEE_PATH_CONST;
 
-import java.util.Map;
-
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -26,16 +23,15 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 import com.sun.jersey.api.JResponse;
-import com.zik.faro.api.bean.Event;
+import com.zik.faro.data.Event;
 import com.zik.faro.api.responder.AddFriendRequest;
 import com.zik.faro.api.responder.InviteeList;
-import com.zik.faro.api.responder.InviteeList.Invitees;
 import com.zik.faro.applogic.EventManagement;
 import com.zik.faro.applogic.EventUserManagement;
 import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
-import com.zik.faro.commons.exceptions.IllegalDataOperation;
+import com.zik.faro.data.IllegalDataOperation;
 
 
 @Path(EVENT_PATH_CONST + EVENT_ID_PATH_PARAM_STRING)

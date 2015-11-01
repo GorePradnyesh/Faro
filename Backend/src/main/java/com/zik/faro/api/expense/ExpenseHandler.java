@@ -1,7 +1,7 @@
 package com.zik.faro.api.expense;
 
 import com.sun.jersey.api.JResponse;
-import com.zik.faro.api.responder.MinUser;
+import com.zik.faro.data.MinUser;
 import com.zik.faro.commons.ParamValidation;
 import com.zik.faro.data.expense.ExpenseGroup;
 

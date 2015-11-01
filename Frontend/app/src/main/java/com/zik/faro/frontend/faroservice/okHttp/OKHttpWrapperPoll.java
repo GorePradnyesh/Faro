@@ -4,8 +4,7 @@ import com.google.gson.reflect.TypeToken;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
-import com.zik.faro.frontend.data.Event;
-import com.zik.faro.frontend.data.Poll;
+import com.zik.faro.data.Poll;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.auth.TokenCache;
 import com.zik.faro.frontend.faroservice.spec.PollHandler;
@@ -33,6 +32,7 @@ public class OKHttpWrapperPoll extends BaseFaroOKHttpWrapper implements PollHand
             Request request = new Request.Builder()
                     .url(this.baseHandlerURL.toString() + eventId + "/polls/")
                     .addHeader(authHeaderName, token)
+                    .addHeader("Accept",DEFAULT_CONTENT_TYPE)
                     .build();
             Type pollList = new TypeToken<ArrayList<Poll>>(){}.getType();
             this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<List<Poll>>(callback, pollList));
@@ -48,6 +48,7 @@ public class OKHttpWrapperPoll extends BaseFaroOKHttpWrapper implements PollHand
             Request request = new Request.Builder()
                     .url(this.baseHandlerURL.toString() + eventId + "/poll/" + pollId + "/")
                     .addHeader(authHeaderName, token)
+                    .addHeader("Accept",DEFAULT_CONTENT_TYPE)
                     .build();
             this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<Poll>(callback, Poll.class));
         }else{
@@ -56,16 +57,17 @@ public class OKHttpWrapperPoll extends BaseFaroOKHttpWrapper implements PollHand
     }
 
     @Override
-    public void createPoll(BaseFaroRequestCallback<String> callback, String eventId, Poll poll) {
+    public void createPoll(BaseFaroRequestCallback<Poll> callback, String eventId, Poll poll) {
         String token = TokenCache.getTokenCache().getAuthToken();
         if(token != null) {
             String pollPostBody = mapper.toJson(poll);
             Request request = new Request.Builder()
                     .url(baseHandlerURL.toString() + eventId + "/poll/create/")
-                    .put(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), pollPostBody))
+                    .post(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), pollPostBody))
                     .addHeader("Authentication", token)
+                    .addHeader("Accept",DEFAULT_CONTENT_TYPE)
                     .build();
-            this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<String>(callback, String.class));
+            this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<>(callback, Poll.class));
         }
         else{
             callback.onFailure(null, new IOException("Could not fetch auth token"));

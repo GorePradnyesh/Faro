@@ -1,21 +1,14 @@
-package com.zik.faro.api.responder;
+package com.zik.faro.data;
 
 import com.zik.faro.data.user.FaroUser;
-
-import javax.xml.bind.annotation.XmlRootElement;
-
-/**
- * Created by granganathan on 2/27/15.
- */
-@XmlRootElement
 public class FaroSignupDetails {
     private FaroUser faroUser;
-    private String password;
-
     public FaroSignupDetails(FaroUser faroUser, String password) {
         this.faroUser = faroUser;
         this.password = password;
     }
+
+    private String password;
 
     private FaroSignupDetails() {}
 

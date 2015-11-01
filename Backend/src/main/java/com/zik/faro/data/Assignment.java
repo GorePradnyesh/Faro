@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.zik.faro.commons.exceptions.IllegalDataOperation;
-
 
 /**
  * NOTE: This is not an @Entity because Assignment is CONTAINED within Activity for now. This therefore does not

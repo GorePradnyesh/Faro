@@ -1,27 +1,16 @@
 package com.zik.faro.frontend;
 
 import android.app.Application;
-import android.test.ApplicationTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.util.Log;
 
-import com.squareup.okhttp.Request;
-import com.zik.faro.frontend.data.DateOffset;
-import com.zik.faro.frontend.data.Event;
-import com.zik.faro.frontend.data.EventCreateData;
-import com.zik.faro.frontend.data.user.FaroUser;
-import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
+import com.zik.faro.data.EventCreateData;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
-import com.zik.faro.frontend.faroservice.HttpError;
 
 import junit.framework.Assert;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -36,10 +25,13 @@ public class EventApiTest extends ApiBaseTest {
         
     @LargeTest
     public void testGetEvent() throws InterruptedException, MalformedURLException {
+        // Sign up user, so that the token cache is populated
         final Semaphore waitSem = new Semaphore(0);
         FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
+        String uuidEmail = UUID.randomUUID().toString()+ "@gmail.com";
+        String password = UUID.randomUUID().toString();
 
-
+        getTokenForNewUser(uuidEmail, password);
         TestGetEventCallbackHandler callback = new TestGetEventCallbackHandler(waitSem, 404);
         serviceHandler.getEventHandler().getEvent(callback, "randomEventId");
         boolean timeout = false;
@@ -107,8 +99,18 @@ public class EventApiTest extends ApiBaseTest {
         Assert.assertFalse(callback.failed);
         Assert.assertFalse(callback.unexpectedResponseCode);
         Assert.assertNotNull(callback.receivedEvent.getEventId());
+
+        // Get Event
+        String eventId = callback.receivedEvent.getEventId();
+        TestGetEventCallbackHandler getEventCallback = new TestGetEventCallbackHandler(waitSem, 200);
+        serviceHandler.getEventHandler().getEvent(getEventCallback, eventId);
+        timeout = !waitSem.tryAcquire(3000, TimeUnit.SECONDS);
+        Assert.assertNotNull(getEventCallback.receivedEvent);
+        Assert.assertFalse(getEventCallback.failed);
+        Assert.assertFalse(getEventCallback.unexpectedResponseCode);
         
         timeout = false;
+        
         // Get event list
         TestGetEventsCallback getEventsCallback 
                 = new TestGetEventsCallback(waitSem);

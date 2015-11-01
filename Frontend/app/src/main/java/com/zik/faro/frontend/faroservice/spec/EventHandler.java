@@ -1,8 +1,7 @@
 package com.zik.faro.frontend.faroservice.spec;
 
-import com.zik.faro.frontend.data.Event;
-import com.zik.faro.frontend.data.EventCreateData;
-import com.zik.faro.frontend.data.MinEvent;
+import com.zik.faro.data.Event;
+import com.zik.faro.data.EventCreateData;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 
 import java.util.List;

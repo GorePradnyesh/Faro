@@ -8,9 +8,10 @@ import com.zik.faro.auth.jwt.FaroJwtClaims;
 import com.zik.faro.auth.jwt.FaroJwtTokenManager;
 import com.zik.faro.auth.jwt.JwtTokenValidationException;
 import com.zik.faro.commons.FaroResponseStatus;
+import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.FaroWebAppException;
 import com.zik.faro.data.user.FaroResetPasswordData;
-import com.zik.faro.data.user.UserCredentials;
+import com.zik.faro.persistence.datastore.data.user.UserCredentialsDo;
 import com.zik.faro.persistence.datastore.UserCredentialsDatastoreImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,16 +66,18 @@ public class PasswordHandler {
                     MessageFormat.format("User {0} does not exist.", userId));
         }
 
-        // Obtain the user credentials and authenticate the user
-        UserCredentials userCredentials = UserCredentialsDatastoreImpl.loadUserCreds(userId);
-
         try {
+            // Obtain the user credentials and authenticate the user
+            UserCredentialsDo userCredentials = UserCredentialsDatastoreImpl.loadUserCreds(userId);
+
             if(!PasswordManager.checkPasswordEquality(resetPasswordData.getOldPassword(), userCredentials.getEncryptedPassword())) {
                 throw new FaroWebAppException(FaroResponseStatus.UNAUTHORIZED);
             }
         } catch (PasswordManagerException e) {
             logger.error("Unable to check the password equality", e);
             throw new IllegalStateException("Cannot verify the user credentials to reset password");
+        } catch (DataNotFoundException e) {
+            e.printStackTrace();
         }
 
         updatePassword(userId, resetPasswordData.getNewPassword());
@@ -97,7 +100,12 @@ public class PasswordHandler {
                     MessageFormat.format("User {0} does not exist.", userId));
         }
 
-        UserCredentials userCredentials = UserCredentialsDatastoreImpl.loadUserCreds(userId);
+        UserCredentialsDo userCredentials = null;
+        try {
+            userCredentials = UserCredentialsDatastoreImpl.loadUserCreds(userId);
+        } catch (DataNotFoundException e) {
+            e.printStackTrace();
+        }
         if (userCredentials == null) {
             logger.error(MessageFormat.format("Usercredentials could not be obtained for user {0}", userId));
             throw new FaroWebAppException(FaroResponseStatus.NOT_FOUND,
@@ -142,9 +150,10 @@ public class PasswordHandler {
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces(MediaType.TEXT_HTML)
     public String forgotPasswordForm(@QueryParam(FARO_TOKEN_PARAM)String token) {
+        FaroJwtClaims jwtClaims = null;
         try {
             // Authenticate the request first
-            FaroJwtClaims jwtClaims = FaroJwtTokenManager.validateToken(token);
+            jwtClaims = FaroJwtTokenManager.validateToken(token);
             logger.info("jwtClaims : " + jwtClaims);
             // Lookup the user
             if (!UserManagement.isExistingUser(jwtClaims.getUsername())) {
@@ -171,6 +180,9 @@ public class PasswordHandler {
         } catch (URISyntaxException | IOException e) {
             logger.error("Failed to generate forgot password html page", e);
             throw new IllegalStateException("Unable to generate forgot password form");
+        } catch (DataNotFoundException e) {
+            throw new FaroWebAppException(FaroResponseStatus.NOT_FOUND,
+                    MessageFormat.format("User {0} does not exist.", jwtClaims.getUsername()));
         }
     }
 
@@ -203,7 +215,7 @@ public class PasswordHandler {
     private void updatePassword(String userId, String newPassword) {
         try {
             // Update the password
-            UserCredentials userCreds = new UserCredentials(userId, PasswordManager.getEncryptedPassword(newPassword), UUID.randomUUID().toString());
+            UserCredentialsDo userCreds = new UserCredentialsDo(userId, PasswordManager.getEncryptedPassword(newPassword), UUID.randomUUID().toString());
             UserCredentialsDatastoreImpl.storeUserCreds(userCreds);
         } catch(PasswordManagerException e) {
             logger.error("Unable to encrypt the new password", e);

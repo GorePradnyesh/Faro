@@ -10,7 +10,7 @@ import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.FaroResponseStatus;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.FaroWebAppException;
-import com.zik.faro.data.user.UserCredentials;
+import com.zik.faro.persistence.datastore.data.user.UserCredentialsDo;
 import com.zik.faro.persistence.datastore.UserCredentialsDatastoreImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,7 +92,7 @@ public class AuthFilter implements ContainerRequestFilter {
 
             // For new password API, check if the token has valid JWT id
             if (requestPath.equals(newPasswordPath)) {
-                UserCredentials userCredentials = UserCredentialsDatastoreImpl.loadUserCreds(jwtClaims.getUsername());
+                UserCredentialsDo userCredentials = UserCredentialsDatastoreImpl.loadUserCreds(jwtClaims.getUsername());
                 String userCredsUuid = userCredentials.getUserCredsUUid();
                 if (!userCredsUuid.equals(jwtClaims.getJwtId())) {
                     throw new FaroWebAppException(FaroResponseStatus.UNAUTHORIZED, "Invalid token");

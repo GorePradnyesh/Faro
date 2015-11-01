@@ -5,8 +5,7 @@ import android.test.ApplicationTestCase;
 import android.util.Log;
 
 import com.squareup.okhttp.Request;
-import com.zik.faro.frontend.data.*;
-import com.zik.faro.frontend.data.user.FaroUser;
+import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
@@ -19,6 +18,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+
+import com.zik.faro.data.Event;
 
 
 public class ApiBaseTest extends ApplicationTestCase<Application> {
@@ -41,13 +42,23 @@ public class ApiBaseTest extends ApplicationTestCase<Application> {
         return callback.token;
     }
 
+    protected void signUpUser(final String username, final String password) throws InterruptedException, MalformedURLException {
+        final Semaphore waitSem = new Semaphore(0);
+        FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
+        Utils.TestSignupCallback callback = new Utils.TestSignupCallback(waitSem, 200);
+        serviceHandler.getSignupHandler().signup(callback, new FaroUser(username), password, false);
+        boolean timeout;
+        timeout = !waitSem.tryAcquire(30000, TimeUnit.MILLISECONDS);
+        Assert.assertFalse(timeout);
+    }
+    
     // ------------------------ Helpers 
 
 
     final static class TestGetEventsCallback
             extends Utils.BaseTestCallbackHandler
-            implements BaseFaroRequestCallback<List<com.zik.faro.frontend.data.Event>> {
-        List<com.zik.faro.frontend.data.Event> eventList;
+            implements BaseFaroRequestCallback<List<Event>> {
+        List<Event> eventList;
         TestGetEventsCallback(Semaphore semaphore){
             super(semaphore, 0);
         }
@@ -58,7 +69,7 @@ public class ApiBaseTest extends ApplicationTestCase<Application> {
         }
 
         @Override
-        public void onResponse(List<com.zik.faro.frontend.data.Event> eventList, HttpError error) {
+        public void onResponse(List<Event> eventList, HttpError error) {
             if(error != null){
                 this.failed = true;
             }
@@ -69,10 +80,10 @@ public class ApiBaseTest extends ApplicationTestCase<Application> {
 
     final static class TestEventCreateCallback
             extends Utils.BaseTestCallbackHandler
-            implements BaseFaroRequestCallback<com.zik.faro.frontend.data.Event>{
-        com.zik.faro.frontend.data.Event expectedEvent;
-        com.zik.faro.frontend.data.Event receivedEvent;
-        TestEventCreateCallback(Semaphore semaphore, int expectedCode, com.zik.faro.frontend.data.Event expectedEvent){
+            implements BaseFaroRequestCallback<Event>{
+        Event expectedEvent;
+        Event receivedEvent;
+        TestEventCreateCallback(Semaphore semaphore, int expectedCode, Event expectedEvent){
             super(semaphore, expectedCode);
             this.expectedEvent = expectedEvent;
         }
@@ -83,7 +94,7 @@ public class ApiBaseTest extends ApplicationTestCase<Application> {
         }
 
         @Override
-        public void onResponse(com.zik.faro.frontend.data.Event event, HttpError error){
+        public void onResponse(Event event, HttpError error){
             if(error != null){
                 this.failed = true;
             }
@@ -111,6 +122,34 @@ public class ApiBaseTest extends ApplicationTestCase<Application> {
         public void onResponse(Event event, HttpError error){
             if(event != null){
                 this.receivedEvent = event;
+            }
+            Log.v("Get Event", "Success");
+            waitSem.release();
+        }
+    }
+
+
+    final static class TestOKActionCallbackHandler<String>
+            extends Utils.BaseTestCallbackHandler implements BaseFaroRequestCallback<String>{
+        TestOKActionCallbackHandler(final Semaphore sem, int expectedCode){
+            super(sem, expectedCode);
+        }
+
+        @Override
+        public void onFailure(Request request, IOException e) {
+            Log.v("Get Event", "Failed");
+            failed = true;
+            waitSem.release();
+        }
+
+        @Override
+        public void onResponse(String s, HttpError error){
+            if(error != null){
+                this.failed = true;
+            }
+            else
+            {
+                this.failed = false;
             }
             Log.v("Get Event", "Success");
             waitSem.release();

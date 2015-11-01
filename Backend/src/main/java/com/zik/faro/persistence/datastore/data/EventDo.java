@@ -1,4 +1,4 @@
-package com.zik.faro.data;
+package com.zik.faro.persistence.datastore.data;
 
 import java.util.Calendar;
 import java.util.UUID;
@@ -10,6 +10,9 @@ import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
 import com.googlecode.objectify.annotation.Serialize;
+import com.zik.faro.data.Assignment;
+import com.zik.faro.data.Location;
+import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.expense.ExpenseGroup;
 
 @Entity

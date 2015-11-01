@@ -7,13 +7,13 @@ import com.zik.faro.TestHelper;
 import com.zik.faro.api.authentication.LoginHandler;
 import com.zik.faro.api.authentication.PasswordHandler;
 import com.zik.faro.api.authentication.SignupHandler;
-import com.zik.faro.api.responder.FaroSignupDetails;
+import com.zik.faro.data.FaroSignupDetails;
 import com.zik.faro.commons.FaroResponseStatus;
 import com.zik.faro.commons.exceptions.FaroWebAppException;
 import com.zik.faro.data.user.Address;
 import com.zik.faro.data.user.FaroResetPasswordData;
 import com.zik.faro.data.user.FaroUser;
-import com.zik.faro.data.user.UserCredentials;
+import com.zik.faro.persistence.datastore.data.user.UserCredentialsDo;
 import org.junit.*;
 import org.powermock.reflect.Whitebox;
 
@@ -35,7 +35,7 @@ public class PasswordHandlerTest {
 
     static {
         ObjectifyService.register(FaroUser.class);
-        ObjectifyService.register(UserCredentials.class);
+        ObjectifyService.register(UserCredentialsDo.class);
     }
 
     @BeforeClass
@@ -73,17 +73,17 @@ public class PasswordHandlerTest {
 
         // Login
         LoginHandler loginHandler = new LoginHandler();
-        String loginToken = loginHandler.login(faroUser.getId(), oldPassword);
+        String loginToken = loginHandler.login(faroUser.getEmail(), oldPassword);
         // Verify login was successful
         Assert.assertNotNull(loginToken);
 
         PasswordHandler passwordHandler =  new PasswordHandler();
-        Whitebox.setInternalState(passwordHandler, TestHelper.setupMockSecurityContext(faroUser.getId()));
+        Whitebox.setInternalState(passwordHandler, TestHelper.setupMockSecurityContext(faroUser.getEmail()));
         passwordHandler.resetPassword(new FaroResetPasswordData(oldPassword, newPassword));
 
         // Verify login fails with old password
         try {
-            loginHandler.login(faroUser.getId(), oldPassword);
+            loginHandler.login(faroUser.getEmail(), oldPassword);
         } catch (Exception e) {
             Assert.assertTrue(e instanceof FaroWebAppException);
             FaroWebAppException faroWebAppException = (FaroWebAppException)e;
@@ -91,7 +91,7 @@ public class PasswordHandlerTest {
         }
 
         // Verify login succeeds with new password
-        loginToken = loginHandler.login(faroUser.getId(), newPassword);
+        loginToken = loginHandler.login(faroUser.getEmail(), newPassword);
         Assert.assertNotNull(loginToken);
     }
 
@@ -116,7 +116,7 @@ public class PasswordHandlerTest {
         Whitebox.setInternalState(passwordHandler, mockedUriInfo);
 
         // Obtain the forgot password url
-        String forgotPasswordUrl = passwordHandler.forgotPassword(faroUser.getId());
+        String forgotPasswordUrl = passwordHandler.forgotPassword(faroUser.getEmail());
         Assert.assertNotNull(forgotPasswordUrl);
         System.out.println("forgot password url = " + forgotPasswordUrl);
         String queryParamToken = getQueryParamFromUrl(forgotPasswordUrl, "token");
@@ -127,14 +127,14 @@ public class PasswordHandlerTest {
         System.out.println("forgot password form html page = " + htmlForm);
 
         // Set a new password
-        Whitebox.setInternalState(passwordHandler, TestHelper.setupMockSecurityContext(faroUser.getId()));
+        Whitebox.setInternalState(passwordHandler, TestHelper.setupMockSecurityContext(faroUser.getEmail()));
 
 
         passwordHandler.newPassword(newPassword);
 
         // Verify login succeeds with new password
         LoginHandler loginHandler = new LoginHandler();
-        String loginToken = loginHandler.login(faroUser.getId(), newPassword);
+        String loginToken = loginHandler.login(faroUser.getEmail(), newPassword);
         Assert.assertNotNull(loginToken);
     }
 

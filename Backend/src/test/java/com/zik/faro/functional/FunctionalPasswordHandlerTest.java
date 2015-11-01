@@ -4,7 +4,7 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.zik.faro.TestHelper;
-import com.zik.faro.api.responder.FaroSignupDetails;
+import com.zik.faro.data.FaroSignupDetails;
 import com.zik.faro.data.user.FaroResetPasswordData;
 import com.zik.faro.data.user.FaroUser;
 import org.junit.Assert;
@@ -47,7 +47,7 @@ public class FunctionalPasswordHandlerTest {
     @Test
     public void resetPasswordTest() throws Exception {
         // Login
-        ClientResponse response = TestHelper.login(faroSignupDetails.getFaroUser().getId(), faroSignupDetails.getPassword());
+        ClientResponse response = TestHelper.login(faroSignupDetails.getFaroUser().getEmail(), faroSignupDetails.getPassword());
         System.out.println("response = " + response);
         Assert.assertEquals(ClientResponse.Status.OK.getStatusCode(), response.getStatus());
         String token = response.getEntity(String.class);
@@ -69,7 +69,7 @@ public class FunctionalPasswordHandlerTest {
         Assert.assertEquals(ClientResponse.Status.NO_CONTENT.getStatusCode(), clientResponse.getStatus());
 
         // Verify login fails with old password and succeeds with new password
-        verifyPasswordChange(faroSignupDetails.getFaroUser().getId(), password, newPassword);
+        verifyPasswordChange(faroSignupDetails.getFaroUser().getEmail(), password, newPassword);
     }
 
     @Test
@@ -83,7 +83,7 @@ public class FunctionalPasswordHandlerTest {
                                     .path("nativeLogin")
                                     .path("password")
                                     .path("forgotPassword")
-                                    .queryParam("username", faroSignupDetails.getFaroUser().getId())
+                                    .queryParam("username", faroSignupDetails.getFaroUser().getEmail())
                                     .header("Content-Type", MediaType.APPLICATION_JSON_TYPE)
                                     .get(String.class);
 
@@ -112,7 +112,7 @@ public class FunctionalPasswordHandlerTest {
         Assert.assertEquals(ClientResponse.Status.NO_CONTENT.getStatusCode(), response.getStatus());
 
         // Verify login fails with old password and succeeds with new password
-        verifyPasswordChange(faroSignupDetails.getFaroUser().getId(), password, newPassword);
+        verifyPasswordChange(faroSignupDetails.getFaroUser().getEmail(), password, newPassword);
     }
 
     private void verifyPasswordChange(String userId, String oldPassword, String newPassword) throws Exception {

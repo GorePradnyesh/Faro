@@ -10,7 +10,5 @@ public class ExpenseGroup {
         this.groupId = groupId;
     }
 
-    public ExpenseGroup() {
-        //this(null, null);
-    }
+    public ExpenseGroup() {}
 }

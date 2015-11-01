@@ -1,46 +1,37 @@
 package com.zik.faro.data;
 
-
 import java.util.Calendar;
-import java.util.UUID;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
-import com.googlecode.objectify.Key;
-import com.googlecode.objectify.Ref;
-import com.googlecode.objectify.annotation.Entity;
-import com.googlecode.objectify.annotation.Id;
-import com.googlecode.objectify.annotation.Parent;
-import com.googlecode.objectify.annotation.Serialize;
-
-
-@XmlRootElement
-@Entity
-public class ActivityDo {
-    
-
-	@Id
+public class Activity {
     private String id;
-    @Parent
-    private Ref<EventDo> eventId;
+    private String eventId;
     private Assignment assignment;
     private String name;
-
     private String description;
     private Location location;
-    @Serialize private Calendar date;
+    private Calendar date;
     
-    public ActivityDo(String eventId, String name) {
+    // Minimalistic constructor
+    public Activity(String eventId, String name) {
         this(eventId, name, null, null, null, null);
     }
-
-    public ActivityDo() {    // TO Satisfy JaxB
+    
+    // TO Satisfy JaxB
+    public Activity() {    
     }
-
-    public ActivityDo(String eventId, String name, String description,
+    
+    // Mainly to be used by client who has all info other than id
+    public Activity(String eventId, String name, String description,
     		Location location, Calendar date, Assignment assignment) {
-        this.id = UUID.randomUUID().toString();;
-        this.eventId = Ref.create(Key.create(EventDo.class, eventId));
+        this(null, eventId, name, description, location, date, assignment);
+    }
+    
+    // Mostly used on server side for to and for communication
+    // Also useful during updates when id is known to client
+    public Activity(String id, String eventId, String name, String description,
+    		Location location, Calendar date, Assignment assignment) {
+        this.id = id;
+        this.eventId = eventId;
         this.name = name;
         this.description = description;
         this.location = location;
@@ -55,7 +46,7 @@ public class ActivityDo {
     }
 
     public String getEventId() {
-        return eventId.getKey().getName();
+        return eventId;
     }
 
     public String getName() {
@@ -99,7 +90,7 @@ public class ActivityDo {
 	}
 
 	public void setEventId(String eventId) {
-		this.eventId = Ref.create(Key.create(EventDo.class, eventId));;
+		this.eventId = eventId;
 	}
 
 	public void setName(String name) {

@@ -3,9 +3,9 @@ package com.zik.faro.applogic;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.zik.faro.api.bean.Activity;
+import com.zik.faro.data.Activity;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
-import com.zik.faro.data.ActivityDo;
+import com.zik.faro.persistence.datastore.data.ActivityDo;
 import com.zik.faro.persistence.datastore.ActivityDatastoreImpl;
 
 public class ActivityManagement {
