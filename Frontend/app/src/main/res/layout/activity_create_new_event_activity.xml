@@ -4,6 +4,105 @@
     android:layout_height="match_parent"
     tools:context="com.zik.faro.frontend.CreateNewEventActivity">
 
+    <EditText
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/activityName"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="40dp"
+        android:hint="Activity Name" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/from"
+        android:id="@+id/startDateTextView"
+        android:layout_below="@+id/activityName"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="15dp"
+        android:enabled="false"
+        android:textColor="#ff000000"
+        android:textSize="@dimen/abc_text_size_medium_material" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/startDateButton"
+        android:textSize="@dimen/abc_text_size_medium_material"
+        android:layout_below="@+id/startDateTextView" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/startTimeButton"
+        android:layout_alignBottom="@+id/startDateButton"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/to"
+        android:id="@+id/EndDateTextView"
+        android:layout_below="@+id/startDateButton"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="15dp"
+        android:enabled="false"
+        android:textColor="#ff000000"
+        android:textSize="@dimen/abc_text_size_medium_material" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/endDateButton"
+        android:textSize="@dimen/abc_text_size_medium_material"
+        android:layout_below="@+id/EndDateTextView" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/endTimeButton"
+        android:layout_alignBottom="@+id/endDateButton"
+        android:layout_alignParentEnd="true" />
+
+    <EditText
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/activityDescription"
+        android:hint="Description"
+        android:layout_below="@id/endDateButton"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="false"
+        android:layout_alignParentBottom="true"
+        android:layout_centerInParent="true"
+        android:padding="0dp"
+        android:paddingLeft="0dp"
+        android:paddingTop="0dp"
+        android:paddingRight="0dp"
+        android:paddingBottom="0dp"
+        android:background="@android:color/black"
+        android:id="@+id/bottomLayout">
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:clickable="true"
+            android:layout_alignParentStart="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/OK"
+            android:id="@+id/createNewActivityOK"
+            android:enabled="false" />
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:clickable="true"
+            android:layout_alignParentEnd="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/Cancel"
+            android:id="@+id/createNewActivityCancel"
+            android:enabled="false" />
+    </RelativeLayout>
 
 
 </RelativeLayout>

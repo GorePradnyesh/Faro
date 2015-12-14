@@ -54,6 +54,10 @@
             android:name=".PollLandingPage"
             android:label="@string/title_activity_poll_landing_page" >
         </activity>
+        <activity
+            android:name=".CreateNewEventActivity"
+            android:label="@string/title_activity_create_new" >
+        </activity>
     </application>
 
 </manifest>
