@@ -9,7 +9,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.squareup.okhttp.Request;
-import com.zik.faro.frontend.data.user.FaroUser;
+import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;

@@ -1,7 +1,7 @@
 package com.zik.faro.frontend;
 
 import com.squareup.okhttp.Request;
-import com.zik.faro.frontend.data.EventCreateData;
+//import com.zik.faro.frontend.data.EventCreateData;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.HttpError;
 
@@ -56,8 +56,8 @@ public class EventListHandler {
     }
 
     final static class TestEventCreateCallback
-            implements BaseFaroRequestCallback<com.zik.faro.frontend.data.Event> {
-        com.zik.faro.frontend.data.Event receivedEvent;
+            implements BaseFaroRequestCallback<com.zik.faro.data.Event> {
+        com.zik.faro.data.Event receivedEvent;
 
         @Override
         public void onFailure(Request request, IOException e) {
@@ -65,7 +65,7 @@ public class EventListHandler {
         }
 
         @Override
-        public void onResponse(com.zik.faro.frontend.data.Event event, HttpError error){
+        public void onResponse(com.zik.faro.data.Event event, HttpError error){
             if(error != null){
             }
             // Assert that event == min event

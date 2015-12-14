@@ -14,7 +14,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
-import com.zik.faro.frontend.data.ObjectStatus;
+import com.zik.faro.data.ObjectStatus;
 
 
 public class CreateNewPoll extends Activity {

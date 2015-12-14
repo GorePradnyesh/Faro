@@ -1,6 +1,6 @@
 package com.zik.faro.frontend;
 
-import com.zik.faro.frontend.data.ObjectStatus;
+import com.zik.faro.data.ObjectStatus;
 
 import java.util.ArrayList;
 import java.util.Calendar;
