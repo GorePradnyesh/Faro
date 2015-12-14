@@ -1,9 +1,8 @@
-package com.zik.faro.frontend.data;
+package com.zik.faro.data;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.UUID;
 
 public class Poll {
     private String id;
@@ -17,36 +16,22 @@ public class Poll {
     private ObjectStatus status;
     private Calendar deadline;                // Will not be used in V1.
 
-    public Poll(String eventId, String creatorId, List<PollOption> pollOptions, String owner, String description) {
-        this.eventId = eventId;
-        this.creatorId = creatorId;
+    public Poll(){ //to satisfy jaxb;
+    }
+
+    public Poll(String eventId, String creator, List<PollOption> pollOptions, String owner, String description) {
+    	this(null,eventId, creator, pollOptions,
+    			owner, description);
+    }
+    
+    public Poll(String id, String eventId, String creator, List<PollOption> pollOptions, String owner, String description){
+    	this.id = id;
+    	this.eventId = eventId;
+        this.creatorId = creator;
         this.pollOptions = pollOptions;
         this.owner = owner;
         this.description = description;
         this.status = ObjectStatus.OPEN;
-    }
-
-    public static class PollOption{
-        public final String id;                                 //TODO: Change type to Id
-        public final String option;
-        public final List<String> voters = new ArrayList<>();   //TODO: Change type to List<Id>/List<MinUser>?
-
-        private PollOption(){
-            this.id = null; this.option = null; // To satisfy JAXB
-        }
-
-        public PollOption(final String option){
-            this.id = UUID.randomUUID().toString();
-            this.option = option;
-        }
-
-        public List<String> getVoters(){
-            return this.voters;                                 //TODO: return clone and not the actual reference.
-        }
-
-        public void addVoters(final String voterId){
-            this.voters.add(voterId);
-        }
     }
 
     public String getId() {
@@ -71,7 +56,6 @@ public class Poll {
 
     public void setWinnerId(String winnerId) {
         this.winnerId = winnerId;
-        this.status = ObjectStatus.CLOSED;
     }
 
     public String getOwner() {
@@ -105,18 +89,20 @@ public class Poll {
     public void setDeadline(Calendar deadline) {
         this.deadline = deadline;
     }
-
-
-    public static class VoteCount{
-        public String eventId;
-        public String pollId;
-        public Integer pollCount;
-
-        private VoteCount(){}
-        VoteCount(final String eventId, final String pollId, final Integer pollCount) {
-            this.pollCount = pollCount;
-            this.eventId = eventId;
-            this.pollId = pollId;
-        }
+    
+    public void setCreatorId(String creatorId){
+    	this.creatorId = creatorId;
     }
+    
+    public void setId(String id){
+    	this.id = id;
+    }
+    
+    public void setEventId(String eventId){
+    	this.eventId = eventId;
+    }
+    
+    public void setPollOptions(List<PollOption> pollOptions) {
+		this.pollOptions = pollOptions;
+	}
 }

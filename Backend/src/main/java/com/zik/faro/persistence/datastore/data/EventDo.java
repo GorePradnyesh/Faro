@@ -1,28 +1,35 @@
-package com.zik.faro.frontend.data;
+package com.zik.faro.persistence.datastore.data;
 
 import java.util.Calendar;
 import java.util.UUID;
 
-public class Event {
-    private String eventId;
-    private String eventName;
-    private Calendar startDate;
-    private Calendar endDate;
-    private boolean controlFlag;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.googlecode.objectify.annotation.Entity;
+import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Index;
+import com.googlecode.objectify.annotation.Serialize;
+import com.zik.faro.data.Assignment;
+import com.zik.faro.data.Location;
+import com.zik.faro.data.ObjectStatus;
+import com.zik.faro.data.expense.ExpenseGroup;
+
+@Entity
+@XmlRootElement
+public class EventDo {
+    @Id @Index
+    private String eventId;           
+    private String eventName;         
+    @Serialize private Calendar startDate;     
+    @Serialize private Calendar endDate;
+    private boolean controlFlag;      
     private ExpenseGroup expenseGroup;
     private Location location;
     private ObjectStatus status;
     private Assignment assignment;
-    private String eventDescription;
 
-    /*TODO change eventCreator boolean to be set based on a check to compare userID to eventCreatorID.
-    eventCreator boolean is not stored or updated to the server. It should not be part of the event
-    This is only to see whether the user gets to see the control flag option on eventEdit Page.
-    That can be determined by comparing the eventCreator userID and my own userID.
-    */
-    private boolean eventCreator;
-
-    public Event(final String eventName, final Calendar startDate, final Calendar endDate,
+    public EventDo(final String eventName, final Calendar startDate, final Calendar endDate,
                  final boolean controlFlag, final ExpenseGroup expenseGroup, final Location location) {
         this.eventId = UUID.randomUUID().toString();
         this.eventName = eventName;
@@ -34,22 +41,23 @@ public class Event {
         this.status = ObjectStatus.OPEN;
     }
 
-    public Event(final String eventName){
+    public EventDo(final String eventName){
         this.eventId = UUID.randomUUID().toString();
         this.eventName = eventName;
         this.status = ObjectStatus.OPEN;
     }
 
-    public Event(){
-
+    public EventDo(){
+       
     }
 
+    @XmlElement
     public String getEventName() {
         return eventName;
     }
-
+    
     public void setEventName(String eventName){
-        this.eventName = eventName;
+    	this.eventName = eventName;
     }
 
     public Calendar getStartDate() {
@@ -61,14 +69,14 @@ public class Event {
     }
 
     public Calendar getEndDate() {
-        return endDate;
+    	return endDate;
     }
 
     public void setEndDate(Calendar endDate) {
         this.endDate = endDate;
     }
 
-    public boolean getControlFlag() {
+    public boolean isControlFlag() {
         return controlFlag;
     }
 
@@ -96,12 +104,13 @@ public class Event {
         this.status = ObjectStatus.CLOSED;
     }
 
+    @XmlElement
     public String getEventId() {
         return eventId;
     }
-
+    
     public void setEventId(String eventId){
-        this.eventId = eventId;
+    	this.eventId = eventId;
     }
 
     public ObjectStatus getStatus() {
@@ -112,15 +121,12 @@ public class Event {
         this.status = status;
     }
 
-    public Assignment getAssignment() {
-        return assignment;
-    }
+	public Assignment getAssignment() {
+		return assignment;
+	}
 
-    public void setAssignment(Assignment assignment) {
-        this.assignment = assignment;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(Calendar.getInstance());
-    }
+	public void setAssignment(Assignment assignment) {
+		this.assignment = assignment;
+	}
+	
 }

@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import com.zik.faro.api.bean.Poll;
+import com.zik.faro.data.Poll;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
-import com.zik.faro.data.PollDo;
+import com.zik.faro.persistence.datastore.data.PollDo;
 import com.zik.faro.persistence.datastore.PollDatastoreImpl;
 
 public class PollManagement {

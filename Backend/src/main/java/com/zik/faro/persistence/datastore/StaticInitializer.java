@@ -1,13 +1,13 @@
 package com.zik.faro.persistence.datastore;
 
 import com.googlecode.objectify.ObjectifyService;
-import com.zik.faro.data.ActivityDo;
-import com.zik.faro.data.EventDo;
-import com.zik.faro.data.EventUser;
-import com.zik.faro.data.PollDo;
-import com.zik.faro.data.user.FaroUser;
-import com.zik.faro.data.user.FriendRelation;
-import com.zik.faro.data.user.UserCredentials;
+import com.zik.faro.persistence.datastore.data.ActivityDo;
+import com.zik.faro.persistence.datastore.data.EventDo;
+import com.zik.faro.persistence.datastore.data.EventUserDo;
+import com.zik.faro.persistence.datastore.data.PollDo;
+import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
+import com.zik.faro.persistence.datastore.data.user.FriendRelationDo;
+import com.zik.faro.persistence.datastore.data.user.UserCredentialsDo;
 
 public class StaticInitializer {
 
@@ -15,10 +15,10 @@ public class StaticInitializer {
         //ObjectifyService.register();
         ObjectifyService.register(ActivityDo.class);
         ObjectifyService.register(EventDo.class);
-        ObjectifyService.register(FaroUser.class);
-        ObjectifyService.register(UserCredentials.class);
-        ObjectifyService.register(EventUser.class);
+        ObjectifyService.register(FaroUserDo.class);
+        ObjectifyService.register(UserCredentialsDo.class);
+        ObjectifyService.register(EventUserDo.class);
         ObjectifyService.register(PollDo.class);
-        ObjectifyService.register(FriendRelation.class);
+        ObjectifyService.register(FriendRelationDo.class);
     }
 }

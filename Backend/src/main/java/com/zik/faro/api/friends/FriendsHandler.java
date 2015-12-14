@@ -1,15 +1,12 @@
 package com.zik.faro.api.friends;
 
 import com.sun.jersey.api.JResponse;
-import com.zik.faro.api.responder.MinUser;
+import com.zik.faro.data.MinUser;
 import com.zik.faro.applogic.FriendManagement;
 import com.zik.faro.commons.Constants;
-import com.zik.faro.commons.FaroResponseStatus;
 import com.zik.faro.commons.ParamValidation;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
-import com.zik.faro.commons.exceptions.FaroWebAppException;
-import com.zik.faro.commons.exceptions.IllegalDataOperation;
-import com.zik.faro.data.user.FriendRelation;
+import com.zik.faro.data.IllegalDataOperation;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -17,7 +14,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Path(Constants.FRIENDS_PATH_CONST)

@@ -3,30 +3,20 @@ package com.zik.faro.data;
 import java.util.Calendar;
 import java.util.UUID;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
-import com.googlecode.objectify.annotation.Entity;
-import com.googlecode.objectify.annotation.Id;
-import com.googlecode.objectify.annotation.Index;
-import com.googlecode.objectify.annotation.Serialize;
 import com.zik.faro.data.expense.ExpenseGroup;
 
-@Entity
-@XmlRootElement
-public class EventDo {
-    @Id @Index
+public class Event {
     private String eventId;           
     private String eventName;         
-    @Serialize private Calendar startDate;     
-    @Serialize private Calendar endDate;
+    private Calendar startDate;     
+    private Calendar endDate;
     private boolean controlFlag;      
     private ExpenseGroup expenseGroup;
     private Location location;
     private ObjectStatus status;
     private Assignment assignment;
 
-    public EventDo(final String eventName, final Calendar startDate, final Calendar endDate,
+    public Event(final String eventName, final Calendar startDate, final Calendar endDate,
                  final boolean controlFlag, final ExpenseGroup expenseGroup, final Location location) {
         this.eventId = UUID.randomUUID().toString();
         this.eventName = eventName;
@@ -38,19 +28,18 @@ public class EventDo {
         this.status = ObjectStatus.OPEN;
     }
 
-    public EventDo(final String eventName){
+    public Event(final String eventName){
         this.eventId = UUID.randomUUID().toString();
         this.eventName = eventName;
         this.status = ObjectStatus.OPEN;
     }
 
-    public EventDo(){
+    public Event(){
        
     }
 
-    @XmlElement
     public String getEventName() {
-        return eventName;
+    	return eventName;
     }
     
     public void setEventName(String eventName){
@@ -73,7 +62,7 @@ public class EventDo {
         this.endDate = endDate;
     }
 
-    public boolean isControlFlag() {
+    public boolean getControlFlag() {
         return controlFlag;
     }
 
@@ -101,7 +90,6 @@ public class EventDo {
         this.status = ObjectStatus.CLOSED;
     }
 
-    @XmlElement
     public String getEventId() {
         return eventId;
     }
@@ -126,4 +114,9 @@ public class EventDo {
 		this.assignment = assignment;
 	}
 	
+	public static void main(String[] args) {
+		System.out.println(Calendar.getInstance());
+	}
+	
 }
+

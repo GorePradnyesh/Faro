@@ -4,9 +4,10 @@
     <modelVersion>4.0.0</modelVersion>
     <packaging>war</packaging>
     <version>1.0-SNAPSHOT</version>
-
     <groupId>com.zik</groupId>
-    <artifactId>faro</artifactId>
+
+    <!--groupId>com.zik</groupId -->
+    <artifactId>faro-backend</artifactId>
 
     <properties>
         <appengine.app.version>1</appengine.app.version>
@@ -22,6 +23,11 @@
 
     <dependencies>
         <!-- Compile/runtime dependencies -->
+        <!-- dependency>
+            <groupId>com.zik</groupId>
+            <artifactId>faro-commons</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency -->
         <!-- Logging dependencies
           In addition to slf4j-log4j12-1.7.10.jar, this will pull slf4j-api-1.7.10.jar
           as well as log4j-1.2.17.jar into the project. -->
@@ -41,6 +47,12 @@
             <groupId>com.googlecode.objectify</groupId>
             <artifactId>objectify</artifactId>
             <version>5.1.1</version>
+        </dependency>
+        <!-- Guava -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>18.0</version>
         </dependency>
 
         <!-- Javax servlet -->
@@ -194,6 +206,7 @@
                     </jvmFlags>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 </project>

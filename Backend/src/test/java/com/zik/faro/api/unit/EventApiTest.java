@@ -1,8 +1,6 @@
 package com.zik.faro.api.unit;
 
 import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.UUID;
 
 import javax.ws.rs.WebApplicationException;
@@ -20,12 +18,12 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
 import com.zik.faro.TestHelper;
-import com.zik.faro.api.bean.Event;
+import com.zik.faro.data.Event;
 import com.zik.faro.api.event.EventCreateHandler;
 import com.zik.faro.api.event.EventHandler;
-import com.zik.faro.api.responder.EventCreateData;
-import com.zik.faro.data.EventDo;
-import com.zik.faro.data.EventUser;
+import com.zik.faro.data.EventCreateData;
+import com.zik.faro.persistence.datastore.data.EventDo;
+import com.zik.faro.persistence.datastore.data.EventUserDo;
 import com.zik.faro.data.Location;
 
 public class EventApiTest {
@@ -37,7 +35,7 @@ public class EventApiTest {
 
 	static {
 		ObjectifyService.register(EventDo.class);
-		ObjectifyService.register(EventUser.class);
+		ObjectifyService.register(EventUserDo.class);
 		 
 	}
 

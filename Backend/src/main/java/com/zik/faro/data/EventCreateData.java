@@ -1,14 +1,9 @@
-package com.zik.faro.api.responder;
+package com.zik.faro.data;
+
+import com.zik.faro.data.expense.ExpenseGroup;
 
 import java.util.Calendar;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
-import com.zik.faro.commons.exceptions.BadRequestException;
-import com.zik.faro.data.Location;
-import com.zik.faro.data.expense.ExpenseGroup;
-
-@XmlRootElement
 public class EventCreateData {
 	
 	private String         eventName;
@@ -20,7 +15,7 @@ public class EventCreateData {
     public EventCreateData(String eventName, Calendar startDate, Calendar endDate, Location location, ExpenseGroup expenseGroup) {
         if(eventName == null || eventName.isEmpty()
         		|| startDate == null ){
-        	throw new BadRequestException("Mandatory event name and start date missing");
+        	throw new RuntimeException("Mandatory event name and start date missing");
         }
     	this.eventName = eventName;
         this.startDate = startDate;

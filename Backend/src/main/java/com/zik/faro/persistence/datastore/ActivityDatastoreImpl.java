@@ -1,12 +1,11 @@
 package com.zik.faro.persistence.datastore;
 
-import java.util.Date;
 import java.util.List;
 
 import com.googlecode.objectify.Work;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
-import com.zik.faro.data.ActivityDo;
-import com.zik.faro.data.EventDo;
+import com.zik.faro.persistence.datastore.data.ActivityDo;
+import com.zik.faro.persistence.datastore.data.EventDo;
 
 public class ActivityDatastoreImpl {
     private static final String EVENTID_FIELD_NAME = "eventId";

@@ -1,19 +1,28 @@
-package com.zik.faro.data.user;
+package com.zik.faro.persistence.datastore.data.user;
 
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.Ref;
+import com.googlecode.objectify.annotation.Entity;
+import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Index;
+import com.googlecode.objectify.annotation.Parent;
 import com.zik.faro.data.IllegalDataOperation;
 
-public class FriendRelation {
+@Entity
+public class FriendRelationDo {
+    @Id
     private String toId;
-    private String fromId;
+    @Parent @Index
+    private Ref<FaroUserDo> fromRef;
 
     // NOTE : This is in a de-normalized form to reduce the queries needed to fetch friends information for a particular user
     private String toFName;
     private String toLName;
     private String toExternalExpenseId;
 
-    private FriendRelation(){}
+    private FriendRelationDo(){}
 
-    public FriendRelation(final String fromId,
+    public FriendRelationDo(final String fromId,
                             final String toId,
                             final String toFName,
                             final String toLName,
@@ -22,14 +31,18 @@ public class FriendRelation {
             throw new IllegalDataOperation("Cannot establish a friend relation to self : " + this.toId);
         }
         this.toId = toId;
-        this.fromId = fromId;
+        this.fromRef = Ref.create(Key.create(FaroUserDo.class, fromId));
         this.toExternalExpenseId = toExternalExpenseId;
         this.toFName = toFName;
         this.toLName = toLName;
     }
 
     public String getFromId(){
-        return this.fromId;
+        return this.fromRef.getKey().getName();
+    }
+
+    public FaroUserDo getFromUser(){
+        return this.fromRef.get();
     }
 
     public String getToId(){
