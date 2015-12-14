@@ -59,6 +59,7 @@ public class EventLandingPage extends Activity {
 
         final Intent PollListPage = new Intent(EventLandingPage.this, PollListPage.class);
         final Intent EditEvent = new Intent(EventLandingPage.this, EditEvent.class);
+        final Intent CreateNewActivity = new Intent(EventLandingPage.this, CreateNewEventActivity.class);
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
@@ -117,6 +118,15 @@ public class EventLandingPage extends Activity {
         eventAssignmentbutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                finish();
+            }
+        });
+
+        activitybutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CreateNewActivity.putExtra("eventID", E.getEventId());
+                startActivity(CreateNewActivity);
                 finish();
             }
         });

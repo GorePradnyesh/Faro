@@ -91,14 +91,24 @@ public class EventListHandler {
     public ErrorCodes addNewEvent(Event event) {
         //TODO: send update to server and if successful then add event to List and Map below and
         // update the eventID in the Event.
+        String eventID = getEventID();
 
-        TestEventCreateCallback createCallback = new TestEventCreateCallback();
+        if(eventID != null) {
+            event.setEventId(eventID);
+            conditionallyAddNewEventToList(event);
+            this.eventMap.put(eventID, event);
+            return ErrorCodes.SUCCESS;
+        }
+        return ErrorCodes.FAILURE;
+
+        /*TestEventCreateCallback createCallback = new TestEventCreateCallback();
         EventCreateData eventCreateData= new EventCreateData(event.getEventName(),
                 event.getStartDateCalendar(), event.getEndDateCalendar(), null, null);
         MainActivity.serviceHandler.getEventHandler().createEvent(createCallback, eventCreateData);
+        return ErrorCodes.SUCCESS;*/
 
 
-        return ErrorCodes.SUCCESS;
+
     }
 
     private void conditionallyAddNewEventToList(Event event) {
