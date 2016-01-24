@@ -1,48 +1,112 @@
 package com.zik.faro.frontend;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
-import java.util.ArrayList;
+import com.zik.faro.data.ObjectStatus;
 
 
 public class CreateNewPoll extends Activity {
 
-    private ArrayList<String> pollOptionsArray = new ArrayList<>();
+    static PollListHandler pollListHandler = PollListHandler.getInstance();
+    int pollOtionsNum = 0;
+    private static String eventID = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_new_poll);
 
-        EditText pollQuestion = (EditText)findViewById(R.id.pollQuestion);
-        CheckBox ismultiChoice = (CheckBox)findViewById(R.id.multiChoicePoll);
-        final EditText pollOption = (EditText)findViewById(R.id.pollOptionEditText);
-        ImageButton addNewOption = (ImageButton)findViewById(R.id.add_new_option);
+        final EditText pollDescription = (EditText)findViewById(R.id.pollDescription);
+        final CheckBox isMultiChoice = (CheckBox)findViewById(R.id.multiChoiceFlag);
+        final EditText optionText = (EditText)findViewById(R.id.pollOptionEditText);
+        final ImageButton addNewOptionButton = (ImageButton)findViewById(R.id.add_new_option);
+
         ListView pollOptionsList = (ListView)findViewById(R.id.pollOptionsList);
 
-        addNewOption.setImageResource(R.drawable.plus);
+        final Button createNewPollOK = (Button) findViewById(R.id.createNewPollOK);
+        final Button createNewPollCancel = (Button) findViewById(R.id.createNewPollCancel);
 
-        final ArrayAdapter<String> pollOptionsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, pollOptionsArray);
+        final Intent PollListPage = new Intent(CreateNewPoll.this, PollListPage.class);
+
+        final PollOptionsAdapter pollOptionsAdapter = new PollOptionsAdapter(this, R.layout.poll_create_new_page_row_style);
         pollOptionsList.setAdapter(pollOptionsAdapter);
 
-        addNewOption.setOnClickListener(new View.OnClickListener() {
+        Bundle extras = getIntent().getExtras();
+        if(extras != null) {
+            eventID = extras.getString("eventID");
+        }
+
+        addNewOptionButton.setImageResource(R.drawable.plus);
+
+
+        //Enable the addNewOptionButton only after Users enters an Option
+        optionText.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onClick(View v) {
-                pollOptionsArray.add(pollOption.getText().toString());
-                //pollOptionsAdapter.add(pollOption.getText().toString());
-                pollOptionsAdapter.notifyDataSetChanged();
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                addNewOptionButton.setEnabled(!(optionText.getText().toString().trim().isEmpty()));
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
             }
         });
 
+        addNewOptionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String optionDescription = optionText.getText().toString();
+                Poll.PollOption pollOption = new Poll.PollOption(optionDescription);
+
+                pollOptionsAdapter.insert(pollOption, 0);
+                pollOptionsAdapter.notifyDataSetChanged();
+                optionText.setText("");
+                pollOtionsNum++;
+                //Enable createNewPollOK button only if atleast 2 poll are added.
+                if (pollOtionsNum == 2) createNewPollOK.setEnabled(true);
+            }
+        });
+
+        createNewPollOK.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Poll poll;
+                poll = new Poll(eventID, "pollCreator", isMultiChoice.isChecked(),
+                        pollOptionsAdapter.list, "pollCreator", pollDescription.getText().toString(),
+                        ObjectStatus.OPEN);
+
+                pollListHandler.addNewPoll(poll);
+                PollListPage.putExtra("eventID", eventID);
+                //startActivity(PollListPage);
+                finish();
+            }
+        });
+
+        createNewPollCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
+
     }
+
 
 
     @Override

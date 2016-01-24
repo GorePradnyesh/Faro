@@ -5,11 +5,14 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
@@ -56,6 +59,7 @@ public class EditEvent extends Activity {
         endTimeButton = (Button) findViewById(R.id.endTimeButton);
 
         TextView eventName = (TextView) findViewById(R.id.eventName);
+        final EditText eventDescription = (EditText) findViewById(R.id.eventDescriptionEditText);
 
         Button editEventOK = (Button) findViewById(R.id.editEventOK);
         Button editEventCancel = (Button) findViewById(R.id.editEventCancel);
@@ -80,6 +84,7 @@ public class EditEvent extends Activity {
                 cloneEvent = gson.fromJson(json, Event.class);
                 String ev_name = cloneEvent.getEventName();
                 eventName.setText(ev_name);
+                eventDescription.setText(cloneEvent.getEventDescription());
                 setBothTimeAndDateToEventDates();
             }
         }
@@ -133,11 +138,27 @@ public class EditEvent extends Activity {
         editEventCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                EventLanding.putExtra("eventID", event.getEventId());
+                startActivity(EventLanding);
                 finish();
             }
         });
 
+        eventDescription.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                cloneEvent.setEventDescription(eventDescription.getText().toString());
+            }
+        });
     }
 
     private void setBothTimeAndDateToEventDates(){
@@ -307,9 +328,10 @@ public class EditEvent extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    //TODO
     @Override
     public void onBackPressed() {
+        EventLanding.putExtra("eventID", event.getEventId());
+        startActivity(EventLanding);
         finish();
         super.onBackPressed();
     }

@@ -35,4 +35,6 @@
     <string name="title_activity_test">Test</string>
     <string name="title_activity_edit_event">EditEvent</string>
     <string name="title_activity_exception_print_page">ExceptionPrintPage</string>
+    <string name="title_activity_assignment_landing_page">AssignmentLandingPage</string>
+    <string name="title_activity_create_new">CreateNewActivity</string>
 </resources>

@@ -16,8 +16,7 @@ import java.text.SimpleDateFormat;
 public class EventLandingPage extends Activity {
 
     public static final int NO_CHANGES = 0;
-    //private Intent AppLandingPage = null;
-    private DateFormat sdf = DateFormat.getDateInstance();
+    private DateFormat sdf = new SimpleDateFormat(" EEE, MMM d, yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
     private  static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static Event E;
@@ -26,6 +25,8 @@ public class EventLandingPage extends Activity {
     private Button statusNo = null;
     private Button statusMaybe = null;
     private ImageButton pollButton = null;
+    private ImageButton eventAssignmentbutton = null;
+    private ImageButton activitybutton = null;
     private ImageButton editButton = null;
     private TextView event_status = null;
 
@@ -36,14 +37,18 @@ public class EventLandingPage extends Activity {
 
         TextView event_name = (TextView)findViewById(R.id.eventNameText);
         event_status = (TextView)findViewById(R.id.eventStatusText);
-        TextView startDate = (TextView)findViewById(R.id.startDateDisplay);
-        TextView startTime = (TextView)findViewById(R.id.startTimeDisplay);
+        TextView eventDescription = (TextView) findViewById(R.id.eventDescriptionTextView);
 
-        TextView endDate = (TextView)findViewById(R.id.endDateDisplay);
-        TextView endTime = (TextView)findViewById(R.id.endTimeDisplay);
+        TextView startDateAndTime = (TextView)findViewById(R.id.startDateAndTimeDisplay);
+
+        TextView endDateAndTime = (TextView)findViewById(R.id.endDateAndTimeDisplay);
 
         pollButton = (ImageButton)findViewById(R.id.pollImageButton);
         pollButton.setImageResource(R.drawable.poll_icon);
+        eventAssignmentbutton = (ImageButton)findViewById(R.id.eventAssignmentImageButton);
+        eventAssignmentbutton.setImageResource(R.drawable.assignment_icon);
+        activitybutton = (ImageButton)findViewById(R.id.activityImageButton);
+        activitybutton.setImageResource(R.drawable.activity);
         editButton = (ImageButton)findViewById(R.id.editButton);
         editButton.setImageResource(R.drawable.edit);
 
@@ -52,9 +57,9 @@ public class EventLandingPage extends Activity {
         statusNo = (Button)findViewById(R.id.statusNo);
         statusMaybe = (Button)findViewById(R.id.statusMaybe);
 
-        //AppLandingPage = new Intent(EventLandingPage.this, AppLandingPage.class);
-        final Intent PollLandingPage = new Intent(EventLandingPage.this, PollLandingPage.class);
+        final Intent PollListPage = new Intent(EventLandingPage.this, PollListPage.class);
         final Intent EditEvent = new Intent(EventLandingPage.this, EditEvent.class);
+        final Intent CreateNewActivity = new Intent(EventLandingPage.this, CreateNewEventActivity.class);
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
@@ -67,14 +72,19 @@ public class EventLandingPage extends Activity {
                 //Display elements based on Event Status
                 eventStateBasedView();
 
+                controlFlagBasedView();
+
                 String ev_name = E.getEventName();
                 event_name.setText(ev_name);
 
-                startDate.setText(sdf.format(E.getStartDateCalendar().getTime()));
-                startTime.setText(stf.format(E.getStartDateCalendar().getTime()));
+                String eventDescr = E.getEventDescription();
+                eventDescription.setText(eventDescr);
 
-                endDate.setText(sdf.format(E.getEndDateCalendar().getTime()));
-                endTime.setText(stf.format(E.getEndDateCalendar().getTime()));
+                startDateAndTime.setText(sdf.format(E.getStartDateCalendar().getTime()) + " at " +
+                        stf.format(E.getStartDateCalendar().getTime()));
+
+                endDateAndTime.setText(sdf.format(E.getEndDateCalendar().getTime()) + " at " +
+                        stf.format(E.getEndDateCalendar().getTime()));
 
                 statusYes.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -99,8 +109,25 @@ public class EventLandingPage extends Activity {
         pollButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setResult(NO_CHANGES);
-                startActivity(PollLandingPage);
+                PollListPage.putExtra("eventID", E.getEventId());
+                startActivity(PollListPage);
+                finish();
+            }
+        });
+
+        eventAssignmentbutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
+        activitybutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CreateNewActivity.putExtra("eventID", E.getEventId());
+                startActivity(CreateNewActivity);
+                finish();
             }
         });
 
@@ -126,7 +153,6 @@ public class EventLandingPage extends Activity {
                 event_status.setText("Not responded");
                 break;
         }
-
         if (E.isEventCreator()){
             statusYes.setVisibility(View.GONE);
             statusNo.setVisibility(View.GONE);
@@ -147,6 +173,16 @@ public class EventLandingPage extends Activity {
             statusNo.setVisibility(View.VISIBLE);
             statusMaybe.setVisibility(View.GONE);
             pollButton.setVisibility(View.GONE);
+        }
+    }
+
+    private void controlFlagBasedView() {
+        if(!E.isEventCreator()) {
+            switch (E.getControlFlag()) {
+                case FRIENDS_CANNOT_EDIT:
+                    editButton.setVisibility(View.GONE);
+                    break;
+            }
         }
     }
 

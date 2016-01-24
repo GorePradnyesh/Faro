@@ -16,14 +16,11 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- * Created by nakulshah on 1/8/15.
- */
 public class EventAdapter extends ArrayAdapter {
     //TODO (Code Review) Implement sorted list instead of Linkedlist
     public List<Event> list = new LinkedList<>();
 
-    DateFormat sdf = new SimpleDateFormat("MMM dd yyyy");
+    DateFormat sdf = new SimpleDateFormat("EEE, MMM dd yyyy");
     DateFormat stf = new SimpleDateFormat("hh:mm a");
 
     public EventAdapter(Context context, int resource) {
@@ -61,7 +58,6 @@ public class EventAdapter extends ArrayAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-
         View row = convertView;
         ImgHolder holder = new ImgHolder();
 
@@ -79,7 +75,7 @@ public class EventAdapter extends ArrayAdapter {
         }
         Event EVENT = (Event) getItem(position);
         holder.EVNT_NAME.setText(EVENT.getEventName());
-        holder.STATUS_IMG.setImageResource(EVENT.getImgResource());
+        holder.STATUS_IMG.setImageResource(SetDisplayProperties.getEventStatusImage(EVENT));
         holder.EVNT_START_DATE.setText(sdf.format(EVENT.getStartDateCalendar().getTime()));
         holder.EVNT_START_TIME.setText(stf.format(EVENT.getStartDateCalendar().getTime()));
         return row;

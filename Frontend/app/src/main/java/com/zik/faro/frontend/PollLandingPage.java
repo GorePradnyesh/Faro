@@ -1,81 +1,116 @@
 package com.zik.faro.frontend;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.TabHost;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static android.widget.Toast.LENGTH_LONG;
+
 
 public class PollLandingPage extends Activity {
 
-    Intent EventLandingPage = null;
+    private  static PollListHandler pollListHandler = PollListHandler.getInstance();
+    private static Poll P;
+    private LinearLayout pollOptionsChecklist = null;
+    private RadioGroup pollOptionsRadioGroup = null;
+    private int radioId = 0;
+    ArrayList<String> checklistIds = new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_poll_landing_page);
 
-        EventLandingPage = new Intent(PollLandingPage.this, EventLandingPage.class);
-        final Intent CreateNewPoll = new Intent(PollLandingPage.this, CreateNewPoll.class);
+        TextView pollDesc = (TextView)findViewById(R.id.pollDescription);
 
-        TextView Poll = (TextView)findViewById(R.id.polls);
-        //Poll.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-        TabHost pollTabHost = (TabHost)findViewById(R.id.polltabHost);
-        pollTabHost.setup();
+        ImageButton editButton = (ImageButton)findViewById(R.id.editButton);
+        editButton.setImageResource(R.drawable.edit);
 
-        TabHost.TabSpec openTabSpec = pollTabHost.newTabSpec("open");
-        openTabSpec.setContent(R.id.open);
-        openTabSpec.setIndicator("Open Polls");
-        pollTabHost.addTab(openTabSpec);
+        Button statusYes = (Button)findViewById(R.id.statusYes);
+        Button statusNo = (Button)findViewById(R.id.statusNo);
 
-        TabHost.TabSpec closedTabSpec = pollTabHost.newTabSpec("closed");
-        closedTabSpec.setContent(R.id.open);
-        closedTabSpec.setIndicator("Closed Polls");
-        pollTabHost.addTab(closedTabSpec);
 
-        ListView openPollsListView  = (ListView)findViewById(R.id.openPolls);
-        openPollsListView.setBackgroundColor(Color.BLACK);
+        Bundle extras = getIntent().getExtras();
+        if(extras != null) {
+            String pollID = extras.getString("pollID");
+            P = pollListHandler.getPollFromMap(pollID);
+            if(P != null) {
+                pollDesc.setText(P.getDescription());
+                //Depending on the type of poll it will be displayed differently
+                if(P.isMultiChoice()) {
+                    pollOptionsChecklist = (LinearLayout) findViewById(R.id.pollOptionsChecklist);
+                    List<Poll.PollOption> pollOptions = P.getPollOptions();
+                    for (int i = 0; i < pollOptions.size(); i++) {
+                        final CheckBox checkBox = new CheckBox(this);
+                        Poll.PollOption pollOption = pollOptions.get(i);
+                        checkBox.setText(pollOption.getOptionDescription());
+                        checkBox.setId(i*10);
+                        checkBox.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                CheckBox chkbox = (CheckBox)v;
+                                Integer id = chkbox.getId();
+                                if(chkbox.isChecked()){
+                                    checklistIds.add(id.toString());
+                                }else{
+                                    checklistIds.remove(id.toString());
+                                }
+                            }
+                        });
+                        pollOptionsChecklist.addView(checkBox);
+                    }
+                }else{
+                    pollOptionsRadioGroup = (RadioGroup) findViewById(R.id.pollOptionsRadioGroup);
+                    List<Poll.PollOption> pollOptions = P.getPollOptions();
+                    for (int i = 0; i < pollOptions.size(); i++) {
+                        final RadioButton button = new RadioButton(this);
+                        Poll.PollOption pollOption = pollOptions.get(i);
+                        button.setText(pollOption.getOptionDescription());
+                        pollOptionsRadioGroup.addView(button);
+                    }
+                }
+            }
+        }
 
-        ListView closedPollsListView  = (ListView)findViewById(R.id.closedPolls);
-        closedPollsListView.setBackgroundColor(Color.BLACK);
-
-        ImageButton createNewPoll = (ImageButton)findViewById(R.id.add_new_poll);
-        createNewPoll.setImageResource(R.drawable.plus);
-
-        createNewPoll.setOnClickListener(new View.OnClickListener() {
+        statusYes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(CreateNewPoll);
+                if(P.isMultiChoice()) {
+                    String ids = "Selected options are ";
+                    for(int i = 0; i < checklistIds.size(); i++) {
+                        String str_id = checklistIds.get(i);
+                        int id = Integer.parseInt(str_id);
+                        ids = ids.concat(str_id);
+                        ids = ids.concat(",");
+                    }
+                    Toast.makeText(PollLandingPage.this, ids, LENGTH_LONG).show();
+                }else {
+                    radioId = pollOptionsRadioGroup.getCheckedRadioButtonId();
+                    Toast.makeText(PollLandingPage.this, "Selected option is " + radioId, LENGTH_LONG).show();
+                }
             }
         });
 
 
     }
-
-    //**********************************************************************************************
-    //**********************************************************************************************
-    //**********************************************************************************************
-    //**********************************************************************************************
-    //This would probably lead to increase in stack size for Intents since the previous intents are
-    //not popped out of the stack. Check how to see the stack size of the intents.
-    @Override
-    public void onBackPressed() {
-        startActivity(EventLandingPage);
-        finish();
-        super.onBackPressed();
-    }
-    //**********************************************************************************************
-    //**********************************************************************************************
-    //**********************************************************************************************
-    //**********************************************************************************************
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

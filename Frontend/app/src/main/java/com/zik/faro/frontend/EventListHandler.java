@@ -1,14 +1,19 @@
 package com.zik.faro.frontend;
 
+import com.squareup.okhttp.Request;
+//import com.zik.faro.frontend.data.EventCreateData;
+import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
+import com.zik.faro.frontend.faroservice.HttpError;
+
+import java.io.IOException;
 import java.util.Calendar;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
 
 public class EventListHandler {
 
-    private static final int MIN_EVENTS_PAGE_SIZE = 10;
+    public static final int MAX_EVENTS_PAGE_SIZE = 100;
     private static final int MAX_TOTAL_EVENTS_IN_CACHE = 500;
 
 
@@ -50,6 +55,30 @@ public class EventListHandler {
         return eventIDStr;
     }
 
+    final static class TestEventCreateCallback
+            implements BaseFaroRequestCallback<com.zik.faro.data.Event> {
+        com.zik.faro.data.Event receivedEvent;
+
+        @Override
+        public void onFailure(Request request, IOException e) {
+            //Handle failure
+        }
+
+        @Override
+        public void onResponse(com.zik.faro.data.Event event, HttpError error){
+            if(error != null){
+            }
+            // Assert that event == min event
+            this.receivedEvent = event;
+            String eventID = event.getEventId();
+            if(eventID != null) {
+                //eventListHandler.conditionallyAddNewEventToList(event);
+                //eventListHandler.eventMap.put(eventID, event);
+            }
+
+        }
+    }
+
     /*
     * Based on the start Date add new event to the list and Map only if it lies between the first
     * and last event retrieved in the list from the server. If it does not lie in between then
@@ -71,6 +100,15 @@ public class EventListHandler {
             return ErrorCodes.SUCCESS;
         }
         return ErrorCodes.FAILURE;
+
+        /*TestEventCreateCallback createCallback = new TestEventCreateCallback();
+        EventCreateData eventCreateData= new EventCreateData(event.getEventName(),
+                event.getStartDateCalendar(), event.getEndDateCalendar(), null, null);
+        MainActivity.serviceHandler.getEventHandler().createEvent(createCallback, eventCreateData);
+        return ErrorCodes.SUCCESS;*/
+
+
+
     }
 
     private void conditionallyAddNewEventToList(Event event) {
@@ -98,11 +136,11 @@ public class EventListHandler {
         int newEventIndex = ++index;
 
         /* We insert the event in the list only if one of the following conditions are met
-        * 1. Combined list size is less than the MIN_EVENTS_PAGE_SIZE. Which means that the number
+        * 1. Combined list size is less than the MAX_EVENTS_PAGE_SIZE. Which means that the number
         * of events in the lists is less than what the server can send at one time.
         * 2. newEventIndex lies between the first and the last event in the list.
         */
-        if (getCombinedListSize() < MIN_EVENTS_PAGE_SIZE ||
+        if (getCombinedListSize() < MAX_EVENTS_PAGE_SIZE ||
                 (newEventIndex < eventAdapter.list.size() &&
                         newEventIndex > 0)) {
             eventAdapter.insert(event, newEventIndex);
@@ -135,7 +173,7 @@ public class EventListHandler {
 
     /*
     * For the case when event is part of Map but not inserted to the List, once we return to
-    * AppLandingPage from EventLandingPage, i.e. we are completely done with that event we need to
+    * EventListPage from eventLanding, i.e. we are completely done with that event we need to
     * remove the event from the Map also to maintain sync between the Map and List.
     * Event is present in the list if
     * 1. event startDate is smaller than or equal to the last event startDate
@@ -177,13 +215,17 @@ public class EventListHandler {
 
     public void changeEventStatusToYes(Event event){
         removeEventForEditing(event);
-        event.setEventStatusProperties(EventStatus.ACCEPTED);
+        event.setEventStatus(EventStatus.ACCEPTED);
         addNewEvent(event);
     }
 
     public void changeEventStatusToMaybe(Event event){
         removeEventForEditing(event);
-        event.setEventStatusProperties(EventStatus.MAYBE);
+        event.setEventStatus(EventStatus.MAYBE);
         addNewEvent(event);
+    }
+
+    public int getAcceptedEventListSize(){
+        return acceptedEventAdapter.list.size();
     }
 }

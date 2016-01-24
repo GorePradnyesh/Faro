@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.zik.faro.frontend" >
+
     <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -17,7 +19,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".AppLandingPage"
+            android:name=".EventListPage"
             android:label="@string/title_activity_app_landing_page" >
         </activity>
         <activity
@@ -45,8 +47,16 @@
             android:label="@string/title_activity_exception_print_page" >
         </activity>
         <activity
+            android:name=".PollListPage"
+            android:label="@string/title_activity_poll_landing_page" >
+        </activity>
+        <activity
             android:name=".PollLandingPage"
             android:label="@string/title_activity_poll_landing_page" >
+        </activity>
+        <activity
+            android:name=".CreateNewEventActivity"
+            android:label="@string/title_activity_create_new" >
         </activity>
     </application>
 

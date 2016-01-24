@@ -1,9 +1,7 @@
 package com.zik.faro.frontend;
 
-import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -11,7 +9,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TimePicker;
@@ -20,21 +17,11 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-/*
- * On this page an Event can be created with certain basic requirements like the Event Name, Start
- * Date and Time and End Date and Time as mandatory requirements.
- * Other fields like Invitees, Location, Description of the event are optional which can be edited
- * later from the Event Landing Page.
- * The Start Date/Time and the End Date/Time will be set to the current Date/Time by default.
- * Checks are made to make sure that the Start Date/Time is not set after the End Date/Time.
- *
- */
-public class CreateNewEvent extends Activity {
+public class CreateNewEventActivity extends android.app.Activity{
 
-    //public static final int NO_CHANGES = 0;
+    private static String eventID = null;
     static EventListHandler eventListHandler = EventListHandler.getInstance();
-    Intent AppLanding = null;
-
+    Event event = null;
 
     Calendar startDateCalendar = Calendar.getInstance();
     Calendar endDateCalendar = Calendar.getInstance();
@@ -49,16 +36,13 @@ public class CreateNewEvent extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_new_event);
+        setContentView(R.layout.activity_create_new_event_activity);
 
-        final EditText eventName = (EditText) findViewById(R.id.eventNameTextEdit);
-        final EditText eventDescription = (EditText) findViewById(R.id.eventDescriptionEditText);
+        final EditText activityName = (EditText) findViewById(R.id.activityName);
+        final EditText activityDescription = (EditText) findViewById(R.id.activityDescription);
 
-        //TODO Remove the below added just to test creator EventLanding Page vs Friend eventLanding
-        final CheckBox eventCreator = (CheckBox) findViewById(R.id.eventCreatorCheckBox);
-        final CheckBox ifAcceptedCheckBox = (CheckBox) findViewById(R.id.ifAcceptedCheckBox);
-        final CheckBox noResponseCheckBox = (CheckBox) findViewById(R.id.noResponseCheckBox);
-        final CheckBox mayBeCheckBox = (CheckBox) findViewById(R.id.mayBeCheckBox);
+        final Button createNewActivityOK = (Button) findViewById(R.id.createNewActivityOK);
+        final Button createNewActivityCancel = (Button) findViewById(R.id.createNewActivityCancel);
 
         startDateButton = (Button) findViewById(R.id.startDateButton);
         startTimeButton = (Button) findViewById(R.id.startTimeButton);
@@ -66,17 +50,14 @@ public class CreateNewEvent extends Activity {
         endDateButton = (Button) findViewById(R.id.endDateButton);
         endTimeButton = (Button) findViewById(R.id.endTimeButton);
 
-        final CheckBox controlFlagCheckBox = (CheckBox)findViewById(R.id.controlFlag);
 
-        final Button createNewEventOK = (Button) findViewById(R.id.createNewEventOK);
-        final Button createNewEventCancel = (Button) findViewById(R.id.createNewEventCancel);
+        Bundle extras = getIntent().getExtras();
+        if(extras != null) {
+            eventID = extras.getString("eventID");
+            event = eventListHandler.getEventFromMap(eventID);
+        }
 
-        final Intent eventLanding = new Intent(CreateNewEvent.this, EventLandingPage.class);
-        AppLanding = new Intent(CreateNewEvent.this, EventListPage.class);
-
-        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
-
-        eventName.addTextChangedListener(new TextWatcher() {
+        activityName.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -84,7 +65,7 @@ public class CreateNewEvent extends Activity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                createNewEventOK.setEnabled(!(eventName.getText().toString().trim().isEmpty()));
+                createNewActivityOK.setEnabled(!(activityName.getText().toString().trim().isEmpty()));
 
             }
 
@@ -94,14 +75,7 @@ public class CreateNewEvent extends Activity {
             }
         });
 
-        controlFlagCheckBox.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //TODO: Implement popup: This flag once set cannot be changed.
-            }
-        });
-
-        eventDescription.addTextChangedListener(new TextWatcher() {
+        activityDescription.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -118,44 +92,21 @@ public class CreateNewEvent extends Activity {
             }
         });
 
-        createNewEventOK.setOnClickListener(new View.OnClickListener() {
+        createNewActivityOK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String event_Name = eventName.getText().toString();
-                String eventDesc = eventDescription.getText().toString();
-                EventControlFlag controlFlag;
-                if (controlFlagCheckBox.isChecked()) controlFlag = EventControlFlag.FRIENDS_CANNOT_EDIT;
-                else controlFlag = EventControlFlag.FRIENDS_CAN_EDIT;
+                String activity_Name = activityName.getText().toString();
+                String activity_Desc = activityDescription.getText().toString();
 
-                final Event event = new Event(event_Name,
-                                          startDateCalendar,
-                                          endDateCalendar,
-                                          EventStatus.ACCEPTED,
-                                          eventDesc,
-                                          controlFlag);
-                event.setEventCreator(false);
-                if(eventCreator.isChecked()){
-                    event.setEventCreator(true);
-                }else if(ifAcceptedCheckBox.isChecked()){
-                    event.setEventStatus(EventStatus.ACCEPTED);
-                }else if(noResponseCheckBox.isChecked()){
-                    event.setEventStatus(EventStatus.NOTRESPONDED);
-                }else if(mayBeCheckBox.isChecked()){
-                    event.setEventStatus(EventStatus.MAYBE);
-                }
-
-                ErrorCodes eventStatus;
-                eventStatus = eventListHandler.addNewEvent(event);
-                //TODO What to do in Failure case?
-                if (eventStatus == ErrorCodes.SUCCESS) {
-                    eventLanding.putExtra("eventID", event.getEventId());
-                    startActivity(eventLanding);
-                    finish();
-                }
+                final EventActivity eventActivity = new EventActivity(activity_Name,
+                        activity_Desc,
+                        null,
+                        startDateCalendar,
+                        endDateCalendar);
             }
         });
 
-        createNewEventCancel.setOnClickListener(new View.OnClickListener() {
+        createNewActivityCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();
@@ -190,23 +141,23 @@ public class CreateNewEvent extends Activity {
             }
         });
 
-        setBothTimeAndDateToDefault();
+        setBothTimeAndDateToEventStartTimeAndDate();
+
     }
 
-
-    private void setBothTimeAndDateToDefault(){
-        startDateButton.setText(sdf.format(startDateCalendar.getTime()));
-        endDateButton.setText(sdf.format(startDateCalendar.getTime()));
-        startTimeButton.setText(stf.format(startDateCalendar.getTime()));
-        endTimeButton.setText(stf.format(startDateCalendar.getTime()));
+    private void setBothTimeAndDateToEventStartTimeAndDate(){
+        startDateButton.setText(sdf.format(event.getStartDateCalendar().getTime()));
+        endDateButton.setText(sdf.format(event.getStartDateCalendar().getTime()));
+        startTimeButton.setText(stf.format(event.getStartDateCalendar().getTime()));
+        endTimeButton.setText(stf.format(event.getStartDateCalendar().getTime()));
     }
 
     private void resetEndDateAndTimeToStartDateAndTime(){
-        endDateCalendar.set(endDateCalendar.YEAR, startDateCalendar.get(Calendar.YEAR));
-        endDateCalendar.set(endDateCalendar.MONTH, startDateCalendar.get(Calendar.MONTH));
-        endDateCalendar.set(endDateCalendar.DAY_OF_MONTH, startDateCalendar.get(Calendar.DAY_OF_MONTH));
-        endDateCalendar.set(endDateCalendar.HOUR_OF_DAY, startDateCalendar.get(Calendar.HOUR_OF_DAY));
-        endDateCalendar.set(endDateCalendar.MINUTE, startDateCalendar.get(Calendar.MINUTE));
+        endDateCalendar.set(Calendar.YEAR, startDateCalendar.get(Calendar.YEAR));
+        endDateCalendar.set(Calendar.MONTH, startDateCalendar.get(Calendar.MONTH));
+        endDateCalendar.set(Calendar.DAY_OF_MONTH, startDateCalendar.get(Calendar.DAY_OF_MONTH));
+        endDateCalendar.set(Calendar.HOUR_OF_DAY, startDateCalendar.get(Calendar.HOUR_OF_DAY));
+        endDateCalendar.set(Calendar.MINUTE, startDateCalendar.get(Calendar.MINUTE));
         updateEndDate();
         updateEndTime();
     }
@@ -229,16 +180,15 @@ public class CreateNewEvent extends Activity {
 
 
     public void setStartDate(){
-        new DatePickerDialog(CreateNewEvent.this,
+        new DatePickerDialog(CreateNewEventActivity.this,
                 startDate,
                 startDateCalendar.get(Calendar.YEAR),
                 startDateCalendar.get(Calendar.MONTH),
                 startDateCalendar.get(Calendar.DAY_OF_MONTH)).show();
-
     }
 
     public void setEndDate(){
-        new DatePickerDialog(CreateNewEvent.this,
+        new DatePickerDialog(CreateNewEventActivity.this,
                 endDate,
                 endDateCalendar.get(Calendar.YEAR),
                 endDateCalendar.get(Calendar.MONTH),
@@ -247,7 +197,7 @@ public class CreateNewEvent extends Activity {
     }
 
     public void setStartTime(){
-        new TimePickerDialog(CreateNewEvent.this,
+        new TimePickerDialog(CreateNewEventActivity.this,
                 startTime,
                 startDateCalendar.get(Calendar.HOUR_OF_DAY),
                 startDateCalendar.get(Calendar.MINUTE),
@@ -255,13 +205,35 @@ public class CreateNewEvent extends Activity {
     }
 
     public void setEndTime(){
-        new TimePickerDialog(CreateNewEvent.this,
+        new TimePickerDialog(CreateNewEventActivity.this,
                 endTime,
                 endDateCalendar.get(Calendar.HOUR_OF_DAY),
                 endDateCalendar.get(Calendar.MINUTE),
                 false).show();
     }
 
+
+    /*
+     * Activity Start Date should lie within the range of the event dates and before the activity End
+     * Date
+     */
+    public boolean isStartDateValid(){
+        return startDateCalendar.after(event.getStartDateCalendar()) &&
+                startDateCalendar.before(event.getEndDateCalendar()) &&
+                startDateCalendar.before(endDateCalendar);
+
+    }
+
+    /*
+     * Activity End Date should lie within the range of the event dates and after the activity Start
+     * Date
+     */
+    public boolean isEndDateValid(){
+        return endDateCalendar.after(event.getStartDateCalendar()) &&
+                endDateCalendar.before(event.getEndDateCalendar()) &&
+                startDateCalendar.before(endDateCalendar);
+
+    }
 
     /* When setting the startDate, we compare the startCalendar to the endCalendar and if the
     * startCalendar is after the endCalendar then we set the endDate same as the startDate
@@ -271,9 +243,15 @@ public class CreateNewEvent extends Activity {
         @Override
         public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
 
-            startDateCalendar.set(startDateCalendar.YEAR, year);
-            startDateCalendar.set(startDateCalendar.MONTH, monthOfYear);
-            startDateCalendar.set(startDateCalendar.DAY_OF_MONTH, dayOfMonth);
+            if(isStartDateValid()) {
+                startDateCalendar.set(Calendar.YEAR, year);
+                startDateCalendar.set(Calendar.MONTH, monthOfYear);
+                startDateCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+            }else{
+                startDateCalendar.set(Calendar.YEAR, event.getStartDateCalendar().get(Calendar.YEAR));
+                startDateCalendar.set(Calendar.MONTH, event.getStartDateCalendar().get(Calendar.MONTH));
+                startDateCalendar.set(Calendar.DAY_OF_MONTH, event.getStartDateCalendar().get(Calendar.DAY_OF_MONTH));
+            }
             updateStartDate();
 
             if(startDateCalendar.after(endDateCalendar)){
@@ -289,9 +267,15 @@ public class CreateNewEvent extends Activity {
         @Override
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
 
-            startDateCalendar.set(startDateCalendar.HOUR_OF_DAY, hourOfDay);
-            startDateCalendar.set(startDateCalendar.MINUTE, minute);
+            if(isStartDateValid()) {
+                startDateCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                startDateCalendar.set(Calendar.MINUTE, minute);
+            }else{
+                startDateCalendar.set(Calendar.HOUR_OF_DAY, event.getStartDateCalendar().get(Calendar.HOUR_OF_DAY));
+                startDateCalendar.set(Calendar.MINUTE, event.getStartDateCalendar().get(Calendar.MINUTE));
+            }
             updateStartTime();
+
 
             if(startDateCalendar.after(endDateCalendar)) {
                 resetEndDateAndTimeToStartDateAndTime();
@@ -308,17 +292,14 @@ public class CreateNewEvent extends Activity {
         @Override
         public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
 
-            endDateCalendar.set(endDateCalendar.YEAR, year);
-            endDateCalendar.set(endDateCalendar.MONTH, monthOfYear);
-            endDateCalendar.set(endDateCalendar.DAY_OF_MONTH, dayOfMonth);
-
-            if(startDateCalendar.after(endDateCalendar)){
-                resetEndDateAndTimeToStartDateAndTime();
-            }else {
+            if(isEndDateValid()){
+                endDateCalendar.set(Calendar.YEAR, year);
+                endDateCalendar.set(Calendar.MONTH, monthOfYear);
+                endDateCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
                 updateEndDate();
+            }else{
+                resetEndDateAndTimeToStartDateAndTime();
             }
-
-
         }
     };
 
@@ -328,28 +309,20 @@ public class CreateNewEvent extends Activity {
     TimePickerDialog.OnTimeSetListener endTime = new TimePickerDialog.OnTimeSetListener(){
         @Override
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-            endDateCalendar.set(endDateCalendar.HOUR_OF_DAY, hourOfDay);
-            endDateCalendar.set(endDateCalendar.MINUTE, minute);
-
-            if(startDateCalendar.after(endDateCalendar)){
-                resetEndDateAndTimeToStartDateAndTime();
-            }else {
+            if(isEndDateValid()) {
+                endDateCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                endDateCalendar.set(Calendar.MINUTE, minute);
                 updateEndTime();
+            }else{
+                resetEndDateAndTimeToStartDateAndTime();
             }
         }
     };
 
     @Override
-    public void onBackPressed() {
-        finish();
-        super.onBackPressed();
-    }
-
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_create_new_event, menu);
+        getMenuInflater().inflate(R.menu.menu_create_new, menu);
         return true;
     }
 
