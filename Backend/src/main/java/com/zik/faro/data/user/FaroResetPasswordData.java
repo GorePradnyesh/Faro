@@ -1,11 +1,8 @@
 package com.zik.faro.data.user;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 /**
  * Created by granganathan on 5/3/15.
  */
-@XmlRootElement
 public class FaroResetPasswordData {
     private String oldPassword;
     private String newPassword;
