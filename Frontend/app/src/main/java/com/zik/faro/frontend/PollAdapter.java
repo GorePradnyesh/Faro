@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import java.util.LinkedList;
 import java.util.List;
+import com.zik.faro.data.Poll;
 
 public class PollAdapter extends ArrayAdapter {
     public List<Poll> list = new LinkedList<>();
@@ -59,7 +60,7 @@ public class PollAdapter extends ArrayAdapter {
         }
         Poll poll = (Poll) getItem(position);
         holder.POLL_DESCRPTN.setText(poll.getDescription());
-        holder.STATUS_IMG.setImageResource(R.drawable.green);
+        holder.STATUS_IMG.setImageResource(SetDisplayProperties.getPollStatusImage(poll));
         return row;
     }
 }

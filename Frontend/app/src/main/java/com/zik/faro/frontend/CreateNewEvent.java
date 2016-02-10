@@ -12,13 +12,24 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TimePicker;
+
+
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+
+import com.zik.faro.data.EventUser;
+import com.zik.faro.data.ObjectStatus;
+import com.zik.faro.data.Event;
+import com.zik.faro.data.user.InviteStatus;
+
 
 /*
  * On this page an Event can be created with certain basic requirements like the Event Name, Start
@@ -45,6 +56,7 @@ public class CreateNewEvent extends Activity {
 
     private DateFormat sdf = new SimpleDateFormat("MMM dd yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
+    private RadioGroup inviteStatusRadioGroup = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,11 +66,20 @@ public class CreateNewEvent extends Activity {
         final EditText eventName = (EditText) findViewById(R.id.eventNameTextEdit);
         final EditText eventDescription = (EditText) findViewById(R.id.eventDescriptionEditText);
 
-        //TODO Remove the below added just to test creator EventLanding Page vs Friend eventLanding
+        //TODO Remove the below added just to test creator EventLanding Page vs Friend EventLandingPage
         final CheckBox eventCreator = (CheckBox) findViewById(R.id.eventCreatorCheckBox);
-        final CheckBox ifAcceptedCheckBox = (CheckBox) findViewById(R.id.ifAcceptedCheckBox);
-        final CheckBox noResponseCheckBox = (CheckBox) findViewById(R.id.noResponseCheckBox);
-        final CheckBox mayBeCheckBox = (CheckBox) findViewById(R.id.mayBeCheckBox);
+
+        inviteStatusRadioGroup = (RadioGroup) findViewById(R.id.inviteStatusRadioGroup);
+        final RadioButton acceptedRadio = new RadioButton(this);
+        acceptedRadio.setText("Accepted");
+        final RadioButton noResponseRadio = new RadioButton(this);
+        noResponseRadio.setText("No Response");
+        final RadioButton maybeRadio = new RadioButton(this);
+        maybeRadio.setText("Maybe");
+        inviteStatusRadioGroup.addView(acceptedRadio);
+        inviteStatusRadioGroup.addView(noResponseRadio);
+        inviteStatusRadioGroup.addView(maybeRadio);
+        inviteStatusRadioGroup.check(inviteStatusRadioGroup.getChildAt(1).getId());
 
         startDateButton = (Button) findViewById(R.id.startDateButton);
         startTimeButton = (Button) findViewById(R.id.startTimeButton);
@@ -118,40 +139,78 @@ public class CreateNewEvent extends Activity {
             }
         });
 
+        eventCreator.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (eventCreator.isChecked()) {
+                    inviteStatusRadioGroup.setClickable(false);
+                } else {
+                    inviteStatusRadioGroup.setClickable(true);
+                }
+            }
+        });
+
+        eventCreator.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (eventCreator.isChecked()) {
+                    for (int i = 0; i < inviteStatusRadioGroup.getChildCount(); i++) {
+                        inviteStatusRadioGroup.getChildAt(i).setEnabled(false);
+                    }
+                } else {
+                    for (int i = 0; i < inviteStatusRadioGroup.getChildCount(); i++) {
+                        inviteStatusRadioGroup.getChildAt(i).setEnabled(true);
+                    }
+                    inviteStatusRadioGroup.check(inviteStatusRadioGroup.getChildAt(1).getId());
+                }
+            }
+        });
+
         createNewEventOK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String event_Name = eventName.getText().toString();
                 String eventDesc = eventDescription.getText().toString();
-                EventControlFlag controlFlag;
-                if (controlFlagCheckBox.isChecked()) controlFlag = EventControlFlag.FRIENDS_CANNOT_EDIT;
-                else controlFlag = EventControlFlag.FRIENDS_CAN_EDIT;
+                String eventCreatorId;
+                String myUserId = eventListHandler.getMyUserId();
 
-                final Event event = new Event(event_Name,
-                                          startDateCalendar,
-                                          endDateCalendar,
-                                          EventStatus.ACCEPTED,
-                                          eventDesc,
-                                          controlFlag);
-                event.setEventCreator(false);
                 if(eventCreator.isChecked()){
-                    event.setEventCreator(true);
-                }else if(ifAcceptedCheckBox.isChecked()){
-                    event.setEventStatus(EventStatus.ACCEPTED);
-                }else if(noResponseCheckBox.isChecked()){
-                    event.setEventStatus(EventStatus.NOTRESPONDED);
-                }else if(mayBeCheckBox.isChecked()){
-                    event.setEventStatus(EventStatus.MAYBE);
+                    eventCreatorId = myUserId;
+                }else{
+                    eventCreatorId = "otherUserId";
                 }
 
+                final Event event = new Event(event_Name,
+                        startDateCalendar,
+                        endDateCalendar,
+                        controlFlagCheckBox.isChecked(),
+                        eventDesc,
+                        null,
+                        null,
+                        ObjectStatus.OPEN,
+                        eventCreatorId);
+
                 ErrorCodes eventStatus;
-                eventStatus = eventListHandler.addNewEvent(event);
+                InviteStatus inviteStatus;
+                int radioID = inviteStatusRadioGroup.getCheckedRadioButtonId();
+
+                if(radioID == acceptedRadio.getId() || eventCreator.isChecked()){ //Accepted
+                    inviteStatus = InviteStatus.ACCEPTED;
+                }else if(radioID == noResponseRadio.getId()){                     //noResponse
+                    inviteStatus = InviteStatus.INVITED;
+                }else{                                                            //Maybe
+                    inviteStatus = InviteStatus.MAYBE;
+                }
+
+                eventStatus = eventListHandler.addNewEvent(event, inviteStatus);
+
                 //TODO What to do in Failure case?
                 if (eventStatus == ErrorCodes.SUCCESS) {
                     eventLanding.putExtra("eventID", event.getEventId());
                     startActivity(eventLanding);
                     finish();
                 }
+
             }
         });
 
@@ -202,11 +261,11 @@ public class CreateNewEvent extends Activity {
     }
 
     private void resetEndDateAndTimeToStartDateAndTime(){
-        endDateCalendar.set(endDateCalendar.YEAR, startDateCalendar.get(Calendar.YEAR));
-        endDateCalendar.set(endDateCalendar.MONTH, startDateCalendar.get(Calendar.MONTH));
-        endDateCalendar.set(endDateCalendar.DAY_OF_MONTH, startDateCalendar.get(Calendar.DAY_OF_MONTH));
-        endDateCalendar.set(endDateCalendar.HOUR_OF_DAY, startDateCalendar.get(Calendar.HOUR_OF_DAY));
-        endDateCalendar.set(endDateCalendar.MINUTE, startDateCalendar.get(Calendar.MINUTE));
+        endDateCalendar.set(Calendar.YEAR, startDateCalendar.get(Calendar.YEAR));
+        endDateCalendar.set(Calendar.MONTH, startDateCalendar.get(Calendar.MONTH));
+        endDateCalendar.set(Calendar.DAY_OF_MONTH, startDateCalendar.get(Calendar.DAY_OF_MONTH));
+        endDateCalendar.set(Calendar.HOUR_OF_DAY, startDateCalendar.get(Calendar.HOUR_OF_DAY));
+        endDateCalendar.set(Calendar.MINUTE, startDateCalendar.get(Calendar.MINUTE));
         updateEndDate();
         updateEndTime();
     }
@@ -271,9 +330,9 @@ public class CreateNewEvent extends Activity {
         @Override
         public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
 
-            startDateCalendar.set(startDateCalendar.YEAR, year);
-            startDateCalendar.set(startDateCalendar.MONTH, monthOfYear);
-            startDateCalendar.set(startDateCalendar.DAY_OF_MONTH, dayOfMonth);
+            startDateCalendar.set(Calendar.YEAR, year);
+            startDateCalendar.set(Calendar.MONTH, monthOfYear);
+            startDateCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
             updateStartDate();
 
             if(startDateCalendar.after(endDateCalendar)){
@@ -289,8 +348,8 @@ public class CreateNewEvent extends Activity {
         @Override
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
 
-            startDateCalendar.set(startDateCalendar.HOUR_OF_DAY, hourOfDay);
-            startDateCalendar.set(startDateCalendar.MINUTE, minute);
+            startDateCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+            startDateCalendar.set(Calendar.MINUTE, minute);
             updateStartTime();
 
             if(startDateCalendar.after(endDateCalendar)) {
@@ -308,9 +367,9 @@ public class CreateNewEvent extends Activity {
         @Override
         public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
 
-            endDateCalendar.set(endDateCalendar.YEAR, year);
-            endDateCalendar.set(endDateCalendar.MONTH, monthOfYear);
-            endDateCalendar.set(endDateCalendar.DAY_OF_MONTH, dayOfMonth);
+            endDateCalendar.set(Calendar.YEAR, year);
+            endDateCalendar.set(Calendar.MONTH, monthOfYear);
+            endDateCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
             if(startDateCalendar.after(endDateCalendar)){
                 resetEndDateAndTimeToStartDateAndTime();

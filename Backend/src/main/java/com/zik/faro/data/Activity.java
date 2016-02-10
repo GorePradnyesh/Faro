@@ -10,10 +10,29 @@ public class Activity {
     private String description;
     private Location location;
     private Calendar date;
-    
+
+    public Calendar getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Calendar startDate) {
+        this.startDate = startDate;
+    }
+
+    public Calendar getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Calendar endDate) {
+        this.endDate = endDate;
+    }
+
+    private Calendar startDate;
+    private Calendar endDate;
+
     // Minimalistic constructor
     public Activity(String eventId, String name) {
-        this(eventId, name, null, null, null, null);
+        this(eventId, name, null, null, null, null, null);
     }
     
     // TO Satisfy JaxB
@@ -22,20 +41,21 @@ public class Activity {
     
     // Mainly to be used by client who has all info other than id
     public Activity(String eventId, String name, String description,
-    		Location location, Calendar date, Assignment assignment) {
-        this(null, eventId, name, description, location, date, assignment);
+    		Location location, Calendar startDate, Calendar endDate, Assignment assignment) {
+        this(null, eventId, name, description, location, startDate, endDate, assignment);
     }
     
     // Mostly used on server side for to and for communication
     // Also useful during updates when id is known to client
     public Activity(String id, String eventId, String name, String description,
-    		Location location, Calendar date, Assignment assignment) {
+    		Location location, Calendar startDate, Calendar endDate, Assignment assignment) {
         this.id = id;
         this.eventId = eventId;
         this.name = name;
         this.description = description;
         this.location = location;
-        this.date = date;
+        this.startDate = startDate;
+        this.endDate = endDate;
         this.assignment = assignment;
     }
 

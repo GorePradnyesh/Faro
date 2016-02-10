@@ -10,11 +10,13 @@ public class Event {
     private String eventName;         
     private Calendar startDate;     
     private Calendar endDate;
-    private boolean controlFlag;      
+    private String eventDescription;
+    private boolean controlFlag;
     private ExpenseGroup expenseGroup;
     private Location location;
     private ObjectStatus status;
     private Assignment assignment;
+    private String eventCreatorId;
 
     public Event(final String eventName, final Calendar startDate, final Calendar endDate,
                  final boolean controlFlag, final ExpenseGroup expenseGroup, final Location location) {
@@ -28,6 +30,22 @@ public class Event {
         this.status = ObjectStatus.OPEN;
     }
 
+    public Event(final String eventName, final Calendar startDate, final Calendar endDate,
+                 final boolean controlFlag, String eventDescription,
+                 final ExpenseGroup expenseGroup, final Location location, final ObjectStatus status,
+                 final String eventCreatorId) {
+        this.eventId = UUID.randomUUID().toString();
+        this.eventName = eventName;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.controlFlag = controlFlag;
+        this.eventDescription = eventDescription;
+        this.expenseGroup = expenseGroup;
+        this.location = location;
+        this.status = status;
+        this.eventCreatorId = eventCreatorId;
+    }
+
     public Event(final String eventName){
         this.eventId = UUID.randomUUID().toString();
         this.eventName = eventName;
@@ -36,6 +54,14 @@ public class Event {
 
     public Event(){
        
+    }
+
+    public String getEventDescription() {
+        return eventDescription;
+    }
+
+    public void setEventDescription(String eventDescription) {
+        this.eventDescription = eventDescription;
     }
 
     public String getEventName() {
@@ -117,6 +143,13 @@ public class Event {
 	public static void main(String[] args) {
 		System.out.println(Calendar.getInstance());
 	}
-	
+
+    public String getEventCreatorId() {
+        return eventCreatorId;
+    }
+
+    public void setEventCreatorId(String eventCreatorId) {
+        this.eventCreatorId = eventCreatorId;
+    }
 }
 

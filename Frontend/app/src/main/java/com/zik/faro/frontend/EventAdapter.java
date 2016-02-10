@@ -5,16 +5,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import com.zik.faro.data.Event;
 
 public class EventAdapter extends ArrayAdapter {
     //TODO (Code Review) Implement sorted list instead of Linkedlist
@@ -76,8 +74,8 @@ public class EventAdapter extends ArrayAdapter {
         Event EVENT = (Event) getItem(position);
         holder.EVNT_NAME.setText(EVENT.getEventName());
         holder.STATUS_IMG.setImageResource(SetDisplayProperties.getEventStatusImage(EVENT));
-        holder.EVNT_START_DATE.setText(sdf.format(EVENT.getStartDateCalendar().getTime()));
-        holder.EVNT_START_TIME.setText(stf.format(EVENT.getStartDateCalendar().getTime()));
+        holder.EVNT_START_DATE.setText(sdf.format(EVENT.getStartDate().getTime()));
+        holder.EVNT_START_TIME.setText(stf.format(EVENT.getStartDate().getTime()));
         return row;
     }
 }

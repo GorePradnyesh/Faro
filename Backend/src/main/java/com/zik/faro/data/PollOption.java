@@ -7,7 +7,7 @@ import java.util.UUID;
 public class PollOption{
     private String id;                                 
     private String option;
-    private Set<String> voters = new HashSet<String>();   
+    private Set<String> voters = new HashSet<String>();
 
     public PollOption(){
         
@@ -33,9 +33,15 @@ public class PollOption{
     public void addVoters(final String voterId){
         this.voters.add(voterId);
     }
+
+    public void removeVoter(final String voterId) {this.voters.remove(voterId);}
     
     public void setVoters(final Set<String> voters){
     	this.voters = voters;
+    }
+
+    public int getVotersCount(){
+        return voters.size();
     }
 
 	public String getId() {

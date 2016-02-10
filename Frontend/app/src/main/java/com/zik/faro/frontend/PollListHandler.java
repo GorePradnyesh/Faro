@@ -3,6 +3,9 @@ package com.zik.faro.frontend;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.zik.faro.data.ObjectStatus;
+import com.zik.faro.data.Poll;
+
 
 public class PollListHandler {
     private static final int MAX_POLLS_PAGE_SIZE = 100;
@@ -43,8 +46,6 @@ public class PollListHandler {
         }
     }
 
-    private PollListHandler(){}
-
     private String getPollID(){
         String pollIDStr = Integer.toString(this.tempPollID);
         this.tempPollID++;
@@ -57,7 +58,7 @@ public class PollListHandler {
         String pollID = getPollID();
 
         if(pollID != null) {
-            poll.setPollId(pollID);
+            poll.setId(pollID);
             conditionallyAddNewPollToList(poll);
             this.pollMap.put(pollID, poll);
             return ErrorCodes.SUCCESS;
@@ -68,26 +69,59 @@ public class PollListHandler {
     private void conditionallyAddNewPollToList(Poll poll) {
         PollAdapter pollAdapter;
         pollAdapter = getPollAdapter(poll);
-        pollAdapter.insert(poll, 0);
-        pollAdapter.notifyDataSetChanged();
+        if(pollAdapter != null) {
+            pollAdapter.insert(poll, 0);
+            pollAdapter.notifyDataSetChanged();
+        }
     }
 
     public int getCombinedListSize(){
-        return openPollsAdapter.list.size()+ closedPollsAdapter.list.size();
+        return this.openPollsAdapter.list.size()+ this.closedPollsAdapter.list.size();
     }
 
     private PollAdapter getPollAdapter(Poll poll){
         switch(poll.getStatus()){
             case OPEN:
-                return openPollsAdapter;
+                return this.openPollsAdapter;
             case CLOSED:
-                return closedPollsAdapter;
+                return this.closedPollsAdapter;
            default:
                 //TODO: How to catch this condition? This should never occur?
                 return null;
         }
     }
 
+    public void deletePoll(Poll poll){
+        //TODO: send update to server and if successful then delete poll from List and Map below
+        PollAdapter pollAdapter;
+        pollAdapter = getPollAdapter(poll);
+        if(pollAdapter != null) {
+            pollAdapter.list.remove(poll);
+            this.pollMap.remove(poll.getId());
+            pollAdapter.notifyDataSetChanged();
+        }
+    }
 
+    public void removePollForEditing (Poll poll){
+        PollAdapter pollAdapter;
+        pollAdapter = getPollAdapter(poll);
+        if(pollAdapter != null) {
+            pollAdapter.list.remove(poll);
+            pollAdapter.notifyDataSetChanged();
+            pollMap.remove(poll.getId());
+        }
 
+    }
+
+    public void changePollStatusToClosed(Poll poll){
+        removePollForEditing(poll);
+        poll.setStatus(ObjectStatus.CLOSED);
+        addNewPoll(poll);
+    }
+
+    public void changePollStatusToOpen(Poll poll){
+        removePollForEditing(poll);
+        poll.setStatus(ObjectStatus.OPEN);
+        addNewPoll(poll);
+    }
 }

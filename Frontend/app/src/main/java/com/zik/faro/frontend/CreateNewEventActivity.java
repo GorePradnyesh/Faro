@@ -16,6 +16,8 @@ import android.widget.TimePicker;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import com.zik.faro.data.Event;
+import com.zik.faro.data.Activity;
 
 public class CreateNewEventActivity extends android.app.Activity{
 
@@ -98,11 +100,13 @@ public class CreateNewEventActivity extends android.app.Activity{
                 String activity_Name = activityName.getText().toString();
                 String activity_Desc = activityDescription.getText().toString();
 
-                final EventActivity eventActivity = new EventActivity(activity_Name,
+                final Activity eventActivity = new Activity(eventID,
+                        activity_Name,
                         activity_Desc,
                         null,
                         startDateCalendar,
-                        endDateCalendar);
+                        endDateCalendar,
+                        null);
             }
         });
 
@@ -146,10 +150,10 @@ public class CreateNewEventActivity extends android.app.Activity{
     }
 
     private void setBothTimeAndDateToEventStartTimeAndDate(){
-        startDateButton.setText(sdf.format(event.getStartDateCalendar().getTime()));
-        endDateButton.setText(sdf.format(event.getStartDateCalendar().getTime()));
-        startTimeButton.setText(stf.format(event.getStartDateCalendar().getTime()));
-        endTimeButton.setText(stf.format(event.getStartDateCalendar().getTime()));
+        startDateButton.setText(sdf.format(event.getStartDate().getTime()));
+        endDateButton.setText(sdf.format(event.getStartDate().getTime()));
+        startTimeButton.setText(stf.format(event.getStartDate().getTime()));
+        endTimeButton.setText(stf.format(event.getStartDate().getTime()));
     }
 
     private void resetEndDateAndTimeToStartDateAndTime(){
@@ -218,8 +222,8 @@ public class CreateNewEventActivity extends android.app.Activity{
      * Date
      */
     public boolean isStartDateValid(){
-        return startDateCalendar.after(event.getStartDateCalendar()) &&
-                startDateCalendar.before(event.getEndDateCalendar()) &&
+        return startDateCalendar.after(event.getStartDate()) &&
+                startDateCalendar.before(event.getEndDate()) &&
                 startDateCalendar.before(endDateCalendar);
 
     }
@@ -229,8 +233,8 @@ public class CreateNewEventActivity extends android.app.Activity{
      * Date
      */
     public boolean isEndDateValid(){
-        return endDateCalendar.after(event.getStartDateCalendar()) &&
-                endDateCalendar.before(event.getEndDateCalendar()) &&
+        return endDateCalendar.after(event.getStartDate()) &&
+                endDateCalendar.before(event.getEndDate()) &&
                 startDateCalendar.before(endDateCalendar);
 
     }
@@ -248,9 +252,9 @@ public class CreateNewEventActivity extends android.app.Activity{
                 startDateCalendar.set(Calendar.MONTH, monthOfYear);
                 startDateCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
             }else{
-                startDateCalendar.set(Calendar.YEAR, event.getStartDateCalendar().get(Calendar.YEAR));
-                startDateCalendar.set(Calendar.MONTH, event.getStartDateCalendar().get(Calendar.MONTH));
-                startDateCalendar.set(Calendar.DAY_OF_MONTH, event.getStartDateCalendar().get(Calendar.DAY_OF_MONTH));
+                startDateCalendar.set(Calendar.YEAR, event.getStartDate().get(Calendar.YEAR));
+                startDateCalendar.set(Calendar.MONTH, event.getStartDate().get(Calendar.MONTH));
+                startDateCalendar.set(Calendar.DAY_OF_MONTH, event.getStartDate().get(Calendar.DAY_OF_MONTH));
             }
             updateStartDate();
 
@@ -271,8 +275,8 @@ public class CreateNewEventActivity extends android.app.Activity{
                 startDateCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
                 startDateCalendar.set(Calendar.MINUTE, minute);
             }else{
-                startDateCalendar.set(Calendar.HOUR_OF_DAY, event.getStartDateCalendar().get(Calendar.HOUR_OF_DAY));
-                startDateCalendar.set(Calendar.MINUTE, event.getStartDateCalendar().get(Calendar.MINUTE));
+                startDateCalendar.set(Calendar.HOUR_OF_DAY, event.getStartDate().get(Calendar.HOUR_OF_DAY));
+                startDateCalendar.set(Calendar.MINUTE, event.getStartDate().get(Calendar.MINUTE));
             }
             updateStartTime();
 

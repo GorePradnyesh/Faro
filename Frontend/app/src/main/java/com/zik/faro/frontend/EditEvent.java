@@ -21,6 +21,8 @@ import com.google.gson.Gson;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import com.zik.faro.data.Event;
+import com.zik.faro.data.EventUser;
 
 
 /*
@@ -125,7 +127,10 @@ public class EditEvent extends Activity {
             public void onClick(View v) {
                 eventListHandler.removeEventForEditing(event);
                 ErrorCodes eventStatus;
-                eventStatus = eventListHandler.addNewEvent(cloneEvent);
+                EventUser eventUser = eventListHandler.getEventUser(cloneEvent.getEventId(),
+                        eventListHandler.getMyUserId());
+
+                eventStatus = eventListHandler.addNewEvent(cloneEvent, eventUser.getInviteStatus());
                 //TODO What to do in Failure case?
                 if (eventStatus == ErrorCodes.SUCCESS) {
                     EventLanding.putExtra("eventID", cloneEvent.getEventId());
@@ -162,70 +167,70 @@ public class EditEvent extends Activity {
     }
 
     private void setBothTimeAndDateToEventDates(){
-        startDateButton.setText(sdf.format(cloneEvent.getStartDateCalendar().getTime()));
-        endDateButton.setText(sdf.format(cloneEvent.getEndDateCalendar().getTime()));
-        startTimeButton.setText(stf.format(cloneEvent.getStartDateCalendar().getTime()));
-        endTimeButton.setText(stf.format(cloneEvent.getEndDateCalendar().getTime()));
+        startDateButton.setText(sdf.format(cloneEvent.getStartDate().getTime()));
+        endDateButton.setText(sdf.format(cloneEvent.getEndDate().getTime()));
+        startTimeButton.setText(stf.format(cloneEvent.getStartDate().getTime()));
+        endTimeButton.setText(stf.format(cloneEvent.getEndDate().getTime()));
     }
 
     private void resetEndDateAndTimeToStartDateAndTime(){
-        cloneEvent.getEndDateCalendar().set(cloneEvent.getEndDateCalendar().YEAR, cloneEvent.getStartDateCalendar().get(Calendar.YEAR));
-        cloneEvent.getEndDateCalendar().set(cloneEvent.getEndDateCalendar().MONTH, cloneEvent.getStartDateCalendar().get(Calendar.MONTH));
-        cloneEvent.getEndDateCalendar().set(cloneEvent.getEndDateCalendar().DAY_OF_MONTH, cloneEvent.getStartDateCalendar().get(Calendar.DAY_OF_MONTH));
-        cloneEvent.getEndDateCalendar().set(cloneEvent.getEndDateCalendar().HOUR_OF_DAY, cloneEvent.getStartDateCalendar().get(Calendar.HOUR_OF_DAY));
-        cloneEvent.getEndDateCalendar().set(cloneEvent.getEndDateCalendar().MINUTE, cloneEvent.getStartDateCalendar().get(Calendar.MINUTE));
+        cloneEvent.getEndDate().set(cloneEvent.getEndDate().YEAR, cloneEvent.getStartDate().get(Calendar.YEAR));
+        cloneEvent.getEndDate().set(cloneEvent.getEndDate().MONTH, cloneEvent.getStartDate().get(Calendar.MONTH));
+        cloneEvent.getEndDate().set(cloneEvent.getEndDate().DAY_OF_MONTH, cloneEvent.getStartDate().get(Calendar.DAY_OF_MONTH));
+        cloneEvent.getEndDate().set(cloneEvent.getEndDate().HOUR_OF_DAY, cloneEvent.getStartDate().get(Calendar.HOUR_OF_DAY));
+        cloneEvent.getEndDate().set(cloneEvent.getEndDate().MINUTE, cloneEvent.getStartDate().get(Calendar.MINUTE));
         updateEndDateButton();
         updateEndTimeButton();
     }
 
     public void updateStartDateButton(){
-        startDateButton.setText(sdf.format(cloneEvent.getStartDateCalendar().getTime()));
+        startDateButton.setText(sdf.format(cloneEvent.getStartDate().getTime()));
     }
 
     public void updateEndDateButton(){
-        endDateButton.setText(sdf.format(cloneEvent.getEndDateCalendar().getTime()));
+        endDateButton.setText(sdf.format(cloneEvent.getEndDate().getTime()));
     }
 
     public void updateStartTimeButton(){
-        startTimeButton.setText(stf.format(cloneEvent.getStartDateCalendar().getTime()));
+        startTimeButton.setText(stf.format(cloneEvent.getStartDate().getTime()));
     }
 
     public void updateEndTimeButton(){
-        endTimeButton.setText(stf.format(cloneEvent.getEndDateCalendar().getTime()));
+        endTimeButton.setText(stf.format(cloneEvent.getEndDate().getTime()));
     }
 
 
     public void setStartDate(){
         new DatePickerDialog(EditEvent.this,
                 startDate,
-                cloneEvent.getStartDateCalendar().get(Calendar.YEAR),
-                cloneEvent.getStartDateCalendar().get(Calendar.MONTH),
-                cloneEvent.getStartDateCalendar().get(Calendar.DAY_OF_MONTH)).show();
+                cloneEvent.getStartDate().get(Calendar.YEAR),
+                cloneEvent.getStartDate().get(Calendar.MONTH),
+                cloneEvent.getStartDate().get(Calendar.DAY_OF_MONTH)).show();
 
     }
 
     public void setEndDate(){
         new DatePickerDialog(EditEvent.this,
                 endDate,
-                cloneEvent.getEndDateCalendar().get(Calendar.YEAR),
-                cloneEvent.getEndDateCalendar().get(Calendar.MONTH),
-                cloneEvent.getEndDateCalendar().get(Calendar.DAY_OF_MONTH)).show();
+                cloneEvent.getEndDate().get(Calendar.YEAR),
+                cloneEvent.getEndDate().get(Calendar.MONTH),
+                cloneEvent.getEndDate().get(Calendar.DAY_OF_MONTH)).show();
 
     }
 
     public void setStartTime(){
         new TimePickerDialog(EditEvent.this,
                 startTime,
-                cloneEvent.getStartDateCalendar().get(Calendar.HOUR_OF_DAY),
-                cloneEvent.getStartDateCalendar().get(Calendar.MINUTE),
+                cloneEvent.getStartDate().get(Calendar.HOUR_OF_DAY),
+                cloneEvent.getStartDate().get(Calendar.MINUTE),
                 false).show();
     }
 
     public void setEndTime(){
         new TimePickerDialog(EditEvent.this,
                 endTime,
-                cloneEvent.getStartDateCalendar().get(Calendar.HOUR_OF_DAY),
-                cloneEvent.getStartDateCalendar().get(Calendar.MINUTE),
+                cloneEvent.getStartDate().get(Calendar.HOUR_OF_DAY),
+                cloneEvent.getStartDate().get(Calendar.MINUTE),
                 false).show();
     }
 
@@ -238,12 +243,12 @@ public class EditEvent extends Activity {
         @Override
         public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
 
-            cloneEvent.getStartDateCalendar().set(cloneEvent.getStartDateCalendar().YEAR, year);
-            cloneEvent.getStartDateCalendar().set(cloneEvent.getStartDateCalendar().MONTH, monthOfYear);
-            cloneEvent.getStartDateCalendar().set(cloneEvent.getStartDateCalendar().DAY_OF_MONTH, dayOfMonth);
+            cloneEvent.getStartDate().set(cloneEvent.getStartDate().YEAR, year);
+            cloneEvent.getStartDate().set(cloneEvent.getStartDate().MONTH, monthOfYear);
+            cloneEvent.getStartDate().set(cloneEvent.getStartDate().DAY_OF_MONTH, dayOfMonth);
             updateStartDateButton();
 
-            if(cloneEvent.getStartDateCalendar().after(cloneEvent.getEndDateCalendar())){
+            if(cloneEvent.getStartDate().after(cloneEvent.getEndDate())){
                 resetEndDateAndTimeToStartDateAndTime();
             }
         }
@@ -256,11 +261,11 @@ public class EditEvent extends Activity {
         @Override
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
 
-            cloneEvent.getStartDateCalendar().set(cloneEvent.getStartDateCalendar().HOUR_OF_DAY, hourOfDay);
-            cloneEvent.getStartDateCalendar().set(cloneEvent.getStartDateCalendar().MINUTE, minute);
+            cloneEvent.getStartDate().set(cloneEvent.getStartDate().HOUR_OF_DAY, hourOfDay);
+            cloneEvent.getStartDate().set(cloneEvent.getStartDate().MINUTE, minute);
             updateStartTimeButton();
 
-            if(cloneEvent.getStartDateCalendar().after(cloneEvent.getEndDateCalendar())) {
+            if(cloneEvent.getStartDate().after(cloneEvent.getEndDate())) {
                 resetEndDateAndTimeToStartDateAndTime();
             }
         }
@@ -275,11 +280,11 @@ public class EditEvent extends Activity {
         @Override
         public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
 
-            cloneEvent.getEndDateCalendar().set(cloneEvent.getEndDateCalendar().YEAR, year);
-            cloneEvent.getEndDateCalendar().set(cloneEvent.getEndDateCalendar().MONTH, monthOfYear);
-            cloneEvent.getEndDateCalendar().set(cloneEvent.getEndDateCalendar().DAY_OF_MONTH, dayOfMonth);
+            cloneEvent.getEndDate().set(cloneEvent.getEndDate().YEAR, year);
+            cloneEvent.getEndDate().set(cloneEvent.getEndDate().MONTH, monthOfYear);
+            cloneEvent.getEndDate().set(cloneEvent.getEndDate().DAY_OF_MONTH, dayOfMonth);
 
-            if(cloneEvent.getStartDateCalendar().after(cloneEvent.getEndDateCalendar())){
+            if(cloneEvent.getStartDate().after(cloneEvent.getEndDate())){
                 resetEndDateAndTimeToStartDateAndTime();
             }else {
                 updateEndDateButton();
@@ -295,10 +300,10 @@ public class EditEvent extends Activity {
     TimePickerDialog.OnTimeSetListener endTime = new TimePickerDialog.OnTimeSetListener(){
         @Override
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-            cloneEvent.getEndDateCalendar().set(cloneEvent.getEndDateCalendar().HOUR_OF_DAY, hourOfDay);
-            cloneEvent.getEndDateCalendar().set(cloneEvent.getEndDateCalendar().MINUTE, minute);
+            cloneEvent.getEndDate().set(cloneEvent.getEndDate().HOUR_OF_DAY, hourOfDay);
+            cloneEvent.getEndDate().set(cloneEvent.getEndDate().MINUTE, minute);
 
-            if(cloneEvent.getStartDateCalendar().after(cloneEvent.getEndDateCalendar())){
+            if(cloneEvent.getStartDate().after(cloneEvent.getEndDate())){
                 resetEndDateAndTimeToStartDateAndTime();
             }else {
                 updateEndTimeButton();

@@ -14,14 +14,19 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
+import com.zik.faro.data.Event;
 import com.zik.faro.data.ObjectStatus;
+import com.zik.faro.data.Poll;
+import com.zik.faro.data.PollOption;
 
 
 public class CreateNewPoll extends Activity {
 
     static PollListHandler pollListHandler = PollListHandler.getInstance();
+    private  static EventListHandler eventListHandler = EventListHandler.getInstance();
     int pollOtionsNum = 0;
     private static String eventID = null;
+    private static Event E;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +36,10 @@ public class CreateNewPoll extends Activity {
         final EditText pollDescription = (EditText)findViewById(R.id.pollDescription);
         final CheckBox isMultiChoice = (CheckBox)findViewById(R.id.multiChoiceFlag);
         final EditText optionText = (EditText)findViewById(R.id.pollOptionEditText);
+
         final ImageButton addNewOptionButton = (ImageButton)findViewById(R.id.add_new_option);
+        addNewOptionButton.setImageResource(R.drawable.plus);
+        addNewOptionButton.setEnabled(false);
 
         ListView pollOptionsList = (ListView)findViewById(R.id.pollOptionsList);
 
@@ -39,6 +47,7 @@ public class CreateNewPoll extends Activity {
         final Button createNewPollCancel = (Button) findViewById(R.id.createNewPollCancel);
 
         final Intent PollListPage = new Intent(CreateNewPoll.this, PollListPage.class);
+        final Intent OpenPollLandingPage = new Intent(CreateNewPoll.this, OpenPollLandingPage.class);
 
         final PollOptionsAdapter pollOptionsAdapter = new PollOptionsAdapter(this, R.layout.poll_create_new_page_row_style);
         pollOptionsList.setAdapter(pollOptionsAdapter);
@@ -46,10 +55,8 @@ public class CreateNewPoll extends Activity {
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
             eventID = extras.getString("eventID");
+            E = eventListHandler.getEventFromMap(eventID);
         }
-
-        addNewOptionButton.setImageResource(R.drawable.plus);
-
 
         //Enable the addNewOptionButton only after Users enters an Option
         optionText.addTextChangedListener(new TextWatcher() {
@@ -71,7 +78,7 @@ public class CreateNewPoll extends Activity {
             @Override
             public void onClick(View v) {
                 String optionDescription = optionText.getText().toString();
-                Poll.PollOption pollOption = new Poll.PollOption(optionDescription);
+                PollOption pollOption = new PollOption(optionDescription);
 
                 pollOptionsAdapter.insert(pollOption, 0);
                 pollOptionsAdapter.notifyDataSetChanged();
@@ -91,8 +98,9 @@ public class CreateNewPoll extends Activity {
                         ObjectStatus.OPEN);
 
                 pollListHandler.addNewPoll(poll);
-                PollListPage.putExtra("eventID", eventID);
-                //startActivity(PollListPage);
+                OpenPollLandingPage.putExtra("eventID", E.getEventId());
+                OpenPollLandingPage.putExtra("pollID", poll.getId());
+                startActivity(OpenPollLandingPage);
                 finish();
             }
         });
@@ -100,6 +108,8 @@ public class CreateNewPoll extends Activity {
         createNewPollCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                PollListPage.putExtra("eventID", E.getEventId());
+                startActivity(PollListPage);
                 finish();
             }
         });

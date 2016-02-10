@@ -2,6 +2,8 @@ package com.zik.faro.frontend;
 
 import com.squareup.okhttp.Request;
 //import com.zik.faro.frontend.data.EventCreateData;
+import com.zik.faro.data.EventUser;
+import com.zik.faro.data.user.InviteStatus;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.HttpError;
 
@@ -9,7 +11,7 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Semaphore;
+import com.zik.faro.data.Event;
 
 public class EventListHandler {
 
@@ -19,6 +21,13 @@ public class EventListHandler {
 
     public EventAdapter acceptedEventAdapter;
     public EventAdapter notAcceptedEventAdapter;
+
+
+
+    //TODO: Temp variable
+    private String myUserId = "TestUser";
+    //TODO: Temp Map
+    private Map<String, EventUser> eventUserMap = new ConcurrentHashMap<>();
 
 
     //TODO Function call to remove items from the List and Map when user keeps scrolling and caches
@@ -48,6 +57,14 @@ public class EventListHandler {
     }
 
     private EventListHandler(){}
+
+    public String getMyUserId() {
+        return myUserId;
+    }
+
+    public void setMyUserId(String myUserId) {
+        this.myUserId = myUserId;
+    }
 
     private String getEventID(){
         String eventIDStr = Integer.toString(this.tempEventID);
@@ -79,6 +96,17 @@ public class EventListHandler {
         }
     }
 
+    public ErrorCodes addNewEventUser(String eventId, String userId, EventUser eventUser) {
+        String key = eventId + userId;
+        eventUserMap.put(key, eventUser);
+        return ErrorCodes.SUCCESS;
+    }
+
+    public EventUser getEventUser(String eventId, String userId){
+        String key = eventId + userId;
+        EventUser eventUser = eventUserMap.get(key);
+        return eventUser;
+    }
     /*
     * Based on the start Date add new event to the list and Map only if it lies between the first
     * and last event retrieved in the list from the server. If it does not lie in between then
@@ -88,22 +116,37 @@ public class EventListHandler {
     * the above reason then once we return back from the EventLanding Page we remove it from the
     * Map.
     */
-    public ErrorCodes addNewEvent(Event event) {
-        //TODO: send update to server and if successful then add event to List and Map below and
-        // update the eventID in the Event.
+    //TODO: Second param is temp for testing purpose only. Remove it later!!!
+    public ErrorCodes addNewEvent(Event event, InviteStatus inviteStatus) {
+        //TODO: send new event update to server
         String eventID = getEventID();
-
         if(eventID != null) {
             event.setEventId(eventID);
-            conditionallyAddNewEventToList(event);
-            this.eventMap.put(eventID, event);
+
+            //Create Event User Relationship
+            final EventUser eventUser = new EventUser(event.getEventId(),
+                    myUserId,
+                    event.getEventCreatorId());
+            eventUser.setInviteStatus(inviteStatus);
+
+            //TODO  update server and if successful then add event to List and Map below and
+            // update the eventID in the Event.
+
+            ErrorCodes errorCode;
+            errorCode = eventListHandler.addNewEventUser(event.getEventId(), myUserId,
+                    eventUser);
+            if(errorCode == ErrorCodes.SUCCESS) {
+                conditionallyAddNewEventToList(event);
+                this.eventMap.put(eventID, event);
+            }
+
             return ErrorCodes.SUCCESS;
         }
         return ErrorCodes.FAILURE;
 
         /*TestEventCreateCallback createCallback = new TestEventCreateCallback();
         EventCreateData eventCreateData= new EventCreateData(event.getEventName(),
-                event.getStartDateCalendar(), event.getEndDateCalendar(), null, null);
+                event.getStartDate(), event.getEndDate(), null, null);
         MainActivity.serviceHandler.getEventHandler().createEvent(createCallback, eventCreateData);
         return ErrorCodes.SUCCESS;*/
 
@@ -124,8 +167,8 @@ public class EventListHandler {
         int lastEventIndex = eventAdapter.list.size() - 1;
         for (index = lastEventIndex; index >= 0; index--) {
             tempEvent = eventAdapter.list.get(index);
-            tempCalendar = tempEvent.getStartDateCalendar();
-            eventCalendar = event.getStartDateCalendar();
+            tempCalendar = tempEvent.getStartDate();
+            eventCalendar = event.getStartDate();
 
             //Break if new event occurs after temp event
             if (eventCalendar.after(tempCalendar)) {
@@ -151,16 +194,25 @@ public class EventListHandler {
     private int getCombinedListSize(){
         return acceptedEventAdapter.list.size()+ notAcceptedEventAdapter.list.size();
     }
+
     private EventAdapter getEventAdapter(Event event){
-        switch(event.getEventStatus()){
-            case ACCEPTED:
-                return acceptedEventAdapter;
-            case NOTRESPONDED:
-            case MAYBE:
-                return notAcceptedEventAdapter;
-            default:
-                //TODO: How to catch this condition? This should never occur?
-                return null;
+        //TODO Change below code to get status from event-User relationship
+
+        String key = event.getEventId()+ myUserId;
+        EventUser eventUser = eventUserMap.get(key);
+        if(eventUser != null) {
+            switch (eventUser.getInviteStatus()) {
+                case ACCEPTED:
+                    return acceptedEventAdapter;
+                case INVITED:
+                case MAYBE:
+                    return notAcceptedEventAdapter;
+                default:
+                    //TODO: How to catch this condition? This should never occur?
+                    return null;
+            }
+        }else{
+            return null;
         }
     }
 
@@ -173,7 +225,7 @@ public class EventListHandler {
 
     /*
     * For the case when event is part of Map but not inserted to the List, once we return to
-    * EventListPage from eventLanding, i.e. we are completely done with that event we need to
+    * EventListPage from EventLandingPage, i.e. we are completely done with that event we need to
     * remove the event from the Map also to maintain sync between the Map and List.
     * Event is present in the list if
     * 1. event startDate is smaller than or equal to the last event startDate
@@ -187,8 +239,8 @@ public class EventListHandler {
         int lastEventIndex = eventAdapter.list.size() - 1;
         Event lastEventInList = eventAdapter.list.get(lastEventIndex);
 
-        eventCalendar = E.getStartDateCalendar();
-        lastEventInListCalendar = lastEventInList.getStartDateCalendar();
+        eventCalendar = E.getStartDate();
+        lastEventInListCalendar = lastEventInList.getStartDate();
 
         //TODO (Code Review) add condition to not add if it lies before the first or 0th event.
         //Cause in that case if newEventIndex is 0 then we shouldnt add it.
@@ -215,14 +267,18 @@ public class EventListHandler {
 
     public void changeEventStatusToYes(Event event){
         removeEventForEditing(event);
-        event.setEventStatus(EventStatus.ACCEPTED);
-        addNewEvent(event);
+        String key = event.getEventId()+ myUserId;
+        EventUser eventUser = eventUserMap.get(key);
+        eventUser.setInviteStatus(InviteStatus.ACCEPTED);
+        addNewEvent(event, eventUser.getInviteStatus());
     }
 
     public void changeEventStatusToMaybe(Event event){
         removeEventForEditing(event);
-        event.setEventStatus(EventStatus.MAYBE);
-        addNewEvent(event);
+        String key = event.getEventId()+ myUserId;
+        EventUser eventUser = eventUserMap.get(key);
+        eventUser.setInviteStatus(InviteStatus.MAYBE);
+        addNewEvent(event, eventUser.getInviteStatus());
     }
 
     public int getAcceptedEventListSize(){

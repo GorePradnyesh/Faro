@@ -14,6 +14,8 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TabHost;
 
+import com.zik.faro.data.Event;
+
 /*
  * This is the page where all the events are listed in separate tabs based on invitation "Accepted"
  * or not.
@@ -58,12 +60,16 @@ public class EventListPage extends Activity{
 
         ListView theAcceptedListView  = (ListView)findViewById(R.id.acceptedList);
         theAcceptedListView.setBackgroundColor(Color.BLACK);
-        eventListHandler.acceptedEventAdapter = new EventAdapter(this, R.layout.event_row_style);
+        if (eventListHandler.acceptedEventAdapter == null) {
+            eventListHandler.acceptedEventAdapter = new EventAdapter(this, R.layout.event_row_style);
+        }
         theAcceptedListView.setAdapter(eventListHandler.acceptedEventAdapter);
 
         ListView theNotAcceptedListView  = (ListView)findViewById(R.id.notAcceptedList);
         theNotAcceptedListView.setBackgroundColor(Color.BLACK);
-        eventListHandler.notAcceptedEventAdapter = new EventAdapter(this, R.layout.event_row_style);
+        if (eventListHandler.notAcceptedEventAdapter == null) {
+            eventListHandler.notAcceptedEventAdapter = new EventAdapter(this, R.layout.event_row_style);
+        }
         theNotAcceptedListView.setAdapter(eventListHandler.notAcceptedEventAdapter);
 
         ImageButton add_event = (ImageButton)findViewById(R.id.addNewEventButton);
@@ -141,6 +147,7 @@ public class EventListPage extends Activity{
         eventLanding.putExtra("eventID", E.getEventId());
         //TODO: check if startActivityForResult is a better way
         startActivity(eventLanding);
+        finish();
     }
 
 

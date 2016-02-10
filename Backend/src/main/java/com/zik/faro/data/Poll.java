@@ -15,6 +15,7 @@ public class Poll {
     private String description;
     private ObjectStatus status;
     private Calendar deadline;                // Will not be used in V1.
+    private boolean multiChoice = false;
 
     public Poll(){ //to satisfy jaxb;
     }
@@ -32,6 +33,18 @@ public class Poll {
         this.owner = owner;
         this.description = description;
         this.status = ObjectStatus.OPEN;
+    }
+
+    public Poll(String eventId, String creator, boolean multiChoice,
+                List<PollOption> pollOptions, String owner, String description,
+                ObjectStatus status) {
+        this.eventId = eventId;
+        this.creatorId = creator;
+        this.multiChoice = multiChoice;
+        this.pollOptions = pollOptions;
+        this.owner = owner;
+        this.description = description;
+        this.status = status;
     }
 
     public String getId() {
@@ -105,4 +118,12 @@ public class Poll {
     public void setPollOptions(List<PollOption> pollOptions) {
 		this.pollOptions = pollOptions;
 	}
+
+    public boolean isMultiChoice() {
+        return multiChoice;
+    }
+
+    public void setMultiChoice(boolean multiChoice) {
+        this.multiChoice = multiChoice;
+    }
 }

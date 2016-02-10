@@ -13,11 +13,17 @@ import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
 
+import com.zik.faro.data.Event;
+import com.zik.faro.data.Poll;
+
 public class PollListPage extends Activity {
 
-    Intent eventLanding = null;
-    Intent pollLanding = null;
+    Intent EventLandingPage = null;
+    Intent OpenPollLandingPage = null;
+    Intent ClosedPollLandingPage = null;
     static PollListHandler pollListHandler = PollListHandler.getInstance();
+    private static EventListHandler eventListHandler = EventListHandler.getInstance();
+    private static Event E;
     private static String eventID = null;
 
     @Override
@@ -25,15 +31,22 @@ public class PollListPage extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_poll_list_page);
 
-        eventLanding = new Intent(PollListPage.this, EventLandingPage.class);
-        pollLanding = new Intent(PollListPage.this, PollLandingPage.class);
+        EventLandingPage = new Intent(PollListPage.this, EventLandingPage.class);
+        OpenPollLandingPage = new Intent(PollListPage.this, OpenPollLandingPage.class);
+        ClosedPollLandingPage = new Intent(PollListPage.this, ClosedPollLandingPage.class);
         final Intent CreateNewPoll = new Intent(PollListPage.this, CreateNewPoll.class);
 
         Bundle extras = getIntent().getExtras();
-        if(extras != null) {
-             eventID = extras.getString("eventID");
+        if(extras == null) {
+            //TODO: Error condition. Handle it. Below code is incorrect
+            EventLandingPage.putExtra("eventID", E.getEventId());
+            startActivity(EventLandingPage);
+            finish();
+            return;
         }
 
+        eventID = extras.getString("eventID");
+        E = eventListHandler.getEventFromMap(eventID);
 
         TextView Poll = (TextView)findViewById(R.id.polls);
         //Poll.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
@@ -52,13 +65,24 @@ public class PollListPage extends Activity {
 
         ListView openPollsListView  = (ListView)findViewById(R.id.openPollsList);
         openPollsListView.setBackgroundColor(Color.BLACK);
-        pollListHandler.openPollsAdapter = new PollAdapter(this, R.layout.poll_list_page_row_style);
-        openPollsListView.setAdapter(pollListHandler.openPollsAdapter);
-
+        if (pollListHandler.openPollsAdapter == null) {
+            pollListHandler.openPollsAdapter = new PollAdapter(this, R.layout.poll_list_page_row_style);
+        }
 
         ListView closedPollsListView  = (ListView)findViewById(R.id.closedPollsList);
         closedPollsListView.setBackgroundColor(Color.BLACK);
-        pollListHandler.closedPollsAdapter = new PollAdapter(this, R.layout.poll_list_page_row_style);
+        if (pollListHandler.closedPollsAdapter == null) {
+            pollListHandler.closedPollsAdapter = new PollAdapter(this, R.layout.poll_list_page_row_style);
+        }
+
+        //TODO: Based on eventID make API call to get Polls for this event
+        /*
+        for(each poll in event){
+            pollListHandler.addNewPoll(poll);
+        }
+        */
+
+        openPollsListView.setAdapter(pollListHandler.openPollsAdapter);
         closedPollsListView.setAdapter(pollListHandler.closedPollsAdapter);
 
 
@@ -71,7 +95,7 @@ public class PollListPage extends Activity {
         openPollsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                pollSelectedFromList(parent, position, pollLanding);
+                pollSelectedFromList(parent, position, OpenPollLandingPage);
             }
         });
 
@@ -79,7 +103,7 @@ public class PollListPage extends Activity {
         closedPollsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                pollSelectedFromList(parent, position, pollLanding);
+                pollSelectedFromList(parent, position, ClosedPollLandingPage);
             }
         });
 
@@ -91,9 +115,9 @@ public class PollListPage extends Activity {
                 if(pollListHandler.getCombinedListSize() == PollListHandler.MAX_TOTAL_POLLS_PER_EVENT) {
                     //DO NOT ALLOW NEW POLL CREATION
                 }else {
-                    CreateNewPoll.putExtra("eventID", eventID);
+                    CreateNewPoll.putExtra("eventID", E.getEventId());
                     startActivity(CreateNewPoll);
-                    //finish();
+                    finish();
                 }
             }
         });
@@ -101,10 +125,12 @@ public class PollListPage extends Activity {
 
     }
 
-    private void pollSelectedFromList(AdapterView<?> parent, int position, Intent eventLanding) {
+    private void pollSelectedFromList(AdapterView<?> parent, int position, Intent intent) {
         Poll poll = (Poll) parent.getItemAtPosition(position);
-            pollLanding.putExtra("pollID", poll.getPollId());
-            startActivity(pollLanding);
+        intent.putExtra("eventID", E.getEventId());
+        intent.putExtra("pollID", poll.getId());
+        startActivity(intent);
+        finish();
     }
 
 
@@ -121,8 +147,8 @@ public class PollListPage extends Activity {
     //not popped out of the stack. Check how to see the stack size of the intents.
     @Override
     public void onBackPressed() {
-        eventLanding.putExtra("eventID", eventID);
-        startActivity(eventLanding);
+        EventLandingPage.putExtra("eventID", eventID);
+        startActivity(EventLandingPage);
         finish();
         super.onBackPressed();
     }

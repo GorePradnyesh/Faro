@@ -1,7 +1,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.zik.faro.frontend.PollLandingPage">
+    tools:context=".OpenPollLandingPage"
+    android:id="@+id/pollLandingPage">
 
     <TextView
         android:layout_width="wrap_content"
@@ -22,54 +23,103 @@
         android:paddingRight="0dp"
         android:paddingBottom="0dp"/>
 
-    <RadioGroup
-        android:id="@+id/pollOptionsRadioGroup"
-        android:layout_width="match_parent"
+    <ScrollView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:layout_centerHorizontal="true"
         android:layout_above="@+id/statusButtons"
-        android:layout_below="@+id/pollDescription">
-    </RadioGroup>
+        android:layout_below="@+id/editButton"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:id="@+id/checkboxScrollView">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/voterButtonLinearLayout"
+                android:orientation="vertical"
+                android:layout_alignParentEnd="true" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:id="@+id/pollOptionsCheckboxList"
+                android:layout_alignParentStart="true"
+                android:layout_toStartOf="@id/voterButtonLinearLayout"/>
+        </RelativeLayout>
+    </ScrollView>
+
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/statusButtons"
+        android:layout_below="@+id/editButton"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:id="@+id/radioScrollView">
+        <RelativeLayout
+            android:id="@+id/pollOptionsList1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/voterButtonLinearLayout1"
+                android:orientation="vertical"
+                android:layout_alignParentEnd="true" />
+            <RadioGroup
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/pollOptionsRadioGroup"
+                android:layout_alignParentStart="true"
+                android:layout_toStartOf="@id/voterButtonLinearLayout1" />
+        </RelativeLayout>
+    </ScrollView>
+
+
 
     <LinearLayout
-        android:id="@+id/pollOptionsChecklist"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_centerHorizontal="true"
-        android:layout_above="@+id/statusButtons"
-        android:layout_below="@+id/pollDescription"></LinearLayout>
-
-
-    <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:id="@+id/statusButtons"
         android:layout_centerInParent="true">
         <Button
-            android:layout_width="wrap_content"
+            android:layout_width="0px"
             android:layout_height="wrap_content"
-            android:id="@+id/statusYes"
+            android:id="@+id/votePoll"
             android:clickable="true"
-            android:text="@string/YES"
-            android:layout_alignParentStart="true"
+            android:layout_weight="1"
+            android:text="@string/vote"
             android:paddingLeft="0dp"
             android:paddingTop="0dp"
             android:paddingRight="0dp"
             android:paddingBottom="0dp"/>
         <Button
-            android:layout_width="wrap_content"
+            android:layout_width="0px"
             android:layout_height="wrap_content"
-            android:id="@+id/statusNo"
+            android:id="@+id/deletePoll"
+            android:layout_weight="1"
             android:clickable="true"
-            android:text="@string/NO"
-            android:layout_alignParentEnd="true"
+            android:text="@string/delete"
             android:paddingLeft="0dp"
             android:paddingTop="0dp"
             android:paddingRight="0dp"
             android:paddingBottom="0dp" />
-    </RelativeLayout>
-
+        <Button
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:id="@+id/closePoll"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:text="@string/close"
+            android:paddingLeft="0dp"
+            android:paddingTop="0dp"
+            android:paddingRight="0dp"
+            android:paddingBottom="0dp" />
+    </LinearLayout>
 </RelativeLayout>

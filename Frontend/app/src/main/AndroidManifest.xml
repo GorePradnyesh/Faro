@@ -1,17 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.zik.faro.frontend" >
+    package="com.zik.faro.frontend">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false" />
+    <uses-feature
+        android:name="android.software.leanback"
+        android:required="true" />
 
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -20,44 +28,41 @@
         </activity>
         <activity
             android:name=".EventListPage"
-            android:label="@string/title_activity_app_landing_page" >
-        </activity>
+            android:label="@string/title_activity_app_landing_page" />
         <activity
             android:name=".CreateNewEvent"
-            android:label="@string/title_activity_create_new_event" >
-        </activity>
+            android:label="@string/title_activity_create_new_event" />
         <activity
             android:name=".CreateNewPoll"
-            android:label="@string/title_activity_create_new_poll" >
-        </activity>
+            android:label="@string/title_activity_create_new_poll" />
         <activity
             android:name=".EditEvent"
-            android:label="@string/title_activity_edit_event" >
-        </activity>
+            android:label="@string/title_activity_edit_event" />
         <activity
             android:name=".EventCalendarView"
-            android:label="@string/title_activity_event_calendar_view" >
-        </activity>
+            android:label="@string/title_activity_event_calendar_view" />
         <activity
             android:name=".EventLandingPage"
-            android:label="@string/title_activity_event_landing_page" >
-        </activity>
+            android:label="@string/title_activity_event_landing_page" />
         <activity
             android:name=".ExceptionPrintPage"
-            android:label="@string/title_activity_exception_print_page" >
-        </activity>
+            android:label="@string/title_activity_exception_print_page" />
         <activity
             android:name=".PollListPage"
-            android:label="@string/title_activity_poll_landing_page" >
-        </activity>
+            android:label="@string/title_activity_poll_landing_page" />
         <activity
-            android:name=".PollLandingPage"
-            android:label="@string/title_activity_poll_landing_page" >
-        </activity>
+            android:name=".OpenPollLandingPage"
+            android:label="@string/title_activity_poll_landing_page" />
         <activity
             android:name=".CreateNewEventActivity"
-            android:label="@string/title_activity_create_new" >
-        </activity>
+            android:label="@string/title_activity_create_new" />
+        <activity android:name=".EditPoll" />
+        <activity
+            android:name=".PickPollWinner"
+            android:label="@string/title_activity_pick_poll_winner" />
+        <activity
+            android:name=".ClosedPollLandingPage"
+            android:label="@string/title_activity_closed_poll_landing_page"></activity>
     </application>
 
 </manifest>

@@ -12,6 +12,9 @@ import android.widget.TextView;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import com.zik.faro.data.Event;
+import com.zik.faro.data.EventUser;
+import com.zik.faro.data.user.InviteStatus;
 
 public class EventLandingPage extends Activity {
 
@@ -29,6 +32,8 @@ public class EventLandingPage extends Activity {
     private ImageButton activitybutton = null;
     private ImageButton editButton = null;
     private TextView event_status = null;
+
+    private Intent EventListPage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +66,8 @@ public class EventLandingPage extends Activity {
         final Intent EditEvent = new Intent(EventLandingPage.this, EditEvent.class);
         final Intent CreateNewActivity = new Intent(EventLandingPage.this, CreateNewEventActivity.class);
 
+        EventListPage = new Intent(EventLandingPage.this, EventListPage.class);
+
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
         Bundle extras = getIntent().getExtras();
@@ -70,7 +77,7 @@ public class EventLandingPage extends Activity {
             if(E != null) {
 
                 //Display elements based on Event Status
-                eventStateBasedView();
+                eventStateBasedView(E);
 
                 controlFlagBasedView();
 
@@ -80,17 +87,17 @@ public class EventLandingPage extends Activity {
                 String eventDescr = E.getEventDescription();
                 eventDescription.setText(eventDescr);
 
-                startDateAndTime.setText(sdf.format(E.getStartDateCalendar().getTime()) + " at " +
-                        stf.format(E.getStartDateCalendar().getTime()));
+                startDateAndTime.setText(sdf.format(E.getStartDate().getTime()) + " at " +
+                        stf.format(E.getStartDate().getTime()));
 
-                endDateAndTime.setText(sdf.format(E.getEndDateCalendar().getTime()) + " at " +
-                        stf.format(E.getEndDateCalendar().getTime()));
+                endDateAndTime.setText(sdf.format(E.getEndDate().getTime()) + " at " +
+                        stf.format(E.getEndDate().getTime()));
 
                 statusYes.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         eventListHandler.changeEventStatusToYes(E);
-                        eventStateBasedView();
+                        eventStateBasedView(E);
                     }
                 });
 
@@ -98,7 +105,7 @@ public class EventLandingPage extends Activity {
                     @Override
                     public void onClick(View v) {
                         eventListHandler.changeEventStatusToMaybe(E);
-                        eventStateBasedView();
+                        eventStateBasedView(E);
                     }
                 });
 
@@ -141,47 +148,49 @@ public class EventLandingPage extends Activity {
         });
     }
 
-    private void eventStateBasedView(){
-        switch (E.getEventStatus()){
+    private void eventStateBasedView(Event event){
+
+        String myUserId = eventListHandler.getMyUserId();
+        EventUser eventUser = eventListHandler.getEventUser(event.getEventId(), myUserId);
+
+        switch (eventUser.getInviteStatus()) {
             case ACCEPTED:
                 event_status.setText("Accepted");
                 break;
             case MAYBE:
                 event_status.setText("Maybe");
                 break;
-            case NOTRESPONDED:
+            case INVITED:
                 event_status.setText("Not responded");
                 break;
         }
-        if (E.isEventCreator()){
+        
+        if (eventUser.getInviteStatus() == InviteStatus.ACCEPTED){
             statusYes.setVisibility(View.GONE);
             statusNo.setVisibility(View.GONE);
             statusMaybe.setVisibility(View.GONE);
             pollButton.setVisibility(View.VISIBLE);
-        }else if (E.getEventStatus() == EventStatus.ACCEPTED){
-            statusYes.setVisibility(View.GONE);
-            statusNo.setVisibility(View.GONE);
-            statusMaybe.setVisibility(View.GONE);
-            pollButton.setVisibility(View.VISIBLE);
-        }else if (E.getEventStatus() == EventStatus.NOTRESPONDED) {
+            eventAssignmentbutton.setVisibility(View.VISIBLE);
+            activitybutton.setVisibility(View.VISIBLE);
+        }else{
+            statusYes.setVisibility(View.VISIBLE);
+            statusNo.setVisibility(View.VISIBLE);
+            pollButton.setVisibility(View.GONE);
+            eventAssignmentbutton.setVisibility(View.GONE);
+            activitybutton.setVisibility(View.GONE);
+        }
+
+        if (eventUser.getInviteStatus() == InviteStatus.INVITED) {
             statusMaybe.setVisibility(View.VISIBLE);
-            statusYes.setVisibility(View.VISIBLE);
-            statusNo.setVisibility(View.VISIBLE);
-            pollButton.setVisibility(View.GONE);
-        } else if (E.getEventStatus() == EventStatus.MAYBE){
-            statusYes.setVisibility(View.VISIBLE);
-            statusNo.setVisibility(View.VISIBLE);
+        } else if (eventUser.getInviteStatus() == InviteStatus.MAYBE){
             statusMaybe.setVisibility(View.GONE);
-            pollButton.setVisibility(View.GONE);
         }
     }
 
     private void controlFlagBasedView() {
-        if(!E.isEventCreator()) {
-            switch (E.getControlFlag()) {
-                case FRIENDS_CANNOT_EDIT:
-                    editButton.setVisibility(View.GONE);
-                    break;
+        if(E.getEventCreatorId() == null) {
+            if (E.getControlFlag()) {
+                editButton.setVisibility(View.GONE);
             }
         }
     }
@@ -189,6 +198,7 @@ public class EventLandingPage extends Activity {
     @Override
     public void onBackPressed() {
         eventListHandler.deleteEventFromMapIfNotInList(E);
+        startActivity(EventListPage);
         finish();
         super.onBackPressed();
     }

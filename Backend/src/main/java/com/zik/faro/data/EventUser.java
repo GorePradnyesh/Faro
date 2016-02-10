@@ -13,6 +13,8 @@ public class EventUser {
 
     }
 
+
+
     public EventUser(final String eventId, final String faroUserId){
         this.id = generateEventUserId(eventId, faroUserId);
         this.eventRef = eventId;
@@ -48,6 +50,9 @@ public class EventUser {
         return this.faroUserRef;
     }
 
+    public void setInviteStatus(InviteStatus inviteStatus) {
+        this.inviteStatus = inviteStatus;
+    }
     public InviteStatus getInviteStatus(){
         return this.inviteStatus;
     }

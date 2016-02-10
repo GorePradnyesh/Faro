@@ -64,7 +64,7 @@ public class ActivityBaseTest extends ApiBaseTest {
         
         // Create Activity 
         String activityName = UUID.randomUUID().toString();
-        Activity activity = new Activity(eventId, activityName, "randomDescription", new Location("Location1"), Calendar.getInstance(), null);
+        Activity activity = new Activity(eventId, activityName, "randomDescription", new Location("Location1"), Calendar.getInstance(), Calendar.getInstance(), null);
         TestActivityCreateCallback createActivityCallback = new TestActivityCreateCallback(waitSem, 200);
         serviceHandler.getActivityHandler().createActivity(createActivityCallback, eventId, activity);
         timeout = !waitSem.tryAcquire(testTimeout, TimeUnit.MILLISECONDS);
@@ -86,7 +86,7 @@ public class ActivityBaseTest extends ApiBaseTest {
         
         // Create Activity 
         String activityName2 = UUID.randomUUID().toString();
-        Activity activity2 = new Activity(eventId, activityName, "randomDescription", new Location("Location1"), Calendar.getInstance(), null);
+        Activity activity2 = new Activity(eventId, activityName, "randomDescription", new Location("Location1"), Calendar.getInstance(), Calendar.getInstance(), null);
         TestActivityCreateCallback createActivityCallback2 = new TestActivityCreateCallback(waitSem, 200);
         serviceHandler.getActivityHandler().createActivity(createActivityCallback2, eventId, activity);
         timeout = !waitSem.tryAcquire(testTimeout, TimeUnit.MILLISECONDS);
