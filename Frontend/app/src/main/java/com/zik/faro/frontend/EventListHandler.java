@@ -227,9 +227,10 @@ public class EventListHandler {
     * For the case when event is part of Map but not inserted to the List, once we return to
     * EventListPage from EventLandingPage, i.e. we are completely done with that event we need to
     * remove the event from the Map also to maintain sync between the Map and List.
-    * Event is present in the list if
-    * 1. event startDate is smaller than or equal to the last event startDate
-    * 2. event startDate is greater than
+    * New event is present in the list if
+    * 1. Combined list size is less than the MAX_EVENTS_PAGE_SIZE. Which means that the number
+    * of events in the lists is less than what the server can send at one time.
+    * 2. newEventIndex lies between the first and the last event in the list.
     */
     public void deleteEventFromMapIfNotInList(Event E){
         Calendar eventCalendar;
@@ -257,16 +258,18 @@ public class EventListHandler {
         return this.eventMap.get(eventID);
     }
 
-    public void removeEventForEditing(Event E){
+    public void removeEventFromListAndMap(Event E){
         EventAdapter eventAdapter;
         eventAdapter = getEventAdapter(E);
-        eventAdapter.list.remove(E);
-        eventAdapter.notifyDataSetChanged();
+        if (eventAdapter != null) {
+            eventAdapter.list.remove(E);
+            eventAdapter.notifyDataSetChanged();
+        }
         eventMap.remove(E.getEventId());
     }
 
     public void changeEventStatusToYes(Event event){
-        removeEventForEditing(event);
+        removeEventFromListAndMap(event);
         String key = event.getEventId()+ myUserId;
         EventUser eventUser = eventUserMap.get(key);
         eventUser.setInviteStatus(InviteStatus.ACCEPTED);
@@ -274,7 +277,7 @@ public class EventListHandler {
     }
 
     public void changeEventStatusToMaybe(Event event){
-        removeEventForEditing(event);
+        removeEventFromListAndMap(event);
         String key = event.getEventId()+ myUserId;
         EventUser eventUser = eventUserMap.get(key);
         eventUser.setInviteStatus(InviteStatus.MAYBE);

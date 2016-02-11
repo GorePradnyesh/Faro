@@ -85,4 +85,6 @@
     <string name="title_activity_closed_poll_landing_page">ClosedPollLandingPage</string>
     <string name="change_winner">Change Winner</string>
     <string name="re_open_poll">Re-open Poll</string>
+    <string name="delete_event">Delete Event</string>
+    <string name="are_you_sure_you_want_to_delete_the_event">Are you sure you want to delete the Event?</string>
 </resources>

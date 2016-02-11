@@ -3,16 +3,24 @@ package com.zik.faro.frontend;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
@@ -48,7 +56,12 @@ public class EditEvent extends Activity {
     private static Event cloneEvent;
     private static Event event;
 
+    private static int popupWidth;
+    private static int popupHeight;
+    private RelativeLayout popUpRelativeLayout;
+
     Intent EventLanding = null;
+    Intent EventListPage = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,9 +77,17 @@ public class EditEvent extends Activity {
         final EditText eventDescription = (EditText) findViewById(R.id.eventDescriptionEditText);
 
         Button editEventOK = (Button) findViewById(R.id.editEventOK);
-        Button editEventCancel = (Button) findViewById(R.id.editEventCancel);
+        Button deleteEventButton = (Button) findViewById(R.id.deleteEvent);
+
+        popUpRelativeLayout = (RelativeLayout) findViewById(R.id.editEventPage);
 
         EventLanding = new Intent(EditEvent.this, EventLandingPage.class);
+        EventListPage = new Intent(EditEvent.this, EventListPage.class);
+
+        DisplayMetrics dm = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(dm);
+        popupWidth = (int) (dm.widthPixels * 0.8);
+        popupHeight = (int) (dm.heightPixels * 0.8);
 
         /*
         * Do not remove the event from the list and the map in the eventListHandler below.
@@ -125,7 +146,7 @@ public class EditEvent extends Activity {
         editEventOK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                eventListHandler.removeEventForEditing(event);
+                eventListHandler.removeEventFromListAndMap(event);
                 ErrorCodes eventStatus;
                 EventUser eventUser = eventListHandler.getEventUser(cloneEvent.getEventId(),
                         eventListHandler.getMyUserId());
@@ -140,12 +161,10 @@ public class EditEvent extends Activity {
             }
         });
 
-        editEventCancel.setOnClickListener(new View.OnClickListener() {
+        deleteEventButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EventLanding.putExtra("eventID", event.getEventId());
-                startActivity(EventLanding);
-                finish();
+                confirmEventDeletePopUP(v);
             }
         });
 
@@ -162,6 +181,45 @@ public class EditEvent extends Activity {
             @Override
             public void afterTextChanged(Editable s) {
                 cloneEvent.setEventDescription(eventDescription.getText().toString());
+            }
+        });
+    }
+
+    public void confirmEventDeletePopUP(View v) {
+        LayoutInflater layoutInflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        ViewGroup container = (ViewGroup) layoutInflater.inflate(R.layout.delete_event_pop_up, null);
+        final PopupWindow popupWindow = new PopupWindow(container, RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT, true);
+
+        Button delete = (Button)container.findViewById(R.id.deleteEventPopUp);
+        Button cancel = (Button)container.findViewById(R.id.cancelEventPopUp);
+
+        popupWindow.showAtLocation(popUpRelativeLayout, Gravity.CENTER, 0, 0);
+
+        container.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                popupWindow.dismiss();
+                return false;
+            }
+        });
+
+        delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                //TODO: Make API call and update server
+                eventListHandler.removeEventFromListAndMap(event);
+                startActivity(EventListPage);
+                popupWindow.dismiss();
+                finish();
+            }
+        });
+
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
             }
         });
     }

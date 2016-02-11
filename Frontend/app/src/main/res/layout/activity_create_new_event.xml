@@ -117,14 +117,5 @@
             android:text="@string/OK"
             android:id="@+id/createNewEventOK"
             android:enabled="false" />
-        <Button
-            style="?android:attr/buttonStyleSmall"
-            android:clickable="true"
-            android:layout_alignParentEnd="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/Cancel"
-            android:id="@+id/createNewEventCancel"
-            android:enabled="false" />
     </RelativeLayout>
 </RelativeLayout>

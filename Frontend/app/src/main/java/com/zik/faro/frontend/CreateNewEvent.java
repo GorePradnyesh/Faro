@@ -45,6 +45,7 @@ public class CreateNewEvent extends Activity {
     //public static final int NO_CHANGES = 0;
     static EventListHandler eventListHandler = EventListHandler.getInstance();
     Intent AppLanding = null;
+    Intent EventListPage = null;
 
 
     Calendar startDateCalendar = Calendar.getInstance();
@@ -90,10 +91,10 @@ public class CreateNewEvent extends Activity {
         final CheckBox controlFlagCheckBox = (CheckBox)findViewById(R.id.controlFlag);
 
         final Button createNewEventOK = (Button) findViewById(R.id.createNewEventOK);
-        final Button createNewEventCancel = (Button) findViewById(R.id.createNewEventCancel);
 
         final Intent eventLanding = new Intent(CreateNewEvent.this, EventLandingPage.class);
         AppLanding = new Intent(CreateNewEvent.this, EventListPage.class);
+        EventListPage = new Intent(CreateNewEvent.this, EventListPage.class);
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
@@ -211,13 +212,6 @@ public class CreateNewEvent extends Activity {
                     finish();
                 }
 
-            }
-        });
-
-        createNewEventCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
             }
         });
 
@@ -400,6 +394,7 @@ public class CreateNewEvent extends Activity {
 
     @Override
     public void onBackPressed() {
+        startActivity(EventListPage);
         finish();
         super.onBackPressed();
     }

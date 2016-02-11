@@ -129,6 +129,7 @@ public class EventListPage extends Activity{
             @Override
             public void onClick(View v) {
                 startActivity(create_event_page);
+                finish();
             }
         });
 

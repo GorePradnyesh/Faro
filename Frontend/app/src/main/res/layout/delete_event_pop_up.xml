@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:outlineProvider="bounds"
+    android:background="@android:drawable/alert_light_frame"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/are_you_sure_you_want_to_delete_the_event"
+            android:layout_centerHorizontal="true"
+            android:id="@+id/questionTextView"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/abc_input_method_navigation_guard" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/questionTextView">
+            <Button
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:id="@+id/deleteEventPopUp"
+                android:text="@string/delete_event"/>
+            <Button
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:id="@+id/cancelEventPopUp"
+                android:text="@string/Cancel"/>
+        </LinearLayout>
+    </RelativeLayout>
+
+</RelativeLayout>
