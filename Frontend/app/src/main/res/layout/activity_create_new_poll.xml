@@ -6,7 +6,7 @@ tools:context="com.zik.faro.frontend.CreateNewPoll">
     <EditText
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:hint="Poll Description?"
+        android:hint="@string/poll_description"
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
         android:layout_marginTop="50dp"
@@ -16,7 +16,7 @@ tools:context="com.zik.faro.frontend.CreateNewPoll">
         android:layout_height="wrap_content"
         android:id="@+id/multiChoiceFlag"
         android:layout_below="@+id/pollDescription"
-        android:text="Multi-Choice?" />
+        android:text="@string/multi_choice" />
 
     <RelativeLayout
         android:layout_width="wrap_content"
@@ -27,7 +27,7 @@ tools:context="com.zik.faro.frontend.CreateNewPoll">
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:id="@+id/pollOptionEditText"
-            android:hint="Poll Option"
+            android:hint="@string/poll_option"
             android:layout_toStartOf="@+id/add_new_option" />
         <ImageButton
             android:layout_width="30dp"

@@ -86,5 +86,16 @@
     <string name="change_winner">Change Winner</string>
     <string name="re_open_poll">Re-open Poll</string>
     <string name="delete_event">Delete Event</string>
+    <string name="delete_activity">Delete Activity</string>
     <string name="are_you_sure_you_want_to_delete_the_event">Are you sure you want to delete the Event?</string>
+    <string name="are_you_sure_you_want_to_delete_the_activity">Are you sure you want to delete the Activity?</string>
+    <string name="title_activity_activity_list_page">ActivityListPage</string>
+    <string name="title_activity_activity_landing_page">ActivityLandingPage</string>
+    <string name="title_activity_edit">EditActivity</string>
+    <string name="activity_description">Activity Description</string>
+    <string name="activity_name">Activity Name</string>
+    <string name="event_description">Event Description</string>
+    <string name="multi_choice">Multi-Choice?</string>
+    <string name="poll_description">Poll Description</string>
+    <string name="poll_option">Poll Option</string>
 </resources>

@@ -34,10 +34,6 @@ import com.zik.faro.data.Event;
 
 public class EventListPage extends Activity{
 
-    /*public static final int NO_CHANGES = 0;
-    public static final int EVENT_UPDATE_TYPE = 100;
-    public static final int CREATE_EVENT = 101;*/
-
     static EventListHandler eventListHandler = EventListHandler.getInstance();
 
     @Override

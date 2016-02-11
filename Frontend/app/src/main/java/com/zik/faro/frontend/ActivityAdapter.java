@@ -8,31 +8,33 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.zik.faro.data.Activity;
+import com.zik.faro.data.Event;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.LinkedList;
 import java.util.List;
-import com.zik.faro.data.Event;
 
-public class EventAdapter extends ArrayAdapter {
+public class ActivityAdapter extends ArrayAdapter{
+
     //TODO (Code Review) Implement sorted list instead of Linkedlist
-    public List<Event> list = new LinkedList<>();
+    public List<Activity> list = new LinkedList<>();
 
     DateFormat sdf = new SimpleDateFormat("EEE, MMM dd yyyy");
     DateFormat stf = new SimpleDateFormat("hh:mm a");
 
-    public EventAdapter(Context context, int resource) {
+    public ActivityAdapter(Context context, int resource) {
         super(context, resource);
     }
-
 
     public int getCount() {
         return this.list.size();
     }
 
-    public void insert(Event event, int index) {
-        list.add(index, event);
-        super.insert(event, index);
+    public void insert(Activity activity, int index) {
+        list.add(index, activity);
+        super.insert(activity, index);
     }
 
     @Override
@@ -41,10 +43,9 @@ public class EventAdapter extends ArrayAdapter {
     }
 
     static class ImgHolder{
-        ImageView STATUS_IMG;
-        TextView EVNT_NAME;
-        TextView EVNT_START_DATE;
-        TextView EVNT_START_TIME;
+        TextView ACTIVITY_NAME;
+        TextView ACTIVITY_START_DATE;
+        TextView ACTIVITY_START_TIME;
     }
 
     @Override
@@ -60,20 +61,19 @@ public class EventAdapter extends ArrayAdapter {
 
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            row = inflater.inflate(R.layout.event_row_style, parent, false);
-            holder.EVNT_NAME = (TextView) row.findViewById(R.id.event_name);
-            holder.STATUS_IMG = (ImageView) row.findViewById(R.id.status_img);
-            holder.EVNT_START_DATE = (TextView)row.findViewById(R.id.startDate);
-            holder.EVNT_START_TIME = (TextView)row.findViewById(R.id.startTime);
+            row = inflater.inflate(R.layout.activity_row_style, parent, false);
+            holder.ACTIVITY_NAME = (TextView) row.findViewById(R.id.activityName);
+            holder.ACTIVITY_START_DATE = (TextView)row.findViewById(R.id.startDate);
+            holder.ACTIVITY_START_TIME = (TextView)row.findViewById(R.id.startTime);
             row.setTag(holder);
         }else{
             holder = (ImgHolder) row.getTag();
         }
-        Event EVENT = (Event) getItem(position);
-        holder.EVNT_NAME.setText(EVENT.getEventName());
-        holder.STATUS_IMG.setImageResource(SetDisplayProperties.getEventStatusImage(EVENT));
-        holder.EVNT_START_DATE.setText(sdf.format(EVENT.getStartDate().getTime()));
-        holder.EVNT_START_TIME.setText(stf.format(EVENT.getStartDate().getTime()));
+        Activity activity = (Activity) getItem(position);
+        holder.ACTIVITY_NAME.setText(activity.getName());
+        holder.ACTIVITY_START_DATE.setText(sdf.format(activity.getStartDate().getTime()));
+        holder.ACTIVITY_START_TIME.setText(stf.format(activity.getStartDate().getTime()));
         return row;
     }
+
 }

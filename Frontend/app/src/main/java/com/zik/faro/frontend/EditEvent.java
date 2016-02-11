@@ -49,15 +49,11 @@ public class EditEvent extends Activity {
     DateFormat sdf = new SimpleDateFormat("MMM dd yyyy");
     DateFormat stf = new SimpleDateFormat("hh:mm a");
 
-    private String eventID = null;
-
 
     private  static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static Event cloneEvent;
     private static Event event;
 
-    private static int popupWidth;
-    private static int popupHeight;
     private RelativeLayout popUpRelativeLayout;
 
     Intent EventLanding = null;
@@ -84,11 +80,6 @@ public class EditEvent extends Activity {
         EventLanding = new Intent(EditEvent.this, EventLandingPage.class);
         EventListPage = new Intent(EditEvent.this, EventListPage.class);
 
-        DisplayMetrics dm = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(dm);
-        popupWidth = (int) (dm.widthPixels * 0.8);
-        popupHeight = (int) (dm.heightPixels * 0.8);
-
         /*
         * Do not remove the event from the list and the map in the eventListHandler below.
         * Make a clone of the event and make changes to that.
@@ -98,7 +89,7 @@ public class EditEvent extends Activity {
         */
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
-            eventID = extras.getString("eventID");
+            String eventID = extras.getString("eventID");
             event = eventListHandler.getEventFromMap(eventID);
             if (event != null) {
                 Gson gson = new Gson();
@@ -232,11 +223,11 @@ public class EditEvent extends Activity {
     }
 
     private void resetEndDateAndTimeToStartDateAndTime(){
-        cloneEvent.getEndDate().set(cloneEvent.getEndDate().YEAR, cloneEvent.getStartDate().get(Calendar.YEAR));
-        cloneEvent.getEndDate().set(cloneEvent.getEndDate().MONTH, cloneEvent.getStartDate().get(Calendar.MONTH));
-        cloneEvent.getEndDate().set(cloneEvent.getEndDate().DAY_OF_MONTH, cloneEvent.getStartDate().get(Calendar.DAY_OF_MONTH));
-        cloneEvent.getEndDate().set(cloneEvent.getEndDate().HOUR_OF_DAY, cloneEvent.getStartDate().get(Calendar.HOUR_OF_DAY));
-        cloneEvent.getEndDate().set(cloneEvent.getEndDate().MINUTE, cloneEvent.getStartDate().get(Calendar.MINUTE));
+        cloneEvent.getEndDate().set(Calendar.YEAR, cloneEvent.getStartDate().get(Calendar.YEAR));
+        cloneEvent.getEndDate().set(Calendar.MONTH, cloneEvent.getStartDate().get(Calendar.MONTH));
+        cloneEvent.getEndDate().set(Calendar.DAY_OF_MONTH, cloneEvent.getStartDate().get(Calendar.DAY_OF_MONTH));
+        cloneEvent.getEndDate().set(Calendar.HOUR_OF_DAY, cloneEvent.getStartDate().get(Calendar.HOUR_OF_DAY));
+        cloneEvent.getEndDate().set(Calendar.MINUTE, cloneEvent.getStartDate().get(Calendar.MINUTE));
         updateEndDateButton();
         updateEndTimeButton();
     }
@@ -301,9 +292,9 @@ public class EditEvent extends Activity {
         @Override
         public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
 
-            cloneEvent.getStartDate().set(cloneEvent.getStartDate().YEAR, year);
-            cloneEvent.getStartDate().set(cloneEvent.getStartDate().MONTH, monthOfYear);
-            cloneEvent.getStartDate().set(cloneEvent.getStartDate().DAY_OF_MONTH, dayOfMonth);
+            cloneEvent.getStartDate().set(Calendar.YEAR, year);
+            cloneEvent.getStartDate().set(Calendar.MONTH, monthOfYear);
+            cloneEvent.getStartDate().set(Calendar.DAY_OF_MONTH, dayOfMonth);
             updateStartDateButton();
 
             if(cloneEvent.getStartDate().after(cloneEvent.getEndDate())){
@@ -319,8 +310,8 @@ public class EditEvent extends Activity {
         @Override
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
 
-            cloneEvent.getStartDate().set(cloneEvent.getStartDate().HOUR_OF_DAY, hourOfDay);
-            cloneEvent.getStartDate().set(cloneEvent.getStartDate().MINUTE, minute);
+            cloneEvent.getStartDate().set(Calendar.HOUR_OF_DAY, hourOfDay);
+            cloneEvent.getStartDate().set(Calendar.MINUTE, minute);
             updateStartTimeButton();
 
             if(cloneEvent.getStartDate().after(cloneEvent.getEndDate())) {
@@ -338,9 +329,9 @@ public class EditEvent extends Activity {
         @Override
         public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
 
-            cloneEvent.getEndDate().set(cloneEvent.getEndDate().YEAR, year);
-            cloneEvent.getEndDate().set(cloneEvent.getEndDate().MONTH, monthOfYear);
-            cloneEvent.getEndDate().set(cloneEvent.getEndDate().DAY_OF_MONTH, dayOfMonth);
+            cloneEvent.getEndDate().set(Calendar.YEAR, year);
+            cloneEvent.getEndDate().set(Calendar.MONTH, monthOfYear);
+            cloneEvent.getEndDate().set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
             if(cloneEvent.getStartDate().after(cloneEvent.getEndDate())){
                 resetEndDateAndTimeToStartDateAndTime();
@@ -358,8 +349,8 @@ public class EditEvent extends Activity {
     TimePickerDialog.OnTimeSetListener endTime = new TimePickerDialog.OnTimeSetListener(){
         @Override
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-            cloneEvent.getEndDate().set(cloneEvent.getEndDate().HOUR_OF_DAY, hourOfDay);
-            cloneEvent.getEndDate().set(cloneEvent.getEndDate().MINUTE, minute);
+            cloneEvent.getEndDate().set(Calendar.HOUR_OF_DAY, hourOfDay);
+            cloneEvent.getEndDate().set(Calendar.MINUTE, minute);
 
             if(cloneEvent.getStartDate().after(cloneEvent.getEndDate())){
                 resetEndDateAndTimeToStartDateAndTime();

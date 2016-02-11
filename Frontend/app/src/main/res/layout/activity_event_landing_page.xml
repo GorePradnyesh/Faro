@@ -1,5 +1,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.zik.faro.frontend.EventLandingPage">
 
@@ -86,81 +87,59 @@
             android:layout_toEndOf="@+id/to" />
     </RelativeLayout>
 
-    <ImageButton
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/pollImageButton"
-        android:clickable="true"
-        android:layout_centerVertical="true"
-        android:layout_below="@id/endDateTimeLayout"
-        android:paddingLeft="0dp"
-        android:paddingTop="0dp"
-        android:paddingRight="0dp"
-        android:paddingBottom="0dp" />
+        android:layout_below="@+id/endDateTimeLayout">
+        <ImageButton
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:id="@+id/pollImageButton"
+            android:clickable="true"/>
 
-    <ImageButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/eventAssignmentImageButton"
-        android:clickable="true"
-        android:paddingLeft="0dp"
-        android:paddingTop="0dp"
-        android:paddingRight="0dp"
-        android:paddingBottom="0dp"
-        android:layout_toRightOf="@+id/pollImageButton"
-        android:layout_below="@+id/endDateTimeLayout" />
+        <ImageButton
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:id="@+id/eventAssignmentImageButton"
+            android:clickable="true"/>
 
-    <ImageButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/activityImageButton"
-        android:clickable="true"
-        android:paddingLeft="0dp"
-        android:paddingTop="0dp"
-        android:paddingRight="0dp"
-        android:paddingBottom="0dp"
-        android:layout_toRightOf="@+id/eventAssignmentImageButton"
-        android:layout_below="@+id/endDateTimeLayout" />
+        <ImageButton
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:id="@+id/activityImageButton"
+            android:clickable="true"/>
+    </LinearLayout>
 
-    <RelativeLayout
-        android:layout_width="fill_parent"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:id="@+id/statusButtons">
         <Button
-            android:layout_width="wrap_content"
+            android:layout_width="0px"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:id="@+id/statusYes"
             android:clickable="true"
-            android:text="@string/YES"
-            android:layout_alignParentStart="true"
-            android:paddingLeft="0dp"
-            android:paddingTop="0dp"
-            android:paddingRight="0dp"
-            android:paddingBottom="0dp"/>
+            android:text="@string/YES"/>
         <Button
-            android:layout_width="wrap_content"
+            android:layout_width="0px"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:id="@+id/statusNo"
             android:clickable="true"
-            android:text="@string/NO"
-            android:layout_centerInParent="true"
-            android:paddingLeft="0dp"
-            android:paddingTop="0dp"
-            android:paddingRight="0dp"
-            android:paddingBottom="0dp" />
+            android:text="@string/NO" />
         <Button
-            android:layout_width="wrap_content"
+            android:layout_width="0px"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:id="@+id/statusMaybe"
             android:clickable="true"
-            android:text="@string/MAYBE"
-            android:layout_alignParentEnd="true"
-            android:paddingLeft="0dp"
-            android:paddingTop="0dp"
-            android:paddingRight="0dp"
-            android:paddingBottom="0dp" />
-    </RelativeLayout>
+            android:text="@string/MAYBE"/>
+    </LinearLayout>
 
 </RelativeLayout>
 

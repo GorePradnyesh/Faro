@@ -6,10 +6,6 @@
         android:layout_height="wrap_content"
         android:id="@+id/deleteOption"
         android:layout_alignParentEnd="true"
-        android:paddingLeft="0dp"
-        android:paddingTop="0dp"
-        android:paddingRight="0dp"
-        android:paddingBottom="0dp"
         android:layout_centerVertical="true"/>
     <TextView
         android:layout_width="match_parent"

@@ -17,14 +17,17 @@ import com.zik.faro.data.Event;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.PollOption;
 
+import java.util.LinkedList;
+import java.util.List;
+
 public class EditPoll extends ActionBarActivity {
 
     static PollListHandler pollListHandler = PollListHandler.getInstance();
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static String eventID = null;
     private String pollID;
-    private static Poll P;
-    private static Event E;
+    private static Poll poll;
+    private static Event event;
     Intent PollLandingPage;
 
     @Override
@@ -38,24 +41,42 @@ public class EditPoll extends ActionBarActivity {
 
         final ImageButton addNewOptionButton = (ImageButton)findViewById(R.id.add_new_option);
         addNewOptionButton.setImageResource(R.drawable.plus);
+        addNewOptionButton.setEnabled(false);
 
-        ListView pollOptionsList = (ListView)findViewById(R.id.pollOptionsList);
+        ListView newPollOptionsList = (ListView)findViewById(R.id.newPollOptionsList);
+        newPollOptionsList.setTag("newPollOptionsList");
+        ListView oldPollOptionsList = (ListView)findViewById(R.id.oldPollOptionsList);
+        oldPollOptionsList.setTag("oldPollOptionsList");
+        final List <PollOption> finalPollOptionList = new LinkedList<>();
 
         final Button editPollOK = (Button) findViewById(R.id.editPollOK);
+        editPollOK.setEnabled(true);
         final Button editPollCancel = (Button) findViewById(R.id.editPollCancel);
 
         PollLandingPage = new Intent(EditPoll.this, OpenPollLandingPage.class);
-
-        final PollOptionsAdapter pollOptionsAdapter = new PollOptionsAdapter(this, R.layout.poll_create_new_page_row_style);
-        pollOptionsList.setAdapter(pollOptionsAdapter);
 
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
             eventID = extras.getString("eventID");
             pollID = extras.getString("pollID");
-            P = pollListHandler.getPollFromMap(pollID);
-            E = eventListHandler.getEventFromMap(eventID);
+            poll = pollListHandler.getPollFromMap(pollID);
+            event = eventListHandler.getEventFromMap(eventID);
         }
+
+        final PollOptionsAdapter newPollOptionsAdapter = new PollOptionsAdapter(this, R.layout.poll_create_new_page_row_style);
+        newPollOptionsList.setAdapter(newPollOptionsAdapter);
+
+        final PollOptionsAdapter oldPollOptionsAdapter = new PollOptionsAdapter(this, R.layout.poll_create_new_page_row_style);
+        for (Integer i = 0; i < poll.getPollOptions().size(); i++){
+            PollOption pollOption = poll.getPollOptions().get(i);
+            oldPollOptionsAdapter.insert(pollOption, 0);
+            oldPollOptionsAdapter.notifyDataSetChanged();
+            finalPollOptionList.add(pollOption);
+        }
+        oldPollOptionsList.setAdapter(oldPollOptionsAdapter);
+
+        pollDescription.setText(poll.getDescription());
+        isMultiChoice.setChecked(poll.isMultiChoice());
 
         //Enable the addNewOptionButton only after Users enters an Option
         optionText.addTextChangedListener(new TextWatcher() {
@@ -79,8 +100,9 @@ public class EditPoll extends ActionBarActivity {
                 String optionDescription = optionText.getText().toString();
                 PollOption pollOption = new PollOption(optionDescription);
 
-                pollOptionsAdapter.insert(pollOption, 0);
-                pollOptionsAdapter.notifyDataSetChanged();
+                newPollOptionsAdapter.insert(pollOption, 0);
+                newPollOptionsAdapter.notifyDataSetChanged();
+                finalPollOptionList.add(pollOption);
                 optionText.setText("");
             }
         });
@@ -88,9 +110,13 @@ public class EditPoll extends ActionBarActivity {
         editPollOK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                P.setPollOptions(pollOptionsAdapter.getList());
-                PollLandingPage.putExtra("eventID", E.getEventId());
-                PollLandingPage.putExtra("pollID", P.getId());
+
+                if(!newPollOptionsAdapter.list.isEmpty()) {
+                    //TODO Make API call to update the pollOptions
+                    poll.setPollOptions(finalPollOptionList);
+                }
+                PollLandingPage.putExtra("eventID", event.getEventId());
+                PollLandingPage.putExtra("pollID", poll.getId());
                 startActivity(PollLandingPage);
                 finish();
             }
@@ -99,8 +125,8 @@ public class EditPoll extends ActionBarActivity {
         editPollCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PollLandingPage.putExtra("eventID", E.getEventId());
-                PollLandingPage.putExtra("pollID", P.getId());
+                PollLandingPage.putExtra("eventID", event.getEventId());
+                PollLandingPage.putExtra("pollID", poll.getId());
                 startActivity(PollLandingPage);
                 finish();
             }
@@ -115,8 +141,8 @@ public class EditPoll extends ActionBarActivity {
     //not popped out of the stack. Check how to see the stack size of the intents.
     @Override
     public void onBackPressed() {
-        PollLandingPage.putExtra("eventID", E.getEventId());
-        PollLandingPage.putExtra("pollID", P.getId());
+        PollLandingPage.putExtra("eventID", event.getEventId());
+        PollLandingPage.putExtra("pollID", poll.getId());
         startActivity(PollLandingPage);
         finish();
         super.onBackPressed();

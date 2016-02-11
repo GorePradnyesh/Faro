@@ -54,7 +54,7 @@
             android:name=".OpenPollLandingPage"
             android:label="@string/title_activity_poll_landing_page" />
         <activity
-            android:name=".CreateNewEventActivity"
+            android:name=".CreateNewActivity"
             android:label="@string/title_activity_create_new" />
         <activity android:name=".EditPoll" />
         <activity
@@ -62,7 +62,16 @@
             android:label="@string/title_activity_pick_poll_winner" />
         <activity
             android:name=".ClosedPollLandingPage"
-            android:label="@string/title_activity_closed_poll_landing_page"></activity>
+            android:label="@string/title_activity_closed_poll_landing_page" />
+        <activity
+            android:name=".ActivityListPage"
+            android:label="@string/title_activity_activity_list_page" />
+        <activity
+            android:name=".ActivityLandingPage"
+            android:label="@string/title_activity_activity_landing_page" />
+        <activity
+            android:name=".EditActivity"
+            android:label="@string/title_activity_edit"></activity>
     </application>
 
 </manifest>

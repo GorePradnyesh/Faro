@@ -119,6 +119,9 @@ public class EventListHandler {
     //TODO: Second param is temp for testing purpose only. Remove it later!!!
     public ErrorCodes addNewEvent(Event event, InviteStatus inviteStatus) {
         //TODO: send new event update to server
+        //TODO  update server and if successful then add event to List and Map below and
+        // update the eventID in the Event.
+
         String eventID = getEventID();
         if(eventID != null) {
             event.setEventId(eventID);
@@ -129,8 +132,7 @@ public class EventListHandler {
                     event.getEventCreatorId());
             eventUser.setInviteStatus(inviteStatus);
 
-            //TODO  update server and if successful then add event to List and Map below and
-            // update the eventID in the Event.
+
 
             ErrorCodes errorCode;
             errorCode = eventListHandler.addNewEventUser(event.getEventId(), myUserId,
@@ -163,12 +165,14 @@ public class EventListHandler {
         EventAdapter eventAdapter;
         eventAdapter = getEventAdapter(event);
 
+        eventCalendar = event.getStartDate();
+        
         assert (eventAdapter != null);
         int lastEventIndex = eventAdapter.list.size() - 1;
         for (index = lastEventIndex; index >= 0; index--) {
             tempEvent = eventAdapter.list.get(index);
             tempCalendar = tempEvent.getStartDate();
-            eventCalendar = event.getStartDate();
+
 
             //Break if new event occurs after temp event
             if (eventCalendar.after(tempCalendar)) {
@@ -230,7 +234,7 @@ public class EventListHandler {
     * New event is present in the list if
     * 1. Combined list size is less than the MAX_EVENTS_PAGE_SIZE. Which means that the number
     * of events in the lists is less than what the server can send at one time.
-    * 2. newEventIndex lies between the first and the last event in the list.
+    * 2. new Event lies between the first and the last event in the list.
     */
     public void deleteEventFromMapIfNotInList(Event E){
         Calendar eventCalendar;

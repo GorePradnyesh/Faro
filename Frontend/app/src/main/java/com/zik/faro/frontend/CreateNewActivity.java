@@ -2,6 +2,7 @@ package com.zik.faro.frontend;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -19,10 +20,11 @@ import java.util.Calendar;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.Activity;
 
-public class CreateNewEventActivity extends android.app.Activity{
+public class CreateNewActivity extends android.app.Activity{
 
     private static String eventID = null;
     static EventListHandler eventListHandler = EventListHandler.getInstance();
+    static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
     Event event = null;
 
     Calendar startDateCalendar = Calendar.getInstance();
@@ -35,10 +37,12 @@ public class CreateNewEventActivity extends android.app.Activity{
     private DateFormat sdf = new SimpleDateFormat("MMM dd yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
 
+    Intent activityListPage = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_new_event_activity);
+        setContentView(R.layout.activity_create_new_activity);
 
         final EditText activityName = (EditText) findViewById(R.id.activityName);
         final EditText activityDescription = (EditText) findViewById(R.id.activityDescription);
@@ -52,6 +56,10 @@ public class CreateNewEventActivity extends android.app.Activity{
         endDateButton = (Button) findViewById(R.id.endDateButton);
         endTimeButton = (Button) findViewById(R.id.endTimeButton);
 
+        activityListPage = new Intent(CreateNewActivity.this, ActivityListPage.class);
+        final Intent activityLanding  = new Intent(CreateNewActivity.this, ActivityLandingPage.class);
+
+        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
@@ -107,6 +115,18 @@ public class CreateNewEventActivity extends android.app.Activity{
                         startDateCalendar,
                         endDateCalendar,
                         null);
+
+                ErrorCodes activityStatus;
+                activityStatus = activityListHandler.addNewActivity(eventActivity);
+
+                //TODO What to do in Failure case?
+                if (activityStatus == ErrorCodes.SUCCESS) {
+                    activityLanding.putExtra("eventID", event.getEventId());
+                    activityLanding.putExtra("activityID", eventActivity.getId());
+                    startActivity(activityLanding);
+                    finish();
+                }
+
             }
         });
 
@@ -184,7 +204,7 @@ public class CreateNewEventActivity extends android.app.Activity{
 
 
     public void setStartDate(){
-        new DatePickerDialog(CreateNewEventActivity.this,
+        new DatePickerDialog(CreateNewActivity.this,
                 startDate,
                 startDateCalendar.get(Calendar.YEAR),
                 startDateCalendar.get(Calendar.MONTH),
@@ -192,7 +212,7 @@ public class CreateNewEventActivity extends android.app.Activity{
     }
 
     public void setEndDate(){
-        new DatePickerDialog(CreateNewEventActivity.this,
+        new DatePickerDialog(CreateNewActivity.this,
                 endDate,
                 endDateCalendar.get(Calendar.YEAR),
                 endDateCalendar.get(Calendar.MONTH),
@@ -201,7 +221,7 @@ public class CreateNewEventActivity extends android.app.Activity{
     }
 
     public void setStartTime(){
-        new TimePickerDialog(CreateNewEventActivity.this,
+        new TimePickerDialog(CreateNewActivity.this,
                 startTime,
                 startDateCalendar.get(Calendar.HOUR_OF_DAY),
                 startDateCalendar.get(Calendar.MINUTE),
@@ -209,7 +229,7 @@ public class CreateNewEventActivity extends android.app.Activity{
     }
 
     public void setEndTime(){
-        new TimePickerDialog(CreateNewEventActivity.this,
+        new TimePickerDialog(CreateNewActivity.this,
                 endTime,
                 endDateCalendar.get(Calendar.HOUR_OF_DAY),
                 endDateCalendar.get(Calendar.MINUTE),
@@ -343,5 +363,13 @@ public class CreateNewEventActivity extends android.app.Activity{
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        activityListPage.putExtra("eventID", event.getEventId());
+        startActivity(activityListPage);
+        finish();
+        super.onBackPressed();
     }
 }

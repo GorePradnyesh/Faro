@@ -66,17 +66,21 @@ public class PollOptionsAdapter extends ArrayAdapter {
         }
         PollOption pollOption = (PollOption) getItem(position);
         holder.OPTION_DESCRPTN.setText(pollOption.getOption());
-        holder.DELETE_OPTION.setImageResource(R.drawable.delete);
-        holder.DELETE_OPTION.setId(position);
-        holder.DELETE_OPTION.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ImageButton imageButton = (ImageButton)v;
-                int position = imageButton.getId();
-                list.remove(getItem(position));
-                notifyDataSetChanged();
-            }
-        });
+        if (parent.getTag().equals("newPollOptionsList") || parent.getTag().equals("pollOptionsList")) {
+            holder.DELETE_OPTION.setImageResource(R.drawable.delete);
+            holder.DELETE_OPTION.setId(position);
+            holder.DELETE_OPTION.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ImageButton imageButton = (ImageButton) v;
+                    int position = imageButton.getId();
+                    list.remove(getItem(position));
+                    notifyDataSetChanged();
+                }
+            });
+        }else if (parent.getTag().equals("newPollOptionsList")){
+            holder.DELETE_OPTION.setVisibility(View.GONE);
+        }
         return row;
     }
 }

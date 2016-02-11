@@ -28,8 +28,8 @@ public class EventLandingPage extends Activity {
     private Button statusNo = null;
     private Button statusMaybe = null;
     private ImageButton pollButton = null;
-    private ImageButton eventAssignmentbutton = null;
-    private ImageButton activitybutton = null;
+    private ImageButton eventAssignmentButton = null;
+    private ImageButton activityButton = null;
     private ImageButton editButton = null;
     private TextView event_status = null;
 
@@ -50,10 +50,10 @@ public class EventLandingPage extends Activity {
 
         pollButton = (ImageButton)findViewById(R.id.pollImageButton);
         pollButton.setImageResource(R.drawable.poll_icon);
-        eventAssignmentbutton = (ImageButton)findViewById(R.id.eventAssignmentImageButton);
-        eventAssignmentbutton.setImageResource(R.drawable.assignment_icon);
-        activitybutton = (ImageButton)findViewById(R.id.activityImageButton);
-        activitybutton.setImageResource(R.drawable.activity);
+        eventAssignmentButton = (ImageButton)findViewById(R.id.eventAssignmentImageButton);
+        eventAssignmentButton.setImageResource(R.drawable.assignment_icon);
+        activityButton = (ImageButton)findViewById(R.id.activityImageButton);
+        activityButton.setImageResource(R.drawable.activity);
         editButton = (ImageButton)findViewById(R.id.editButton);
         editButton.setImageResource(R.drawable.edit);
 
@@ -64,10 +64,9 @@ public class EventLandingPage extends Activity {
 
         final Intent PollListPage = new Intent(EventLandingPage.this, PollListPage.class);
         final Intent EditEvent = new Intent(EventLandingPage.this, EditEvent.class);
-        final Intent CreateNewActivity = new Intent(EventLandingPage.this, CreateNewEventActivity.class);
+        final Intent ActivityListPage = new Intent(EventLandingPage.this, ActivityListPage.class);
 
         EventListPage = new Intent(EventLandingPage.this, EventListPage.class);
-
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
         Bundle extras = getIntent().getExtras();
@@ -110,6 +109,16 @@ public class EventLandingPage extends Activity {
                 });
 
                 //TODO Handle listener for statusNo
+                statusNo.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //TODO: Make API call and update server
+
+                        eventListHandler.removeEventFromListAndMap(E);
+                        startActivity(EventListPage);
+                        finish();
+                    }
+                });
             }
         }
 
@@ -122,18 +131,18 @@ public class EventLandingPage extends Activity {
             }
         });
 
-        eventAssignmentbutton.setOnClickListener(new View.OnClickListener() {
+        eventAssignmentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();
             }
         });
 
-        activitybutton.setOnClickListener(new View.OnClickListener() {
+        activityButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CreateNewActivity.putExtra("eventID", E.getEventId());
-                startActivity(CreateNewActivity);
+                ActivityListPage.putExtra("eventID", E.getEventId());
+                startActivity(ActivityListPage);
                 finish();
             }
         });
@@ -170,14 +179,14 @@ public class EventLandingPage extends Activity {
             statusNo.setVisibility(View.GONE);
             statusMaybe.setVisibility(View.GONE);
             pollButton.setVisibility(View.VISIBLE);
-            eventAssignmentbutton.setVisibility(View.VISIBLE);
-            activitybutton.setVisibility(View.VISIBLE);
+            eventAssignmentButton.setVisibility(View.VISIBLE);
+            activityButton.setVisibility(View.VISIBLE);
         }else{
             statusYes.setVisibility(View.VISIBLE);
             statusNo.setVisibility(View.VISIBLE);
             pollButton.setVisibility(View.GONE);
-            eventAssignmentbutton.setVisibility(View.GONE);
-            activitybutton.setVisibility(View.GONE);
+            eventAssignmentButton.setVisibility(View.GONE);
+            activityButton.setVisibility(View.GONE);
         }
 
         if (eventUser.getInviteStatus() == InviteStatus.INVITED) {

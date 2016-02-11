@@ -42,6 +42,7 @@ public class CreateNewPoll extends Activity {
         addNewOptionButton.setEnabled(false);
 
         ListView pollOptionsList = (ListView)findViewById(R.id.pollOptionsList);
+        pollOptionsList.setTag("pollOptionsList");
 
         final Button createNewPollOK = (Button) findViewById(R.id.createNewPollOK);
         final Button createNewPollCancel = (Button) findViewById(R.id.createNewPollCancel);
