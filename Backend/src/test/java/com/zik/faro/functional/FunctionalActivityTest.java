@@ -65,13 +65,12 @@ public class FunctionalActivityTest {
     }
     
     public static void createAndReadActivityTest() throws Exception{
-    	Assignment assignment = new Assignment("HikingToDo", ActionStatus.INCOMPLETE);
-    	assignment.addItem(new Item("food", "Gaurav", 2, Unit.COUNT));
-    	assignment.addItem(new Item("drinks", "Paddy", 5, Unit.COUNT));
     	// Create sample activity without id
     	Activity activity = new Activity(eventId, "Hiking",
     			"Test activity description", new Location("NYC"), 
-    			Calendar.getInstance(), assignment);
+    			Calendar.getInstance());
+        activity.getAssignment().addItem(new Item("food", "Gaurav", 2, Unit.COUNT));
+        activity.getAssignment().addItem(new Item("drinks", "Paddy", 5, Unit.COUNT));
     	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/create", token, activity);
         Activity activityResponse = response.getEntity(Activity.class);
         assertEntity(activity, activityResponse);
@@ -82,14 +81,14 @@ public class FunctionalActivityTest {
     }
     
     public static void updateActivityTest()throws Exception{
-    	Assignment assignment = new Assignment("HikingToDo", ActionStatus.INCOMPLETE);
-    	assignment.addItem(new Item("food", "Gaurav", 2, Unit.COUNT));
-    	assignment.addItem(new Item("drinks", "Paddy", 5, Unit.COUNT));
     	// Create sample activity without id
     	Activity activity = new Activity(eventId, "Hiking",
     			"Test activity description", new Location("NYC"), 
-    			Calendar.getInstance(), assignment);
-    	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/create", token, activity);
+    			Calendar.getInstance());
+        activity.getAssignment().addItem(new Item("food", "Gaurav", 2, Unit.COUNT));
+        activity.getAssignment().addItem(new Item("drinks", "Paddy", 5, Unit.COUNT));
+
+        ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/create", token, activity);
         Activity activityResponse = response.getEntity(Activity.class);
         assertEntity(activity, activityResponse);
         // Update activity. Activity id and event id should be passed in URI. Values in activity object will not be honored
@@ -105,13 +104,12 @@ public class FunctionalActivityTest {
     }
     
     public static void deleteActivityTest() throws Exception{
-    	Assignment assignment = new Assignment("HikingToDo", ActionStatus.INCOMPLETE);
-    	assignment.addItem(new Item("food", "Gaurav", 2, Unit.COUNT));
-    	assignment.addItem(new Item("drinks", "Paddy", 5, Unit.COUNT));
     	// Create sample activity without id
     	Activity activity = new Activity(eventId, "Hiking",
     			"Test activity description", new Location("NYC"), 
-    			Calendar.getInstance(), assignment);
+    			Calendar.getInstance());
+        activity.getAssignment().addItem(new Item("food", "Gaurav", 2, Unit.COUNT));
+        activity.getAssignment().addItem(new Item("drinks", "Paddy", 5, Unit.COUNT));
     	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/create", token, activity);
         Activity activityResponse = response.getEntity(Activity.class);
         assertEntity(activity, activityResponse);
@@ -129,20 +127,19 @@ public class FunctionalActivityTest {
     }
     
     public static void getActivitiesTest() throws Exception{
-    	Assignment assignment = new Assignment("HikingToDo", ActionStatus.INCOMPLETE);
-    	assignment.addItem(new Item("food", "Gaurav", 2, Unit.COUNT));
-    	assignment.addItem(new Item("drinks", "Paddy", 5, Unit.COUNT));
     	// Create sample activity without id
     	Activity activity = new Activity(eventId, "Hiking",
     			"Test activity description", new Location("NYC"), 
-    			Calendar.getInstance(), assignment);
+    			Calendar.getInstance());
+        activity.getAssignment().addItem(new Item("food", "Gaurav", 2, Unit.COUNT));
+        activity.getAssignment().addItem(new Item("drinks", "Paddy", 5, Unit.COUNT));
     	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/create", token, activity);
         Activity activityResponse = response.getEntity(Activity.class);
         assertEntity(activity, activityResponse);
         // Create another activity
         Activity activity1 = new Activity(eventId, "Swimming",
     			"Test activity description for swimming", new Location("Mafatlal bath"), 
-    			Calendar.getInstance(), assignment);
+    			Calendar.getInstance());
         response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/create", token, activity1);
         Activity activityResponse1 = response.getEntity(Activity.class);
         assertEntity(activity1, activityResponse1);
