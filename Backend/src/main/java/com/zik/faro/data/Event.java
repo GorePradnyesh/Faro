@@ -111,7 +111,8 @@ public class Event {
 		return assignment;
 	}
 
-	private void setAssignment(Assignment assignment) {
+    // for use only in the ConversionUtils
+	public void setAssignment(Assignment assignment) {
 		this.assignment = assignment;
 	}
 	

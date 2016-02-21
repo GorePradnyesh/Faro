@@ -12,6 +12,7 @@ import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 public class ConversionUtils {
 	public static Event fromDo(EventDo eventDo){
 		Event event = new Event();
+		event.setAssignment(eventDo.getAssignment());
 		event.setControlFlag(eventDo.isControlFlag());
 		event.setEndDate(eventDo.getEndDate());
 		event.setStartDate(eventDo.getStartDate());
@@ -49,6 +50,7 @@ public class ConversionUtils {
 	
 	public static Activity fromDo(ActivityDo activityDo){
 		Activity activity = new Activity();
+		activity.setAssignment(activityDo.getAssignment());
 		activity.setDate(activityDo.getDate());
 		activity.setDescription(activityDo.getDescription());
 		activity.setLocation(activityDo.getLocation());
