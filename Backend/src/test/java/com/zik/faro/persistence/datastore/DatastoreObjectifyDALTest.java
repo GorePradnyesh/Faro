@@ -398,7 +398,7 @@ public class DatastoreObjectifyDALTest {
     	String eventId = event.getEventId();
     	EventDatastoreImpl.storeEventOnly(event);
     	ActivityDo a = new ActivityDo(event.getEventId(), "TestEvent", "Testing update",
-    			new Location("San Jose"), new GregorianCalendar(), new Assignment(UUID.randomUUID().toString(), ActionStatus.INCOMPLETE));
+    			new Location("San Jose"), new GregorianCalendar(), new Assignment());
     	DatastoreObjectifyDAL.storeObject(a);
     	
     	// Verify indeed created
