@@ -7,7 +7,7 @@ import com.zik.faro.TestHelper;
 import com.zik.faro.api.authentication.LoginHandler;
 import com.zik.faro.api.authentication.PasswordHandler;
 import com.zik.faro.api.authentication.SignupHandler;
-import com.zik.faro.data.FaroSignupDetails;
+import com.zik.faro.data.user.FaroSignupDetails;
 import com.zik.faro.commons.FaroResponseStatus;
 import com.zik.faro.commons.exceptions.FaroWebAppException;
 import com.zik.faro.data.user.Address;

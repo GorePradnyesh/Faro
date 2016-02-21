@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 import com.sun.jersey.api.JResponse;
-import com.zik.faro.data.FaroSignupDetails;
+import com.zik.faro.data.user.FaroSignupDetails;
 import com.zik.faro.applogic.UserManagement;
 import com.zik.faro.auth.PasswordManager;
 import com.zik.faro.auth.PasswordManagerException;

@@ -19,7 +19,7 @@ public class OkHttpWrapperProfile extends BaseFaroOKHttpWrapper implements Profi
     public void createProfile(final BaseFaroRequestCallback<String> callback, final FaroUser faroUser) {
         // TODO: add param checks
         // TODO: Move create to string constants
-        String token = TokenCache.getTokenCache().getAuthToken();
+        String token = TokenCache.getTokenCache().getToken();
         String eventPutBody = mapper.toJson(faroUser);
         Request request = new Request.Builder()
                 .url(baseHandlerURL.toString() + "create")
@@ -33,7 +33,7 @@ public class OkHttpWrapperProfile extends BaseFaroOKHttpWrapper implements Profi
     @Override
     public void getProfile(final BaseFaroRequestCallback<FaroUser> callback, String userId) {
         // TODO: add param checks
-        String token = TokenCache.getTokenCache().getAuthToken();
+        String token = TokenCache.getTokenCache().getToken();
          Request request = new Request.Builder()
                  .url(baseHandlerURL.toString())
                  .addHeader(authHeaderName, token)

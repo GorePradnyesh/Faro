@@ -22,7 +22,7 @@ public class OKHttpWrapperFriends extends BaseFaroOKHttpWrapper implements Frien
 
     @Override
     public void inviteFriend(BaseFaroRequestCallback<String> callback, String userId) {
-        String token = TokenCache.getTokenCache().getAuthToken();
+        String token = TokenCache.getTokenCache().getToken();
         if(token != null){
             Request request = new Request.Builder()
                     .url(this.baseHandlerURL.toString() + "invite/")
@@ -38,7 +38,7 @@ public class OKHttpWrapperFriends extends BaseFaroOKHttpWrapper implements Frien
 
     @Override
     public void getFriends(BaseFaroRequestCallback<List<MinUser>> callback) {
-        String token = TokenCache.getTokenCache().getAuthToken();
+        String token = TokenCache.getTokenCache().getToken();
         if(token != null){
             Request request = new Request.Builder()
                     .url(this.baseHandlerURL.toString())
@@ -54,7 +54,7 @@ public class OKHttpWrapperFriends extends BaseFaroOKHttpWrapper implements Frien
 
     @Override
     public void unFriend(BaseFaroRequestCallback<String> callback, String userId) {
-        String token = TokenCache.getTokenCache().getAuthToken();
+        String token = TokenCache.getTokenCache().getToken();
         if(token != null){
             Request request = new Request.Builder()
                     .url(this.baseHandlerURL.toString() + "remove?userId=" + userId)

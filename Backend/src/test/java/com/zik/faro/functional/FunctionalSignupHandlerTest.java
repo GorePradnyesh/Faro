@@ -2,7 +2,7 @@ package com.zik.faro.functional;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.zik.faro.TestHelper;
-import com.zik.faro.data.FaroSignupDetails;
+import com.zik.faro.data.user.FaroSignupDetails;
 import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 import org.junit.Assert;

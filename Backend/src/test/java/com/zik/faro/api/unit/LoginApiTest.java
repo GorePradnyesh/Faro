@@ -16,7 +16,7 @@ import com.googlecode.objectify.ObjectifyService;
 import com.sun.jersey.api.JResponse;
 import com.zik.faro.api.authentication.LoginHandler;
 import com.zik.faro.api.authentication.SignupHandler;
-import com.zik.faro.data.FaroSignupDetails;
+import com.zik.faro.data.user.FaroSignupDetails;
 import com.zik.faro.data.user.Address;
 import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 import com.zik.faro.persistence.datastore.data.user.UserCredentialsDo;

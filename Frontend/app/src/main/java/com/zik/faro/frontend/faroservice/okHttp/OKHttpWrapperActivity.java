@@ -23,7 +23,7 @@ public class OKHttpWrapperActivity extends BaseFaroOKHttpWrapper implements Acti
 
     @Override
     public void getActivities(BaseFaroRequestCallback<List<Activity>> callback, String eventId) {
-        String token = TokenCache.getTokenCache().getAuthToken();
+        String token = TokenCache.getTokenCache().getToken();
         if(token != null){
             Request request = new Request.Builder()
                     .url(this.baseHandlerURL.toString() + eventId + "/activities")
@@ -38,7 +38,7 @@ public class OKHttpWrapperActivity extends BaseFaroOKHttpWrapper implements Acti
 
     @Override
     public void getActivity(BaseFaroRequestCallback<Activity> callback, String eventId, String activityId) {
-        String token = TokenCache.getTokenCache().getAuthToken();
+        String token = TokenCache.getTokenCache().getToken();
         if(token != null){
             Request request = new Request.Builder()
                     .url(this.baseHandlerURL.toString() + eventId + "/activity/" + activityId)
@@ -52,7 +52,7 @@ public class OKHttpWrapperActivity extends BaseFaroOKHttpWrapper implements Acti
 
     @Override
     public void createActivity(BaseFaroRequestCallback<Activity> callback, String eventId, Activity activity) {
-        String token = TokenCache.getTokenCache().getAuthToken();
+        String token = TokenCache.getTokenCache().getToken();
         if(token != null) {
             String pollPostBody = mapper.toJson(activity);
             Request request = new Request.Builder()
@@ -69,7 +69,7 @@ public class OKHttpWrapperActivity extends BaseFaroOKHttpWrapper implements Acti
 
     @Override
     public void updateActivity(BaseFaroRequestCallback<String> callback, String eventId, String activityId, Activity updateData) {
-        String token = TokenCache.getTokenCache().getAuthToken();
+        String token = TokenCache.getTokenCache().getToken();
         if(token != null) {
             String pollPostBody = mapper.toJson(updateData);
             Request request = new Request.Builder()
@@ -86,7 +86,7 @@ public class OKHttpWrapperActivity extends BaseFaroOKHttpWrapper implements Acti
 
     @Override
     public void deleteActivity(BaseFaroRequestCallback<String> callback, String eventId, String activityId) {
-        String token = TokenCache.getTokenCache().getAuthToken();
+        String token = TokenCache.getTokenCache().getToken();
         if(token != null) {
             Request request = new Request.Builder()
                     .url(baseHandlerURL.toString() + eventId + "/activity/" + activityId)

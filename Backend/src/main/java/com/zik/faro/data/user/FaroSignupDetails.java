@@ -1,16 +1,15 @@
-package com.zik.faro.data;
+package com.zik.faro.data.user;
 
-import com.zik.faro.data.user.FaroUser;
 public class FaroSignupDetails {
     private FaroUser faroUser;
+    private String password;
+
+    private FaroSignupDetails() {}
+
     public FaroSignupDetails(FaroUser faroUser, String password) {
         this.faroUser = faroUser;
         this.password = password;
     }
-
-    private String password;
-
-    private FaroSignupDetails() {}
 
     public FaroUser getFaroUser() {
         return faroUser;

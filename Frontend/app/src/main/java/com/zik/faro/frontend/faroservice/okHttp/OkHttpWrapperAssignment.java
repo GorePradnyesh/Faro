@@ -27,7 +27,7 @@ public class OkHttpWrapperAssignment extends BaseFaroOKHttpWrapper implements As
 
     @Override
     public void getAssignments(BaseFaroRequestCallback<Map<String, Assignment>> callback, String eventId) {
-        String token = TokenCache.getTokenCache().getAuthToken();
+        String token = TokenCache.getTokenCache().getToken();
         if(token != null) {
             Request request = new Request.Builder()
                     .url(this.getEventsUrl + eventId + "/assignments") // getting events has a different base url
@@ -44,7 +44,7 @@ public class OkHttpWrapperAssignment extends BaseFaroOKHttpWrapper implements As
 
     @Override
     public void getAssignment(BaseFaroRequestCallback<Assignment> callback, String eventId, String assignmentId, String activityId) {
-        String token = TokenCache.getTokenCache().getAuthToken();
+        String token = TokenCache.getTokenCache().getToken();
         String queryString = "";
         if(token != null) {
             if(activityId != null)
@@ -64,7 +64,7 @@ public class OkHttpWrapperAssignment extends BaseFaroOKHttpWrapper implements As
 
     @Override
     public void getPendingAssignmentCount(BaseFaroRequestCallback<AssignmentCount> callback, String eventId) {
-        String token = TokenCache.getTokenCache().getAuthToken();
+        String token = TokenCache.getTokenCache().getToken();
         if(token != null) {
             Request request = new Request.Builder()
                     .url(this.getEventsUrl + eventId + "/assignment/pending/count") // getting events has a different base url
@@ -79,7 +79,7 @@ public class OkHttpWrapperAssignment extends BaseFaroOKHttpWrapper implements As
 
     @Override
     public void deleteAssignment(BaseFaroRequestCallback<String> callback, String eventId, String assignmentId, String activityId) {
-        String token = TokenCache.getTokenCache().getAuthToken();
+        String token = TokenCache.getTokenCache().getToken();
         String queryString = "";
         if(token != null) {
             if(activityId != null)
@@ -100,7 +100,7 @@ public class OkHttpWrapperAssignment extends BaseFaroOKHttpWrapper implements As
 
     @Override
     public void updateAssignment(BaseFaroRequestCallback<String> callback, String eventId, String assignmentId, String activityId, List<Item> items) {
-        String token = TokenCache.getTokenCache().getAuthToken();
+        String token = TokenCache.getTokenCache().getToken();
         String queryString = "";
         String itemList = mapper.toJson(items);
         if(token != null) {
@@ -122,7 +122,7 @@ public class OkHttpWrapperAssignment extends BaseFaroOKHttpWrapper implements As
 
     @Override
     public void addAssignment(BaseFaroRequestCallback<String> callback, String eventId, Assignment assignment, String activityId) {
-        String token = TokenCache.getTokenCache().getAuthToken();
+        String token = TokenCache.getTokenCache().getToken();
         String queryString = "";
         String assignmentString = mapper.toJson(assignment);
         if(token != null) {

@@ -4,7 +4,7 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.zik.faro.TestHelper;
-import com.zik.faro.data.FaroSignupDetails;
+import com.zik.faro.data.user.FaroSignupDetails;
 import com.zik.faro.data.user.FaroResetPasswordData;
 import com.zik.faro.data.user.FaroUser;
 import org.junit.Assert;
