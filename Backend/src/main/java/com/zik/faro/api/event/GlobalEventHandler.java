@@ -13,6 +13,7 @@ import javax.ws.rs.core.SecurityContext;
 
 import com.sun.jersey.api.JResponse;
 import com.zik.faro.data.Event;
+import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.applogic.EventManagement;
 
 @Path(EVENTS_PATH_CONST)
@@ -23,9 +24,9 @@ public class GlobalEventHandler {
 	
 	@GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public JResponse<List<Event>> getEvents(){
+    public JResponse<List<EventInviteStatusWrapper>> getEvents(){
     	String userId = context.getUserPrincipal().getName();
-        List<Event> eventList = EventManagement.getEvents(userId);
+        List<EventInviteStatusWrapper> eventList = EventManagement.getEvents(userId);
         return JResponse.ok(eventList).build();
     }
   

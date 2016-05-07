@@ -16,11 +16,12 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import com.zik.faro.TestHelper;
-import com.zik.faro.data.Event;
 import com.zik.faro.api.responder.AddFriendRequest;
-import com.zik.faro.data.EventCreateData;
 import com.zik.faro.api.responder.InviteeList;
 import com.zik.faro.api.responder.InviteeList.Invitees;
+import com.zik.faro.data.Event;
+import com.zik.faro.data.EventCreateData;
+import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.Location;
 
 public class FunctionalEventTest {
@@ -156,7 +157,7 @@ public class FunctionalEventTest {
     	ClientResponse eventsResponse = TestHelper.doGET(endpoint.toString(), "v1/events", new MultivaluedMapImpl(), token);
     	eventsResponse = TestHelper.doGET(endpoint.toString(), "v1/events", new MultivaluedMapImpl(), token);
     	eventsResponse = TestHelper.doGET(endpoint.toString(), "v1/events", new MultivaluedMapImpl(), token);
-    	List<Event> events = eventsResponse.getEntity(new GenericType<List<Event>>(){});
+    	List<EventInviteStatusWrapper> events = eventsResponse.getEntity(new GenericType<List<EventInviteStatusWrapper>>(){});
     	Assert.assertEquals(6, events.size());
     }
     
