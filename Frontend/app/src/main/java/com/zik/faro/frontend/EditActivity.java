@@ -360,4 +360,13 @@ public class EditActivity extends ActionBarActivity {
                 cloneActivity.getStartDate().get(Calendar.MINUTE),
                 false).show();
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        ActivityLandingPage.putExtra("eventID", event.getEventId());
+        ActivityLandingPage.putExtra("activityID", activity.getId());
+        startActivity(ActivityLandingPage);
+        finish();
+    }
 }

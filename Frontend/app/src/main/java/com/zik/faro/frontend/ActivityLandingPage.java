@@ -32,8 +32,13 @@ public class ActivityLandingPage extends ActionBarActivity {
         ImageButton editButton = (ImageButton)findViewById(R.id.editButton);
         editButton.setImageResource(R.drawable.edit);
 
+        ImageButton activityAssignmentButton = (ImageButton)findViewById(R.id.activityAssignmentImageButton);
+        activityAssignmentButton.setImageResource(R.drawable.assignment_icon);
+
         ActivityListPage = new Intent(ActivityLandingPage.this, ActivityListPage.class);
         final Intent EditActivityPage = new Intent(ActivityLandingPage.this, EditActivity.class);
+        final Intent CreateActivityAssignment = new Intent(ActivityLandingPage.this, CreateNewAssignment.class);
+        final Intent AssignmentLandingPage = new Intent(ActivityLandingPage.this, AssignmentLandingPage.class);
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
@@ -68,6 +73,25 @@ public class ActivityLandingPage extends ActionBarActivity {
                 EditActivityPage.putExtra("activityID", activity.getId());
                 startActivity(EditActivityPage);
                 finish();
+            }
+        });
+
+        activityAssignmentButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (activity.getAssignment() == null) {
+                    CreateActivityAssignment.putExtra("eventID", event.getEventId());
+                    CreateActivityAssignment.putExtra("activityID", activity.getId());
+                    startActivity(CreateActivityAssignment);
+                    finish();
+                }else{
+                    AssignmentLandingPage.putExtra("eventID", event.getEventId());
+                    AssignmentLandingPage.putExtra("activityID", activity.getId());
+                    AssignmentLandingPage.putExtra("assignmentID", activity.getAssignment().getId());
+                    startActivity(AssignmentLandingPage);
+                    finish();
+                }
+
             }
         });
     }

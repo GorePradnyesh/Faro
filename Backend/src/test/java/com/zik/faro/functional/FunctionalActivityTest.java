@@ -53,12 +53,12 @@ public class FunctionalActivityTest {
     	Assert.assertEquals(activityRequest.getName(), activityResponse.getName());
     	Assert.assertEquals(activityRequest.getDate(), activityResponse.getDate());
     	Assert.assertEquals(activityRequest.getLocation().locationName, activityResponse.getLocation().locationName);
-    	for(int i = 0 ; i < activityRequest.getAssignment().getItemsList().size() ; i++){
-    		Assert.assertEquals(activityRequest.getAssignment().getItemsList().get(i).getName(), activityResponse.getAssignment().getItemsList().get(i).getName());
-    		Assert.assertEquals(activityRequest.getAssignment().getItemsList().get(i).getCount(), activityResponse.getAssignment().getItemsList().get(i).getCount());
-    		Assert.assertEquals(activityRequest.getAssignment().getItemsList().get(i).getAssigneeId(), activityResponse.getAssignment().getItemsList().get(i).getAssigneeId());
-    		Assert.assertEquals(activityRequest.getAssignment().getItemsList().get(i).getId(), activityResponse.getAssignment().getItemsList().get(i).getId());
-    		Assert.assertEquals(activityRequest.getAssignment().getItemsList().get(i).getStatus(), activityResponse.getAssignment().getItemsList().get(i).getStatus());
+    	for(int i = 0 ; i < activityRequest.getAssignment().getItems().size() ; i++){
+    		Assert.assertEquals(activityRequest.getAssignment().getItems().get(i).getName(), activityResponse.getAssignment().getItems().get(i).getName());
+    		Assert.assertEquals(activityRequest.getAssignment().getItems().get(i).getCount(), activityResponse.getAssignment().getItems().get(i).getCount());
+    		Assert.assertEquals(activityRequest.getAssignment().getItems().get(i).getAssigneeId(), activityResponse.getAssignment().getItems().get(i).getAssigneeId());
+    		Assert.assertEquals(activityRequest.getAssignment().getItems().get(i).getId(), activityResponse.getAssignment().getItems().get(i).getId());
+    		Assert.assertEquals(activityRequest.getAssignment().getItems().get(i).getStatus(), activityResponse.getAssignment().getItems().get(i).getStatus());
     	}
     	Assert.assertEquals(activityRequest.getAssignment().getId(), activityResponse.getAssignment().getId());
     	Assert.assertEquals(activityRequest.getAssignment().getStatus(), activityResponse.getAssignment().getStatus());

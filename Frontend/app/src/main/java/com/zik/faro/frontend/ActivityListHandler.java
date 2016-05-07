@@ -150,9 +150,10 @@ public class ActivityListHandler{
     }
 
     public void removeActivityFromListAndMap(Activity activity){
+        //TODO: send update to server and if successful then delete activity from List and Map below
+
         activityAdapter.list.remove(activity);
         activityAdapter.notifyDataSetChanged();
-
         activityMap.remove(activity.getId());
     }
 

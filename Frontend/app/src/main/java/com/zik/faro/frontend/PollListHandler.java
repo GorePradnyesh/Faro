@@ -5,6 +5,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.Poll;
+import com.zik.faro.data.PollOption;
+import java.util.UUID;
 
 
 public class PollListHandler {
@@ -56,6 +58,10 @@ public class PollListHandler {
         //TODO: send update to server and if successful then add poll to List and Map below and
         // update the pollID in the Poll.
         String pollID = getPollID();
+        for (Integer i = 0; i < poll.getPollOptions().size(); i++){
+            PollOption pollOption = poll.getPollOptions().get(i);
+            pollOption.setId(UUID.randomUUID().toString());
+        }
 
         if(pollID != null) {
             poll.setId(pollID);
@@ -116,12 +122,18 @@ public class PollListHandler {
     public void changePollStatusToClosed(Poll poll){
         removePollForEditing(poll);
         poll.setStatus(ObjectStatus.CLOSED);
+
+        //TODO: send update to server and if successful then delete poll from List and Map below
+
         addNewPoll(poll);
     }
 
     public void changePollStatusToOpen(Poll poll){
         removePollForEditing(poll);
         poll.setStatus(ObjectStatus.OPEN);
+
+        //TODO: send update to server and if successful then delete poll from List and Map below
+
         addNewPoll(poll);
     }
 }

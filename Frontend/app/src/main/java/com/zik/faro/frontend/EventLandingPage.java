@@ -22,7 +22,7 @@ public class EventLandingPage extends Activity {
     private DateFormat sdf = new SimpleDateFormat(" EEE, MMM d, yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
     private  static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static Event E;
+    private static Event event;
 
     private Button statusYes = null;
     private Button statusNo = null;
@@ -40,7 +40,7 @@ public class EventLandingPage extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_landing_page);
 
-        TextView event_name = (TextView)findViewById(R.id.eventNameText);
+        final TextView event_name = (TextView)findViewById(R.id.eventNameText);
         event_status = (TextView)findViewById(R.id.eventStatusText);
         TextView eventDescription = (TextView) findViewById(R.id.eventDescriptionTextView);
 
@@ -65,6 +65,8 @@ public class EventLandingPage extends Activity {
         final Intent PollListPage = new Intent(EventLandingPage.this, PollListPage.class);
         final Intent EditEvent = new Intent(EventLandingPage.this, EditEvent.class);
         final Intent ActivityListPage = new Intent(EventLandingPage.this, ActivityListPage.class);
+        final Intent CreateEventAssignment = new Intent(EventLandingPage.this, CreateNewAssignment.class);
+        final Intent AssignmentLandingPage = new Intent(EventLandingPage.this, AssignmentLandingPage.class);
 
         EventListPage = new Intent(EventLandingPage.this, EventListPage.class);
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
@@ -72,39 +74,39 @@ public class EventLandingPage extends Activity {
         Bundle extras = getIntent().getExtras();
         if(extras != null){
             String eventID = extras.getString("eventID");
-            E = eventListHandler.getEventFromMap(eventID);
-            if(E != null) {
+            event = eventListHandler.getEventFromMap(eventID);
+            if(event != null) {
 
                 //Display elements based on Event Status
-                eventStateBasedView(E);
+                eventStateBasedView(event);
 
                 controlFlagBasedView();
 
-                String ev_name = E.getEventName();
+                String ev_name = event.getEventName();
                 event_name.setText(ev_name);
 
-                String eventDescr = E.getEventDescription();
+                String eventDescr = event.getEventDescription();
                 eventDescription.setText(eventDescr);
 
-                startDateAndTime.setText(sdf.format(E.getStartDate().getTime()) + " at " +
-                        stf.format(E.getStartDate().getTime()));
+                startDateAndTime.setText(sdf.format(event.getStartDate().getTime()) + " at " +
+                        stf.format(event.getStartDate().getTime()));
 
-                endDateAndTime.setText(sdf.format(E.getEndDate().getTime()) + " at " +
-                        stf.format(E.getEndDate().getTime()));
+                endDateAndTime.setText(sdf.format(event.getEndDate().getTime()) + " at " +
+                        stf.format(event.getEndDate().getTime()));
 
                 statusYes.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        eventListHandler.changeEventStatusToYes(E);
-                        eventStateBasedView(E);
+                        eventListHandler.changeEventStatusToYes(event);
+                        eventStateBasedView(event);
                     }
                 });
 
                 statusMaybe.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        eventListHandler.changeEventStatusToMaybe(E);
-                        eventStateBasedView(E);
+                        eventListHandler.changeEventStatusToMaybe(event);
+                        eventStateBasedView(event);
                     }
                 });
 
@@ -114,7 +116,7 @@ public class EventLandingPage extends Activity {
                     public void onClick(View v) {
                         //TODO: Make API call and update server
 
-                        eventListHandler.removeEventFromListAndMap(E);
+                        eventListHandler.removeEventFromListAndMap(event);
                         startActivity(EventListPage);
                         finish();
                     }
@@ -125,7 +127,7 @@ public class EventLandingPage extends Activity {
         pollButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PollListPage.putExtra("eventID", E.getEventId());
+                PollListPage.putExtra("eventID", event.getEventId());
                 startActivity(PollListPage);
                 finish();
             }
@@ -134,14 +136,23 @@ public class EventLandingPage extends Activity {
         eventAssignmentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                if (event.getAssignment() == null) {
+                    CreateEventAssignment.putExtra("eventID", event.getEventId());
+                    startActivity(CreateEventAssignment);
+                    finish();
+                }else{
+                    AssignmentLandingPage.putExtra("eventID", event.getEventId());
+                    AssignmentLandingPage.putExtra("assignmentID", event.getAssignment().getId());
+                    startActivity(AssignmentLandingPage);
+                    finish();
+                }
             }
         });
 
         activityButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ActivityListPage.putExtra("eventID", E.getEventId());
+                ActivityListPage.putExtra("eventID", event.getEventId());
                 startActivity(ActivityListPage);
                 finish();
             }
@@ -150,7 +161,7 @@ public class EventLandingPage extends Activity {
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EditEvent.putExtra("eventID", E.getEventId());
+                EditEvent.putExtra("eventID", event.getEventId());
                 startActivity(EditEvent);
                 finish();
             }
@@ -197,8 +208,8 @@ public class EventLandingPage extends Activity {
     }
 
     private void controlFlagBasedView() {
-        if(E.getEventCreatorId() == null) {
-            if (E.getControlFlag()) {
+        if(event.getEventCreatorId() == null) {
+            if (event.getControlFlag()) {
                 editButton.setVisibility(View.GONE);
             }
         }
@@ -206,7 +217,7 @@ public class EventLandingPage extends Activity {
 
     @Override
     public void onBackPressed() {
-        eventListHandler.deleteEventFromMapIfNotInList(E);
+        eventListHandler.deleteEventFromMapIfNotInList(event);
         startActivity(EventListPage);
         finish();
         super.onBackPressed();

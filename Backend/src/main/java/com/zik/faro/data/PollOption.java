@@ -19,7 +19,7 @@ public class PollOption{
     }
 
     public PollOption(final String option){
-    	this(UUID.randomUUID().toString(),option);
+    	this(null, option);
     }
 
 //    public List<String> getVotersAsList(){

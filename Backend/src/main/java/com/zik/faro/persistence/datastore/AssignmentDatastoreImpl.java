@@ -60,7 +60,7 @@ public class AssignmentDatastoreImpl {
 		if(assignment == null){
 			return 0;
 		}
-		List<Item> items = assignment.getItemsList();
+		List<Item> items = assignment.getItems();
 		int count = 0;
 		for(Item item : items){
 			if(item.getStatus().equals(ActionStatus.INCOMPLETE)){

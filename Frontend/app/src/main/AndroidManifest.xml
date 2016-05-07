@@ -71,7 +71,16 @@
             android:label="@string/title_activity_activity_landing_page" />
         <activity
             android:name=".EditActivity"
-            android:label="@string/title_activity_edit"></activity>
+            android:label="@string/title_activity_edit" />
+        <activity
+            android:name=".CreateNewAssignment"
+            android:label="@string/title_activity_create_new_assignment" />
+        <activity
+            android:name=".AssignmentLandingPage"
+            android:label="@string/title_activity_assignment_landing_page" />
+        <activity
+            android:name=".EditAssignment"
+            android:label="@string/title_activity_edit_assignment"></activity>
     </application>
 
 </manifest>

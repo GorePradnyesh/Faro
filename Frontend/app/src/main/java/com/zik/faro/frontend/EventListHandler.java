@@ -191,6 +191,9 @@ public class EventListHandler {
                 (newEventIndex < eventAdapter.list.size() &&
                         newEventIndex > 0)) {
             eventAdapter.insert(event, newEventIndex);
+            //TODO: pull this out from here since we should not do it for each event, in case when
+            // we are fetching multiple events from the server. Do it after all events are fetched.
+            // Since notifyDataSetChanged is a very expensive operation.
             eventAdapter.notifyDataSetChanged();
         }
     }
@@ -262,6 +265,7 @@ public class EventListHandler {
         return this.eventMap.get(eventID);
     }
 
+
     public void removeEventFromListAndMap(Event E){
         EventAdapter eventAdapter;
         eventAdapter = getEventAdapter(E);
@@ -277,6 +281,7 @@ public class EventListHandler {
         String key = event.getEventId()+ myUserId;
         EventUser eventUser = eventUserMap.get(key);
         eventUser.setInviteStatus(InviteStatus.ACCEPTED);
+        //TODO: send update to server and if successful then delete event from List and Map below
         addNewEvent(event, eventUser.getInviteStatus());
     }
 
@@ -285,6 +290,7 @@ public class EventListHandler {
         String key = event.getEventId()+ myUserId;
         EventUser eventUser = eventUserMap.get(key);
         eventUser.setInviteStatus(InviteStatus.MAYBE);
+        //TODO: send update to server and if successful then delete event from List and Map below
         addNewEvent(event, eventUser.getInviteStatus());
     }
 

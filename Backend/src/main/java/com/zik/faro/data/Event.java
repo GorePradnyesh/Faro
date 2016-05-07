@@ -7,7 +7,7 @@ import com.zik.faro.data.expense.ExpenseGroup;
 
 public class Event {
     private String eventId;           
-    private String eventName;         
+    private String eventName;
     private Calendar startDate;     
     private Calendar endDate;
     private String eventDescription;

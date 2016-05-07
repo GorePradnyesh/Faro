@@ -14,7 +14,6 @@ public class EventUser {
     }
 
 
-
     public EventUser(final String eventId, final String faroUserId){
         this.id = generateEventUserId(eventId, faroUserId);
         this.eventRef = eventId;

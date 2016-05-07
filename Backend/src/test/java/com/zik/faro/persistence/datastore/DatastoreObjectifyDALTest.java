@@ -418,7 +418,7 @@ public class DatastoreObjectifyDALTest {
     	Assert.assertNotNull(retrievedActivity);
     	
     	// Verify
-    	Assert.assertEquals(retrievedActivity.getAssignment().getItemsList().get(0).getAssigneeId(), "123");
+    	Assert.assertEquals(retrievedActivity.getAssignment().getItems().get(0).getAssigneeId(), "123");
     	Assert.assertEquals(retrievedActivity.getLocation().locationName, "Fremont");
     	Assert.assertEquals(retrievedActivity.getDescription(), "Description changed");
     	

@@ -24,9 +24,9 @@ public class CreateNewPoll extends Activity {
 
     static PollListHandler pollListHandler = PollListHandler.getInstance();
     private  static EventListHandler eventListHandler = EventListHandler.getInstance();
-    int pollOtionsNum = 0;
     private static String eventID = null;
-    private static Event E;
+    private static Event event;
+    Intent PollListPage = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,12 +42,10 @@ public class CreateNewPoll extends Activity {
         addNewOptionButton.setEnabled(false);
 
         ListView pollOptionsList = (ListView)findViewById(R.id.pollOptionsList);
-        pollOptionsList.setTag("pollOptionsList");
 
         final Button createNewPollOK = (Button) findViewById(R.id.createNewPollOK);
-        final Button createNewPollCancel = (Button) findViewById(R.id.createNewPollCancel);
 
-        final Intent PollListPage = new Intent(CreateNewPoll.this, PollListPage.class);
+        PollListPage = new Intent(CreateNewPoll.this, PollListPage.class);
         final Intent OpenPollLandingPage = new Intent(CreateNewPoll.this, OpenPollLandingPage.class);
 
         final PollOptionsAdapter pollOptionsAdapter = new PollOptionsAdapter(this, R.layout.poll_create_new_page_row_style);
@@ -56,7 +54,7 @@ public class CreateNewPoll extends Activity {
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
             eventID = extras.getString("eventID");
-            E = eventListHandler.getEventFromMap(eventID);
+            event = eventListHandler.getEventFromMap(eventID);
         }
 
         //Enable the addNewOptionButton only after Users enters an Option
@@ -84,38 +82,40 @@ public class CreateNewPoll extends Activity {
                 pollOptionsAdapter.insert(pollOption, 0);
                 pollOptionsAdapter.notifyDataSetChanged();
                 optionText.setText("");
-                pollOtionsNum++;
                 //Enable createNewPollOK button only if atleast 2 poll are added.
-                if (pollOtionsNum == 2) createNewPollOK.setEnabled(true);
+                if (pollOptionsAdapter.getCount() == 2) createNewPollOK.setEnabled(true);
             }
         });
 
         createNewPollOK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                if (pollOptionsAdapter.getCount() < 2){
+                    //TODO Display Popup asking for atleast 2 options
+                    createNewPollOK.setEnabled(false);
+                    return;
+                }
                 Poll poll;
                 poll = new Poll(eventID, "pollCreator", isMultiChoice.isChecked(),
                         pollOptionsAdapter.list, "pollCreator", pollDescription.getText().toString(),
                         ObjectStatus.OPEN);
 
                 pollListHandler.addNewPoll(poll);
-                OpenPollLandingPage.putExtra("eventID", E.getEventId());
+                OpenPollLandingPage.putExtra("eventID", event.getEventId());
                 OpenPollLandingPage.putExtra("pollID", poll.getId());
                 startActivity(OpenPollLandingPage);
                 finish();
             }
         });
+    }
 
-        createNewPollCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                PollListPage.putExtra("eventID", E.getEventId());
-                startActivity(PollListPage);
-                finish();
-            }
-        });
-
-
+    @Override
+    public void onBackPressed() {
+        PollListPage.putExtra("eventID", event.getEventId());
+        startActivity(PollListPage);
+        finish();
+        super.onBackPressed();
     }
 
 

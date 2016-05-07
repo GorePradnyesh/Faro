@@ -55,18 +55,19 @@ public class PollOptionsAdapter extends ArrayAdapter {
         View row = convertView;
         ImgHolder holder = new ImgHolder();
 
-        if (convertView == null) {
+        PollOption pollOption = (PollOption) getItem(position);
+
+        if (pollOption.getId() != null){
+            LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            row = inflater.inflate(R.layout.poll_cant_edit_row_style, parent, false);
+            holder.OPTION_DESCRPTN = (TextView)row.findViewById(R.id.optionDescription);
+            row.setTag(holder);
+        }else {
             LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             row = inflater.inflate(R.layout.poll_create_new_page_row_style, parent, false);
             holder.OPTION_DESCRPTN = (TextView)row.findViewById(R.id.optionDescription);
             holder.DELETE_OPTION = (ImageButton) row.findViewById(R.id.deleteOption);
             row.setTag(holder);
-        }else{
-            holder = (ImgHolder) row.getTag();
-        }
-        PollOption pollOption = (PollOption) getItem(position);
-        holder.OPTION_DESCRPTN.setText(pollOption.getOption());
-        if (parent.getTag().equals("newPollOptionsList") || parent.getTag().equals("pollOptionsList")) {
             holder.DELETE_OPTION.setImageResource(R.drawable.delete);
             holder.DELETE_OPTION.setId(position);
             holder.DELETE_OPTION.setOnClickListener(new View.OnClickListener() {
@@ -74,13 +75,14 @@ public class PollOptionsAdapter extends ArrayAdapter {
                 public void onClick(View v) {
                     ImageButton imageButton = (ImageButton) v;
                     int position = imageButton.getId();
-                    list.remove(getItem(position));
+                    PollOption removepollOption = (PollOption) getItem(position);
+                    list.remove(removepollOption);
                     notifyDataSetChanged();
                 }
             });
-        }else if (parent.getTag().equals("newPollOptionsList")){
-            holder.DELETE_OPTION.setVisibility(View.GONE);
         }
+        holder.OPTION_DESCRPTN.setText(pollOption.getOption());
+
         return row;
     }
 }

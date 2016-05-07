@@ -41,14 +41,8 @@
     <ListView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/newPollOptionsList"
+        android:id="@+id/editPollOptionsList"
         android:layout_below="@+id/pollOptionRelativeLayout"/>
-    <ListView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/oldPollOptionsList"
-        android:layout_below="@id/newPollOptionsList"/>
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

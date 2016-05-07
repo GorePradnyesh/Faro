@@ -14,40 +14,52 @@ import java.util.Map;
 public class Assignment {
     private String id;
     private ActionStatus status;
-    private Map<String,Item> items = new HashMap<String, Item>();
+
+    //private Map<String,Item> items = new HashMap<String, Item>();
+    private List<Item> items = new ArrayList<>();
 
     private static final String NA = "N/A";
     
     private Assignment(){
     }
     
-    public Assignment(final String id, final ActionStatus status) throws IllegalDataOperation{
-    	if(id == null || id.isEmpty()){
-    		throw new IllegalDataOperation("Assignment id cannot be null");
-    	}
+    public Assignment(final String id, final ActionStatus status){
     	this.id = id;
     	this.status = status;
     }
-    
-    public Map<String,Item> getItems(){
-    	return this.items;
+
+    public Assignment(final  ActionStatus status){
+        this.status = status;
     }
     
-    public List<Item> getItemsList(){
-        return new ArrayList<Item>(this.items.values());     
+    /*public Map<String,Item> getItems(){
+    	return this.items;
+    }*/
+
+    public List<Item> getItems() {
+        return items;
     }
 
+    public void setItems(List<Item> items) {
+        this.items = items;
+    }
+    
+    /*public List<Item> getItemsList(){
+        return new ArrayList<Item>(this.items.values());
+    }*/
+
     public void addItem(Item item){
-        items.put(item.getId(), item);
+        //items.put(item.getId(), item);
+        items.add(item);
     }
     
-    public void setItems(Map<String,Item> items){
+    /*public void setItems(Map<String,Item> items){
     	this.items = items;
-    }
+    }*/
     
-    public Item getItem(String key){
+    /*public Item getItem(String key){
     	return items.get(key);
-    }
+    }*/
 
     public ActionStatus getStatus() {
         return status;

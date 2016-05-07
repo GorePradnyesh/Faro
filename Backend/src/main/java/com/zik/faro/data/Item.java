@@ -4,7 +4,7 @@ public class Item {
    
 	private String id;
     private String name;
-    private String assigneeId; 
+    private String assigneeId;
     private int count;
     private Unit unit;
     private ActionStatus status;
@@ -14,9 +14,6 @@ public class Item {
     
     
     public Item(String name, String assigneeId, int count, Unit unit, String id) throws IllegalDataOperation {
-    	if(id == null || id.isEmpty() || name == null || name.isEmpty()){
-        	throw new IllegalDataOperation("TODO item name or id cannot be null");
-        }
     	this.id = id;
         this.name = name;
         this.assigneeId = assigneeId;
