@@ -18,44 +18,54 @@ public class Event {
     private Assignment assignment;
     private String eventCreatorId;
 
+    // *** Server side constructors ***
     public Event(final String eventName, final Calendar startDate, final Calendar endDate,
-                 final boolean controlFlag, final ExpenseGroup expenseGroup, final Location location) {
+                 final String eventDescription, final boolean controlFlag, final ExpenseGroup expenseGroup, 
+                 final Location location, final ObjectStatus objectStatus, final Assignment assignment,
+                 final String eventCreatorId) {
         this.eventId = UUID.randomUUID().toString();
         this.eventName = eventName;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.eventDescription = eventDescription;
         this.controlFlag = controlFlag;
         this.expenseGroup = expenseGroup;
         this.location = location;
         this.status = ObjectStatus.OPEN;
+        this.assignment = assignment;
+        this.eventCreatorId = eventCreatorId;
     }
 
+    public Event(final String eventName){
+        this(eventName,null,null,null,false, null,null,null, new Assignment(),null);
+    }
+
+    // TODO: 05/07/16: Paddy Kaivan spoke about potential problems when a vanilla 
+    // event object is expected and you get one with id and assignment initialized
+    // Jaxb another avenue where problems possibly can occur which it seems like is
+    // overwriting these values.. If problems occur, clean up the below contructor
+    // and create overloaded ones as needed
+    public Event(){
+        this(null,null,null,null,false, null,null,null, new Assignment(),null);
+    }
+    
+    // *** Client constructor ***
     public Event(final String eventName, final Calendar startDate, final Calendar endDate,
                  final boolean controlFlag, String eventDescription,
-                 final ExpenseGroup expenseGroup, final Location location, final ObjectStatus status,
+                 final ExpenseGroup expenseGroup, final Location location,
                  final String eventCreatorId) {
-        this.eventId = UUID.randomUUID().toString();
-        this.eventName = eventName;
+        
+    	this.eventName = eventName;
         this.startDate = startDate;
         this.endDate = endDate;
         this.controlFlag = controlFlag;
         this.eventDescription = eventDescription;
         this.expenseGroup = expenseGroup;
         this.location = location;
-        this.status = status;
         this.eventCreatorId = eventCreatorId;
     }
 
-    public Event(final String eventName){
-        this.eventId = UUID.randomUUID().toString();
-        this.eventName = eventName;
-        this.status = ObjectStatus.OPEN;
-    }
-
-    public Event(){
-        this.eventId = UUID.randomUUID().toString();
-        this.assignment = new Assignment();
-    }
+    
 
     public String getEventDescription() {
         return eventDescription;
@@ -140,10 +150,6 @@ public class Event {
     // for use only in the ConversionUtils
 	public void setAssignment(Assignment assignment) {
 		this.assignment = assignment;
-	}
-	
-	public static void main(String[] args) {
-		System.out.println(Calendar.getInstance());
 	}
 
     public String getEventCreatorId() {

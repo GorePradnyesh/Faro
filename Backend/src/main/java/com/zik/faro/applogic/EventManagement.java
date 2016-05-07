@@ -1,34 +1,32 @@
 package com.zik.faro.applogic;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.zik.faro.data.Event;
-import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.api.responder.AddFriendRequest;
-import com.zik.faro.data.EventCreateData;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.data.Event;
+import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.IllegalDataOperation;
+import com.zik.faro.persistence.datastore.EventDatastoreImpl;
 import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.persistence.datastore.data.EventUserDo;
 import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
-import com.zik.faro.persistence.datastore.DatastoreObjectifyDAL;
-import com.zik.faro.persistence.datastore.EventDatastoreImpl;
 
 public class EventManagement {
 
-	public static Event createEvent(final String userId, final EventCreateData eventCreateData){
-        /*Create a new event with the provided data, with the FALSE control flag.*/
-        Event newEvent = new Event(eventCreateData.getEventName(), eventCreateData.getStartDate(),
-                eventCreateData.getEndDate(), false, eventCreateData.getExpenseGroup(), eventCreateData.getLocation());
-        
-        EventDatastoreImpl.storeEvent(userId, ConversionUtils.toDo(newEvent));
+	public static Event createEvent(final String userId, final Event ev){
+        // clientEvent object created with client constructor needs to be passed through
+		// server constructor to generate eventId and other defaults invisible to client
+		Event event = new Event(ev.getEventName(), ev.getStartDate(), ev.getEndDate(),
+        		ev.getEventDescription(), ev.getControlFlag(), ev.getExpenseGroup(), 
+        		ev.getLocation(), null, null, null);
+        EventDatastoreImpl.storeEvent(userId, ConversionUtils.toDo(event));
         //TODO: send out notifications t
-        return newEvent;
+        return event;
     }
 
     public static Event getEventDetails(final String userId, final String eventId) throws DataNotFoundException{

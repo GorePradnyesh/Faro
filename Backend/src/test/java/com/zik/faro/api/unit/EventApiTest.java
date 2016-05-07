@@ -18,13 +18,12 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
 import com.zik.faro.TestHelper;
-import com.zik.faro.data.Event;
 import com.zik.faro.api.event.EventCreateHandler;
 import com.zik.faro.api.event.EventHandler;
-import com.zik.faro.data.EventCreateData;
+import com.zik.faro.data.Event;
+import com.zik.faro.data.Location;
 import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.persistence.datastore.data.EventUserDo;
-import com.zik.faro.data.Location;
 
 public class EventApiTest {
 	private static final LocalServiceTestHelper helper = new LocalServiceTestHelper(
@@ -61,9 +60,10 @@ public class EventApiTest {
 	public void testEventCreation() {
 		String eventName = UUID.randomUUID().toString();
 
-		EventCreateData eventCreateData = new EventCreateData(eventName,
-				Calendar.getInstance(), Calendar.getInstance(), new Location(
-						"Random Location"), null);
+		Event eventCreateData = new Event(eventName,
+				Calendar.getInstance(), Calendar.getInstance(), "Test event description",
+				false, null, new Location(
+						"Random Location"), null, null,"Mafia god");
 
 		EventCreateHandler eventCreateHandler = new EventCreateHandler();
 		Whitebox.setInternalState(eventCreateHandler, securityContextMock);
@@ -89,9 +89,10 @@ public class EventApiTest {
 		Whitebox.setInternalState(eventHandler, securityContextMock);
 
 		// Store event
-		EventCreateData eventCreateData = new EventCreateData(eventName,
-				Calendar.getInstance(), Calendar.getInstance(),
-				new Location("Random Location"), null);
+		Event eventCreateData = new Event(eventName,
+				Calendar.getInstance(), Calendar.getInstance(), "Test event description",
+				false, null, new Location(
+						"Random Location"), null, null,"Mafia god");
 		Event minEvent = eventCreateHandler
 				.createEvent(eventCreateData).getEntity();
 

@@ -14,11 +14,10 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import com.zik.faro.TestHelper;
-import com.zik.faro.data.Activity;
-import com.zik.faro.data.Event;
-import com.zik.faro.data.EventCreateData;
 import com.zik.faro.data.ActionStatus;
+import com.zik.faro.data.Activity;
 import com.zik.faro.data.Assignment;
+import com.zik.faro.data.Event;
 import com.zik.faro.data.Item;
 import com.zik.faro.data.Location;
 import com.zik.faro.data.Unit;
@@ -37,8 +36,8 @@ public class FunctionalActivityTest {
 
     // Create an event for all activity tests
     private static void createEvent() throws IOException{
-        EventCreateData eventCreateData = new EventCreateData("MySampleEvent", Calendar.getInstance(),
-                Calendar.getInstance(), new Location("Random Location"), null);
+    	Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(),
+                Calendar.getInstance(), "Description", false, null, new Location("Random Location"),null, null, "Mafia god");
         ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);
         Event event = response.getEntity(Event.class);
         FunctionalEventTest.assertEntity(eventCreateData, event);

@@ -28,6 +28,8 @@ public class EventDo {
     private Location location;
     private ObjectStatus status;
     private Assignment assignment;
+    private String eventDescription;
+    private String eventCreatorId;
 
     public EventDo(final String eventName, final Calendar startDate, final Calendar endDate,
                  final boolean controlFlag, final ExpenseGroup expenseGroup, final Location location) {
@@ -127,6 +129,22 @@ public class EventDo {
 
 	public void setAssignment(Assignment assignment) {
 		this.assignment = assignment;
+	}
+
+	public String getEventDescription() {
+		return eventDescription;
+	}
+
+	public void setEventDescription(String eventDescription) {
+		this.eventDescription = eventDescription;
+	}
+
+	public String getEventCreatorId() {
+		return eventCreatorId;
+	}
+
+	public void setEventCreatorId(String eventCreatorId) {
+		this.eventCreatorId = eventCreatorId;
 	}
 	
 }

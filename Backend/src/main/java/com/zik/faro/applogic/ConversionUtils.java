@@ -20,6 +20,9 @@ public class ConversionUtils {
 		event.setLocation(eventDo.getLocation());
 		event.setEventId(eventDo.getEventId());
 		event.setEventName(eventDo.getEventName());
+		event.setEventCreatorId(eventDo.getEventCreatorId());
+		event.setEventDescription(eventDo.getEventDescription());
+		event.setStatus(eventDo.getStatus());
 		return event;
 	}
 	
@@ -33,6 +36,9 @@ public class ConversionUtils {
 		eventDo.setLocation(event.getLocation());
 		eventDo.setEventId(event.getEventId());
 		eventDo.setEventName(event.getEventName());
+		eventDo.setEventCreatorId(event.getEventCreatorId());
+		eventDo.setEventDescription(event.getEventDescription());
+		eventDo.setStatus(event.getStatus());
 		return eventDo;
 	}
 	

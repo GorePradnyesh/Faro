@@ -13,9 +13,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
 
 import com.sun.jersey.api.JResponse;
-import com.zik.faro.data.Event;
-import com.zik.faro.data.EventCreateData;
 import com.zik.faro.applogic.EventManagement;
+import com.zik.faro.data.Event;
 
 @Path(EVENT_PATH_CONST + EVENT_CREATE_PATH_CONST)
 public class EventCreateHandler {
@@ -44,10 +43,9 @@ public class EventCreateHandler {
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public JResponse<Event> createEvent(EventCreateData eventCreateData){
+    public JResponse<Event> createEvent(Event clientEvent){
         final String userId = context.getUserPrincipal().getName();
-
-        Event event = EventManagement.createEvent(userId, eventCreateData);
+        Event event = EventManagement.createEvent(userId, clientEvent);
         return JResponse.ok(event).build();
     }
 

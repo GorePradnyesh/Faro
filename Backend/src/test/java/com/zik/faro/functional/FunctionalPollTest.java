@@ -18,10 +18,9 @@ import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import com.zik.faro.TestHelper;
 import com.zik.faro.data.Event;
+import com.zik.faro.data.Location;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.PollOption;
-import com.zik.faro.data.EventCreateData;
-import com.zik.faro.data.Location;
 
 public class FunctionalPollTest {
 	private static URL endpoint;
@@ -37,8 +36,8 @@ public class FunctionalPollTest {
     
     // Create an event for all activity tests
     private static void createEvent() throws IOException{
-    	EventCreateData eventCreateData = new EventCreateData("Dinner", Calendar.getInstance(),
-                Calendar.getInstance(), new Location("SFO"), null);
+    	Event eventCreateData = new Event("Dinner", Calendar.getInstance(),
+                Calendar.getInstance(), "Description", false, null, new Location("SFO"),null, null, "Mafia god");
     	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);
         Event event = response.getEntity(Event.class);
         FunctionalEventTest.assertEntity(eventCreateData, event);

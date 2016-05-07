@@ -20,7 +20,6 @@ import com.zik.faro.api.responder.AddFriendRequest;
 import com.zik.faro.api.responder.InviteeList;
 import com.zik.faro.api.responder.InviteeList.Invitees;
 import com.zik.faro.data.Event;
-import com.zik.faro.data.EventCreateData;
 import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.Location;
 
@@ -39,8 +38,9 @@ public class FunctionalEventTest {
     
     // 1. createEvent
     public void createEventTest() throws Exception {
-    	EventCreateData eventCreateData = new EventCreateData("MySampleEvent", Calendar.getInstance(),
-                Calendar.getInstance(), new Location("Random Location"), null);
+    	
+    	Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(),
+                Calendar.getInstance(), "Description", false, null, new Location("Random Location"),null, null, "Mafia god");
     	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);
         Event event = response.getEntity(Event.class);
         assertEntity(eventCreateData, event);
@@ -48,8 +48,8 @@ public class FunctionalEventTest {
     
     // 2. getEventDetails
     public void getEventDetails() throws Exception{
-    	EventCreateData eventCreateData = new EventCreateData("MySampleEvent", Calendar.getInstance(),
-                Calendar.getInstance(), new Location("NYC"), null);
+    	Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(),
+                Calendar.getInstance(), "Description", false, null, new Location("NYC"),null, null, "Mafia god");
     	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);
         Event ev = response.getEntity(Event.class);
         ClientResponse response1 = TestHelper.doGET(endpoint.toString(), "v1/event/"+ ev.getEventId()+"/details", new MultivaluedMapImpl(), token);
@@ -60,8 +60,8 @@ public class FunctionalEventTest {
     // 3. getEventInvitees
     public void getEventInvitees() throws Exception{
     	// Create event
-    	EventCreateData eventCreateData = new EventCreateData("MySampleEvent", Calendar.getInstance(),
-                Calendar.getInstance(), new Location("NYC"), null);
+    	Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(),
+                Calendar.getInstance(), "Description", false, null, new Location("NYC"),null, null, "Mafia god");
     	ClientResponse createEventResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);
         Event ev = createEventResponse.getEntity(Event.class);
         // Verify indeed created by doing GET
@@ -116,8 +116,8 @@ public class FunctionalEventTest {
     
     // 4. disableEventControl
     public void disableEventControl() throws IOException{
-    	EventCreateData eventCreateData = new EventCreateData("MySampleEvent", Calendar.getInstance(),
-                Calendar.getInstance(), new Location("NYC"), null);
+    	Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(),
+                Calendar.getInstance(), "Description", false, null, new Location("NYC"),null, null, "Mafia god");
     	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);
         Event ev = response.getEntity(Event.class);
         ClientResponse response1 = TestHelper.doGET(endpoint.toString(), "v1/event/"+ ev.getEventId()+"/details", new MultivaluedMapImpl(), token);
@@ -144,12 +144,12 @@ public class FunctionalEventTest {
     // 7. getEvents
     public void getEvents() throws Exception{
     	// Create 3 events
-    	EventCreateData eventCreateData = new EventCreateData("MySampleEvent", Calendar.getInstance(),
-                Calendar.getInstance(), new Location("NYC"), null);
-    	EventCreateData eventCreateData1 = new EventCreateData("MySampleEvent", Calendar.getInstance(),
-                Calendar.getInstance(), new Location("SFO"), null);
-    	EventCreateData eventCreateData2 = new EventCreateData("MySampleEvent", Calendar.getInstance(),
-                Calendar.getInstance(), new Location("Vegas"), null);
+    	Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(),
+                Calendar.getInstance(), "Description", false, null, new Location("NYC"),null, null, "Mafia god");
+    	Event eventCreateData1 = new Event("MySampleEvent", Calendar.getInstance(),
+                Calendar.getInstance(), "Description", false, null, new Location("SFO"),null, null, "Mafia god");
+    	Event eventCreateData2 = new Event("MySampleEvent", Calendar.getInstance(),
+                Calendar.getInstance(), "Description", false, null, new Location("Vegas"),null, null, "Mafia god");
     	ClientResponse createEventResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);
     	ClientResponse createEventResponse1 = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData1);
     	ClientResponse createEventResponse2 = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData2);
@@ -171,7 +171,7 @@ public class FunctionalEventTest {
     }
 
     
-    public static void assertEntity(EventCreateData expected, Event actual){
+    public static void assertEntity(Event expected, Event actual){
     	Assert.assertEquals(expected.getEventName(), actual.getEventName());
         Assert.assertEquals(expected.getEndDate(), actual.getEndDate());
         Assert.assertEquals(expected.getStartDate(), actual.getStartDate());
