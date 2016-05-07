@@ -17,10 +17,9 @@ import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.api.JResponse;
+import com.zik.faro.auth.jwt.FaroJwtTokenManager;
 import com.zik.faro.auth.PasswordManager;
 import com.zik.faro.auth.PasswordManagerException;
-import com.zik.faro.auth.jwt.FaroJwtTokenManager;
 import com.zik.faro.commons.FaroResponseStatus;
 import com.zik.faro.commons.ParamValidation;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
@@ -46,15 +45,15 @@ public class LoginHandler {
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public JResponse<String> login(@QueryParam(LOGIN_USERNAME_PARAM) final String username,
+    public String login(@QueryParam(LOGIN_USERNAME_PARAM) final String username,
                         final String password) {
         ParamValidation.genericParamValidations(username, LOGIN_USERNAME_PARAM);
         ParamValidation.genericParamValidations(password, "password");
 
         logger.info("username : " + username);
-        logger.info("password : " + password);
 
         try {
+            // Authenticate the user
         	UserCredentialsDo userCredentials = UserCredentialsDatastoreImpl.loadUserCreds(username);
 
             if (!PasswordManager.checkPasswordEquality(password, userCredentials.getEncryptedPassword())) {
@@ -71,7 +70,7 @@ public class LoginHandler {
 		}
 
         // Generate a JWT token
-        return JResponse.ok(FaroJwtTokenManager.createToken(username)).build();
+        return FaroJwtTokenManager.createToken(username);
     }
 
     /**

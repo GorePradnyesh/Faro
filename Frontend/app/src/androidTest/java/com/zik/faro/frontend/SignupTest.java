@@ -39,7 +39,7 @@ public class SignupTest extends ApplicationTestCase<Application> {
         Assert.assertFalse(callback.failed);
         Assert.assertFalse(callback.unexpectedResponseCode);
         Assert.assertNotNull(callback.token);
-        Assert.assertEquals(TokenCache.getTokenCache().getAuthToken(), callback.token);
+        Assert.assertEquals(TokenCache.getTokenCache().getToken(), callback.token);
     }
 
 

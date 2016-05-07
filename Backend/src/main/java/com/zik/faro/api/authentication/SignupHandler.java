@@ -19,19 +19,25 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 import com.sun.jersey.api.JResponse;
-import com.zik.faro.data.FaroSignupDetails;
+import com.zik.faro.data.user.FaroSignupDetails;
 import com.zik.faro.applogic.UserManagement;
 import com.zik.faro.auth.PasswordManager;
 import com.zik.faro.auth.PasswordManagerException;
 import com.zik.faro.auth.jwt.FaroJwtTokenManager;
 import com.zik.faro.commons.FaroResponseStatus;
+import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.FaroWebAppException;
 import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 import com.zik.faro.persistence.datastore.data.user.UserCredentialsDo;
 import com.zik.faro.persistence.datastore.UserCredentialsDatastoreImpl;
 import com.zik.faro.persistence.datastore.UserDatastoreImpl;
+import java.text.MessageFormat;
+import java.util.UUID;
 
 
+/**
+ * Created by granganathan on 2/8/15.
+ */
 @Path(AUTH_PATH_CONST + AUTH_SIGN_UP_PATH_CONST)
 public class SignupHandler {
     private static Logger logger = LoggerFactory.getLogger(SignupHandler.class);
@@ -39,7 +45,7 @@ public class SignupHandler {
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public JResponse<String> signupUser(FaroSignupDetails faroSignupDetails) {
+    public String signupUser(FaroSignupDetails faroSignupDetails) {
         if (faroSignupDetails == null) {
             throw new FaroWebAppException(FaroResponseStatus.BAD_REQUEST, "User signup  details missing.");
         }
@@ -60,20 +66,19 @@ public class SignupHandler {
         if (Strings.isNullOrEmpty(password)) {
             throw new FaroWebAppException(FaroResponseStatus.BAD_REQUEST, "User password not specifed.");
         }
-        
+
         // Lookup to sees if an user exists with the same id
         if (UserManagement.isExistingUser(newFaroUser.getEmail())) {
             // Return  error code indicating user exists
             logger.info("User already exists");
-            // TODO (Code Review) : throw only WebApplicationException . Keep an emum of Faro status codes
             throw new FaroWebAppException(FaroResponseStatus.ENTITY_EXISTS, MessageFormat.format("Username {0} already exists.", newFaroUser.getEmail()));
         }
-        
 
         try {
         	// Store the New user's credentials and user details
             UserCredentialsDo userCreds = new UserCredentialsDo(newFaroUser.getEmail(),
-                                                            PasswordManager.getEncryptedPassword(password));
+                                                            PasswordManager.getEncryptedPassword(password),
+                                                            UUID.randomUUID().toString());
             UserCredentialsDatastoreImpl.storeUserCreds(userCreds);
             FaroUserDo faroUserDo = ConversionUtils.toDo(newFaroUser);
             UserDatastoreImpl.storeUser(faroUserDo);
@@ -81,8 +86,7 @@ public class SignupHandler {
             logger.error("Password could not be encrypted", e);
         }
 
-        return JResponse.ok(FaroJwtTokenManager.createToken(newFaroUser.getEmail()))
-        		.build();
+        return FaroJwtTokenManager.createToken(newFaroUser.getEmail());
     }
 
 }

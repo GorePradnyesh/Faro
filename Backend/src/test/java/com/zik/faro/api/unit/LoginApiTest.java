@@ -16,7 +16,7 @@ import com.googlecode.objectify.ObjectifyService;
 import com.sun.jersey.api.JResponse;
 import com.zik.faro.api.authentication.LoginHandler;
 import com.zik.faro.api.authentication.SignupHandler;
-import com.zik.faro.data.FaroSignupDetails;
+import com.zik.faro.data.user.FaroSignupDetails;
 import com.zik.faro.data.user.Address;
 import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 import com.zik.faro.persistence.datastore.data.user.UserCredentialsDo;
@@ -71,14 +71,14 @@ public class LoginApiTest {
         createNewUser(faroUser, "pfloyd782$");
 
         LoginHandler loginHandler = new LoginHandler();
-        JResponse<String> token = loginHandler.login(faroUser.getEmail(), "pfloyd782$");
+        String token = loginHandler.login(faroUser.getEmail(), "pfloyd782$");
 
-        Assert.assertNotNull(token.getEntity());
+        Assert.assertNotNull(token);
     }
 
     public String createNewUser(FaroUserDo user, String password) {
         SignupHandler signupHandler = new SignupHandler();
         FaroUser faroUser = ConversionUtils.fromDo(user);
-        return signupHandler.signupUser(new FaroSignupDetails(faroUser, password)).getEntity();
+        return signupHandler.signupUser(new FaroSignupDetails(faroUser, password));
     }
 }

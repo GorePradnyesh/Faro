@@ -7,3 +7,4 @@ logs/*
 *.settings
 .DS_Store
 Frontend/app/src/main/java/com/zik/faro/data
+**/.metadata*

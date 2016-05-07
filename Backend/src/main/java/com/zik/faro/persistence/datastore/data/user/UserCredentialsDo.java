@@ -16,14 +16,17 @@ public class UserCredentialsDo {
     @Index
     private String             email;
     private String encryptedPassword;
+    private String userCredsUUid;
 
     private UserCredentialsDo() {}
 
-    public UserCredentialsDo(String email, String encryptedPassword) {
+    public UserCredentialsDo(String email, String encryptedPassword, String userCredsUUid) {
         this.email = email;
 
         // Store the encrypted encryptedPassword
         this.encryptedPassword = encryptedPassword;
+
+        this.userCredsUUid = userCredsUUid;
     }
 
     public String getEncryptedPassword() {
@@ -40,5 +43,13 @@ public class UserCredentialsDo {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getUserCredsUUid() {
+        return userCredsUUid;
+    }
+
+    public void setUserCredsUUid(String userCredsUUid) {
+        this.userCredsUUid = userCredsUUid;
     }
 }

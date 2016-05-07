@@ -8,7 +8,10 @@ import com.zik.faro.auth.jwt.FaroJwtTokenManager;
 import com.zik.faro.auth.jwt.JwtTokenValidationException;
 import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.FaroResponseStatus;
+import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.FaroWebAppException;
+import com.zik.faro.persistence.datastore.data.user.UserCredentialsDo;
+import com.zik.faro.persistence.datastore.UserCredentialsDatastoreImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +49,12 @@ public class AuthFilter implements ContainerRequestFilter {
 
         String nativeLoginPath = Constants.AUTH_PATH_CONST + Constants.AUTH_LOGIN_PATH_CONST + "/";
         String nativeSignupPath = Constants.AUTH_PATH_CONST + Constants.AUTH_SIGN_UP_PATH_CONST + "/";
+        String forgotPasswordPath = Constants.AUTH_PATH_CONST + Constants.AUTH_PASSWORD_PATH_CONST
+                                    + Constants.AUTH_FORGOT_PASSWORD_PATH_CONST;
+        String forgotPasswordFormPath = Constants.AUTH_PATH_CONST + Constants.AUTH_PASSWORD_PATH_CONST
+                                         + Constants.AUTH_FORGOT_PASSWORD_FORM_PATH_CONST;
+        String newPasswordPath = Constants.AUTH_PATH_CONST + Constants.AUTH_PASSWORD_PATH_CONST
+                                 + Constants.AUTH_NEW_PASSWORD_PATH_CONST;
         String requestPath = "/" + containerRequest.getPath();
 
         if(!requestPath.endsWith("/")){
@@ -56,13 +65,16 @@ public class AuthFilter implements ContainerRequestFilter {
 
         // No authentication required for login/signup requests
         if (requestPath.equals(nativeLoginPath) ||
-                requestPath.equals(nativeSignupPath)) {
+                requestPath.equals(nativeSignupPath) ||
+                requestPath.equals(forgotPasswordPath) ||
+                requestPath.equals(forgotPasswordFormPath)) {
             return containerRequest;
         }
 
         String authHeaderValue = containerRequest.getHeaderValue(AUTH_HEADER);
 
         if (Strings.isNullOrEmpty(authHeaderValue)) {
+            logger.error("Authentication header not present");
             throw new FaroWebAppException(FaroResponseStatus.UNAUTHORIZED, "Authentication token not provided");
         }
 
@@ -76,6 +88,16 @@ public class AuthFilter implements ContainerRequestFilter {
             //final FaroJwtClaims jwtClaims = FaroJwtTokenManager.obtainClaimsWithNoChecks(authHeaderValue);
 
             final FaroJwtClaims jwtClaims = FaroJwtTokenManager.validateToken(authHeaderValue);
+            logger.info("jwtClaims : " + jwtClaims);
+
+            // For new password API, check if the token has valid JWT id
+            if (requestPath.equals(newPasswordPath)) {
+                UserCredentialsDo userCredentials = UserCredentialsDatastoreImpl.loadUserCreds(jwtClaims.getUsername());
+                String userCredsUuid = userCredentials.getUserCredsUUid();
+                if (!userCredsUuid.equals(jwtClaims.getJwtId())) {
+                    throw new FaroWebAppException(FaroResponseStatus.UNAUTHORIZED, "Invalid token");
+                }
+            }
 
             // Pass the JWT claims up to the resource classes through the SecurityContext object
             containerRequest.setSecurityContext(new SecurityContext() {
@@ -108,7 +130,11 @@ public class AuthFilter implements ContainerRequestFilter {
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             // Add logging
             throw new IllegalStateException("Unable to authenticate the request");
+        } catch (DataNotFoundException e) {
+            throw new FaroWebAppException(FaroResponseStatus.UNAUTHORIZED, "Invalid token. User not found");
         }
+
+
     }
 }
 

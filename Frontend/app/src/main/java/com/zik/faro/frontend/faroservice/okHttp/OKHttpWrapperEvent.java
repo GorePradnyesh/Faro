@@ -6,7 +6,6 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.EventCreateData;
-import com.zik.faro.data.Location;
 
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.auth.TokenCache;
@@ -18,10 +17,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 public class OKHttpWrapperEvent extends BaseFaroOKHttpWrapper implements EventHandler {
     
@@ -34,7 +30,7 @@ public class OKHttpWrapperEvent extends BaseFaroOKHttpWrapper implements EventHa
 
     @Override
     public void getEvents(final BaseFaroRequestCallback<List<Event>> callback) {
-        String token = TokenCache.getTokenCache().getAuthToken();
+        String token = TokenCache.getTokenCache().getToken();
         if(token != null){
             Request request = new Request.Builder()
                     .url(this.getEventsUrl) // getting events has a different base url
@@ -51,7 +47,7 @@ public class OKHttpWrapperEvent extends BaseFaroOKHttpWrapper implements EventHa
 
     // TODO: Temp use this actual implementation instead of event
     public void getEvent(final BaseFaroRequestCallback<Event> callback, final String eventId){
-        String token = TokenCache.getTokenCache().getAuthToken();
+        String token = TokenCache.getTokenCache().getToken();
         Request request = new Request.Builder()
                 .url(baseHandlerURL.toString() + eventId + "/details/")
                 .addHeader("Authentication", token)
@@ -62,7 +58,7 @@ public class OKHttpWrapperEvent extends BaseFaroOKHttpWrapper implements EventHa
 
     public void createEvent(final BaseFaroRequestCallback<Event> callback, EventCreateData eventCreateData){
         // TODO: Validate the eventCreateData
-        String token = TokenCache.getTokenCache().getAuthToken();
+        String token = TokenCache.getTokenCache().getToken();
         String eventPostBody = mapper.toJson(eventCreateData);
         Request request = new Request.Builder()
                 .url(baseHandlerURL.toString() + "create")

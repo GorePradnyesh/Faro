@@ -1,9 +1,6 @@
 package com.zik.faro.data;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -20,7 +17,9 @@ public class Assignment {
 
     private static final String NA = "N/A";
     
-    private Assignment(){
+    public Assignment(){
+        this.id = UUID.randomUUID().toString();
+        this.status = ActionStatus.INCOMPLETE;
     }
     
     public Assignment(final String id, final ActionStatus status){

@@ -10,11 +10,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TabHost;
 
 import com.zik.faro.data.Event;
+import com.zik.faro.frontend.faroservice.auth.TokenCache;
 
 /*
  * This is the page where all the events are listed in separate tabs based on invitation "Accepted"
@@ -72,6 +74,7 @@ public class EventListPage extends Activity{
         add_event.setImageResource(R.drawable.plus);
         ImageButton calendar_view = (ImageButton)findViewById(R.id.calendarViewButton);
         calendar_view.setImageResource(R.drawable.calendar);
+        Button logout = (Button)findViewById(R.id.logout);
 
         final Intent eventLanding = new Intent(EventListPage.this, EventLandingPage.class);
         final Intent create_event_page = new Intent(EventListPage.this, CreateNewEvent.class);
@@ -125,6 +128,14 @@ public class EventListPage extends Activity{
             @Override
             public void onClick(View v) {
                 startActivity(create_event_page);
+                finish();
+            }
+        });
+
+        logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TokenCache.getTokenCache().deleteToken();
                 finish();
             }
         });

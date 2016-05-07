@@ -97,6 +97,7 @@ public class Activity {
         this.date = date;
     }
 
+    // for use only in conversionUtils
     public void setAssignment(final Assignment assignment){
         this.assignment = assignment;
     }

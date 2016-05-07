@@ -27,7 +27,7 @@ public class OKHttpWrapperPoll extends BaseFaroOKHttpWrapper implements PollHand
     
     @Override
     public void getPolls(BaseFaroRequestCallback<List<Poll>> callback, String eventId) {
-        String token = TokenCache.getTokenCache().getAuthToken();
+        String token = TokenCache.getTokenCache().getToken();
         if(token != null){
             Request request = new Request.Builder()
                     .url(this.baseHandlerURL.toString() + eventId + "/polls/")
@@ -43,7 +43,7 @@ public class OKHttpWrapperPoll extends BaseFaroOKHttpWrapper implements PollHand
 
     @Override
     public void getPoll(BaseFaroRequestCallback<Poll> callback, String eventId, String pollId) {
-        String token = TokenCache.getTokenCache().getAuthToken();
+        String token = TokenCache.getTokenCache().getToken();
         if(token != null){
             Request request = new Request.Builder()
                     .url(this.baseHandlerURL.toString() + eventId + "/poll/" + pollId + "/")
@@ -58,7 +58,7 @@ public class OKHttpWrapperPoll extends BaseFaroOKHttpWrapper implements PollHand
 
     @Override
     public void createPoll(BaseFaroRequestCallback<Poll> callback, String eventId, Poll poll) {
-        String token = TokenCache.getTokenCache().getAuthToken();
+        String token = TokenCache.getTokenCache().getToken();
         if(token != null) {
             String pollPostBody = mapper.toJson(poll);
             Request request = new Request.Builder()
@@ -76,7 +76,7 @@ public class OKHttpWrapperPoll extends BaseFaroOKHttpWrapper implements PollHand
 
     @Override
     public void getUnvotedCount(BaseFaroRequestCallback<Integer> callback, final String eventId) {
-        String token = TokenCache.getTokenCache().getAuthToken();
+        String token = TokenCache.getTokenCache().getToken();
         if(token != null) {
             Request request = new Request.Builder()
                     .url(baseHandlerURL.toString() + eventId + "/polls/unvoted/count/")
@@ -91,7 +91,7 @@ public class OKHttpWrapperPoll extends BaseFaroOKHttpWrapper implements PollHand
 
     @Override
     public void castVote(BaseFaroRequestCallback<String> callback, String eventId, String pollId, Set<String> options) {
-        String token = TokenCache.getTokenCache().getAuthToken();
+        String token = TokenCache.getTokenCache().getToken();
         if(token != null) {
             String voteBody = mapper.toJson(options);
             Request request = new Request.Builder()
@@ -108,7 +108,7 @@ public class OKHttpWrapperPoll extends BaseFaroOKHttpWrapper implements PollHand
 
     @Override
     public void closePoll(BaseFaroRequestCallback<String> callback, String eventId, String pollId) {
-        String token = TokenCache.getTokenCache().getAuthToken();
+        String token = TokenCache.getTokenCache().getToken();
         if(token != null) {
             Request request = new Request.Builder()
                     .url(baseHandlerURL.toString() + eventId + "/poll/" + pollId + "/close/")
@@ -123,7 +123,7 @@ public class OKHttpWrapperPoll extends BaseFaroOKHttpWrapper implements PollHand
 
     @Override
     public void deletePoll(BaseFaroRequestCallback<String> callback, String eventId, String pollId) {
-        String token = TokenCache.getTokenCache().getAuthToken();
+        String token = TokenCache.getTokenCache().getToken();
         if(token != null) {
             Request request = new Request.Builder()
                     .url(baseHandlerURL.toString() + eventId + "/poll/" + pollId)

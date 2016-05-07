@@ -59,8 +59,8 @@ public class AssignmentDatastoreImplTest {
     	ActivityDo activity1 = new ActivityDo(eventId, name, "dummyDescription",
                 new Location("Lake Shasta"),
                 new GregorianCalendar(),
-                new Assignment(UUID.randomUUID().toString(), ActionStatus.INCOMPLETE));
-        Assignment tempAssignment = new Assignment(UUID.randomUUID().toString(), ActionStatus.INCOMPLETE);
+                new Assignment());
+        Assignment tempAssignment = new Assignment();
         tempAssignment.addItem(new Item("blankets", "David", 4, Unit.COUNT));
         tempAssignment.addItem(new Item("rice", "Roger", 10, Unit.LB));
         activity1.setAssignment(tempAssignment);
@@ -159,7 +159,7 @@ public class AssignmentDatastoreImplTest {
 	@Test
 	public void updateEventLevelAssignmentItems() throws IllegalDataOperation, DataNotFoundException, DatastoreException{
 		EventDo event = new EventDo("TestEvent", Calendar.getInstance(), Calendar.getInstance(), false, null, new Location("San Jose"));
-		Assignment eventAssignment = new Assignment(UUID.randomUUID().toString(), ActionStatus.INCOMPLETE);
+		Assignment eventAssignment = new Assignment();
 		eventAssignment.addItem(new Item("Kaivan", "420", 3, Unit.KG));
 		event.setAssignment(eventAssignment);
     	EventDatastoreImpl.storeEventOnly(event);

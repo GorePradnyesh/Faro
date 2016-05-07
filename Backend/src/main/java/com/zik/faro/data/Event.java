@@ -1,9 +1,9 @@
 package com.zik.faro.data;
 
+import com.zik.faro.data.expense.ExpenseGroup;
+
 import java.util.Calendar;
 import java.util.UUID;
-
-import com.zik.faro.data.expense.ExpenseGroup;
 
 public class Event {
     private String eventId;           
@@ -53,7 +53,8 @@ public class Event {
     }
 
     public Event(){
-       
+        this.eventId = UUID.randomUUID().toString();
+        this.assignment = new Assignment();
     }
 
     public String getEventDescription() {
@@ -136,6 +137,7 @@ public class Event {
 		return assignment;
 	}
 
+    // for use only in the ConversionUtils
 	public void setAssignment(Assignment assignment) {
 		this.assignment = assignment;
 	}

@@ -3,7 +3,7 @@ package com.zik.faro.frontend.faroservice.okHttp;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
-import com.zik.faro.data.user.Signup;
+import com.zik.faro.data.user.FaroSignupDetails;
 import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.HttpError;
@@ -26,7 +26,7 @@ public class OKHttpWrapperSignup extends BaseFaroOKHttpWrapper implements Signup
 
     @Override
     public void signup(BaseFaroRequestCallback<String> callback, FaroUser faroUser, String password, boolean addToCache) {
-        Signup signupDetails = new Signup(faroUser, password);
+        FaroSignupDetails signupDetails = new FaroSignupDetails(faroUser, password);
         final String eventPostBody = mapper.toJson(signupDetails);
         Request request = new Request.Builder()
                 .url(baseHandlerURL.toString())
@@ -54,7 +54,7 @@ public class OKHttpWrapperSignup extends BaseFaroOKHttpWrapper implements Signup
         @Override
         public void onResponse(String token, HttpError error) {
             if(error == null && this.addToCache) {
-                TokenCache.setTokenCache(token);
+                TokenCache.getTokenCache().setToken(token);
             }
             callback.onResponse(token, error);
         }

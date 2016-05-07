@@ -1,6 +1,7 @@
 package com.zik.faro.api.test;
 
 import com.zik.faro.auth.jwt.FaroJwtClaims;
+import com.zik.faro.mail.FaroEmailClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

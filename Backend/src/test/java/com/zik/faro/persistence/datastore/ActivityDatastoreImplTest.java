@@ -77,8 +77,8 @@ public class ActivityDatastoreImplTest {
     	ActivityDo activity1 = new ActivityDo(eventId, name, "dummyDescription",
                 new Location("Lake Shasta"),
                 new GregorianCalendar(),
-                new Assignment("1234",ActionStatus.INCOMPLETE));
-        Assignment tempAssignment = new Assignment("12345", ActionStatus.INCOMPLETE);
+                new Assignment());
+        Assignment tempAssignment = new Assignment();
         tempAssignment.addItem(new Item("blankets", "David", 4, Unit.COUNT));
         tempAssignment.addItem(new Item("rice", "Roger", 10, Unit.LB));
         activity1.setAssignment(tempAssignment);
@@ -131,7 +131,7 @@ public class ActivityDatastoreImplTest {
     	EventDatastoreImpl.storeEventOnly(event);
     	
     	ActivityDo a = new ActivityDo(eventId, "TestEvent", "Testing update",
-    			new Location("San Jose"),new GregorianCalendar(), new Assignment("12", ActionStatus.INCOMPLETE));
+    			new Location("San Jose"),new GregorianCalendar(), new Assignment());
     	ActivityDatastoreImpl.storeActivity(a);
     	
     	// Verify indeed created

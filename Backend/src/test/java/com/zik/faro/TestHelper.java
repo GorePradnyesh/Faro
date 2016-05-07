@@ -29,8 +29,7 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.zik.faro.api.event.CustomDateSerializer;
-import com.zik.faro.data.FaroSignupDetails;
-import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
+import com.zik.faro.data.user.FaroSignupDetails;
 
 public class TestHelper {
     /*Private helper functions*/

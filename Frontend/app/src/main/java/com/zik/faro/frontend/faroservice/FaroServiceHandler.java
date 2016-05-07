@@ -3,12 +3,14 @@ package com.zik.faro.frontend.faroservice;
 import com.zik.faro.frontend.faroservice.okHttp.OKHttpWrapperActivity;
 import com.zik.faro.frontend.faroservice.okHttp.OKHttpWrapperEvent;
 import com.zik.faro.frontend.faroservice.okHttp.OKHttpWrapperFriends;
+import com.zik.faro.frontend.faroservice.okHttp.OKHttpWrapperLogin;
 import com.zik.faro.frontend.faroservice.okHttp.OKHttpWrapperPoll;
 import com.zik.faro.frontend.faroservice.okHttp.OKHttpWrapperSignup;
 import com.zik.faro.frontend.faroservice.okHttp.OkHttpWrapperProfile;
 import com.zik.faro.frontend.faroservice.spec.ActivityHandler;
 import com.zik.faro.frontend.faroservice.spec.EventHandler;
 import com.zik.faro.frontend.faroservice.spec.FriendsHandler;
+import com.zik.faro.frontend.faroservice.spec.LoginHandler;
 import com.zik.faro.frontend.faroservice.spec.PollHandler;
 import com.zik.faro.frontend.faroservice.spec.ProfileHandler;
 import com.zik.faro.frontend.faroservice.spec.SignupHandler;
@@ -19,6 +21,7 @@ public class FaroServiceHandler {
     private EventHandler        eventHandler;
     private ProfileHandler      profileHandler;
     private SignupHandler       signupHandler;
+    private LoginHandler        loginHandler;
     private ActivityHandler     activityHandler;
     private PollHandler         pollHandler;
     private FriendsHandler      friendsHandler;
@@ -30,6 +33,7 @@ public class FaroServiceHandler {
         serviceHandler.eventHandler = new OKHttpWrapperEvent(baseUrl);
         serviceHandler.profileHandler = new OkHttpWrapperProfile(baseUrl);
         serviceHandler.signupHandler = new OKHttpWrapperSignup(baseUrl);
+        serviceHandler.loginHandler = new OKHttpWrapperLogin(baseUrl);
         serviceHandler.pollHandler = new OKHttpWrapperPoll(baseUrl);
         serviceHandler.activityHandler = new OKHttpWrapperActivity(baseUrl);
         serviceHandler.friendsHandler = new OKHttpWrapperFriends(baseUrl);
@@ -46,6 +50,10 @@ public class FaroServiceHandler {
 
     public SignupHandler getSignupHandler() {
         return signupHandler;
+    }
+
+    public LoginHandler getLoginHandler() {
+        return loginHandler;
     }
     
     public PollHandler getPollHandler() {

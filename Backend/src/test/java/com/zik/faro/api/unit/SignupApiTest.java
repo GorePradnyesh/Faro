@@ -5,7 +5,7 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
 import com.zik.faro.api.authentication.SignupHandler;
 import com.zik.faro.applogic.ConversionUtils;
-import com.zik.faro.data.FaroSignupDetails;
+import com.zik.faro.data.user.FaroSignupDetails;
 import com.zik.faro.applogic.UserManagement;
 import com.zik.faro.commons.FaroResponseStatus;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
@@ -136,7 +136,7 @@ public class SignupApiTest {
 
     public static String createNewUser(FaroUserDo user, String password) {
         FaroUser faroUser = ConversionUtils.fromDo(user);
-        return new SignupHandler().signupUser(new FaroSignupDetails(faroUser, password)).getEntity();
+        return new SignupHandler().signupUser(new FaroSignupDetails(faroUser, password));
     }
 
 }

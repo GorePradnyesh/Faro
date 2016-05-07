@@ -7,6 +7,7 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.zik.faro.data.Event;
+import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.api.responder.AddFriendRequest;
 import com.zik.faro.data.EventCreateData;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
@@ -57,21 +58,15 @@ public class EventManagement {
     	}
     }
     
-    public static List<Event> getEvents(final String faroUserId){
-    	// Load first "N" event Ids for particular user
-		List<EventUserDo> eventUsers = EventUserManagement.getEventsByFaroUser(faroUserId);
-		List<String> eventIds = new ArrayList<String>();
- 		for(EventUserDo eventUser : eventUsers){
-			eventIds.add(eventUser.getEvent().getEventId());
+    public static List<EventInviteStatusWrapper> getEvents(final String faroUserId){
+    	
+    	List<EventUserDo> eventUsers = EventUserManagement.getEventsByFaroUser(faroUserId);
+		
+		List<EventInviteStatusWrapper> events = new ArrayList<EventInviteStatusWrapper>();
+		for(EventUserDo eventUser : eventUsers){
+ 			events.add(new EventInviteStatusWrapper(ConversionUtils.fromDo(eventUser.getEvent()), eventUser.getInviteStatus()));
 		}
- 		// Load actual events
- 		Collection<EventDo> eventDos = DatastoreObjectifyDAL.
- 				loadMultipleObjectsByIdSync(eventIds, EventDo.class).values();
- 		List<Event> events = new ArrayList<Event>();
- 		for(EventDo eventDo:eventDos){
- 			events.add(ConversionUtils.fromDo(eventDo));
- 		}
- 		
+
  		return events;
 	}
     
