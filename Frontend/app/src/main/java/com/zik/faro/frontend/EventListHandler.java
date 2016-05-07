@@ -73,8 +73,8 @@ public class EventListHandler {
     }
 
     final static class TestEventCreateCallback
-            implements BaseFaroRequestCallback<com.zik.faro.data.Event> {
-        com.zik.faro.data.Event receivedEvent;
+            implements BaseFaroRequestCallback<Event> {
+        Event receivedEvent;
 
         @Override
         public void onFailure(Request request, IOException e) {
@@ -92,7 +92,6 @@ public class EventListHandler {
                 //eventListHandler.conditionallyAddNewEventToList(event);
                 //eventListHandler.eventMap.put(eventID, event);
             }
-
         }
     }
 
