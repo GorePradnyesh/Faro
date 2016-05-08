@@ -27,14 +27,16 @@ public class OKHttpWrapperLogin extends BaseFaroOKHttpWrapper implements LoginHa
 
     @Override
     public void login(BaseFaroRequestCallback<String> callback, String email, String password, boolean addToCache) {
-        final String postBody = mapper.toJson(password);
         HttpUrl httpUrl = HttpUrl.parse(baseHandlerURL.toString())
                 .newBuilder()
                 .addQueryParameter("username", email)
                 .build();
+
+        // Note : No need to convert password to Json as it is not required to do so when
+        //       when passing a string to RequestBody.create
         Request request = new Request.Builder()
                 .url(httpUrl)
-                .post(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), postBody))
+                .post(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), password))
                 .build();
 
         LoginHandlerCallback loginHandlerCallback = new LoginHandlerCallback(callback, addToCache);
