@@ -188,7 +188,6 @@ public class CreateNewEvent extends Activity {
                         eventDesc,
                         null,
                         null,
-                        ObjectStatus.OPEN,
                         eventCreatorId);
 
                 ErrorCodes eventStatus;
