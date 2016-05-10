@@ -5,7 +5,6 @@ import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.zik.faro.data.Event;
-import com.zik.faro.data.EventCreateData;
 
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.auth.TokenCache;
@@ -56,10 +55,10 @@ public class OKHttpWrapperEvent extends BaseFaroOKHttpWrapper implements EventHa
         this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<Event>(callback, Event.class));
     }
 
-    public void createEvent(final BaseFaroRequestCallback<Event> callback, EventCreateData eventCreateData){
+    public void createEvent(final BaseFaroRequestCallback<Event> callback, Event event){
         // TODO: Validate the eventCreateData
         String token = TokenCache.getTokenCache().getToken();
-        String eventPostBody = mapper.toJson(eventCreateData);
+        String eventPostBody = mapper.toJson(event);
         Request request = new Request.Builder()
                 .url(baseHandlerURL.toString() + "create")
                 .post(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), eventPostBody))

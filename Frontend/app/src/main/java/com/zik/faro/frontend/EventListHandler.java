@@ -1,14 +1,24 @@
 package com.zik.faro.frontend;
 
+import android.util.Log;
+
+import com.google.gson.Gson;
 import com.squareup.okhttp.Request;
 //import com.zik.faro.frontend.data.EventCreateData;
+import com.zik.faro.data.Activity;
+import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.EventUser;
+import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.user.InviteStatus;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
+import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.zik.faro.data.Event;
@@ -39,19 +49,36 @@ public class EventListHandler {
     * Map of events needed to access events downloaded from the server in O(1) time. The Key to the
     * Map is the eventID String which returns the Event as the value
     */
-    private Map<String, Event> eventMap = new ConcurrentHashMap<>();
+    private Map<String, EventInviteStatusWrapper> eventMap = new ConcurrentHashMap<>();
 
     private static int tempEventID = 0;
+    public static final FaroServiceHandler serviceHandler = CreateFaroServiceHandler();
+    protected static final String baseUrl = "http://10.0.2.2:8080/v1/";
+    private static String TAG = "EventListHandler";
+
+    private static final FaroServiceHandler CreateFaroServiceHandler()
+    {
+        FaroServiceHandler innerServiceHandler = null;
+        try {
+            innerServiceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
+        } catch (MalformedURLException e) {
+            Log.e(TAG, "failed to obtain servicehandler", e);
+        }
+        return innerServiceHandler;
+    }
+
 
     private static EventListHandler eventListHandler = null;
+
     public static EventListHandler getInstance(){
         if (eventListHandler != null){
             return eventListHandler;
         }
         synchronized (EventListHandler.class)
         {
-            if(eventListHandler == null)
+            if(eventListHandler == null) {
                 eventListHandler = new EventListHandler();
+            }
             return eventListHandler;
         }
     }
@@ -62,50 +89,7 @@ public class EventListHandler {
         return myUserId;
     }
 
-    public void setMyUserId(String myUserId) {
-        this.myUserId = myUserId;
-    }
 
-    private String getEventID(){
-        String eventIDStr = Integer.toString(this.tempEventID);
-        this.tempEventID++;
-        return eventIDStr;
-    }
-
-    final static class TestEventCreateCallback
-            implements BaseFaroRequestCallback<Event> {
-        Event receivedEvent;
-
-        @Override
-        public void onFailure(Request request, IOException e) {
-            //Handle failure
-        }
-
-        @Override
-        public void onResponse(com.zik.faro.data.Event event, HttpError error){
-            if(error != null){
-            }
-            // Assert that event == min event
-            this.receivedEvent = event;
-            String eventID = event.getEventId();
-            if(eventID != null) {
-                //eventListHandler.conditionallyAddNewEventToList(event);
-                //eventListHandler.eventMap.put(eventID, event);
-            }
-        }
-    }
-
-    public ErrorCodes addNewEventUser(String eventId, String userId, EventUser eventUser) {
-        String key = eventId + userId;
-        eventUserMap.put(key, eventUser);
-        return ErrorCodes.SUCCESS;
-    }
-
-    public EventUser getEventUser(String eventId, String userId){
-        String key = eventId + userId;
-        EventUser eventUser = eventUserMap.get(key);
-        return eventUser;
-    }
     /*
     * Based on the start Date add new event to the list and Map only if it lies between the first
     * and last event retrieved in the list from the server. If it does not lie in between then
@@ -115,54 +99,85 @@ public class EventListHandler {
     * the above reason then once we return back from the EventLanding Page we remove it from the
     * Map.
     */
-    //TODO: Second param is temp for testing purpose only. Remove it later!!!
-    public ErrorCodes addNewEvent(Event event, InviteStatus inviteStatus) {
+    public ErrorCodes updateEvent(final EventInviteStatusWrapper eventInviteStatusWrapper) {
+        //TODO: send new event update to server
+
+        Event event = eventInviteStatusWrapper.getEvent();
+        final InviteStatus inviteStatus = eventInviteStatusWrapper.getInviteStatus();
+        serviceHandler.getEventHandler().createEvent(new BaseFaroRequestCallback<Event>() {
+            @Override
+            public void onFailure(Request request, IOException ex) {
+                Log.e(TAG, "failed to send event create request");
+            }
+
+            @Override
+            public void onResponse(Event receivedEvent, HttpError error) {
+                if (error == null ) {
+                    //Since update to server successful, adding event to List and Map below
+                    Log.i(TAG, "Response received Successfully");
+                    conditionallyAddEventToList(receivedEvent, inviteStatus);
+                    EventInviteStatusWrapper eventInviteStatusWrapper = new EventInviteStatusWrapper(receivedEvent, InviteStatus.ACCEPTED);
+                    eventListHandler.eventMap.put(receivedEvent.getEventId(), eventInviteStatusWrapper);
+                } else {
+                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                }
+            }
+        }, event);
+        return ErrorCodes.SUCCESS;
+    }
+
+    public void addEventToListAndMap(Event event) {
+        conditionallyAddEventToList(event, InviteStatus.ACCEPTED);
+        EventInviteStatusWrapper eventInviteStatusWrapper = new EventInviteStatusWrapper(event, InviteStatus.ACCEPTED);
+        eventListHandler.eventMap.put(event.getEventId(), eventInviteStatusWrapper);
+    }
+
+    public ErrorCodes updateEventInviteStatus(final Event event, InviteStatus inviteStatus) {
         //TODO: send new event update to server
         //TODO  update server and if successful then add event to List and Map below and
         // update the eventID in the Event.
-
-        String eventID = getEventID();
-        if(eventID != null) {
-            event.setEventId(eventID);
-
-            //Create Event User Relationship
-            final EventUser eventUser = new EventUser(event.getEventId(),
-                    myUserId,
-                    event.getEventCreatorId());
-            eventUser.setInviteStatus(inviteStatus);
-
-
-
-            ErrorCodes errorCode;
-            errorCode = eventListHandler.addNewEventUser(event.getEventId(), myUserId,
-                    eventUser);
-            if(errorCode == ErrorCodes.SUCCESS) {
-                conditionallyAddNewEventToList(event);
-                this.eventMap.put(eventID, event);
+        serviceHandler.getEventHandler().createEvent(new BaseFaroRequestCallback<Event>() {
+            @Override
+            public void onFailure(Request request, IOException ex) {
+                Log.e(TAG, "failed to send event create request");
             }
 
-            return ErrorCodes.SUCCESS;
-        }
-        return ErrorCodes.FAILURE;
+            @Override
+            public void onResponse(Event receivedEvent, HttpError error) {
+                if (error == null ) {
+                    Log.i(TAG, "Response received Successfully");
+                    conditionallyAddEventToList(receivedEvent, InviteStatus.ACCEPTED);
+                    EventInviteStatusWrapper eventInviteStatusWrapper = new EventInviteStatusWrapper(receivedEvent, InviteStatus.ACCEPTED);
+                    eventListHandler.eventMap.put(receivedEvent.getEventId(), eventInviteStatusWrapper);
 
-        /*TestEventCreateCallback createCallback = new TestEventCreateCallback();
-        EventCreateData eventCreateData= new EventCreateData(event.getEventName(),
-                event.getStartDate(), event.getEndDate(), null, null);
-        MainActivity.serviceHandler.getEventHandler().createEvent(createCallback, eventCreateData);
-        return ErrorCodes.SUCCESS;*/
-
-
-
+                } else {
+                }
+            }
+        }, event);
+        return ErrorCodes.SUCCESS;
     }
 
-    private void conditionallyAddNewEventToList(Event event) {
+    private void addDownloadedEventsToListAndMap(List<EventInviteStatusWrapper> eventInviteStatusWrappers){
+        EventAdapter eventAdapter = null;
+        for (int i = 0; i < eventInviteStatusWrappers.size(); i++) {
+            EventInviteStatusWrapper eventInviteStatusWrapper = eventInviteStatusWrappers.get(i);
+            Event event = eventInviteStatusWrapper.getEvent();
+            InviteStatus inviteStatus = eventInviteStatusWrapper.getInviteStatus();
+            eventAdapter = getEventAdapter(event, inviteStatus);
+            eventListHandler.addEventToListAndMap(event);
+        }
+        this.acceptedEventAdapter.notifyDataSetChanged();
+        this.notAcceptedEventAdapter.notifyDataSetChanged();
+    }
+
+    private void conditionallyAddEventToList(Event event, InviteStatus inviteStatus) {
         Event tempEvent;
         Calendar tempCalendar;
         Calendar eventCalendar;
         int index;
 
         EventAdapter eventAdapter;
-        eventAdapter = getEventAdapter(event);
+        eventAdapter = getEventAdapter(event, inviteStatus);
 
         eventCalendar = event.getStartDate();
         
@@ -201,24 +216,16 @@ public class EventListHandler {
         return acceptedEventAdapter.list.size()+ notAcceptedEventAdapter.list.size();
     }
 
-    private EventAdapter getEventAdapter(Event event){
-        //TODO Change below code to get status from event-User relationship
-
-        String key = event.getEventId()+ myUserId;
-        EventUser eventUser = eventUserMap.get(key);
-        if(eventUser != null) {
-            switch (eventUser.getInviteStatus()) {
-                case ACCEPTED:
-                    return acceptedEventAdapter;
-                case INVITED:
-                case MAYBE:
-                    return notAcceptedEventAdapter;
-                default:
-                    //TODO: How to catch this condition? This should never occur?
-                    return null;
-            }
-        }else{
-            return null;
+    private EventAdapter getEventAdapter(Event event, InviteStatus inviteStatus){
+        switch (inviteStatus) {
+            case ACCEPTED:
+                return acceptedEventAdapter;
+            case INVITED:
+            case MAYBE:
+                return notAcceptedEventAdapter;
+            default:
+                //TODO: How to catch this condition? This should never occur?
+                return null;
         }
     }
 
@@ -238,21 +245,22 @@ public class EventListHandler {
     * of events in the lists is less than what the server can send at one time.
     * 2. new Event lies between the first and the last event in the list.
     */
-    public void deleteEventFromMapIfNotInList(Event E){
+    public void deleteEventFromMapIfNotInList(Event event){
         Calendar eventCalendar;
         Calendar lastEventInListCalendar;
         EventAdapter eventAdapter;
-        eventAdapter = getEventAdapter(E);
+        InviteStatus inviteStatus = getUserEventStatus(event.getEventId());
+        eventAdapter = getEventAdapter(event, inviteStatus);
         int lastEventIndex = eventAdapter.list.size() - 1;
         Event lastEventInList = eventAdapter.list.get(lastEventIndex);
 
-        eventCalendar = E.getStartDate();
+        eventCalendar = event.getStartDate();
         lastEventInListCalendar = lastEventInList.getStartDate();
 
         //TODO (Code Review) add condition to not add if it lies before the first or 0th event.
         //Cause in that case if newEventIndex is 0 then we shouldnt add it.
         if (eventCalendar.compareTo(lastEventInListCalendar) == 1){
-            this.eventMap.remove(E.getEventId());
+            this.eventMap.remove(event.getEventId());
         }
 
         //TODO Check for Map and List sync here. And somehow catch this error
@@ -260,37 +268,45 @@ public class EventListHandler {
         boolean issync = isMapAndListInSync();
     }
 
-    public Event getEventFromMap(String eventID){
-        return this.eventMap.get(eventID);
+    public Event getEventCloneFromMap(String eventID){
+        EventInviteStatusWrapper eventInviteStatusWrapper = this.eventMap.get(eventID);
+        Event event = eventInviteStatusWrapper.getEvent();
+        Gson gson = new Gson();
+        String json = gson.toJson(event);
+        Event cloneEvent = gson.fromJson(json, Event.class);
+        return cloneEvent;
     }
 
+    public InviteStatus getUserEventStatus(String eventId) {
+        EventInviteStatusWrapper eventInviteStatusWrapper = eventMap.get(eventId);
+        return eventInviteStatusWrapper.getInviteStatus();
+    }
 
-    public void removeEventFromListAndMap(Event E){
+    public void removeEventFromListAndMap(String eventID){
+        EventInviteStatusWrapper eventInviteStatusWrapper = this.eventMap.get(eventID);
+        Event event = eventInviteStatusWrapper.getEvent();
+
+        InviteStatus inviteStatus = getUserEventStatus(event.getEventId());
+
         EventAdapter eventAdapter;
-        eventAdapter = getEventAdapter(E);
+        eventAdapter = getEventAdapter(event, inviteStatus);
         if (eventAdapter != null) {
-            eventAdapter.list.remove(E);
+            eventAdapter.list.remove(event);
             eventAdapter.notifyDataSetChanged();
         }
-        eventMap.remove(E.getEventId());
+        eventMap.remove(event.getEventId());
     }
 
     public void changeEventStatusToYes(Event event){
-        removeEventFromListAndMap(event);
-        String key = event.getEventId()+ myUserId;
-        EventUser eventUser = eventUserMap.get(key);
-        eventUser.setInviteStatus(InviteStatus.ACCEPTED);
+        removeEventFromListAndMap(event.getEventId());
         //TODO: send update to server and if successful then delete event from List and Map below
-        addNewEvent(event, eventUser.getInviteStatus());
+        updateEventInviteStatus(event, InviteStatus.ACCEPTED);
     }
 
     public void changeEventStatusToMaybe(Event event){
-        removeEventFromListAndMap(event);
-        String key = event.getEventId()+ myUserId;
-        EventUser eventUser = eventUserMap.get(key);
-        eventUser.setInviteStatus(InviteStatus.MAYBE);
+        removeEventFromListAndMap(event.getEventId());
         //TODO: send update to server and if successful then delete event from List and Map below
-        addNewEvent(event, eventUser.getInviteStatus());
+        updateEventInviteStatus(event, InviteStatus.MAYBE);
     }
 
     public int getAcceptedEventListSize(){

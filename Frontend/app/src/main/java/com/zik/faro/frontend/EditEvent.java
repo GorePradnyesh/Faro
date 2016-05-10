@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -24,13 +23,12 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
-import com.google.gson.Gson;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import com.zik.faro.data.Event;
-import com.zik.faro.data.EventUser;
+import com.zik.faro.data.EventInviteStatusWrapper;
+import com.zik.faro.data.user.InviteStatus;
 
 
 /*
@@ -52,7 +50,6 @@ public class EditEvent extends Activity {
 
     private  static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static Event cloneEvent;
-    private static Event event;
 
     private RelativeLayout popUpRelativeLayout;
 
@@ -90,12 +87,8 @@ public class EditEvent extends Activity {
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
             String eventID = extras.getString("eventID");
-            event = eventListHandler.getEventFromMap(eventID);
-            if (event != null) {
-                Gson gson = new Gson();
-                String json = gson.toJson(event);
-
-                cloneEvent = gson.fromJson(json, Event.class);
+            cloneEvent = eventListHandler.getEventCloneFromMap(eventID);
+            if (cloneEvent != null) {
                 String ev_name = cloneEvent.getEventName();
                 eventName.setText(ev_name);
                 eventDescription.setText(cloneEvent.getEventDescription());
@@ -137,14 +130,19 @@ public class EditEvent extends Activity {
         editEventOK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                eventListHandler.removeEventFromListAndMap(event);
-                ErrorCodes eventStatus;
-                EventUser eventUser = eventListHandler.getEventUser(cloneEvent.getEventId(),
-                        eventListHandler.getMyUserId());
+                InviteStatus inviteStatus = eventListHandler.getUserEventStatus(cloneEvent.getEventId());
 
-                eventStatus = eventListHandler.addNewEvent(cloneEvent, eventUser.getInviteStatus());
+                //Make sure the getUserEventStatus is called before removing from map else it the
+                //event will not be found there!!!
+                eventListHandler.removeEventFromListAndMap(cloneEvent.getEventId());
+                ErrorCodes errorCodes;
+
+
+                EventInviteStatusWrapper eventInviteStatusWrapper =
+                        new EventInviteStatusWrapper(cloneEvent, inviteStatus);
+                errorCodes = eventListHandler.updateEvent(eventInviteStatusWrapper);
                 //TODO What to do in Failure case?
-                if (eventStatus == ErrorCodes.SUCCESS) {
+                if (errorCodes == ErrorCodes.SUCCESS) {
                     EventLanding.putExtra("eventID", cloneEvent.getEventId());
                     startActivity(EventLanding);
                     finish();
@@ -200,7 +198,7 @@ public class EditEvent extends Activity {
             public void onClick(View v) {
 
                 //TODO: Make API call and update server
-                eventListHandler.removeEventFromListAndMap(event);
+                eventListHandler.removeEventFromListAndMap(cloneEvent.getEventId());
                 startActivity(EventListPage);
                 popupWindow.dismiss();
                 finish();
@@ -384,7 +382,7 @@ public class EditEvent extends Activity {
 
     @Override
     public void onBackPressed() {
-        EventLanding.putExtra("eventID", event.getEventId());
+        EventLanding.putExtra("eventID", cloneEvent.getEventId());
         startActivity(EventLanding);
         finish();
         super.onBackPressed();

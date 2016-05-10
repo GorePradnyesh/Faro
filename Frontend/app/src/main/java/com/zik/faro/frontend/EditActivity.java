@@ -24,7 +24,6 @@ import android.widget.TimePicker;
 import com.google.gson.Gson;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Event;
-import com.zik.faro.data.EventUser;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -86,7 +85,7 @@ public class EditActivity extends ActionBarActivity {
         if(extras != null) {
             eventID = extras.getString("eventID");
             activityID = extras.getString("activityID");
-            event = eventListHandler.getEventFromMap(eventID);
+            event = eventListHandler.getEventCloneFromMap(eventID);
             activity = activityListHandler.getActivityFromMap(activityID);
 
             if (activity != null) {

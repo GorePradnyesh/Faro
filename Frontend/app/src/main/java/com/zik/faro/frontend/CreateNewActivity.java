@@ -64,7 +64,7 @@ public class CreateNewActivity extends android.app.Activity{
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
             eventID = extras.getString("eventID");
-            event = eventListHandler.getEventFromMap(eventID);
+            event = eventListHandler.getEventCloneFromMap(eventID);
         }
 
         activityName.addTextChangedListener(new TextWatcher() {

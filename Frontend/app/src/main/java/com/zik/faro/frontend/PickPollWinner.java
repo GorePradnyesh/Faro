@@ -23,7 +23,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.zik.faro.data.Event;
-import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.PollOption;
 
@@ -78,7 +77,7 @@ public class PickPollWinner extends ActionBarActivity {
             pollID = extras.getString("pollID");
             calledFrom = extras.getString("calledFrom");
             P = pollListHandler.getPollFromMap(pollID);
-            E = eventListHandler.getEventFromMap(eventID);
+            E = eventListHandler.getEventCloneFromMap(eventID);
 
             pollOptionsList = P.getPollOptions();
             pollDesc.setText(P.getDescription());

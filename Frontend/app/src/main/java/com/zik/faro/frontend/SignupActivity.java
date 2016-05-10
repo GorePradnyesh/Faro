@@ -14,6 +14,7 @@ import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
+import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 import com.zik.faro.frontend.faroservice.auth.TokenCache;
 
 import java.io.IOException;
@@ -121,6 +122,8 @@ public class SignupActivity extends Activity {
                     if (error == null ) {
                         Log.i(TAG, "token = " + token);
                         TokenCache.getTokenCache().setToken(token);
+                        FaroUserContext faroUserContext = FaroUserContext.getInstance();
+                        faroUserContext.setEmail(email);
 
                         // Go to event list page
                         startActivity(new Intent(SignupActivity.this, EventListPage.class));

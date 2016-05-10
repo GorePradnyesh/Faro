@@ -46,7 +46,7 @@ public class ActivityLandingPage extends ActionBarActivity {
         if(extras != null) {
             String eventID = extras.getString("eventID");
             String activityID = extras.getString("activityID");
-            event = eventListHandler.getEventFromMap(eventID);
+            event = eventListHandler.getEventCloneFromMap(eventID);
             activity = activityListHandler.getActivityFromMap(activityID);
 
             if (activityID != null){

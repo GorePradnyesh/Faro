@@ -2,7 +2,6 @@ package com.zik.faro.frontend;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -59,7 +58,7 @@ public class EditPoll extends Activity {
             eventID = extras.getString("eventID");
             pollID = extras.getString("pollID");
             poll = pollListHandler.getPollFromMap(pollID);
-            event = eventListHandler.getEventFromMap(eventID);
+            event = eventListHandler.getEventCloneFromMap(eventID);
         }
 
 

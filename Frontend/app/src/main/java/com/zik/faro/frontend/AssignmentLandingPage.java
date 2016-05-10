@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -39,7 +38,7 @@ public class AssignmentLandingPage extends Activity{
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
             eventID = extras.getString("eventID");
-            event = eventListHandler.getEventFromMap(eventID);
+            event = eventListHandler.getEventCloneFromMap(eventID);
 
             activityID = extras.getString("activityID");
             String assignmentID = extras.getString("assignmentID");

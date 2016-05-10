@@ -2,7 +2,6 @@ package com.zik.faro.frontend;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -47,7 +46,7 @@ public class EditAssignment extends android.app.Activity {
         if (extras != null) {
             eventID = extras.getString("eventID");
             activityID = extras.getString("activityID");
-            event = eventListHandler.getEventFromMap(eventID);
+            event = eventListHandler.getEventCloneFromMap(eventID);
 
             TextView assignmentDescription = (TextView) findViewById(R.id.assignmentDescription);
             if (activityID != null) {

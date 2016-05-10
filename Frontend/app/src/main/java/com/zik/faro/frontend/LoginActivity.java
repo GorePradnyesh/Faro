@@ -14,6 +14,7 @@ import com.squareup.okhttp.Request;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
+import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 import com.zik.faro.frontend.faroservice.auth.TokenCache;
 
 
@@ -99,7 +100,7 @@ public class LoginActivity extends ActionBarActivity {
     public void onLoginClick(View view) {
         Log.i(TAG, "login button clicked");
 
-        String email = emailTextBox.getText().toString();
+        final String email = emailTextBox.getText().toString();
         String password = passwordTextBox.getText().toString();
 
         Log.i(TAG, MessageFormat.format("username :{0} password :{1}", email, password));
@@ -115,6 +116,8 @@ public class LoginActivity extends ActionBarActivity {
                 public void onResponse(String token, HttpError error) {
                     Log.i(TAG, "login response, token = " + token);
                     if (error == null) {
+                        FaroUserContext faroUserContext = FaroUserContext.getInstance();
+                        faroUserContext.setEmail(email);
                         // Go to event list page
                         startActivity(new Intent(LoginActivity.this, EventListPage.class));
                     } else {

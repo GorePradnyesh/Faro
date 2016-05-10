@@ -46,7 +46,7 @@ public class PollListPage extends Activity {
         }
 
         eventID = extras.getString("eventID");
-        E = eventListHandler.getEventFromMap(eventID);
+        E = eventListHandler.getEventCloneFromMap(eventID);
 
         TextView Poll = (TextView)findViewById(R.id.polls);
         //Poll.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);

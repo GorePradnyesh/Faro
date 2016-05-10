@@ -3,10 +3,13 @@ package com.zik.faro.frontend;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,15 +23,17 @@ import android.widget.RadioGroup;
 import android.widget.TimePicker;
 
 
-
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-import com.zik.faro.data.EventUser;
-import com.zik.faro.data.ObjectStatus;
+import com.squareup.okhttp.Request;
 import com.zik.faro.data.Event;
-import com.zik.faro.data.user.InviteStatus;
+import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
+import com.zik.faro.frontend.faroservice.FaroServiceHandler;
+import com.zik.faro.frontend.faroservice.HttpError;
+import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 
 
 /*
@@ -58,6 +63,9 @@ public class CreateNewEvent extends Activity {
     private DateFormat sdf = new SimpleDateFormat("MMM dd yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
     private RadioGroup inviteStatusRadioGroup = null;
+
+    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+    private static String TAG = "CreateNewEvent";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,6 +103,9 @@ public class CreateNewEvent extends Activity {
         final Intent eventLanding = new Intent(CreateNewEvent.this, EventLandingPage.class);
         AppLanding = new Intent(CreateNewEvent.this, EventListPage.class);
         EventListPage = new Intent(CreateNewEvent.this, EventListPage.class);
+
+        final Context mContext = this.getApplicationContext();
+
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
@@ -172,14 +183,9 @@ public class CreateNewEvent extends Activity {
             public void onClick(View v) {
                 String event_Name = eventName.getText().toString();
                 String eventDesc = eventDescription.getText().toString();
-                String eventCreatorId;
-                String myUserId = eventListHandler.getMyUserId();
+                FaroUserContext faroUserContext = FaroUserContext.getInstance();
+                String eventCreatorId = faroUserContext.getEmail();
 
-                if(eventCreator.isChecked()){
-                    eventCreatorId = myUserId;
-                }else{
-                    eventCreatorId = "otherUserId";
-                }
 
                 final Event event = new Event(event_Name,
                         startDateCalendar,
@@ -188,30 +194,36 @@ public class CreateNewEvent extends Activity {
                         eventDesc,
                         null,
                         null,
-                        ObjectStatus.OPEN,
                         eventCreatorId);
 
-                ErrorCodes eventStatus;
-                InviteStatus inviteStatus;
-                int radioID = inviteStatusRadioGroup.getCheckedRadioButtonId();
 
-                if(radioID == acceptedRadio.getId() || eventCreator.isChecked()){ //Accepted
-                    inviteStatus = InviteStatus.ACCEPTED;
-                }else if(radioID == noResponseRadio.getId()){                     //noResponse
-                    inviteStatus = InviteStatus.INVITED;
-                }else{                                                            //Maybe
-                    inviteStatus = InviteStatus.MAYBE;
-                }
+                serviceHandler.getEventHandler().createEvent(new BaseFaroRequestCallback<Event>() {
+                    @Override
+                    public void onFailure(Request request, IOException ex) {
+                        Log.e(TAG, "failed to send event create request");
+                    }
 
-                eventStatus = eventListHandler.addNewEvent(event, inviteStatus);
-
-                //TODO What to do in Failure case?
-                if (eventStatus == ErrorCodes.SUCCESS) {
-                    eventLanding.putExtra("eventID", event.getEventId());
-                    startActivity(eventLanding);
-                    finish();
-                }
-
+                    @Override
+                    public void onResponse(final Event receivedEvent, HttpError error) {
+                        if (error == null ) {
+                            Runnable myRunnable = new Runnable() {
+                                @Override
+                                public void run() {
+                                    //Since update to server successful, adding event to List and Map below
+                                    Log.i(TAG, "Event Create Response received Successfully");
+                                    eventListHandler.addEventToListAndMap(receivedEvent);
+                                    eventLanding.putExtra("eventID", receivedEvent.getEventId());
+                                    startActivity(eventLanding);
+                                    finish();
+                                }
+                            };
+                            Handler mainHandler = new Handler(mContext.getMainLooper());
+                            mainHandler.post(myRunnable);
+                        } else {
+                            Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                        }
+                    }
+                }, event);
             }
         });
 

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,10 +15,16 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
+import com.squareup.okhttp.Request;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.PollOption;
+import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
+import com.zik.faro.frontend.faroservice.FaroServiceHandler;
+import com.zik.faro.frontend.faroservice.HttpError;
+
+import java.io.IOException;
 
 
 public class CreateNewPoll extends Activity {
@@ -27,6 +34,9 @@ public class CreateNewPoll extends Activity {
     private static String eventID = null;
     private static Event event;
     Intent PollListPage = null;
+
+    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+    private static String TAG = "CreateNewPoll";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +64,7 @@ public class CreateNewPoll extends Activity {
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
             eventID = extras.getString("eventID");
-            event = eventListHandler.getEventFromMap(eventID);
+            event = eventListHandler.getEventCloneFromMap(eventID);
         }
 
         //Enable the addNewOptionButton only after Users enters an Option
@@ -101,11 +111,22 @@ public class CreateNewPoll extends Activity {
                         pollOptionsAdapter.list, "pollCreator", pollDescription.getText().toString(),
                         ObjectStatus.OPEN);
 
-                pollListHandler.addNewPoll(poll);
-                OpenPollLandingPage.putExtra("eventID", event.getEventId());
-                OpenPollLandingPage.putExtra("pollID", poll.getId());
-                startActivity(OpenPollLandingPage);
-                finish();
+                serviceHandler.getPollHandler().createPoll(new BaseFaroRequestCallback<Poll>() {
+                    @Override
+                    public void onFailure(Request request, IOException ex) {
+                        Log.e(TAG, "failed to send poll create request");
+                    }
+
+                    @Override
+                    public void onResponse(Poll receivedPoll, HttpError error) {
+                        Log.i(TAG, "Poll Create Response received Successfully");
+                        pollListHandler.addPollToListAndMap(receivedPoll);
+                        OpenPollLandingPage.putExtra("eventID", event.getEventId());
+                        OpenPollLandingPage.putExtra("pollID", receivedPoll.getId());
+                        startActivity(OpenPollLandingPage);
+                        finish();
+                    }
+                }, eventID, poll);
             }
         });
     }

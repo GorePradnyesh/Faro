@@ -57,19 +57,26 @@ public class PollListHandler {
     public ErrorCodes addNewPoll(Poll poll) {
         //TODO: send update to server and if successful then add poll to List and Map below and
         // update the pollID in the Poll.
-        String pollID = getPollID();
+        /*String pollID = getPollID();
         for (Integer i = 0; i < poll.getPollOptions().size(); i++){
             PollOption pollOption = poll.getPollOptions().get(i);
             pollOption.setId(UUID.randomUUID().toString());
-        }
+        }*/
 
-        if(pollID != null) {
+        /*if(pollID != null) {
             poll.setId(pollID);
             conditionallyAddNewPollToList(poll);
             this.pollMap.put(pollID, poll);
             return ErrorCodes.SUCCESS;
         }
-        return ErrorCodes.FAILURE;
+        return ErrorCodes.FAILURE;*/
+        conditionallyAddNewPollToList(poll);
+        return ErrorCodes.SUCCESS;
+    }
+
+    public void addPollToListAndMap(Poll poll){
+        conditionallyAddNewPollToList(poll);
+        this.pollMap.put(poll.getId(), poll);
     }
 
     private void conditionallyAddNewPollToList(Poll poll) {

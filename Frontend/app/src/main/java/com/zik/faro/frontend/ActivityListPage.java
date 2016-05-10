@@ -3,7 +3,6 @@ package com.zik.faro.frontend;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.AbsListView;
@@ -54,7 +53,7 @@ public class ActivityListPage extends android.app.Activity {
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
             String eventID = extras.getString("eventID");
-            event = eventListHandler.getEventFromMap(eventID);
+            event = eventListHandler.getEventCloneFromMap(eventID);
         }
 
         //Listener to go to the Activity Landing Page for the activity selected from the list

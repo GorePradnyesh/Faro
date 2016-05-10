@@ -100,7 +100,7 @@ public class OpenPollLandingPage extends Activity {
             eventID = extras.getString("eventID");
             pollID = extras.getString("pollID");
             poll = pollListHandler.getPollFromMap(pollID);
-            event = eventListHandler.getEventFromMap(eventID);
+            event = eventListHandler.getEventCloneFromMap(eventID);
             if (poll == null){
                 Toast.makeText(OpenPollLandingPage.this, "No Poll found", LENGTH_LONG).show();
                 PollListPage.putExtra("eventID", event.getEventId());

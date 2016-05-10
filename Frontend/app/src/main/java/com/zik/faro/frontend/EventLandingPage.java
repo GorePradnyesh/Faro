@@ -13,6 +13,7 @@ import android.widget.TextView;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import com.zik.faro.data.Event;
+import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.EventUser;
 import com.zik.faro.data.user.InviteStatus;
 
@@ -74,7 +75,7 @@ public class EventLandingPage extends Activity {
         Bundle extras = getIntent().getExtras();
         if(extras != null){
             String eventID = extras.getString("eventID");
-            event = eventListHandler.getEventFromMap(eventID);
+            event = eventListHandler.getEventCloneFromMap(eventID);
             if(event != null) {
 
                 //Display elements based on Event Status
@@ -116,7 +117,7 @@ public class EventLandingPage extends Activity {
                     public void onClick(View v) {
                         //TODO: Make API call and update server
 
-                        eventListHandler.removeEventFromListAndMap(event);
+                        eventListHandler.removeEventFromListAndMap(event.getEventId());
                         startActivity(EventListPage);
                         finish();
                     }
@@ -170,10 +171,8 @@ public class EventLandingPage extends Activity {
 
     private void eventStateBasedView(Event event){
 
-        String myUserId = eventListHandler.getMyUserId();
-        EventUser eventUser = eventListHandler.getEventUser(event.getEventId(), myUserId);
-
-        switch (eventUser.getInviteStatus()) {
+        InviteStatus inviteStatus = eventListHandler.getUserEventStatus(event.getEventId());
+        switch (inviteStatus) {
             case ACCEPTED:
                 event_status.setText("Accepted");
                 break;
@@ -185,7 +184,7 @@ public class EventLandingPage extends Activity {
                 break;
         }
         
-        if (eventUser.getInviteStatus() == InviteStatus.ACCEPTED){
+        if (inviteStatus == InviteStatus.ACCEPTED){
             statusYes.setVisibility(View.GONE);
             statusNo.setVisibility(View.GONE);
             statusMaybe.setVisibility(View.GONE);
@@ -200,9 +199,9 @@ public class EventLandingPage extends Activity {
             activityButton.setVisibility(View.GONE);
         }
 
-        if (eventUser.getInviteStatus() == InviteStatus.INVITED) {
+        if (inviteStatus == InviteStatus.INVITED) {
             statusMaybe.setVisibility(View.VISIBLE);
-        } else if (eventUser.getInviteStatus() == InviteStatus.MAYBE){
+        } else if (inviteStatus == InviteStatus.MAYBE){
             statusMaybe.setVisibility(View.GONE);
         }
     }

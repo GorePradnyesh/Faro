@@ -20,7 +20,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.zik.faro.data.Event;
-import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.PollOption;
 
@@ -75,7 +74,7 @@ public class ClosedPollLandingPage extends ActionBarActivity {
             eventID = extras.getString("eventID");
             pollID = extras.getString("pollID");
             P = pollListHandler.getPollFromMap(pollID);
-            E = eventListHandler.getEventFromMap(eventID);
+            E = eventListHandler.getEventCloneFromMap(eventID);
             pollOptionsList = P.getPollOptions();
             pollDesc.setText(P.getDescription());
 

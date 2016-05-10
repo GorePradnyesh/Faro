@@ -1,9 +1,11 @@
 package com.zik.faro.frontend;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,8 +17,16 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TabHost;
 
+import com.squareup.okhttp.Request;
 import com.zik.faro.data.Event;
+import com.zik.faro.data.EventInviteStatusWrapper;
+import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
+import com.zik.faro.frontend.faroservice.FaroServiceHandler;
+import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.faroservice.auth.TokenCache;
+
+import java.io.IOException;
+import java.util.List;
 
 /*
  * This is the page where all the events are listed in separate tabs based on invitation "Accepted"
@@ -37,6 +47,8 @@ import com.zik.faro.frontend.faroservice.auth.TokenCache;
 public class EventListPage extends Activity{
 
     static EventListHandler eventListHandler = EventListHandler.getInstance();
+    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+    private static String TAG = "EventListPage";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +91,8 @@ public class EventListPage extends Activity{
         final Intent eventLanding = new Intent(EventListPage.this, EventLandingPage.class);
         final Intent create_event_page = new Intent(EventListPage.this, CreateNewEvent.class);
         final Intent eventCalendarView = new Intent(EventListPage.this, EventCalendarView.class);
+
+        final Context mContext = this.getApplicationContext();
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
@@ -148,6 +162,30 @@ public class EventListPage extends Activity{
                 //finish();
             }
         });
+
+        /*serviceHandler.getEventHandler().getEvents(new BaseFaroRequestCallback<List<EventInviteStatusWrapper>>() {
+            @Override
+            public void onFailure(Request request, IOException ex) {
+                Log.e(TAG, "failed to get event list");
+            }
+
+            @Override
+            public void onResponse(final List<EventInviteStatusWrapper> eventInviteStatusWrappers, HttpError error) {
+                if (error == null ) {
+                    Runnable myRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.i(TAG, "Successfully received events from the server!!");
+                            addDownloadedEventsToListAndMap(eventInviteStatusWrappers);
+                        }
+                    };
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(myRunnable);
+                }else {
+                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                }
+            }
+        });*/
     }
 
     private void eventSelectedFromList(AdapterView<?> parent, int position, Intent eventLanding) {
