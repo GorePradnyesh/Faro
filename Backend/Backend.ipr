@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <option name="DEFAULT_COMPILER" value="Javac" />
+    <resourceExtensions />
+    <wildcardResourcePatterns>
+      <entry name="!?*.java" />
+      <entry name="!?*.form" />
+      <entry name="!?*.class" />
+      <entry name="!?*.groovy" />
+      <entry name="!?*.scala" />
+      <entry name="!?*.flex" />
+      <entry name="!?*.kt" />
+      <entry name="!?*.clj" />
+    </wildcardResourcePatterns>
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="false">
+        <processorPath useClasspath="true" />
+      </profile>
+    </annotationProcessing>
+  </component>
+  <component name="CopyrightManager" default="" />
+  <component name="Encoding">
+    <file url="PROJECT" charset="UTF-8" />
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="false">
+    <OptionsSetting value="true" id="Add" />
+    <OptionsSetting value="true" id="Remove" />
+    <OptionsSetting value="true" id="Checkout" />
+    <OptionsSetting value="true" id="Update" />
+    <OptionsSetting value="true" id="Status" />
+    <OptionsSetting value="true" id="Edit" />
+    <ConfirmationsSetting value="0" id="Add" />
+    <ConfirmationsSetting value="0" id="Remove" />
+  </component>
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/src/main/main.iml" filepath="$PROJECT_DIR$/src/main/main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/src/test/test.iml" filepath="$PROJECT_DIR$/src/test/test.iml" />
+    </modules>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_6" assert-keyword="true" jdk-15="true" project-jdk-name="1.7" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/out" />
+  </component>
+  <component name="libraryTable">
+    <library name=".mylyn">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/.metadata/.mylyn/repositories.xml.zip!/" />
+        <root url="jar://$PROJECT_DIR$/.metadata/.mylyn/tasks.xml.zip!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+    <library name="lib">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/stax-api-1.0-2.jar!/" />
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/objenesis-2.1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/activation-1.1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/jsr311-api-1.1.1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/jersey-bundle-1.18.2.jar!/" />
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/jackson-core-asl-1.9.2.jar!/" />
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/jaxb-api-2.2.2.jar!/" />
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/mockito-all-1.10.19.jar!/" />
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/appengine-api-1.0-sdk-1.9.15.jar!/" />
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/jackson-mapper-asl-1.9.13.jar!/" />
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/powermock-api-support-1.6.2.jar!/" />
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/commons-lang3-3.4.jar!/" />
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/jaxb-impl-2.2.3-1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/jackson-jaxrs-1.9.2.jar!/" />
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/jstl-1.2.jar!/" />
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/jettison-1.1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/commons-codec-1.4.jar!/" />
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/javassist-3.19.0-GA.jar!/" />
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/slf4j-api-1.7.10.jar!/" />
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/jersey-core-1.18.2.jar!/" />
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/powermock-api-mockito-1.6.2.jar!/" />
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/guava-18.0.jar!/" />
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/powermock-reflect-1.6.2.jar!/" />
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/jackson-xc-1.9.2.jar!/" />
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/slf4j-log4j12-1.7.10.jar!/" />
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/log4j-1.2.17.jar!/" />
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/jersey-json-1.18.2.jar!/" />
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/objectify-5.1.1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/powermock-core-1.6.2.jar!/" />
+        <root url="jar://$PROJECT_DIR$/target/faro-backend-1.0-SNAPSHOT/WEB-INF/lib/java-jwt-2.0.1.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+  </component>
+  <component name="masterDetails">
+    <states>
+      <state key="ProjectJDKs.UI">
+        <settings>
+          <last-edited>1.7</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+    </states>
+  </component>
+</project>
