@@ -37,8 +37,7 @@ import com.zik.faro.data.Item;
 
 @Path(EVENT_PATH_CONST + EVENT_ID_PATH_PARAM_STRING + ASSIGNMENT_PATH_CONST)
 public class AssignmentHandler {
-	
-    @Path(ASSIGNMENT_ID_PATH_PARAM_STRING)
+
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public JResponse<Assignment> getAssignment(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
@@ -86,7 +85,6 @@ public class AssignmentHandler {
 		}
     }
 
-    @Path(ASSIGNMENT_ID_PATH_PARAM_STRING)
     @DELETE
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public JResponse<String> deleteAssignment(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
@@ -98,7 +96,7 @@ public class AssignmentHandler {
     // If activityId is present in queryparam, update is for assignment of the activityId
     // present in the request.
     // Else update is for assignment at event level
-    @Path(ASSIGNMENT_ID_PATH_PARAM_STRING+ASSIGNMENT_UPDATE_PATH_CONST)
+    @Path(ASSIGNMENT_UPDATE_PATH_CONST)
     @POST
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public JResponse<String> updateAssignment(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,

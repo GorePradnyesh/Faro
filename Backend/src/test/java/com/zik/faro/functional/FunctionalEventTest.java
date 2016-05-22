@@ -38,7 +38,7 @@ public class FunctionalEventTest {
     
     // 1. createEvent
     public void createEventTest() throws Exception {
-    	
+
     	Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(),
                 Calendar.getInstance(), "Description", false, null, new Location("Random Location"),null, null, "Mafia god");
     	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);

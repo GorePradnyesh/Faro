@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import com.zik.faro.api.responder.AddFriendRequest;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.data.Assignment;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.IllegalDataOperation;
@@ -23,7 +24,7 @@ public class EventManagement {
 		// server constructor to generate eventId and other defaults invisible to client
 		Event event = new Event(ev.getEventName(), ev.getStartDate(), ev.getEndDate(),
         		ev.getEventDescription(), ev.getControlFlag(), ev.getExpenseGroup(), 
-        		ev.getLocation(), null, null, null);
+        		ev.getLocation(), null, new Assignment(), null);
         EventDatastoreImpl.storeEvent(userId, ConversionUtils.toDo(event));
         //TODO: send out notifications t
         return event;
