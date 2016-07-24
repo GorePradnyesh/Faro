@@ -6,6 +6,7 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.zik.faro.data.Event;
 
+import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.auth.TokenCache;
 import com.zik.faro.frontend.faroservice.spec.EventHandler;
@@ -28,7 +29,7 @@ public class OKHttpWrapperEvent extends BaseFaroOKHttpWrapper implements EventHa
     }
 
     @Override
-    public void getEvents(final BaseFaroRequestCallback<List<Event>> callback) {
+    public void getEvents(final BaseFaroRequestCallback<List<EventInviteStatusWrapper>> callback) {
         String token = TokenCache.getTokenCache().getToken();
         if(token != null){
             Request request = new Request.Builder()
@@ -36,8 +37,8 @@ public class OKHttpWrapperEvent extends BaseFaroOKHttpWrapper implements EventHa
                     .addHeader(authHeaderName, token)
                     .build();
             // Use GSON to get the TypeToken
-            Type eventList = new TypeToken<ArrayList<Event>>(){}.getType();
-            this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<List<Event>>(callback, eventList));
+            Type eventList = new TypeToken<ArrayList<EventInviteStatusWrapper>>(){}.getType();
+            this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<List<EventInviteStatusWrapper>>(callback, eventList));
         }else{
             callback.onFailure(null, new IOException("Could not fetch auth token"));
         }

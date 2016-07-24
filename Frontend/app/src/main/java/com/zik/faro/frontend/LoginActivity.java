@@ -1,5 +1,6 @@
 package com.zik.faro.frontend;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -23,7 +24,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.MessageFormat;
 
-public class LoginActivity extends ActionBarActivity {
+public class LoginActivity extends Activity {
     private String TAG = "LoginActivity";
 
     protected static final String baseUrl = "http://10.0.2.2:8080/v1/";
@@ -43,7 +44,7 @@ public class LoginActivity extends ActionBarActivity {
         try {
             token = tokenCache.getToken();
             if (token != null) {
-                startActivity(new Intent(LoginActivity.this, EventListPage.class));
+                startActivity(new Intent(LoginActivity.this, AppLandingPage.class));
             }
 
             Log.i(TAG, "token = " + token);
@@ -119,7 +120,7 @@ public class LoginActivity extends ActionBarActivity {
                         FaroUserContext faroUserContext = FaroUserContext.getInstance();
                         faroUserContext.setEmail(email);
                         // Go to event list page
-                        startActivity(new Intent(LoginActivity.this, EventListPage.class));
+                        startActivity(new Intent(LoginActivity.this, AppLandingPage.class));
                     } else {
                         Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                         // Invalid login

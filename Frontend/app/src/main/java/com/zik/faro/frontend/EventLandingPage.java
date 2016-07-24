@@ -217,7 +217,7 @@ public class EventLandingPage extends Activity {
     @Override
     public void onBackPressed() {
         eventListHandler.deleteEventFromMapIfNotInList(event);
-        startActivity(EventListPage);
+        //startActivity(EventListPage);
         finish();
         super.onBackPressed();
     }

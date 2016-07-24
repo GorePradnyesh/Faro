@@ -54,7 +54,7 @@ public class EditEvent extends Activity {
     private RelativeLayout popUpRelativeLayout;
 
     Intent EventLanding = null;
-    Intent EventListPage = null;
+    Intent AppLandingPage = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,7 +75,7 @@ public class EditEvent extends Activity {
         popUpRelativeLayout = (RelativeLayout) findViewById(R.id.editEventPage);
 
         EventLanding = new Intent(EditEvent.this, EventLandingPage.class);
-        EventListPage = new Intent(EditEvent.this, EventListPage.class);
+        //AppLandingPage = new Intent(EditEvent.this, AppLandingPage.class);
 
         /*
         * Do not remove the event from the list and the map in the eventListHandler below.
@@ -199,7 +199,7 @@ public class EditEvent extends Activity {
 
                 //TODO: Make API call and update server
                 eventListHandler.removeEventFromListAndMap(cloneEvent.getEventId());
-                startActivity(EventListPage);
+                //startActivity(AppLandingPage);
                 popupWindow.dismiss();
                 finish();
             }

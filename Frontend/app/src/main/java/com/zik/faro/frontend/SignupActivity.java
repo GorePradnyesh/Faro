@@ -1,6 +1,7 @@
 package com.zik.faro.frontend;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -126,7 +127,7 @@ public class SignupActivity extends Activity {
                         faroUserContext.setEmail(email);
 
                         // Go to event list page
-                        startActivity(new Intent(SignupActivity.this, EventListPage.class));
+                        startActivity(new Intent(SignupActivity.this, AppLandingPage.class));
                     } else {
                         Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                         if (error.getCode() == 409) {

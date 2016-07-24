@@ -101,4 +101,11 @@
     <string name="title_activity_create_new_assignment">CreateNewAssignment</string>
     <string name="add_item">Add Item</string>
     <string name="title_activity_edit_assignment">EditAssignment</string>
+    <string name="title_activity_more_options">MoreOptions</string>
+    <string name="title_activity_more_options_page">MoreOptionsPage</string>
+    <string name="title_activity_tab_try">TabTry</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

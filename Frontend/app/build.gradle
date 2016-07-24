@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 21
+    compileSdkVersion 23
     buildToolsVersion "21.1.2"
 
     defaultConfig {
         applicationId "com.zik.faro.frontend"
         minSdkVersion 18
-        targetSdkVersion 21
+        targetSdkVersion 23
         versionCode 1
         versionName "1.0"
     }
@@ -22,14 +22,20 @@ android {
     lintOptions {
         abortOnError false
     }
+
+    ext {
+        supportLibVersion = '23.2.1'
+    }
 }
 
 dependencies {
     testCompile 'com.auth0:java-jwt:2.1.0'
-    compile files('build/libs/faro-commons-1.0-SNAPSHOT.jar')
-    compile 'com.android.support:appcompat-v7:21.0.3'
+    compile 'com.android.support:appcompat-v7:23.4.0'
+    compile 'com.android.support:support-annotations:23.4.0'
+    compile 'com.android.support:design:23.4.0'
     compile 'com.squareup.okhttp:okhttp:2.5.0'
-    compile 'com.google.code.gson:gson:2.3.1'
+    compile 'com.google.code.gson:gson:2.4'
     compile 'com.google.guava:guava:18.0'
-    compile 'com.github.bumptech.glide:glide:3.4.+'
+    compile 'com.github.bumptech.glide:glide:3.4.0'
+    compile 'com.android.support:support-v4:23.4.0'
 }

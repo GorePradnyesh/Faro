@@ -25,7 +25,7 @@ public class EventUserDatastoreImpl {
     // should only be called while new event is being created since that is the time
     // we need to save user creating event as owner
     public static void storeEventUser(final String eventId, final String faroUserId, String ownerId){
-    	EventUserDo eventUserRelation = new EventUserDo(eventId, faroUserId, ownerId);
+    	EventUserDo eventUserRelation = EventUserDo.createEventUserDoAccepted(eventId, faroUserId, ownerId);
     	DatastoreObjectifyDAL.storeObject(eventUserRelation);
     }
 

@@ -19,7 +19,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".LoginActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -28,8 +28,7 @@
         </activity>
         <activity
             android:name=".SignupActivity"
-            android:label="SignupPage" >
-        </activity>
+            android:label="SignupPage" />
         <activity
             android:name=".EventListPage"
             android:label="@string/title_activity_app_landing_page" />
@@ -84,7 +83,13 @@
             android:label="@string/title_activity_assignment_landing_page" />
         <activity
             android:name=".EditAssignment"
-            android:label="@string/title_activity_edit_assignment"></activity>
+            android:label="@string/title_activity_edit_assignment" />
+        <activity
+            android:name=".AppLandingPage"
+            android:label="@string/title_activity_app_landing_page" />
+        <activity
+            android:name=".MoreOptionsPage"
+            android:label="@string/title_activity_more_options_page" />
     </application>
 
 </manifest>

@@ -10,7 +10,6 @@ import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -30,6 +29,7 @@ import java.util.Calendar;
 
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.Event;
+import com.zik.faro.data.user.InviteStatus;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
@@ -49,16 +49,16 @@ public class CreateNewEvent extends Activity {
 
     //public static final int NO_CHANGES = 0;
     static EventListHandler eventListHandler = EventListHandler.getInstance();
-    Intent AppLanding = null;
-    Intent EventListPage = null;
+    //Intent AppLanding = null;
+    //Intent EventListPage = null;
 
 
-    Calendar startDateCalendar = Calendar.getInstance();
-    Calendar endDateCalendar = Calendar.getInstance();
-    Button startDateButton = null;
-    Button startTimeButton = null;
-    Button endTimeButton = null;
-    Button endDateButton = null;
+    private Calendar startDateCalendar = Calendar.getInstance();
+    private Calendar endDateCalendar = Calendar.getInstance();
+    private Button startDateButton = null;
+    private Button startTimeButton = null;
+    private Button endTimeButton = null;
+    private Button endDateButton = null;
 
     private DateFormat sdf = new SimpleDateFormat("MMM dd yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
@@ -68,9 +68,10 @@ public class CreateNewEvent extends Activity {
     private static String TAG = "CreateNewEvent";
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_new_event);
+
 
         final EditText eventName = (EditText) findViewById(R.id.eventNameTextEdit);
         final EditText eventDescription = (EditText) findViewById(R.id.eventDescriptionEditText);
@@ -101,10 +102,10 @@ public class CreateNewEvent extends Activity {
         final Button createNewEventOK = (Button) findViewById(R.id.createNewEventOK);
 
         final Intent eventLanding = new Intent(CreateNewEvent.this, EventLandingPage.class);
-        AppLanding = new Intent(CreateNewEvent.this, EventListPage.class);
-        EventListPage = new Intent(CreateNewEvent.this, EventListPage.class);
+        //AppLanding = new Intent(CreateNewEvent.this, EventListPage.class);
+        //EventListPage = new Intent(CreateNewEvent.this, EventListPage.class);
 
-        final Context mContext = this.getApplicationContext();
+        final Context mContext = this;
 
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
@@ -211,7 +212,7 @@ public class CreateNewEvent extends Activity {
                                 public void run() {
                                     //Since update to server successful, adding event to List and Map below
                                     Log.i(TAG, "Event Create Response received Successfully");
-                                    eventListHandler.addEventToListAndMap(receivedEvent);
+                                    eventListHandler.addEventToListAndMap(receivedEvent, InviteStatus.ACCEPTED);
                                     eventLanding.putExtra("eventID", receivedEvent.getEventId());
                                     startActivity(eventLanding);
                                     finish();
@@ -258,7 +259,6 @@ public class CreateNewEvent extends Activity {
         setBothTimeAndDateToDefault();
     }
 
-
     private void setBothTimeAndDateToDefault(){
         startDateButton.setText(sdf.format(startDateCalendar.getTime()));
         endDateButton.setText(sdf.format(startDateCalendar.getTime()));
@@ -276,24 +276,24 @@ public class CreateNewEvent extends Activity {
         updateEndTime();
     }
 
-    public void updateStartDate(){
+    private void updateStartDate(){
         startDateButton.setText(sdf.format(startDateCalendar.getTime()));
     }
 
-    public void updateEndDate(){
+    private void updateEndDate(){
         endDateButton.setText(sdf.format(endDateCalendar.getTime()));
     }
 
-    public void updateStartTime(){
+    private void updateStartTime(){
         startTimeButton.setText(stf.format(startDateCalendar.getTime()));
     }
 
-    public void updateEndTime(){
+    private void updateEndTime(){
         endTimeButton.setText(stf.format(endDateCalendar.getTime()));
     }
 
 
-    public void setStartDate(){
+    private void setStartDate(){
         new DatePickerDialog(CreateNewEvent.this,
                 startDate,
                 startDateCalendar.get(Calendar.YEAR),
@@ -302,7 +302,7 @@ public class CreateNewEvent extends Activity {
 
     }
 
-    public void setEndDate(){
+    private void setEndDate(){
         new DatePickerDialog(CreateNewEvent.this,
                 endDate,
                 endDateCalendar.get(Calendar.YEAR),
@@ -311,7 +311,7 @@ public class CreateNewEvent extends Activity {
 
     }
 
-    public void setStartTime(){
+    private void setStartTime(){
         new TimePickerDialog(CreateNewEvent.this,
                 startTime,
                 startDateCalendar.get(Calendar.HOUR_OF_DAY),
@@ -319,7 +319,7 @@ public class CreateNewEvent extends Activity {
                 false).show();
     }
 
-    public void setEndTime(){
+    private void setEndTime(){
         new TimePickerDialog(CreateNewEvent.this,
                 endTime,
                 endDateCalendar.get(Calendar.HOUR_OF_DAY),
@@ -331,7 +331,7 @@ public class CreateNewEvent extends Activity {
     /* When setting the startDate, we compare the startCalendar to the endCalendar and if the
     * startCalendar is after the endCalendar then we set the endDate same as the startDate
     */
-    DatePickerDialog.OnDateSetListener startDate = new DatePickerDialog.OnDateSetListener(){
+    private DatePickerDialog.OnDateSetListener startDate = new DatePickerDialog.OnDateSetListener(){
 
         @Override
         public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
@@ -350,7 +350,7 @@ public class CreateNewEvent extends Activity {
     /* When setting the startTime, we compare the startCalendar to the endCalendar and if the
     * startCalendar is after the endCalendar then we set the endTime same as the startTime
     */
-    TimePickerDialog.OnTimeSetListener startTime = new TimePickerDialog.OnTimeSetListener(){
+    private TimePickerDialog.OnTimeSetListener startTime = new TimePickerDialog.OnTimeSetListener(){
         @Override
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
 
@@ -368,7 +368,7 @@ public class CreateNewEvent extends Activity {
     * startCalendar is after the endCalendar then we set the endDate same as the startDate
     */
 
-    DatePickerDialog.OnDateSetListener endDate = new DatePickerDialog.OnDateSetListener(){
+    private DatePickerDialog.OnDateSetListener endDate = new DatePickerDialog.OnDateSetListener(){
 
         @Override
         public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
@@ -390,11 +390,11 @@ public class CreateNewEvent extends Activity {
     /* When setting the endTime, we compare the startCalendar to the endCalendar and if the
     * startCalendar is after the endCalendar then we set the endTime same as the startTime
     */
-    TimePickerDialog.OnTimeSetListener endTime = new TimePickerDialog.OnTimeSetListener(){
+    private TimePickerDialog.OnTimeSetListener endTime = new TimePickerDialog.OnTimeSetListener(){
         @Override
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-            endDateCalendar.set(endDateCalendar.HOUR_OF_DAY, hourOfDay);
-            endDateCalendar.set(endDateCalendar.MINUTE, minute);
+            endDateCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+            endDateCalendar.set(Calendar.MINUTE, minute);
 
             if(startDateCalendar.after(endDateCalendar)){
                 resetEndDateAndTimeToStartDateAndTime();
@@ -404,20 +404,12 @@ public class CreateNewEvent extends Activity {
         }
     };
 
-    @Override
+    /*@Override
     public void onBackPressed() {
         startActivity(EventListPage);
         finish();
         super.onBackPressed();
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_create_new_event, menu);
-        return true;
-    }
+    }*/
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
