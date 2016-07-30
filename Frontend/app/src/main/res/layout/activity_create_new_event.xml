@@ -12,29 +12,13 @@
         android:layout_marginTop="40dp"
         android:hint="@string/EventName" />
 
-    <CheckBox
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/eventCreatorCheckBox"
-        android:text="@string/EventCreator"
-        android:layout_below="@+id/eventNameTextEdit"
-        android:layout_alignParentStart="true"/>
-
-    <RadioGroup
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/inviteStatusRadioGroup"
-        android:orientation="horizontal"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@+id/eventCreatorCheckBox"/>
-
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/from"
         android:id="@+id/startDateTextView"
-        android:layout_below="@+id/inviteStatusRadioGroup"
+        android:layout_below="@+id/eventNameTextEdit"
         android:layout_alignParentStart="true"
         android:layout_marginTop="15dp"
         android:enabled="false"

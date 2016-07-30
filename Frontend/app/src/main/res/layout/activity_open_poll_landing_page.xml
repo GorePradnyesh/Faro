@@ -102,17 +102,6 @@
         <Button
             android:layout_width="0px"
             android:layout_height="wrap_content"
-            android:id="@+id/deletePoll"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:text="@string/delete"
-            android:paddingLeft="0dp"
-            android:paddingTop="0dp"
-            android:paddingRight="0dp"
-            android:paddingBottom="0dp" />
-        <Button
-            android:layout_width="0px"
-            android:layout_height="wrap_content"
             android:id="@+id/closePoll"
             android:layout_weight="1"
             android:clickable="true"

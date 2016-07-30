@@ -78,16 +78,14 @@
     <string name="dismiss_error">Dismiss</string>
     <string name="oops">Oops</string>
     <string name="vote">VOTE</string>
-    <string name="delete">DELETE</string>
+    <string name="delete">Delete</string>
     <string name="close">CLOSE</string>
     <string name="title_activity_pick_poll_winner">PickPollWinner</string>
     <string name="winner">Winner</string>
     <string name="title_activity_closed_poll_landing_page">ClosedPollLandingPage</string>
     <string name="change_winner">Change Winner</string>
     <string name="re_open_poll">Re-open Poll</string>
-    <string name="delete_event">Delete Event</string>
     <string name="delete_activity">Delete Activity</string>
-    <string name="are_you_sure_you_want_to_delete_the_event">Are you sure you want to delete the Event?</string>
     <string name="are_you_sure_you_want_to_delete_the_activity">Are you sure you want to delete the Activity?</string>
     <string name="title_activity_activity_list_page">ActivityListPage</string>
     <string name="title_activity_activity_landing_page">ActivityLandingPage</string>

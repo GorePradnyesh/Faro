@@ -1,16 +1,23 @@
 package com.zik.faro.frontend;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.zik.faro.data.Event;
@@ -31,6 +38,8 @@ public class EditPoll extends Activity {
     private static Event event;
     Intent PollLandingPage;
 
+    private RelativeLayout popUpRelativeLayout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,6 +59,9 @@ public class EditPoll extends Activity {
         final Button editPollOK = (Button) findViewById(R.id.editPollOK);
         editPollOK.setEnabled(true);
         final Button editPollCancel = (Button) findViewById(R.id.editPollCancel);
+        final Button deletePoll = (Button)findViewById(R.id.deletePoll);
+
+        popUpRelativeLayout = (RelativeLayout) findViewById(R.id.editPollPage);
 
         PollLandingPage = new Intent(EditPoll.this, OpenPollLandingPage.class);
 
@@ -144,8 +156,54 @@ public class EditPoll extends Activity {
                 finish();
             }
         });
+
+        deletePoll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                confirmPollDeletePopUP(v);
+            }
+        });
     }
 
+    public void confirmPollDeletePopUP(View v) {
+        LayoutInflater layoutInflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        ViewGroup container = (ViewGroup) layoutInflater.inflate(R.layout.delete_pop_up, null);
+        final PopupWindow popupWindow = new PopupWindow(container, RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT, true);
+
+        TextView message = (TextView)container.findViewById(R.id.questionTextView);
+        message.setText("Are you sure you want to delete the Poll?");
+        Button delete = (Button)container.findViewById(R.id.deleteEventPopUp);
+        Button cancel = (Button)container.findViewById(R.id.cancelEventPopUp);
+
+        popupWindow.showAtLocation(popUpRelativeLayout, Gravity.CENTER, 0, 0);
+
+        container.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                popupWindow.dismiss();
+                return false;
+            }
+        });
+
+        delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO: Make API call and update server
+                pollListHandler.removePollFromListAndMap(poll);
+                popupWindow.dismiss();
+                finish();
+            }
+        });
+
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+            }
+        });
+
+    }
     //**********************************************************************************************
     //**********************************************************************************************
     //**********************************************************************************************

@@ -23,6 +23,7 @@ public class EventLandingPage extends Activity {
     private DateFormat sdf = new SimpleDateFormat(" EEE, MMM d, yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
     private  static EventListHandler eventListHandler = EventListHandler.getInstance();
+    static PollListHandler pollListHandler = PollListHandler.getInstance();
     private static Event event;
 
     private Button statusYes = null;
@@ -34,7 +35,7 @@ public class EventLandingPage extends Activity {
     private ImageButton editButton = null;
     private TextView event_status = null;
 
-    private Intent EventListPage;
+    private Intent AppLandingPage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +70,7 @@ public class EventLandingPage extends Activity {
         final Intent CreateEventAssignment = new Intent(EventLandingPage.this, CreateNewAssignment.class);
         final Intent AssignmentLandingPage = new Intent(EventLandingPage.this, AssignmentLandingPage.class);
 
-        EventListPage = new Intent(EventLandingPage.this, EventListPage.class);
+        AppLandingPage = new Intent(EventLandingPage.this, AppLandingPage.class);
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
         Bundle extras = getIntent().getExtras();
@@ -118,7 +119,7 @@ public class EventLandingPage extends Activity {
                         //TODO: Make API call and update server
 
                         eventListHandler.removeEventFromListAndMap(event.getEventId());
-                        startActivity(EventListPage);
+                        startActivity(AppLandingPage);
                         finish();
                     }
                 });
@@ -214,10 +215,11 @@ public class EventLandingPage extends Activity {
         }
     }
 
+    //Clear all event related datastructures
     @Override
     public void onBackPressed() {
         eventListHandler.deleteEventFromMapIfNotInList(event);
-        //startActivity(EventListPage);
+        pollListHandler.clearPollListsAndMap();
         finish();
         super.onBackPressed();
     }

@@ -27,16 +27,23 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static android.widget.Toast.LENGTH_LONG;
 
+import com.squareup.okhttp.Request;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.PollOption;
+import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
+import com.zik.faro.frontend.faroservice.FaroServiceHandler;
+import com.zik.faro.frontend.faroservice.HttpError;
+import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 
 public class OpenPollLandingPage extends Activity {
 
@@ -47,7 +54,10 @@ public class OpenPollLandingPage extends Activity {
     private static String eventID = null;
     private static String pollID = null;
 
-    String myUserId = eventListHandler.getMyUserId();
+
+    static FaroUserContext faroUserContext = FaroUserContext.getInstance();
+    String myUserId = faroUserContext.getEmail();
+    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
 
     //Maps to manage Multichoice polls
     private Map<Integer, PollOption> selectedPollMap = new ConcurrentHashMap<>();
@@ -81,7 +91,6 @@ public class OpenPollLandingPage extends Activity {
         editButton.setImageResource(R.drawable.edit);
 
         Button votePoll = (Button)findViewById(R.id.votePoll);
-        final Button deletePoll = (Button)findViewById(R.id.deletePoll);
         Button closePoll = (Button)findViewById(R.id.closePoll);
 
         popUpRelativeLayout = (RelativeLayout) findViewById(R.id.pollLandingPage);
@@ -94,6 +103,7 @@ public class OpenPollLandingPage extends Activity {
         PollListPage = new Intent(OpenPollLandingPage.this, PollListPage.class);
         PickPollWinner = new Intent(OpenPollLandingPage.this, PickPollWinner.class);
         EditPollPage = new Intent(OpenPollLandingPage.this, EditPoll.class);
+        final Context mContext = this;
 
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
@@ -293,21 +303,25 @@ public class OpenPollLandingPage extends Activity {
                             pollOption.removeVoter(myUserId);
                         }
 
+                        //Set<String>
+
+                        /*serviceHandler.getPollHandler().castVote(new BaseFaroRequestCallback<String>() {
+                            @Override
+                            public void onFailure(Request request, IOException ex) {
+
+                            }
+
+                            @Override
+                            public void onResponse(String s, HttpError error) {
+
+                            }
+                        }, eventID, poll.getId(), );*/
+
                         PollListPage.putExtra("eventID", event.getEventId());
                         startActivity(PollListPage);
                         finish();
                     }
                 }
-            }
-        });
-
-        deletePoll.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pollListHandler.deletePoll(poll);
-                PollListPage.putExtra("eventID", eventID);
-                startActivity(PollListPage);
-                finish();
             }
         });
 

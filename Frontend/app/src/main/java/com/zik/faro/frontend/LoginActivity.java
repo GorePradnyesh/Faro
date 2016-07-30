@@ -12,6 +12,7 @@ import android.widget.EditText;
 
 import com.google.common.base.Strings;
 import com.squareup.okhttp.Request;
+import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
@@ -33,6 +34,10 @@ public class LoginActivity extends Activity {
     private EditText emailTextBox;
     private EditText passwordTextBox;
 
+    static FaroUserContext faroUserContext = FaroUserContext.getInstance();
+
+    static FaroCache faroCache;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // Init the activity
@@ -40,13 +45,26 @@ public class LoginActivity extends Activity {
 
         // Setup token cache
         TokenCache tokenCache = TokenCache.getOrCreateTokenCache(LoginActivity.this);
+
+        //Setup Faro Cache
+        faroCache = FaroCache.getOrCreateFaroUserContextCache(LoginActivity.this);
+
+        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
+
         String token = null;
         try {
             token = tokenCache.getToken();
             if (token != null) {
-                startActivity(new Intent(LoginActivity.this, AppLandingPage.class));
+                String email = faroCache.loadFaroCacheFromDisk("email");
+                if (email != null){
+                    faroUserContext.setEmail(email);
+                    startActivity(new Intent(LoginActivity.this, AppLandingPage.class));
+                }else{
+                    Log.e(TAG, "email not found");
+                }
+            }else{
+                Log.i(TAG, "Token not found");
             }
-
             Log.i(TAG, "token = " + token);
         } catch (Exception e) {
             Log.i(TAG, "Could not obtain valid token");
@@ -117,8 +135,8 @@ public class LoginActivity extends Activity {
                 public void onResponse(String token, HttpError error) {
                     Log.i(TAG, "login response, token = " + token);
                     if (error == null) {
-                        FaroUserContext faroUserContext = FaroUserContext.getInstance();
                         faroUserContext.setEmail(email);
+                        faroCache.saveFaroCacheToDisk("email", email);
                         // Go to event list page
                         startActivity(new Intent(LoginActivity.this, AppLandingPage.class));
                     } else {

@@ -30,9 +30,6 @@
             android:name=".SignupActivity"
             android:label="SignupPage" />
         <activity
-            android:name=".EventListPage"
-            android:label="@string/title_activity_app_landing_page" />
-        <activity
             android:name=".CreateNewEvent"
             android:label="@string/title_activity_create_new_event" />
         <activity

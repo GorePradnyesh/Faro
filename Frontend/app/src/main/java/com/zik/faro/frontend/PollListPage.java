@@ -1,9 +1,12 @@
 package com.zik.faro.frontend;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -13,8 +16,16 @@ import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
 
+import com.squareup.okhttp.Request;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.Poll;
+import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
+import com.zik.faro.frontend.faroservice.FaroServiceHandler;
+import com.zik.faro.frontend.faroservice.HttpError;
+import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
+
+import java.io.IOException;
+import java.util.List;
 
 public class PollListPage extends Activity {
 
@@ -25,6 +36,9 @@ public class PollListPage extends Activity {
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static Event E;
     private static String eventID = null;
+    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+
+    private static String TAG = "PollListPage";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,7 +136,31 @@ public class PollListPage extends Activity {
             }
         });
 
+        final Context mContext = this;
 
+        serviceHandler.getPollHandler().getPolls(new BaseFaroRequestCallback<List<com.zik.faro.data.Poll>>() {
+            @Override
+            public void onFailure(Request request, IOException ex) {
+                Log.e(TAG, "failed to get polls list");
+            }
+
+            @Override
+            public void onResponse(final List<Poll> polls, HttpError error) {
+                if (error == null ) {
+                    Runnable myRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.i(TAG, "Successfully received polls from the server!!");
+                            pollListHandler.addDownloadedPollsToListAndMap(polls);
+                        }
+                    };
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(myRunnable);
+                }else{
+                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                }
+            }
+        }, eventID);
     }
 
     private void pollSelectedFromList(AdapterView<?> parent, int position, Intent intent) {
@@ -130,7 +168,6 @@ public class PollListPage extends Activity {
         intent.putExtra("eventID", E.getEventId());
         intent.putExtra("pollID", poll.getId());
         startActivity(intent);
-        finish();
     }
 
 

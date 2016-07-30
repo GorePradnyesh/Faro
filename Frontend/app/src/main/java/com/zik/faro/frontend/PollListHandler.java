@@ -1,12 +1,11 @@
 package com.zik.faro.frontend;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.Poll;
-import com.zik.faro.data.PollOption;
-import java.util.UUID;
 
 
 public class PollListHandler {
@@ -75,6 +74,7 @@ public class PollListHandler {
     }
 
     public void addPollToListAndMap(Poll poll){
+        removePollFromListAndMap(poll);
         conditionallyAddNewPollToList(poll);
         this.pollMap.put(poll.getId(), poll);
     }
@@ -86,6 +86,15 @@ public class PollListHandler {
             pollAdapter.insert(poll, 0);
             pollAdapter.notifyDataSetChanged();
         }
+    }
+
+    public void addDownloadedPollsToListAndMap(List<Poll> pollList){
+        for (int i = 0; i < pollList.size(); i++){
+            Poll poll = pollList.get(i);
+            pollListHandler.addPollToListAndMap(poll);
+        }
+        this.openPollsAdapter.notifyDataSetChanged();
+        this.closedPollsAdapter.notifyDataSetChanged();
     }
 
     public int getCombinedListSize(){
@@ -104,30 +113,28 @@ public class PollListHandler {
         }
     }
 
-    public void deletePoll(Poll poll){
-        //TODO: send update to server and if successful then delete poll from List and Map below
-        PollAdapter pollAdapter;
-        pollAdapter = getPollAdapter(poll);
-        if(pollAdapter != null) {
-            pollAdapter.list.remove(poll);
-            this.pollMap.remove(poll.getId());
-            pollAdapter.notifyDataSetChanged();
+    public void removePollFromList(String pollID, List <Poll> pollList){
+        for (int i = 0; i < pollList.size(); i++){
+            Poll poll = pollList.get(i);
+            if (poll.getId().equals(pollID)){
+                pollList.remove(poll);
+                return;
+            }
         }
     }
 
-    public void removePollForEditing (Poll poll){
+    public void removePollFromListAndMap(Poll poll){
         PollAdapter pollAdapter;
         pollAdapter = getPollAdapter(poll);
         if(pollAdapter != null) {
-            pollAdapter.list.remove(poll);
+            removePollFromList(poll.getId(), pollAdapter.list);
             pollAdapter.notifyDataSetChanged();
             pollMap.remove(poll.getId());
         }
-
     }
 
     public void changePollStatusToClosed(Poll poll){
-        removePollForEditing(poll);
+        removePollFromListAndMap(poll);
         poll.setStatus(ObjectStatus.CLOSED);
 
         //TODO: send update to server and if successful then delete poll from List and Map below
@@ -136,11 +143,17 @@ public class PollListHandler {
     }
 
     public void changePollStatusToOpen(Poll poll){
-        removePollForEditing(poll);
+        removePollFromListAndMap(poll);
         poll.setStatus(ObjectStatus.OPEN);
 
         //TODO: send update to server and if successful then delete poll from List and Map below
 
         addNewPoll(poll);
+    }
+
+    public void clearPollListsAndMap(){
+        pollListHandler.openPollsAdapter.list.clear();
+        pollListHandler.closedPollsAdapter.list.clear();
+        pollListHandler.pollMap.clear();
     }
 }

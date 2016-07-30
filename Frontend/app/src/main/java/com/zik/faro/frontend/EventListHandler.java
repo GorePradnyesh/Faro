@@ -25,49 +25,9 @@ import com.zik.faro.data.Event;
 
 public class EventListHandler {
 
-    public static final int MAX_EVENTS_PAGE_SIZE = 100;
-    private static final int MAX_TOTAL_EVENTS_IN_CACHE = 500;
-
-
-    public EventAdapter acceptedEventAdapter;
-    public EventAdapter notAcceptedEventAdapter;
-
-
-
-    //TODO: Temp variable
-    private String myUserId = "TestUser";
-    //TODO: Temp Map
-    private Map<String, EventUser> eventUserMap = new ConcurrentHashMap<>();
-
-
-    //TODO Function call to remove items from the List and Map when user keeps scrolling and caches
-    // lot of events. Have a Max limit on number of events we will cache else will use up a lot of
-    // memory and battery. Use MAX_TOTAL_EVENTS_IN_CACHE to set the max events we will cache
-
-
     /*
-    * Map of events needed to access events downloaded from the server in O(1) time. The Key to the
-    * Map is the eventID String which returns the Event as the value
-    */
-    private Map<String, EventInviteStatusWrapper> eventMap = new ConcurrentHashMap<>();
-
-    private static int tempEventID = 0;
-    public static final FaroServiceHandler serviceHandler = CreateFaroServiceHandler();
-    protected static final String baseUrl = "http://10.0.2.2:8080/v1/";
-    private static String TAG = "EventListHandler";
-
-    private static final FaroServiceHandler CreateFaroServiceHandler()
-    {
-        FaroServiceHandler innerServiceHandler = null;
-        try {
-            innerServiceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
-        } catch (MalformedURLException e) {
-            Log.e(TAG, "failed to obtain servicehandler", e);
-        }
-        return innerServiceHandler;
-    }
-
-
+     *This is a Singleton class
+     */
     private static EventListHandler eventListHandler = null;
 
     public static EventListHandler getInstance(){
@@ -85,9 +45,39 @@ public class EventListHandler {
 
     private EventListHandler(){}
 
-    public String getMyUserId() {
-        return myUserId;
+
+    public static final int MAX_EVENTS_PAGE_SIZE = 100;
+    private static final int MAX_TOTAL_EVENTS_IN_CACHE = 500;
+
+    public EventAdapter acceptedEventAdapter;
+    public EventAdapter notAcceptedEventAdapter;
+
+    /*
+    * Map of events needed to access events downloaded from the server in O(1) time. The Key to the
+    * Map is the eventID String which returns the Event as the value
+    */
+    private Map<String, EventInviteStatusWrapper> eventMap = new ConcurrentHashMap<>();
+
+    public static final FaroServiceHandler serviceHandler = CreateFaroServiceHandler();
+
+    protected static final String baseUrl = "http://10.0.2.2:8080/v1/";
+    private static String TAG = "EventListHandler";
+
+    private static final FaroServiceHandler CreateFaroServiceHandler()
+    {
+        FaroServiceHandler innerServiceHandler = null;
+        try {
+            innerServiceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
+        } catch (MalformedURLException e) {
+            Log.e(TAG, "failed to obtain servicehandler", e);
+        }
+        return innerServiceHandler;
     }
+
+    //TODO Function call to remove items from the List and Map when user keeps scrolling and caches
+    // lot of events. Have a Max limit on number of events we will cache else will use up a lot of
+    // memory and battery. Use MAX_TOTAL_EVENTS_IN_CACHE to set the max events we will cache
+
 
 
     /*
@@ -147,24 +137,7 @@ public class EventListHandler {
         //TODO: send new event update to server
         //TODO  update server and if successful then add event to List and Map below and
         // update the eventID in the Event.
-        serviceHandler.getEventHandler().createEvent(new BaseFaroRequestCallback<Event>() {
-            @Override
-            public void onFailure(Request request, IOException ex) {
-                Log.e(TAG, "failed to send event create request");
-            }
-
-            @Override
-            public void onResponse(Event receivedEvent, HttpError error) {
-                if (error == null ) {
-                    Log.i(TAG, "Response received Successfully");
-                    conditionallyAddEventToList(receivedEvent, InviteStatus.ACCEPTED);
-                    EventInviteStatusWrapper eventInviteStatusWrapper = new EventInviteStatusWrapper(receivedEvent, InviteStatus.ACCEPTED);
-                    eventListHandler.eventMap.put(receivedEvent.getEventId(), eventInviteStatusWrapper);
-
-                } else {
-                }
-            }
-        }, event);
+        //TODO: Server call to change the user's status for this event
         return ErrorCodes.SUCCESS;
     }
 
@@ -186,7 +159,7 @@ public class EventListHandler {
         int index;
 
         EventAdapter eventAdapter;
-        eventAdapter = getEventAdapter(event, inviteStatus);
+        eventAdapter = getEventAdapter(inviteStatus);
 
         eventCalendar = event.getStartDate();
         
@@ -225,7 +198,7 @@ public class EventListHandler {
         return acceptedEventAdapter.list.size()+ notAcceptedEventAdapter.list.size();
     }
 
-    private EventAdapter getEventAdapter(Event event, InviteStatus inviteStatus){
+    private EventAdapter getEventAdapter(InviteStatus inviteStatus){
         switch (inviteStatus) {
             case ACCEPTED:
                 return acceptedEventAdapter;
@@ -247,7 +220,7 @@ public class EventListHandler {
 
     /*
     * For the case when event is part of Map but not inserted to the List, once we return to
-    * EventListPage from EventLandingPage, i.e. we are completely done with that event we need to
+    * AppLandingPage from EventLandingPage, i.e. we are completely done with that event we need to
     * remove the event from the Map also to maintain sync between the Map and List.
     * New event is present in the list if
     * 1. Combined list size is less than the MAX_EVENTS_PAGE_SIZE. Which means that the number
@@ -259,7 +232,7 @@ public class EventListHandler {
         Calendar lastEventInListCalendar;
         EventAdapter eventAdapter;
         InviteStatus inviteStatus = getUserEventStatus(event.getEventId());
-        eventAdapter = getEventAdapter(event, inviteStatus);
+        eventAdapter = getEventAdapter(inviteStatus);
         int lastEventIndex = eventAdapter.list.size() - 1;
         Event lastEventInList = eventAdapter.list.get(lastEventIndex);
 
@@ -291,6 +264,16 @@ public class EventListHandler {
         return eventInviteStatusWrapper.getInviteStatus();
     }
 
+    public void removeEventFromList(String eventID, List<Event> eventList){
+        for (int i = 0; i < eventList.size(); i++){
+            Event event = eventList.get(i);
+            if (event.getEventId().equals(eventID)){
+                eventList.remove(event);
+                return;
+            }
+        }
+
+    }
     public void removeEventFromListAndMap(String eventID){
         EventInviteStatusWrapper eventInviteStatusWrapper = this.eventMap.get(eventID);
         if (eventInviteStatusWrapper == null){
@@ -301,7 +284,7 @@ public class EventListHandler {
         InviteStatus inviteStatus = getUserEventStatus(event.getEventId());
 
         EventAdapter eventAdapter;
-        eventAdapter = getEventAdapter(event, inviteStatus);
+        eventAdapter = getEventAdapter(inviteStatus);
         if (eventAdapter != null) {
             eventAdapter.list.remove(event);
             eventAdapter.notifyDataSetChanged();

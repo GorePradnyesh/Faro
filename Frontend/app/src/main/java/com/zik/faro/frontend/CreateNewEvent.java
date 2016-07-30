@@ -49,9 +49,6 @@ public class CreateNewEvent extends Activity {
 
     //public static final int NO_CHANGES = 0;
     static EventListHandler eventListHandler = EventListHandler.getInstance();
-    //Intent AppLanding = null;
-    //Intent EventListPage = null;
-
 
     private Calendar startDateCalendar = Calendar.getInstance();
     private Calendar endDateCalendar = Calendar.getInstance();
@@ -62,7 +59,6 @@ public class CreateNewEvent extends Activity {
 
     private DateFormat sdf = new SimpleDateFormat("MMM dd yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
-    private RadioGroup inviteStatusRadioGroup = null;
 
     private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
     private static String TAG = "CreateNewEvent";
@@ -72,24 +68,8 @@ public class CreateNewEvent extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_new_event);
 
-
         final EditText eventName = (EditText) findViewById(R.id.eventNameTextEdit);
         final EditText eventDescription = (EditText) findViewById(R.id.eventDescriptionEditText);
-
-        //TODO Remove the below added just to test creator EventLanding Page vs Friend EventLandingPage
-        final CheckBox eventCreator = (CheckBox) findViewById(R.id.eventCreatorCheckBox);
-
-        inviteStatusRadioGroup = (RadioGroup) findViewById(R.id.inviteStatusRadioGroup);
-        final RadioButton acceptedRadio = new RadioButton(this);
-        acceptedRadio.setText("Accepted");
-        final RadioButton noResponseRadio = new RadioButton(this);
-        noResponseRadio.setText("No Response");
-        final RadioButton maybeRadio = new RadioButton(this);
-        maybeRadio.setText("Maybe");
-        inviteStatusRadioGroup.addView(acceptedRadio);
-        inviteStatusRadioGroup.addView(noResponseRadio);
-        inviteStatusRadioGroup.addView(maybeRadio);
-        inviteStatusRadioGroup.check(inviteStatusRadioGroup.getChildAt(1).getId());
 
         startDateButton = (Button) findViewById(R.id.startDateButton);
         startTimeButton = (Button) findViewById(R.id.startTimeButton);
@@ -101,12 +81,9 @@ public class CreateNewEvent extends Activity {
 
         final Button createNewEventOK = (Button) findViewById(R.id.createNewEventOK);
 
-        final Intent eventLanding = new Intent(CreateNewEvent.this, EventLandingPage.class);
-        //AppLanding = new Intent(CreateNewEvent.this, EventListPage.class);
-        //EventListPage = new Intent(CreateNewEvent.this, EventListPage.class);
+        final Intent EventLanding = new Intent(CreateNewEvent.this, EventLandingPage.class);
 
         final Context mContext = this;
-
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
@@ -152,33 +129,6 @@ public class CreateNewEvent extends Activity {
             }
         });
 
-        eventCreator.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (eventCreator.isChecked()) {
-                    inviteStatusRadioGroup.setClickable(false);
-                } else {
-                    inviteStatusRadioGroup.setClickable(true);
-                }
-            }
-        });
-
-        eventCreator.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (eventCreator.isChecked()) {
-                    for (int i = 0; i < inviteStatusRadioGroup.getChildCount(); i++) {
-                        inviteStatusRadioGroup.getChildAt(i).setEnabled(false);
-                    }
-                } else {
-                    for (int i = 0; i < inviteStatusRadioGroup.getChildCount(); i++) {
-                        inviteStatusRadioGroup.getChildAt(i).setEnabled(true);
-                    }
-                    inviteStatusRadioGroup.check(inviteStatusRadioGroup.getChildAt(1).getId());
-                }
-            }
-        });
-
         createNewEventOK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -213,8 +163,8 @@ public class CreateNewEvent extends Activity {
                                     //Since update to server successful, adding event to List and Map below
                                     Log.i(TAG, "Event Create Response received Successfully");
                                     eventListHandler.addEventToListAndMap(receivedEvent, InviteStatus.ACCEPTED);
-                                    eventLanding.putExtra("eventID", receivedEvent.getEventId());
-                                    startActivity(eventLanding);
+                                    EventLanding.putExtra("eventID", receivedEvent.getEventId());
+                                    startActivity(EventLanding);
                                     finish();
                                 }
                             };
@@ -403,13 +353,6 @@ public class CreateNewEvent extends Activity {
             }
         }
     };
-
-    /*@Override
-    public void onBackPressed() {
-        startActivity(EventListPage);
-        finish();
-        super.onBackPressed();
-    }*/
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

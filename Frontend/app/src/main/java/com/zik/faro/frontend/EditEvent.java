@@ -6,8 +6,10 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -23,12 +25,17 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+
+import com.squareup.okhttp.Request;
 import com.zik.faro.data.Event;
-import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.user.InviteStatus;
+import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
+import com.zik.faro.frontend.faroservice.FaroServiceHandler;
+import com.zik.faro.frontend.faroservice.HttpError;
 
 
 /*
@@ -49,9 +56,12 @@ public class EditEvent extends Activity {
 
 
     private  static EventListHandler eventListHandler = EventListHandler.getInstance();
+    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
     private static Event cloneEvent;
 
     private RelativeLayout popUpRelativeLayout;
+
+    private static String TAG = "EditEvent";
 
     Intent EventLanding = null;
     Intent AppLandingPage = null;
@@ -76,6 +86,10 @@ public class EditEvent extends Activity {
 
         EventLanding = new Intent(EditEvent.this, EventLandingPage.class);
         //AppLandingPage = new Intent(EditEvent.this, AppLandingPage.class);
+
+        final Context mContext = this;
+
+        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
         /*
         * Do not remove the event from the list and the map in the eventListHandler below.
@@ -130,23 +144,36 @@ public class EditEvent extends Activity {
         editEventOK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                InviteStatus inviteStatus = eventListHandler.getUserEventStatus(cloneEvent.getEventId());
 
-                //Make sure the getUserEventStatus is called before removing from map else it the
-                //event will not be found there!!!
-                eventListHandler.removeEventFromListAndMap(cloneEvent.getEventId());
-                ErrorCodes errorCodes;
+                //TODO: the below call is creating a new event instead of editing the same event. FIX THIS!!
+                serviceHandler.getEventHandler().createEvent(new BaseFaroRequestCallback<Event>() {
+                    @Override
+                    public void onFailure(Request request, IOException ex) {
+                        Log.e(TAG, "failed to send event create request");
+                    }
 
-
-                EventInviteStatusWrapper eventInviteStatusWrapper =
-                        new EventInviteStatusWrapper(cloneEvent, inviteStatus);
-                errorCodes = eventListHandler.updateEvent(eventInviteStatusWrapper);
-                //TODO What to do in Failure case?
-                if (errorCodes == ErrorCodes.SUCCESS) {
-                    EventLanding.putExtra("eventID", cloneEvent.getEventId());
-                    startActivity(EventLanding);
-                    finish();
-                }
+                    @Override
+                    public void onResponse(final Event receivedEvent, HttpError error) {
+                        if (error == null ) {
+                            //Since update to server successful, adding event to List and Map below
+                            Runnable myRunnable = new Runnable() {
+                                @Override
+                                public void run() {
+                                    //Since update to server successful, adding event to List and Map below
+                                    Log.i(TAG, "Event Create Response received Successfully");
+                                    eventListHandler.addEventToListAndMap(receivedEvent, InviteStatus.ACCEPTED);
+                                    EventLanding.putExtra("eventID", receivedEvent.getEventId());
+                                    startActivity(EventLanding);
+                                    finish();
+                                }
+                            };
+                            Handler mainHandler = new Handler(mContext.getMainLooper());
+                            mainHandler.post(myRunnable);
+                        } else {
+                            Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                        }
+                    }
+                }, cloneEvent);
             }
         });
 
@@ -176,10 +203,12 @@ public class EditEvent extends Activity {
 
     public void confirmEventDeletePopUP(View v) {
         LayoutInflater layoutInflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        ViewGroup container = (ViewGroup) layoutInflater.inflate(R.layout.delete_event_pop_up, null);
+        ViewGroup container = (ViewGroup) layoutInflater.inflate(R.layout.delete_pop_up, null);
         final PopupWindow popupWindow = new PopupWindow(container, RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT, true);
 
+        TextView message = (TextView)container.findViewById(R.id.questionTextView);
+        message.setText("Are you sure you want to delete the Event?");
         Button delete = (Button)container.findViewById(R.id.deleteEventPopUp);
         Button cancel = (Button)container.findViewById(R.id.cancelEventPopUp);
 
