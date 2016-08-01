@@ -13,10 +13,13 @@ public class FaroUser {
     private String             externalExpenseID;
     private String             telephone;
     private Address address;
+    private AppInviteStatus inviteStatus = AppInviteStatus.INVITED; 
 
-    public FaroUser(final String email) {
-        this(email, null, null, null, null, null, null);
-    }
+// Ideally this should be utilized on server side only. Commenting out until absolutely required
+// Assumption is user will be forced to give basic details along with email
+//    public FaroUser(final String email) {
+//        this(email, null, null, null, null, null, null);
+//    }
 
     public FaroUser(final String email,
                       final String firstName,
@@ -37,6 +40,9 @@ public class FaroUser {
         this.externalExpenseID = externalExpenseID;
         this.telephone = telephone;
         this.address = address;
+        // Cannot imagine use case on client side where this should be "INVITED"
+        // Primarily for server side to handle "addFriend/inviteFriend" when "friend" is not a farouser 
+        this.inviteStatus = AppInviteStatus.ACCEPTED;
     }
 
     public void setIfNullExternalExpenseID(final String externalExpenseID) throws IllegalDataOperation {
@@ -123,4 +129,12 @@ public class FaroUser {
                 .add("address", getAddress())
                 .toString();
     }
+
+	public AppInviteStatus getInviteStatus() {
+		return inviteStatus;
+	}
+
+	public void setInviteStatus(AppInviteStatus inviteStatus) {
+		this.inviteStatus = inviteStatus;
+	}
 }

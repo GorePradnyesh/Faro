@@ -3,13 +3,13 @@ package com.zik.faro.persistence.datastore.data.user;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.google.appengine.repackaged.com.google.common.base.MoreObjects;
-
 import com.google.common.base.Strings;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
 import com.zik.faro.data.IllegalDataOperation;
 import com.zik.faro.data.user.Address;
+import com.zik.faro.data.user.AppInviteStatus;
 
 @Entity
 @XmlRootElement
@@ -23,19 +23,24 @@ public class FaroUserDo {
     private String             externalExpenseID;
     private String             telephone;   
     private Address address;
+    private AppInviteStatus inviteStatus = AppInviteStatus.INVITED;
 
+    // To be used for creating users who are invited by other faro users
+    // Due to lack of info available, using only email
+    // Invite Status to be updated later when user clicks on email, downloads app and signs up with more details
     public FaroUserDo(final String email) {
-        this(email, null, null, null, null, null, null);
+        this(email, null, null, null, null, null, null, AppInviteStatus.INVITED);
     }
-
+    
     public FaroUserDo(final String email,
-                      final String firstName,
-                      final String middleName,
-                      final String lastName,
-                      final String externalExpenseID,
-                      final String telephone,
-                      final Address address) {
-        // Ensure Email is a valid value as it is a mandatory field
+            final String firstName,
+            final String middleName,
+            final String lastName,
+            final String externalExpenseID,
+            final String telephone,
+            final Address address,
+            final AppInviteStatus inviteStatus) {
+    	// Ensure Email is a valid value as it is a mandatory field
         if (Strings.isNullOrEmpty(email)) {
             throw new IllegalArgumentException("Email is null/empty");
         }
@@ -47,6 +52,17 @@ public class FaroUserDo {
         this.externalExpenseID = externalExpenseID;
         this.telephone = telephone;
         this.address = address;
+        this.inviteStatus = inviteStatus;
+    }
+
+    public FaroUserDo(final String email,
+                      final String firstName,
+                      final String middleName,
+                      final String lastName,
+                      final String externalExpenseID,
+                      final String telephone,
+                      final Address address) {
+        this(email, firstName, middleName, lastName, externalExpenseID, telephone, address, AppInviteStatus.ACCEPTED);
     }
 
     public void setIfNullExternalExpenseID(final String externalExpenseID) throws IllegalDataOperation {
@@ -134,4 +150,12 @@ public class FaroUserDo {
                .add("address", getAddress())
                .toString();
     }
+
+public AppInviteStatus getInviteStatus() {
+	return inviteStatus;
+}
+
+public void setInviteStatus(AppInviteStatus inviteStatus) {
+	this.inviteStatus = inviteStatus;
+}
 }

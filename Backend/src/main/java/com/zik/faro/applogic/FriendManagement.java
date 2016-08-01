@@ -1,19 +1,19 @@
 package com.zik.faro.applogic;
 
-import com.zik.faro.data.MinUser;
-import com.zik.faro.commons.exceptions.DataNotFoundException;
-import com.zik.faro.data.IllegalDataOperation;
-import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
-import com.zik.faro.persistence.datastore.data.user.FriendRelationDo;
-import com.zik.faro.persistence.datastore.FriendRelationDatastoreImpl;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.zik.faro.commons.exceptions.DataNotFoundException;
+import com.zik.faro.data.IllegalDataOperation;
+import com.zik.faro.data.MinUser;
+import com.zik.faro.persistence.datastore.FriendRelationDatastoreImpl;
+import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
+import com.zik.faro.persistence.datastore.data.user.FriendRelationDo;
+
 public class FriendManagement {
 	
-	public static void inviteFriend(final String existingUserId, final String friendId) throws IllegalDataOperation, DataNotFoundException{
+	public static void createFriendRelation(final String existingUserId, final String friendId) throws IllegalDataOperation, DataNotFoundException{
 		
         
         // Create friend relation between user and new friend
@@ -22,16 +22,16 @@ public class FriendManagement {
     	try {
 			FriendRelationDatastoreImpl.loadFriendRelation(existingUserId,friendId);
 		} catch (DataNotFoundException e) {
-			// If this throw DataNotFound, then the friend does not exist in the system yet.
-			// Hence cannot create friend relation
+			// Either friend not a FaroUser or not user's friend. 
+			if(!UserManagement.isExistingUser(friendId)){
+				// Create basic user with email and inviteStatus as INVITED(default)
+				UserManagement.storeFaroUser(friendId, new FaroUserDo(friendId));
+				//TODO: Send out email
+			}
 			storeFriendRelation(existingUserId,	friendId);
 		} 
     }
 	
-	private static FaroUserDo getFaroUser(final String userId) throws DataNotFoundException{
-    	FaroUserDo faroUser = UserManagement.loadFaroUser(userId);
-    	return faroUser;
-    }
 
     public static void storeFriendRelation(final String requestingUserId, final String invitedUserId) throws IllegalDataOperation, DataNotFoundException {
         List<String> userIdsToLoad = new ArrayList<>();

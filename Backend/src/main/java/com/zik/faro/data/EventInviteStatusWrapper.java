@@ -1,12 +1,12 @@
 package com.zik.faro.data;
 
-import com.zik.faro.data.user.InviteStatus;
+import com.zik.faro.data.user.EventInviteStatus;
 
 public class EventInviteStatusWrapper {
 	private Event event;
-	private InviteStatus inviteStatus;
+	private EventInviteStatus inviteStatus;
 	
-	public EventInviteStatusWrapper(Event event, InviteStatus inviteStatus){
+	public EventInviteStatusWrapper(Event event, EventInviteStatus inviteStatus){
 		this.event = event;
 		this.inviteStatus = inviteStatus;
 	}
@@ -19,10 +19,10 @@ public class EventInviteStatusWrapper {
 	public void setEvent(Event event) {
 		this.event = event;
 	}
-	public InviteStatus getInviteStatus() {
+	public EventInviteStatus getInviteStatus() {
 		return inviteStatus;
 	}
-	public void setInviteStatus(InviteStatus inviteStatus) {
+	public void setInviteStatus(EventInviteStatus inviteStatus) {
 		this.inviteStatus = inviteStatus;
 	}
 }

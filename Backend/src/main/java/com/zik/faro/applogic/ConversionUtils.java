@@ -77,6 +77,7 @@ public class ConversionUtils {
 		poll.setStatus(pollDo.getStatus());
 		poll.setWinnerId(pollDo.getWinnerId());
 		poll.setPollOptions(pollDo.getPollOptions());
+		
 		return poll;
 	}
 	
@@ -103,6 +104,7 @@ public class ConversionUtils {
 		faroUserDo.setExternalExpenseID(faroUser.getExternalExpenseID());
 		faroUserDo.setTelephone(faroUser.getExternalExpenseID());
 		faroUserDo.setAddress(faroUser.getAddress());
+		faroUserDo.setInviteStatus(faroUser.getInviteStatus());
 		return faroUserDo;
 	}
 
@@ -116,6 +118,7 @@ public class ConversionUtils {
 		faroUser.setExternalExpenseID(faroUserDo.getExternalExpenseID());
 		faroUser.setTelephone(faroUserDo.getExternalExpenseID());
 		faroUser.setAddress(faroUserDo.getAddress());
+		faroUser.setInviteStatus(faroUserDo.getInviteStatus());
 		return faroUser;
 	}
 }

@@ -53,7 +53,7 @@ public class EventManagement {
     		// TODO: If friend is not in the system, then we need to create a FaroUser with friend's email
     		// and send out the invite to him and after that establish friend relation with a "NOTACCEPTED" kind of state.
     		// Once user accepts invitation and joins Faro this has to be updated.
-    		FriendManagement.inviteFriend(existingUser.getEmail(), friendId);
+    		FriendManagement.createFriendRelation(existingUser.getEmail(), friendId);
         	
         	// Add to event invitees
         	EventUserManagement.storeEventUser(eventId, friendId);

@@ -7,7 +7,7 @@ import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
 import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
-import com.zik.faro.data.user.InviteStatus;
+import com.zik.faro.data.user.EventInviteStatus;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -21,7 +21,7 @@ public class EventUserDo {
     private Ref<EventDo> eventRef;
     @Index
     private Ref<FaroUserDo> faroUserRef;
-    private InviteStatus inviteStatus;
+    private EventInviteStatus inviteStatus;
     private String ownerId;
 
     private EventUserDo(){    // To satisfy JAXB
@@ -30,7 +30,7 @@ public class EventUserDo {
 
    public static EventUserDo createEventUserDoAccepted(final String eventId, final String faroUserId, String ownerId)
     {
-        return new EventUserDo(eventId, faroUserId, ownerId, InviteStatus.ACCEPTED);
+        return new EventUserDo(eventId, faroUserId, ownerId, EventInviteStatus.ACCEPTED);
     }
 
     public EventUserDo(final String eventId, final String faroUserId){
@@ -39,7 +39,7 @@ public class EventUserDo {
         this.faroUserRef = Ref.create(Key.create(FaroUserDo.class, faroUserId));
     }
 
-    public EventUserDo(final String eventId, final String faroUserId, final String ownerId, InviteStatus inviteStatus){
+    public EventUserDo(final String eventId, final String faroUserId, final String ownerId, EventInviteStatus inviteStatus){
         this(eventId,faroUserId);
         this.ownerId = ownerId;
         this.inviteStatus = inviteStatus;
@@ -81,12 +81,12 @@ public class EventUserDo {
         return this.faroUserRef.get();
     }
 
-    public InviteStatus getInviteStatus(){
+    public EventInviteStatus getInviteStatus(){
         return this.inviteStatus;
     }
 
     public void setAccepted(){
-        this.inviteStatus = InviteStatus.ACCEPTED;
+        this.inviteStatus = EventInviteStatus.ACCEPTED;
     }
 
 	public String getOwnerId() {

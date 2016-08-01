@@ -30,7 +30,7 @@ public class FriendsHandler {
         String requestingUserId = securityContext.getUserPrincipal().getName();
        
         try {
-			FriendManagement.inviteFriend(requestingUserId, friendId);
+			FriendManagement.createFriendRelation(requestingUserId, friendId);
 		} catch (DataNotFoundException e) {
 			Response response = Response.status(Response.Status.NOT_FOUND)
 					.entity(e.getMessage())
