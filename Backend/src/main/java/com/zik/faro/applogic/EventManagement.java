@@ -29,6 +29,10 @@ public class EventManagement {
         return event;
     }
 
+    public static void deleteEvent(final String eventId) {
+        EventDatastoreImpl.deleteEvent(eventId);
+    }
+
     public static Event getEventDetails(final String userId, final String eventId) throws DataNotFoundException{
         EventDo event = EventDatastoreImpl.loadEventByID(eventId);
         return ConversionUtils.fromDo(event);
@@ -69,7 +73,7 @@ public class EventManagement {
 	}
     
     public static void removeAttendee(final String eventId, final String userId){
-    	
+
     }
     
     @XmlRootElement

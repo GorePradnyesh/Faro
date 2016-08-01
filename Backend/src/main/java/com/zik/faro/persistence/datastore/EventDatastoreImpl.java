@@ -42,7 +42,11 @@ public class EventDatastoreImpl {
         TransactionResult result = DatastoreObjectifyDAL.update(w);
         DatastoreUtil.processResult(result);
     }
-    
+
+    public static void deleteEvent(final String eventId) {
+        DatastoreObjectifyDAL.delelteObjectById(eventId, EventDo.class);
+    }
+
 //    public static List<Event> getEventsOfFaroUser(final String faroUserId){
 //    	List<EventUser> events = EventUserDatastoreImpl.loadEventUserByFaroUser(faroUserId);
 //    	for(EventUser event : events){

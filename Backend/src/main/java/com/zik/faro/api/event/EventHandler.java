@@ -10,13 +10,7 @@ import static com.zik.faro.commons.Constants.EVENT_INVITEES_PATH_CONST;
 import static com.zik.faro.commons.Constants.EVENT_PATH_CONST;
 import static com.zik.faro.commons.Constants.EVENT_REMOVE_ATTENDEE_PATH_CONST;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -64,6 +58,13 @@ public class EventHandler {
     	// TODO: Implement count.
         InviteeList list = EventUserManagement.getEventInvitees(eventId);
         return JResponse.ok(list).build();
+    }
+
+    @DELETE
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public JResponse<String> deleteEvent(@PathParam(EVENT_ID_PATH_PARAM) final String eventId) {
+        EventManagement.deleteEvent(eventId);
+        return JResponse.ok(Constants.HTTP_OK).build();
     }
 
     @Path(EVENT_DISABLE_CONTROL_PATH_CONST)
