@@ -49,6 +49,14 @@ public class EventUserDatastoreImpl {
         return eventUserList;
     }
 
+    public static void deleteEventUserByEvent(final String eventId){
+        DatastoreObjectifyDAL.deleteObjectsByIndexedRefFieldEQ(EVENT_REF_FIELD_NAME,
+                EventDo.class,
+                eventId,
+                EventUserDo.class);
+    }
+
+
     public static List<EventUserDo> loadEventUserByFaroUser(final String faroUserId){
         List<EventUserDo> eventUserList =
                 DatastoreObjectifyDAL.loadObjectsByIndexedRefFieldEQ(FARO_USER_REF_FIELD_NAME,

@@ -120,6 +120,35 @@ public class RefSampleTest {
 
         List<Car> carList = DatastoreObjectifyDAL.loadObjectsByIndexedRefFieldEQ("owner", Person.class, "person1", Car.class);
         Assert.assertEquals(1, carList.size());
+
+    }
+
+    @Test
+    public void deleteTest() throws DataNotFoundException{
+        Person owner = new Person("person1", "Sam");
+        DatastoreObjectifyDAL.storeObject(owner);
+
+        Car car1 = new Car("car1", "vin1", Ref.create(owner));
+        DatastoreObjectifyDAL.storeObject(car1);
+        Car lCar1 = DatastoreObjectifyDAL.loadObjectById(car1.id, Car.class);
+        Assert.assertNotNull(lCar1);
+
+        Car car2 = new Car("car2", "vin2", Ref.create(owner));
+        DatastoreObjectifyDAL.storeObject(car2);
+        Car lCar2 = DatastoreObjectifyDAL.loadObjectById(car2.id, Car.class);
+        Assert.assertNotNull(lCar1);
+
+        Car retCar = DatastoreObjectifyDAL.loadObjectByIndexedRefFieldEQ("owner", Person.class, "person1", Car.class);
+        Assert.assertNotNull(retCar);
+
+        List<Car> carList = DatastoreObjectifyDAL.loadObjectsByIndexedRefFieldEQ("owner", Person.class, "person1", Car.class);
+        Assert.assertEquals(2, carList.size());
+
+        DatastoreObjectifyDAL.deleteObjectsByIndexedRefFieldEQ("owner", Person.class, "person1", Car.class);
+
+        List<Car> carList2 = DatastoreObjectifyDAL.loadObjectsByIndexedRefFieldEQ("owner", Person.class, "person1", Car.class);
+        Assert.assertEquals(0, carList.size());
+
     }
 
 

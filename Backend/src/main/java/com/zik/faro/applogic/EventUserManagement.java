@@ -18,6 +18,10 @@ public class EventUserManagement {
 		}
 		return invitees;
 	}
+
+	public static void deleteRelationForEvent(final String eventId) {
+		EventUserDatastoreImpl.deleteEventUserByEvent(eventId);
+	}
 	
 	public static void storeEventUser(final String eventId, final String faroUserId){
 		EventUserDatastoreImpl.storeEventUser(eventId, faroUserId);

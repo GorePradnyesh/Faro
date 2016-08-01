@@ -86,6 +86,15 @@ public class DatastoreObjectifyDAL {
         return objectMap;
     }
 
+    public static <T> void deleteMultipleObjectsByIdSync(List<String> objectIds, Class<T> clazz){
+        List<Key<T>> keys = new ArrayList<>();
+        Map<String, T> objectMap = new HashMap<>();
+        for(String objectId: objectIds){
+            keys.add(Key.create(clazz, objectId));
+        }
+        ofy().delete().keys(keys).now();
+    }
+
     public static <T,V> T loadObjectWithParentId(final Class<V> parentClazz,
                                                  final String parentIdValue,
                                                  final Class<T> clazz,
@@ -175,7 +184,18 @@ public class DatastoreObjectifyDAL {
         		list();
         return objectList;
     }
-    
+
+    public static <T> List<T> deleteObjectsByIndexedRefFieldEQ(final String filterFieldName,
+                                                             final Class filterFieldClass,
+                                                             final String filterFieldValue,
+                                                             Class<T> clazz){
+        Ref<T> filterRef = getRefForClassById(filterFieldValue, filterFieldClass);
+        List<T> objectList = ofy().load().type(clazz).filter(filterFieldName, filterRef).
+                list();
+        ofy().delete().entities(objectList).now();
+        return objectList;
+    }
+
     public static <T> List<T> loadObjectsByIndexedRefFieldEQ(final String filterFieldName,
             final Class filterFieldClass,
             final String filterFieldValue,

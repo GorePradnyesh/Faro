@@ -64,6 +64,7 @@ public class EventHandler {
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public JResponse<String> deleteEvent(@PathParam(EVENT_ID_PATH_PARAM) final String eventId) {
         EventManagement.deleteEvent(eventId);
+        EventUserManagement.deleteRelationForEvent(eventId);
         return JResponse.ok(Constants.HTTP_OK).build();
     }
 
