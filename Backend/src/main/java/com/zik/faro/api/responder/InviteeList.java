@@ -1,7 +1,7 @@
 package com.zik.faro.api.responder;
 
 import com.zik.faro.data.MinUser;
-import com.zik.faro.data.user.InviteStatus;
+import com.zik.faro.data.user.EventInviteStatus;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -19,7 +19,7 @@ public class InviteeList {
     }
 
 
-    public void addUserStatus(final MinUser minUser, final InviteStatus status){
+    public void addUserStatus(final MinUser minUser, final EventInviteStatus status){
         this.userStatusMap.put(minUser.getEmail(), new Invitees(minUser.getFirstName(), minUser.getLastName(), minUser.getExpenseUserId(), status));
     }
     
@@ -57,21 +57,21 @@ public class InviteeList {
 			this.expenseId = expenseId;
 		}
 
-		public InviteStatus getInviteStatus() {
+		public EventInviteStatus getInviteStatus() {
 			return inviteStatus;
 		}
 
-		public void setInviteStatus(InviteStatus inviteStatus) {
+		public void setInviteStatus(EventInviteStatus inviteStatus) {
 			this.inviteStatus = inviteStatus;
 		}
 
 		private String firstName;
     	private String lastName;
     	private String expenseId;
-    	private InviteStatus inviteStatus;
+    	private EventInviteStatus inviteStatus;
     	private Invitees(){}
     	
-    	public Invitees(final String firstName, final String lastName, final String expenseId, final InviteStatus inviteStatus){
+    	public Invitees(final String firstName, final String lastName, final String expenseId, final EventInviteStatus inviteStatus){
     		this.firstName = firstName;
     		this.lastName = lastName;
     		this.expenseId = expenseId;

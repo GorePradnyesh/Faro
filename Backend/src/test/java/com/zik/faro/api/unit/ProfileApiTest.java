@@ -1,25 +1,30 @@
 package com.zik.faro.api.unit;
 
 
+import java.util.UUID;
+
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.powermock.reflect.Whitebox;
+
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
 import com.zik.faro.TestHelper;
 import com.zik.faro.api.profile.ProfileHandler;
-
 import com.zik.faro.data.user.Address;
+import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
-import org.junit.*;
-import org.powermock.reflect.Whitebox;
-
-import java.util.UUID;
 
 public class ProfileApiTest {
     private static final LocalServiceTestHelper helper =
             new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 
     static{
-        ObjectifyService.register(FaroUserDo.class);
+        ObjectifyService.register(FaroUser.class);
     }
 
     @BeforeClass
@@ -40,7 +45,7 @@ public class ProfileApiTest {
     @Test
     public void testCreateUser(){
         final String fName = UUID.randomUUID().toString();
-        FaroUserDo user = new FaroUserDo("rwaters@gmail.com",
+        FaroUser user = new FaroUser("rwaters@gmail.com",
                 fName, null, "waters",
                 "rwaters@splitwise.com",
                 "4085393212",
@@ -50,7 +55,7 @@ public class ProfileApiTest {
         Whitebox.setInternalState(profileHandler, TestHelper.setupMockSecurityContext("rwaters@gmail.com"));
         profileHandler.createProfile(user);
 
-        FaroUserDo retrievedUser = profileHandler.getProfile().getEntity();
+        FaroUser retrievedUser = profileHandler.getProfile().getEntity();
         Assert.assertEquals(user.getFirstName(), retrievedUser.getFirstName());
     }
 }

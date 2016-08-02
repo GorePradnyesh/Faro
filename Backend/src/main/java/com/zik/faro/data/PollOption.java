@@ -40,10 +40,6 @@ public class PollOption{
     	this.voters = voters;
     }
 
-    public int getVotersCount(){
-        return voters.size();
-    }
-
 	public String getId() {
 		return id;
 	}

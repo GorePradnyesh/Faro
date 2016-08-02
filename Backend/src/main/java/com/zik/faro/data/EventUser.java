@@ -1,12 +1,12 @@
 package com.zik.faro.data;
 
-import com.zik.faro.data.user.InviteStatus;
+import com.zik.faro.data.user.EventInviteStatus;
 
 public class EventUser {
     private String id;
     private String eventRef;
     private String faroUserRef;
-    private InviteStatus inviteStatus;
+    private EventInviteStatus inviteStatus;
     private String ownerId;
 
     private EventUser(){    // To satisfy JAXB
@@ -18,7 +18,7 @@ public class EventUser {
         this.id = generateEventUserId(eventId, faroUserId);
         this.eventRef = eventId;
         this.faroUserRef = faroUserId;
-        this.inviteStatus = InviteStatus.INVITED;
+        this.inviteStatus = EventInviteStatus.INVITED;
     }
 
     public EventUser(final String eventId, final String faroUserId, final String ownerId){
@@ -49,15 +49,15 @@ public class EventUser {
         return this.faroUserRef;
     }
 
-    public void setInviteStatus(InviteStatus inviteStatus) {
+    public void setInviteStatus(EventInviteStatus inviteStatus) {
         this.inviteStatus = inviteStatus;
     }
-    public InviteStatus getInviteStatus(){
+    public EventInviteStatus getInviteStatus(){
         return this.inviteStatus;
     }
 
     public void setAccepted(){
-        this.inviteStatus = InviteStatus.ACCEPTED;
+        this.inviteStatus = EventInviteStatus.ACCEPTED;
     }
 
     public String getOwnerId() {

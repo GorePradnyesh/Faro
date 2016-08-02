@@ -31,19 +31,21 @@ public class FunctionalEventTest {
     public static void init() throws Exception {
         endpoint = TestHelper.getExternalTargetEndpoint();
         token = TestHelper.createUserAndGetToken();
-    }
+        //token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE0Njg1ODkwNzMsInVzZXJuYW1lIjoiNzY0ZmZlYjAtZGViMi00MTdhLTkyNzYtZWRkZmRiZGFkNzUwQGdtYWlsLmNvbSIsImVtYWlsIjoiNzY0ZmZlYjAtZGViMi00MTdhLTkyNzYtZWRkZmRiZGFkNzUwQGdtYWlsLmNvbSIsImlzcyI6ImZhcm8iLCJpYXQiOjE0NjM0MDUwNzN9.Ktv4YbXV8BrJsYSHdBikpEwINNF-q8iTLUBhzr9cVZA";
+         }
     
     
     // **** Tests ****
     
     // 1. createEvent
     public void createEventTest() throws Exception {
-    	
-    	Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(),
-                Calendar.getInstance(), "Description", false, null, new Location("Random Location"),null, null, "Mafia god");
-    	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);
-        Event event = response.getEntity(Event.class);
-        assertEntity(eventCreateData, event);
+    	for(int i = 0 ; i < 10; i++){
+    		Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(),
+                    Calendar.getInstance(), "Description", false, null, new Location("Random Location"),null, null, "Mafia god");
+        	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);
+            Event event = response.getEntity(Event.class);
+            assertEntity(eventCreateData, event);
+    	}
     }
     
     // 2. getEventDetails
@@ -83,6 +85,7 @@ public class FunctionalEventTest {
         // Add faro users to event
         List<String> friends = new ArrayList<String>();
         friends.add(faroUser4);friends.add(faroUser3);friends.add(faroUser2);friends.add(faroUser1);
+        friends.add("not_a_user@farotest.com");
         AddFriendRequest addFriendRequest = new AddFriendRequest();
         addFriendRequest.setFriendIds(friends);
         ClientResponse addFriendsResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+ev.getEventId()+"/add", token, addFriendRequest);
@@ -158,11 +161,12 @@ public class FunctionalEventTest {
     	eventsResponse = TestHelper.doGET(endpoint.toString(), "v1/events", new MultivaluedMapImpl(), token);
     	eventsResponse = TestHelper.doGET(endpoint.toString(), "v1/events", new MultivaluedMapImpl(), token);
     	List<EventInviteStatusWrapper> events = eventsResponse.getEntity(new GenericType<List<EventInviteStatusWrapper>>(){});
-    	Assert.assertEquals(6, events.size());
+    	Assert.assertEquals(15, events.size());
     }
     
     @Test
     public void allTest() throws Exception{
+    	System.out.println(token);
     	createEventTest();
     	getEventDetails();
     	disableEventControl();

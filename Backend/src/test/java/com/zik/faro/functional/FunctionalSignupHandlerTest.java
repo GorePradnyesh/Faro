@@ -15,7 +15,7 @@ import java.util.UUID;
 /**
  * Created by granganathan on 2/22/15.
  */
-@Ignore
+//@Ignore
 public class FunctionalSignupHandlerTest {
     private static URL endpoint;
 
