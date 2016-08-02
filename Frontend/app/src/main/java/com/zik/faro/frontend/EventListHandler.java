@@ -9,7 +9,7 @@ import com.zik.faro.data.Activity;
 import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.EventUser;
 import com.zik.faro.data.ObjectStatus;
-import com.zik.faro.data.user.InviteStatus;
+import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
@@ -93,7 +93,7 @@ public class EventListHandler {
         //TODO: send new event update to server
 
         Event event = eventInviteStatusWrapper.getEvent();
-        final InviteStatus inviteStatus = eventInviteStatusWrapper.getInviteStatus();
+        final EventInviteStatus eventInviteStatus = eventInviteStatusWrapper.getInviteStatus();
         serviceHandler.getEventHandler().createEvent(new BaseFaroRequestCallback<Event>() {
             @Override
             public void onFailure(Request request, IOException ex) {
@@ -105,8 +105,8 @@ public class EventListHandler {
                 if (error == null ) {
                     //Since update to server successful, adding event to List and Map below
                     Log.i(TAG, "Response received Successfully");
-                    conditionallyAddEventToList(receivedEvent, inviteStatus);
-                    EventInviteStatusWrapper eventInviteStatusWrapper = new EventInviteStatusWrapper(receivedEvent, InviteStatus.ACCEPTED);
+                    conditionallyAddEventToList(receivedEvent, eventInviteStatus);
+                    EventInviteStatusWrapper eventInviteStatusWrapper = new EventInviteStatusWrapper(receivedEvent, EventInviteStatus.ACCEPTED);
                     eventMap.put(receivedEvent.getEventId(), eventInviteStatusWrapper);
                 } else {
                     Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
@@ -128,18 +128,18 @@ public class EventListHandler {
         }
     }
 
-    public void addEventToListAndMap(Event receivedEvent, InviteStatus inviteStatus) {
+    public void addEventToListAndMap(Event receivedEvent, EventInviteStatus eventInviteStatus) {
         /*
          * If the received event is already present in the local database, then we need to delete that and
          * update it with the newly received Event.
          */
         removeEventFromListAndMap(receivedEvent.getEventId());
-        conditionallyAddEventToList(receivedEvent, inviteStatus);
-        EventInviteStatusWrapper eventInviteStatusWrapper = new EventInviteStatusWrapper(receivedEvent, inviteStatus);
+        conditionallyAddEventToList(receivedEvent, eventInviteStatus);
+        EventInviteStatusWrapper eventInviteStatusWrapper = new EventInviteStatusWrapper(receivedEvent, eventInviteStatus);
         eventMap.put(receivedEvent.getEventId(), eventInviteStatusWrapper);
     }
 
-    public ErrorCodes updateEventInviteStatus(final Event event, InviteStatus inviteStatus) {
+    public ErrorCodes updateEventInviteStatus(final Event event, EventInviteStatus eventInviteStatus) {
         //TODO: send new event update to server
         //TODO  update server and if successful then add event to List and Map below and
         // update the eventID in the Event.
@@ -151,21 +151,21 @@ public class EventListHandler {
         for (int i = 0; i < eventInviteStatusWrappers.size(); i++) {
             EventInviteStatusWrapper eventInviteStatusWrapper = eventInviteStatusWrappers.get(i);
             Event event = eventInviteStatusWrapper.getEvent();
-            InviteStatus inviteStatus = eventInviteStatusWrapper.getInviteStatus();
-            addEventToListAndMap(event, inviteStatus);
+            EventInviteStatus eventInviteStatus = eventInviteStatusWrapper.getInviteStatus();
+            addEventToListAndMap(event, eventInviteStatus);
         }
         acceptedEventAdapter.notifyDataSetChanged();
         notAcceptedEventAdapter.notifyDataSetChanged();
     }
 
-    private void conditionallyAddEventToList(Event event, InviteStatus inviteStatus) {
+    private void conditionallyAddEventToList(Event event, EventInviteStatus eventInviteStatus) {
         Event tempEvent;
         Calendar tempCalendar;
         Calendar eventCalendar;
         int index;
 
         EventAdapter eventAdapter;
-        eventAdapter = getEventAdapter(inviteStatus);
+        eventAdapter = getEventAdapter(eventInviteStatus);
 
         eventCalendar = event.getStartDate();
         
@@ -204,8 +204,8 @@ public class EventListHandler {
         return acceptedEventAdapter.list.size()+ notAcceptedEventAdapter.list.size();
     }
 
-    private EventAdapter getEventAdapter(InviteStatus inviteStatus){
-        switch (inviteStatus) {
+    private EventAdapter getEventAdapter(EventInviteStatus eventInviteStatus){
+        switch (eventInviteStatus) {
             case ACCEPTED:
                 return acceptedEventAdapter;
             case INVITED:
@@ -237,8 +237,8 @@ public class EventListHandler {
         Calendar eventCalendar;
         Calendar lastEventInListCalendar;
         EventAdapter eventAdapter;
-        InviteStatus inviteStatus = getUserEventStatus(event.getEventId());
-        eventAdapter = getEventAdapter(inviteStatus);
+        EventInviteStatus eventInviteStatus = getUserEventStatus(event.getEventId());
+        eventAdapter = getEventAdapter(eventInviteStatus);
         int lastEventIndex = eventAdapter.list.size() - 1;
         Event lastEventInList = eventAdapter.list.get(lastEventIndex);
 
@@ -265,7 +265,7 @@ public class EventListHandler {
         return cloneEvent;
     }
 
-    public InviteStatus getUserEventStatus(String eventId) {
+    public EventInviteStatus getUserEventStatus(String eventId) {
         EventInviteStatusWrapper eventInviteStatusWrapper = eventMap.get(eventId);
         return eventInviteStatusWrapper.getInviteStatus();
     }
@@ -287,10 +287,10 @@ public class EventListHandler {
         }
         Event event = eventInviteStatusWrapper.getEvent();
 
-        InviteStatus inviteStatus = getUserEventStatus(event.getEventId());
+        EventInviteStatus eventInviteStatus = getUserEventStatus(event.getEventId());
 
         EventAdapter eventAdapter;
-        eventAdapter = getEventAdapter(inviteStatus);
+        eventAdapter = getEventAdapter(eventInviteStatus);
         if (eventAdapter != null) {
             eventAdapter.list.remove(event);
             eventAdapter.notifyDataSetChanged();
@@ -301,13 +301,13 @@ public class EventListHandler {
     public void changeEventStatusToYes(Event event){
         removeEventFromListAndMap(event.getEventId());
         //TODO: send update to server and if successful then delete event from List and Map below
-        updateEventInviteStatus(event, InviteStatus.ACCEPTED);
+        updateEventInviteStatus(event, EventInviteStatus.ACCEPTED);
     }
 
     public void changeEventStatusToMaybe(Event event){
         removeEventFromListAndMap(event.getEventId());
         //TODO: send update to server and if successful then delete event from List and Map below
-        updateEventInviteStatus(event, InviteStatus.MAYBE);
+        updateEventInviteStatus(event, EventInviteStatus.MAYBE);
     }
 
     public int getAcceptedEventListSize(){
