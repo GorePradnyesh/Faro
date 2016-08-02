@@ -131,7 +131,6 @@ public class EventLandingPage extends Activity {
             public void onClick(View v) {
                 PollListPage.putExtra("eventID", event.getEventId());
                 startActivity(PollListPage);
-                finish();
             }
         });
 

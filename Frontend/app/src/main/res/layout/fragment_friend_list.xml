@@ -2,24 +2,26 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.zik.faro.frontend.FriendListFragment">
+    tools:context="com.zik.faro.frontend.FriendListFragment"
+    android:id="@+id/friendListFragment">
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:id="@+id/addNewFriend"/>
+        android:id="@+id/inviteFriend"/>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Contacts"
+        android:text="Friends"
         android:textAppearance="@style/TextAppearance.AppCompat.Headline"
         android:layout_centerHorizontal="true"
         android:gravity="center_vertical|center_horizontal|center"
-        tools:layout_toLeftOf="@id/addNewFriend"
-        android:layout_alignBottom="@id/addNewFriend" />
+        tools:layout_toLeftOf="@id/inviteFriend"
+        android:layout_alignBottom="@id/inviteFriend" />
     <ListView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"></ListView>
-
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/friendList"
+        android:layout_below="@id/inviteFriend" />
 </RelativeLayout>

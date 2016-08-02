@@ -34,7 +34,7 @@ public class AppLandingPage extends FragmentActivity{
                 EventListFragment.class, null);
         mTabHost.addTab(
                 mTabHost.newTabSpec("tab2").setIndicator(getTabIndicator(mTabHost.getContext(), R.drawable.friend_list)),
-                MoreOptionsPage.class, null);
+                FriendListFragment.class, null);
         mTabHost.addTab(
                 mTabHost.newTabSpec("tab3").setIndicator(getTabIndicator(mTabHost.getContext(), R.drawable.plus)),
                 null, null);

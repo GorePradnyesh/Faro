@@ -1,10 +1,10 @@
 package com.zik.faro.frontend;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -31,7 +31,7 @@ import java.util.List;
 
 import static android.widget.Toast.LENGTH_LONG;
 
-public class PickPollWinner extends ActionBarActivity {
+public class PickPollWinner extends Activity {
 
     private static String eventID = null;
     private static String pollID = null;
@@ -70,6 +70,8 @@ public class PickPollWinner extends ActionBarActivity {
         getWindowManager().getDefaultDisplay().getMetrics(dm);
         popupWidth = (int) (dm.widthPixels * 0.8);
         popupHeight = (int) (dm.heightPixels * 0.8);
+
+        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
         Bundle extras = getIntent().getExtras();
         if(extras != null) {

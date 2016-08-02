@@ -1,6 +1,7 @@
 package com.zik.faro.frontend.faroservice.okHttp;
 
 
+import com.google.gson.internal.Streams;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
@@ -67,5 +68,17 @@ public class OKHttpWrapperEvent extends BaseFaroOKHttpWrapper implements EventHa
                 .build();
         
         this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<Event>(callback, Event.class));
+    }
+
+    // TODO: Temp use this actual implementation instead of event
+    public void deleteEvent(final BaseFaroRequestCallback<String> callback, final String eventId){
+        String token = TokenCache.getTokenCache().getToken();
+        Request request = new Request.Builder()
+                .delete()
+                .url(baseHandlerURL.toString() + eventId)
+                .addHeader("Authentication", token)
+                .build();
+
+        this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<String>(callback, String.class));
     }
 }

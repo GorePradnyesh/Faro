@@ -105,6 +105,8 @@ public class OpenPollLandingPage extends Activity {
         EditPollPage = new Intent(OpenPollLandingPage.this, EditPoll.class);
         final Context mContext = this;
 
+        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
+
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
             eventID = extras.getString("eventID");
@@ -113,8 +115,6 @@ public class OpenPollLandingPage extends Activity {
             event = eventListHandler.getEventCloneFromMap(eventID);
             if (poll == null){
                 Toast.makeText(OpenPollLandingPage.this, "No Poll found", LENGTH_LONG).show();
-                PollListPage.putExtra("eventID", event.getEventId());
-                startActivity(PollListPage);
                 finish();
             }
 
@@ -279,8 +279,6 @@ public class OpenPollLandingPage extends Activity {
                             }
                         }
                         Toast.makeText(OpenPollLandingPage.this, ids, LENGTH_LONG).show();
-                        PollListPage.putExtra("eventID", event.getEventId());
-                        startActivity(PollListPage);
                         finish();
                     }
                 }else {
@@ -317,9 +315,9 @@ public class OpenPollLandingPage extends Activity {
                             }
                         }, eventID, poll.getId(), );*/
 
-                        PollListPage.putExtra("eventID", event.getEventId());
-                        startActivity(PollListPage);
+                        //Refresh current activity
                         finish();
+                        startActivity(getIntent());
                     }
                 }
             }
@@ -377,26 +375,6 @@ public class OpenPollLandingPage extends Activity {
             }
         });
     }
-
-    //**********************************************************************************************
-    //**********************************************************************************************
-    //**********************************************************************************************
-    //**********************************************************************************************
-    //This would probably lead to increase in stack size for Intents since the previous intents are
-    //not popped out of the stack. Check how to see the stack size of the intents.
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        PollListPage.putExtra("eventID", event.getEventId());
-        startActivity(PollListPage);
-        finish();
-
-    }
-    //**********************************************************************************************
-    //**********************************************************************************************
-    //**********************************************************************************************
-    //**********************************************************************************************
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

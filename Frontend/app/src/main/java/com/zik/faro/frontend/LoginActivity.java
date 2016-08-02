@@ -59,6 +59,7 @@ public class LoginActivity extends Activity {
                 if (email != null){
                     faroUserContext.setEmail(email);
                     startActivity(new Intent(LoginActivity.this, AppLandingPage.class));
+                    finish();
                 }else{
                     Log.e(TAG, "email not found");
                 }
@@ -139,6 +140,7 @@ public class LoginActivity extends Activity {
                         faroCache.saveFaroCacheToDisk("email", email);
                         // Go to event list page
                         startActivity(new Intent(LoginActivity.this, AppLandingPage.class));
+                        finish();
                     } else {
                         Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                         // Invalid login
@@ -159,6 +161,7 @@ public class LoginActivity extends Activity {
     public void onSignupClick(View view) {
         Log.i(TAG, "activity_signup button clicked");
         startActivity(new Intent(LoginActivity.this, SignupActivity.class));
+        finish();
     }
 
     @Override

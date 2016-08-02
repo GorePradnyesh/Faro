@@ -10,4 +10,5 @@ public interface EventHandler {
     public void getEvents(final BaseFaroRequestCallback<List<EventInviteStatusWrapper>> callback);
     public void getEvent(final BaseFaroRequestCallback<Event> callback, final String eventId);
     public void createEvent(final BaseFaroRequestCallback<Event> callback, Event event);
+    public void deleteEvent(final BaseFaroRequestCallback<String> callback, final String eventId);
 }

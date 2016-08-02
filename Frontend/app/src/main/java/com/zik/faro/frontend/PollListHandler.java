@@ -28,7 +28,7 @@ public class PollListHandler {
     private Map<String, Poll> pollMap = new ConcurrentHashMap<>();
 
     public Poll getPollFromMap(String pollID){
-        return this.pollMap.get(pollID);
+        return pollMap.get(pollID);
     }
 
     private static int tempPollID = 0;
@@ -48,8 +48,8 @@ public class PollListHandler {
     }
 
     private String getPollID(){
-        String pollIDStr = Integer.toString(this.tempPollID);
-        this.tempPollID++;
+        String pollIDStr = Integer.toString(tempPollID);
+        tempPollID++;
         return pollIDStr;
     }
 
@@ -65,7 +65,7 @@ public class PollListHandler {
         /*if(pollID != null) {
             poll.setId(pollID);
             conditionallyAddNewPollToList(poll);
-            this.pollMap.put(pollID, poll);
+            pollMap.put(pollID, poll);
             return ErrorCodes.SUCCESS;
         }
         return ErrorCodes.FAILURE;*/
@@ -76,7 +76,7 @@ public class PollListHandler {
     public void addPollToListAndMap(Poll poll){
         removePollFromListAndMap(poll);
         conditionallyAddNewPollToList(poll);
-        this.pollMap.put(poll.getId(), poll);
+        pollMap.put(poll.getId(), poll);
     }
 
     private void conditionallyAddNewPollToList(Poll poll) {
@@ -91,22 +91,22 @@ public class PollListHandler {
     public void addDownloadedPollsToListAndMap(List<Poll> pollList){
         for (int i = 0; i < pollList.size(); i++){
             Poll poll = pollList.get(i);
-            pollListHandler.addPollToListAndMap(poll);
+            addPollToListAndMap(poll);
         }
-        this.openPollsAdapter.notifyDataSetChanged();
-        this.closedPollsAdapter.notifyDataSetChanged();
+        openPollsAdapter.notifyDataSetChanged();
+        closedPollsAdapter.notifyDataSetChanged();
     }
 
     public int getCombinedListSize(){
-        return this.openPollsAdapter.list.size()+ this.closedPollsAdapter.list.size();
+        return openPollsAdapter.list.size()+ closedPollsAdapter.list.size();
     }
 
     private PollAdapter getPollAdapter(Poll poll){
         switch(poll.getStatus()){
             case OPEN:
-                return this.openPollsAdapter;
+                return openPollsAdapter;
             case CLOSED:
-                return this.closedPollsAdapter;
+                return closedPollsAdapter;
            default:
                 //TODO: How to catch this condition? This should never occur?
                 return null;
@@ -152,8 +152,14 @@ public class PollListHandler {
     }
 
     public void clearPollListsAndMap(){
-        pollListHandler.openPollsAdapter.list.clear();
-        pollListHandler.closedPollsAdapter.list.clear();
-        pollListHandler.pollMap.clear();
+        if (openPollsAdapter != null) {
+            openPollsAdapter.list.clear();
+        }
+        if (closedPollsAdapter != null) {
+            closedPollsAdapter.list.clear();
+        }
+        if (pollMap != null) {
+            pollMap.clear();
+        }
     }
 }

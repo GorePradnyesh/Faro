@@ -15,7 +15,6 @@ import java.util.List;
 import com.zik.faro.data.Event;
 
 public class EventAdapter extends ArrayAdapter {
-    //TODO (Code Review) Implement sorted list instead of Linkedlist
     public List<Event> list = new LinkedList<>();
 
     DateFormat sdf = new SimpleDateFormat("EEE, MMM dd yyyy");
@@ -69,11 +68,11 @@ public class EventAdapter extends ArrayAdapter {
         }else{
             holder = (ImgHolder) row.getTag();
         }
-        Event EVENT = (Event) getItem(position);
-        holder.EVNT_NAME.setText(EVENT.getEventName());
-        holder.STATUS_IMG.setImageResource(SetDisplayProperties.getEventStatusImage(EVENT));
-        holder.EVNT_START_DATE.setText(sdf.format(EVENT.getStartDate().getTime()));
-        holder.EVNT_START_TIME.setText(stf.format(EVENT.getStartDate().getTime()));
+        Event event = (Event) getItem(position);
+        holder.EVNT_NAME.setText(event.getEventName());
+        holder.STATUS_IMG.setImageResource(SetDisplayProperties.getEventStatusImage(event));
+        holder.EVNT_START_DATE.setText(sdf.format(event.getStartDate().getTime()));
+        holder.EVNT_START_TIME.setText(stf.format(event.getStartDate().getTime()));
         return row;
     }
 }

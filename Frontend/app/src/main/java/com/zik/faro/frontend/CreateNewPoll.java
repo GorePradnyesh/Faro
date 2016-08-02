@@ -1,8 +1,10 @@
 package com.zik.faro.frontend;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -55,6 +57,8 @@ public class CreateNewPoll extends Activity {
 
         final Button createNewPollOK = (Button) findViewById(R.id.createNewPollOK);
 
+        final Context mContext = this;
+
         PollListPage = new Intent(CreateNewPoll.this, PollListPage.class);
         final Intent OpenPollLandingPage = new Intent(CreateNewPoll.this, OpenPollLandingPage.class);
 
@@ -66,6 +70,8 @@ public class CreateNewPoll extends Activity {
             eventID = extras.getString("eventID");
             event = eventListHandler.getEventCloneFromMap(eventID);
         }
+
+        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
         //Enable the addNewOptionButton only after Users enters an Option
         optionText.addTextChangedListener(new TextWatcher() {
@@ -118,28 +124,25 @@ public class CreateNewPoll extends Activity {
                     }
 
                     @Override
-                    public void onResponse(Poll receivedPoll, HttpError error) {
-                        Log.i(TAG, "Poll Create Response received Successfully");
-                        pollListHandler.addPollToListAndMap(receivedPoll);
-                        OpenPollLandingPage.putExtra("eventID", event.getEventId());
-                        OpenPollLandingPage.putExtra("pollID", receivedPoll.getId());
-                        startActivity(OpenPollLandingPage);
-                        finish();
+                    public void onResponse(final Poll receivedPoll, HttpError error) {
+                        Runnable myRunnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                Log.i(TAG, "Poll Create Response received Successfully");
+                                pollListHandler.addPollToListAndMap(receivedPoll);
+                                OpenPollLandingPage.putExtra("eventID", event.getEventId());
+                                OpenPollLandingPage.putExtra("pollID", receivedPoll.getId());
+                                startActivity(OpenPollLandingPage);
+                                finish();
+                            }
+                        };
+                        Handler mainHandler = new Handler(mContext.getMainLooper());
+                        mainHandler.post(myRunnable);
                     }
                 }, eventID, poll);
             }
         });
     }
-
-    @Override
-    public void onBackPressed() {
-        PollListPage.putExtra("eventID", event.getEventId());
-        startActivity(PollListPage);
-        finish();
-        super.onBackPressed();
-    }
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

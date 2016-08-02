@@ -128,6 +128,7 @@ public class SignupActivity extends Activity {
 
                         // Go to event list page
                         startActivity(new Intent(SignupActivity.this, AppLandingPage.class));
+                        finish();
                     } else {
                         Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                         if (error.getCode() == 409) {

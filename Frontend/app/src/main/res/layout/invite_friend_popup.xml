@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:outlineProvider="bounds"
+    android:background="@android:drawable/alert_light_frame"
+    android:orientation="vertical">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Enter friend's email ID:"
+        android:id="@+id/emailID_textview"
+        android:textColor="@color/black"
+        android:gravity="center"/>
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/friend_email_id"
+        android:hint="emailID"
+        android:layout_below="@+id/emailID_textview"
+        android:textColor="@color/black"
+        android:inputType="textEmailAddress"/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/send_invite_button"
+        android:text="@string/OK"
+        android:clickable="true"
+        android:enabled="false"
+        android:layout_below="@id/friend_email_id"
+        android:layout_centerHorizontal="true"/>
+</RelativeLayout>

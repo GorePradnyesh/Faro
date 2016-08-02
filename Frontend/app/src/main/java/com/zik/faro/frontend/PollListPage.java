@@ -89,13 +89,6 @@ public class PollListPage extends Activity {
             pollListHandler.closedPollsAdapter = new PollAdapter(this, R.layout.poll_list_page_row_style);
         }
 
-        //TODO: Based on eventID make API call to get Polls for this event
-        /*
-        for(each poll in event){
-            pollListHandler.addNewPoll(poll);
-        }
-        */
-
         openPollsListView.setAdapter(pollListHandler.openPollsAdapter);
         closedPollsListView.setAdapter(pollListHandler.closedPollsAdapter);
 
@@ -121,8 +114,6 @@ public class PollListPage extends Activity {
             }
         });
 
-
-
         createNewPoll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -131,13 +122,13 @@ public class PollListPage extends Activity {
                 }else {
                     CreateNewPoll.putExtra("eventID", E.getEventId());
                     startActivity(CreateNewPoll);
-                    finish();
                 }
             }
         });
 
         final Context mContext = this;
 
+        //Based on eventID make API call to get Polls for this event
         serviceHandler.getPollHandler().getPolls(new BaseFaroRequestCallback<List<com.zik.faro.data.Poll>>() {
             @Override
             public void onFailure(Request request, IOException ex) {
@@ -169,32 +160,6 @@ public class PollListPage extends Activity {
         intent.putExtra("pollID", poll.getId());
         startActivity(intent);
     }
-
-
-
-
-
-
-
-    //**********************************************************************************************
-    //**********************************************************************************************
-    //**********************************************************************************************
-    //**********************************************************************************************
-    //This would probably lead to increase in stack size for Intents since the previous intents are
-    //not popped out of the stack. Check how to see the stack size of the intents.
-    @Override
-    public void onBackPressed() {
-        EventLandingPage.putExtra("eventID", eventID);
-        startActivity(EventLandingPage);
-        finish();
-        super.onBackPressed();
-    }
-    //**********************************************************************************************
-    //**********************************************************************************************
-    //**********************************************************************************************
-    //**********************************************************************************************
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

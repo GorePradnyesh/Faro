@@ -87,6 +87,7 @@
         <activity
             android:name=".MoreOptionsPage"
             android:label="@string/title_activity_more_options_page" />
+        <activity android:name=".InviteFriendPage"></activity>
     </application>
 
 </manifest>

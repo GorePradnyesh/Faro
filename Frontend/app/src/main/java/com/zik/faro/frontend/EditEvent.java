@@ -24,6 +24,7 @@ import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -36,6 +37,8 @@ import com.zik.faro.data.user.InviteStatus;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
+
+import static android.widget.Toast.LENGTH_LONG;
 
 
 /*
@@ -66,6 +69,8 @@ public class EditEvent extends Activity {
     Intent EventLanding = null;
     Intent AppLandingPage = null;
 
+    final Context mContext = this;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,7 +92,7 @@ public class EditEvent extends Activity {
         EventLanding = new Intent(EditEvent.this, EventLandingPage.class);
         //AppLandingPage = new Intent(EditEvent.this, AppLandingPage.class);
 
-        final Context mContext = this;
+
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
@@ -203,7 +208,7 @@ public class EditEvent extends Activity {
 
     public void confirmEventDeletePopUP(View v) {
         LayoutInflater layoutInflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        ViewGroup container = (ViewGroup) layoutInflater.inflate(R.layout.delete_pop_up, null);
+        ViewGroup container = (ViewGroup) layoutInflater.inflate(R.layout.delete_popup, null);
         final PopupWindow popupWindow = new PopupWindow(container, RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT, true);
 
@@ -227,10 +232,33 @@ public class EditEvent extends Activity {
             public void onClick(View v) {
 
                 //TODO: Make API call and update server
-                eventListHandler.removeEventFromListAndMap(cloneEvent.getEventId());
-                //startActivity(AppLandingPage);
-                popupWindow.dismiss();
-                finish();
+                serviceHandler.getEventHandler().deleteEvent(new BaseFaroRequestCallback<String>() {
+                    @Override
+                    public void onFailure(Request request, IOException ex) {
+                        Log.e(TAG, "failed to delete event");
+                    }
+
+                    @Override
+                    public void onResponse(String s, HttpError error) {
+                        if (error == null ) {
+                            Runnable myRunnable = new Runnable() {
+                                @Override
+                                public void run() {
+                                    eventListHandler.removeEventFromListAndMap(cloneEvent.getEventId());
+                                    popupWindow.dismiss();
+                                    Toast.makeText(EditEvent.this, cloneEvent.getEventName() + "is Deleted", LENGTH_LONG).show();
+                                    finish();
+                                }
+                            };
+                            Handler mainHandler = new Handler(mContext.getMainLooper());
+                            mainHandler.post(myRunnable);
+                        }else {
+                            Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                        }
+
+                    }
+                }, cloneEvent.getEventId());
+
             }
         });
 

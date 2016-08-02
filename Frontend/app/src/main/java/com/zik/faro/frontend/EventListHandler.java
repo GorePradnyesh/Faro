@@ -107,7 +107,7 @@ public class EventListHandler {
                     Log.i(TAG, "Response received Successfully");
                     conditionallyAddEventToList(receivedEvent, inviteStatus);
                     EventInviteStatusWrapper eventInviteStatusWrapper = new EventInviteStatusWrapper(receivedEvent, InviteStatus.ACCEPTED);
-                    eventListHandler.eventMap.put(receivedEvent.getEventId(), eventInviteStatusWrapper);
+                    eventMap.put(receivedEvent.getEventId(), eventInviteStatusWrapper);
                 } else {
                     Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                 }
@@ -117,9 +117,15 @@ public class EventListHandler {
     }
 
     public void clearListAndMapOnLogout(){
-        eventListHandler.acceptedEventAdapter.list.clear();
-        eventListHandler.notAcceptedEventAdapter.list.clear();
-        eventListHandler.eventMap.clear();
+        if (acceptedEventAdapter != null){
+            acceptedEventAdapter.list.clear();
+        }
+        if (notAcceptedEventAdapter != null) {
+            notAcceptedEventAdapter.list.clear();
+        }
+        if (eventMap != null) {
+            eventMap.clear();
+        }
     }
 
     public void addEventToListAndMap(Event receivedEvent, InviteStatus inviteStatus) {
@@ -130,7 +136,7 @@ public class EventListHandler {
         removeEventFromListAndMap(receivedEvent.getEventId());
         conditionallyAddEventToList(receivedEvent, inviteStatus);
         EventInviteStatusWrapper eventInviteStatusWrapper = new EventInviteStatusWrapper(receivedEvent, inviteStatus);
-        eventListHandler.eventMap.put(receivedEvent.getEventId(), eventInviteStatusWrapper);
+        eventMap.put(receivedEvent.getEventId(), eventInviteStatusWrapper);
     }
 
     public ErrorCodes updateEventInviteStatus(final Event event, InviteStatus inviteStatus) {
@@ -146,10 +152,10 @@ public class EventListHandler {
             EventInviteStatusWrapper eventInviteStatusWrapper = eventInviteStatusWrappers.get(i);
             Event event = eventInviteStatusWrapper.getEvent();
             InviteStatus inviteStatus = eventInviteStatusWrapper.getInviteStatus();
-            eventListHandler.addEventToListAndMap(event, inviteStatus);
+            addEventToListAndMap(event, inviteStatus);
         }
-        this.acceptedEventAdapter.notifyDataSetChanged();
-        this.notAcceptedEventAdapter.notifyDataSetChanged();
+        acceptedEventAdapter.notifyDataSetChanged();
+        notAcceptedEventAdapter.notifyDataSetChanged();
     }
 
     private void conditionallyAddEventToList(Event event, InviteStatus inviteStatus) {
@@ -212,10 +218,10 @@ public class EventListHandler {
     }
 
     /*
-    * Funtion to check the sync between Map and List
+    * Function to check the sync between Map and List
     */
     private boolean isMapAndListInSync(){
-        return (this.eventMap.size() == getCombinedListSize());
+        return (eventMap.size() == getCombinedListSize());
     }
 
     /*
@@ -242,7 +248,7 @@ public class EventListHandler {
         //TODO (Code Review) add condition to not add if it lies before the first or 0th event.
         //Cause in that case if newEventIndex is 0 then we shouldnt add it.
         if (eventCalendar.compareTo(lastEventInListCalendar) == 1){
-            this.eventMap.remove(event.getEventId());
+            eventMap.remove(event.getEventId());
         }
 
         //TODO Check for Map and List sync here. And somehow catch this error
@@ -251,7 +257,7 @@ public class EventListHandler {
     }
 
     public Event getEventCloneFromMap(String eventID){
-        EventInviteStatusWrapper eventInviteStatusWrapper = this.eventMap.get(eventID);
+        EventInviteStatusWrapper eventInviteStatusWrapper = eventMap.get(eventID);
         Event event = eventInviteStatusWrapper.getEvent();
         Gson gson = new Gson();
         String json = gson.toJson(event);
@@ -272,10 +278,10 @@ public class EventListHandler {
                 return;
             }
         }
-
     }
+
     public void removeEventFromListAndMap(String eventID){
-        EventInviteStatusWrapper eventInviteStatusWrapper = this.eventMap.get(eventID);
+        EventInviteStatusWrapper eventInviteStatusWrapper = eventMap.get(eventID);
         if (eventInviteStatusWrapper == null){
             return;
         }
