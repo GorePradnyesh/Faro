@@ -1,41 +1,44 @@
 package com.zik.faro.applogic;
 
 
-import com.zik.faro.commons.exceptions.BadRequestException;
-import com.zik.faro.commons.exceptions.DataNotFoundException;
-import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
-import com.zik.faro.persistence.datastore.DatastoreObjectifyDAL;
-import com.zik.faro.persistence.datastore.UserDatastoreImpl;
-
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.zik.faro.commons.exceptions.BadRequestException;
+import com.zik.faro.commons.exceptions.DataNotFoundException;
+import com.zik.faro.data.user.FaroUser;
+import com.zik.faro.persistence.datastore.UserDatastoreImpl;
+import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
+
 public class UserManagement {
-    public static void storeFaroUser(final String userId, final FaroUserDo faroUser){
+    public static void storeFaroUser(final String userId, final FaroUser faroUser){
         if(faroUser.getEmail() != userId){
             throw new BadRequestException("requesting userId does not match the User to be created");
         }
-        UserDatastoreImpl.storeUser(faroUser);
+        
+        UserDatastoreImpl.storeUser(ConversionUtils.toDo(faroUser));
     }
 
-    public static FaroUserDo loadFaroUser(final String userId) throws DataNotFoundException{
+    public static FaroUser loadFaroUser(final String userId) throws DataNotFoundException{
         FaroUserDo user = UserDatastoreImpl.loadFaroUserById(userId);
-        return user;
+        return ConversionUtils.fromDo(user);
     }
 
-    public static Map<String, FaroUserDo> loadFaroUsers(List<String> objectIds){
-        Map<String, FaroUserDo> users = DatastoreObjectifyDAL.loadMultipleObjectsByIdSync(objectIds, FaroUserDo.class);
+    public static Map<String, FaroUser> loadFaroUsers(List<String> objectIds){
+        Map<String, FaroUserDo> userDos = UserDatastoreImpl.loadFaroUsers(objectIds);
+        Map<String, FaroUser> users = new HashMap<String, FaroUser>();
+        for(String objectId: objectIds){
+        	if(userDos.containsKey(objectId)){
+        		users.put(objectId, ConversionUtils.fromDo(userDos.get(objectId)));
+        	}else{
+        		users.put(objectId, null);
+        	}
+        }
         return users;
     }
 
     public static boolean isExistingUser(final String userId){
-        try{
-        	if(UserDatastoreImpl.loadFaroUserById(userId) != null) {
-                return true;
-            }
-        }catch(DataNotFoundException e){
-        	return false;
-        }
-    	return false;
+        return UserDatastoreImpl.isExistingUser(userId);
     }
 }
