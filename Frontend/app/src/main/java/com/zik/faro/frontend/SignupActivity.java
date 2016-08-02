@@ -108,7 +108,8 @@ public class SignupActivity extends Activity {
         String confirmPassword = confirmPasswordBox.getText().toString();
 
         if(validate(name, email, password, confirmPassword)) {
-            FaroUser newFaroUser = new FaroUser(email);
+            FaroUser newFaroUser = new FaroUser(email, null, null,
+            null, null, null, null);
             newFaroUser.setFirstName(name);
 
             serviceHandler.getSignupHandler().signup(new BaseFaroRequestCallback<String>() {

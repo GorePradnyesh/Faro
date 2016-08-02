@@ -114,7 +114,7 @@ public class PickPollWinner extends Activity {
 
                 //Create voter count button
                 Button voterCountButton = new Button(this);
-                int votersCount = pollOption.getVotersCount();
+                int votersCount = pollOption.votersCount();
                 voterCountButton.setText("(" + Integer.toString(votersCount) + ")");
                 voterCountButton.setBackgroundColor(Color.TRANSPARENT);
                 voterCountButton.setId(i);

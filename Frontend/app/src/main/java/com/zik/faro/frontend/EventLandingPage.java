@@ -15,7 +15,7 @@ import java.text.SimpleDateFormat;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.EventUser;
-import com.zik.faro.data.user.InviteStatus;
+import com.zik.faro.data.user.EventInviteStatus;
 
 public class EventLandingPage extends Activity {
 
@@ -171,7 +171,7 @@ public class EventLandingPage extends Activity {
 
     private void eventStateBasedView(Event event){
 
-        InviteStatus inviteStatus = eventListHandler.getUserEventStatus(event.getEventId());
+        EventInviteStatus inviteStatus = eventListHandler.getUserEventStatus(event.getEventId());
         switch (inviteStatus) {
             case ACCEPTED:
                 event_status.setText("Accepted");
@@ -184,7 +184,7 @@ public class EventLandingPage extends Activity {
                 break;
         }
         
-        if (inviteStatus == InviteStatus.ACCEPTED){
+        if (inviteStatus == EventInviteStatus.ACCEPTED){
             statusYes.setVisibility(View.GONE);
             statusNo.setVisibility(View.GONE);
             statusMaybe.setVisibility(View.GONE);
@@ -199,9 +199,9 @@ public class EventLandingPage extends Activity {
             activityButton.setVisibility(View.GONE);
         }
 
-        if (inviteStatus == InviteStatus.INVITED) {
+        if (inviteStatus == EventInviteStatus.INVITED) {
             statusMaybe.setVisibility(View.VISIBLE);
-        } else if (inviteStatus == InviteStatus.MAYBE){
+        } else if (inviteStatus == EventInviteStatus.MAYBE){
             statusMaybe.setVisibility(View.GONE);
         }
     }

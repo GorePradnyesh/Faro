@@ -29,7 +29,7 @@ import java.util.Calendar;
 
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.Event;
-import com.zik.faro.data.user.InviteStatus;
+import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
@@ -162,7 +162,7 @@ public class CreateNewEvent extends Activity {
                                 public void run() {
                                     //Since update to server successful, adding event to List and Map below
                                     Log.i(TAG, "Event Create Response received Successfully");
-                                    eventListHandler.addEventToListAndMap(receivedEvent, InviteStatus.ACCEPTED);
+                                    eventListHandler.addEventToListAndMap(receivedEvent, EventInviteStatus.ACCEPTED);
                                     EventLanding.putExtra("eventID", receivedEvent.getEventId());
                                     startActivity(EventLanding);
                                     finish();

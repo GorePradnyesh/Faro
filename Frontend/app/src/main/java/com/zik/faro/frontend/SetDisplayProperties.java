@@ -3,7 +3,7 @@ package com.zik.faro.frontend;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.EventUser;
 import com.zik.faro.data.Poll;
-import com.zik.faro.data.user.InviteStatus;
+import com.zik.faro.data.user.EventInviteStatus;
 
 /**
  * Created by nakulshah on 4/26/15.
@@ -13,8 +13,8 @@ public class SetDisplayProperties {
     static EventListHandler eventListHandler = EventListHandler.getInstance();
 
     static public int getEventStatusImage(Event event){
-        InviteStatus inviteStatus = eventListHandler.getUserEventStatus(event.getEventId());
-        switch (inviteStatus){
+        EventInviteStatus eventInviteStatus = eventListHandler.getUserEventStatus(event.getEventId());
+        switch (eventInviteStatus){
             case ACCEPTED:
                 return R.drawable.green;
             case MAYBE:

@@ -55,4 +55,8 @@ public class PollOption{
 	public void setOption(String option) {
 		this.option = option;
 	}
+
+    public int votersCount(){
+        return voters.size();
+    }
 }
