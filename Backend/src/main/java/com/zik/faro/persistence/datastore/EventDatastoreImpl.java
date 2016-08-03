@@ -4,13 +4,14 @@ package com.zik.faro.persistence.datastore;
 import com.googlecode.objectify.Work;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.persistence.datastore.data.EventDo;
 
 public class EventDatastoreImpl {       
     public static void storeEvent(final String userId, final EventDo event){
     	DatastoreObjectifyDAL.storeObject(event);
-    	// Creating event user relation if event creation succeeds
-    	EventUserDatastoreImpl.storeEventUser(event.getEventId(), userId, userId);
+    	// Creating event user relation if event creation succeeds. Owner will be userId too and since owner created event, he has by default accepted it
+    	EventUserDatastoreImpl.storeEventUser(event.getEventId(), userId, userId, EventInviteStatus.ACCEPTED);
     }
     
     // For use cases where we do not need to store eventuser relation

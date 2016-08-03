@@ -196,6 +196,20 @@ public class TestHelper {
         return clientResponse.getEntity(String.class);
     }
     
+    public static String createUserAndGetToken(String email) throws Exception{
+    	String newRandomEmail = email;
+        FaroUser newUser = new FaroUser(newRandomEmail,
+                "sachin",
+                "ramesh",
+                "tendulkar",
+                "splitwise",
+                null,
+                null);
+        FaroSignupDetails faroSignupDetails = new FaroSignupDetails(newUser, "hero123#");
+        ClientResponse clientResponse = signupUser(faroSignupDetails);
+        return clientResponse.getEntity(String.class);
+    }
+    
     public static String createUser(String email, String fname, String lname, String mname) throws Exception{
         FaroUser newUser = new FaroUser(email,
                 fname,

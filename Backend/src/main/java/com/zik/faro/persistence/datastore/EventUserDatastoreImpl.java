@@ -1,15 +1,16 @@
 package com.zik.faro.persistence.datastore;
 
 
-import com.googlecode.objectify.Ref;
-import com.googlecode.objectify.cmd.Query;
-import com.zik.faro.persistence.datastore.data.EventDo;
-import com.zik.faro.persistence.datastore.data.EventUserDo;
-import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
+import static com.googlecode.objectify.ObjectifyService.ofy;
 
 import java.util.List;
 
-import static com.googlecode.objectify.ObjectifyService.ofy;
+import com.googlecode.objectify.Ref;
+import com.googlecode.objectify.cmd.Query;
+import com.zik.faro.data.user.EventInviteStatus;
+import com.zik.faro.persistence.datastore.data.EventDo;
+import com.zik.faro.persistence.datastore.data.EventUserDo;
+import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 
 public class EventUserDatastoreImpl {
 
@@ -24,8 +25,8 @@ public class EventUserDatastoreImpl {
     // overloaded method to store ownerId in the the relation.
     // should only be called while new event is being created since that is the time
     // we need to save user creating event as owner
-    public static void storeEventUser(final String eventId, final String faroUserId, String ownerId){
-    	EventUserDo eventUserRelation = EventUserDo.createEventUserDoAccepted(eventId, faroUserId, ownerId);
+    public static void storeEventUser(final String eventId, final String faroUserId, String ownerId, EventInviteStatus inviteStatus){
+    	EventUserDo eventUserRelation = new EventUserDo(eventId, faroUserId, ownerId, inviteStatus);
     	DatastoreObjectifyDAL.storeObject(eventUserRelation);
     }
 

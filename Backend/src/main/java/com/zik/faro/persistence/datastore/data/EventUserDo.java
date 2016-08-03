@@ -28,26 +28,20 @@ public class EventUserDo {
         
     }
 
-   public static EventUserDo createEventUserDoAccepted(final String eventId, final String faroUserId, String ownerId)
-    {
-        return new EventUserDo(eventId, faroUserId, ownerId, EventInviteStatus.ACCEPTED);
-    }
-
     public EventUserDo(final String eventId, final String faroUserId){
-        this.id = generateEventUserId(eventId, faroUserId);
-        this.eventRef = Ref.create(Key.create(EventDo.class, eventId));
-        this.faroUserRef = Ref.create(Key.create(FaroUserDo.class, faroUserId));
+        this(eventId, faroUserId, null);
     }
 
     public EventUserDo(final String eventId, final String faroUserId, final String ownerId, EventInviteStatus inviteStatus){
-        this(eventId,faroUserId);
+    	this.id = generateEventUserId(eventId, faroUserId);
+        this.eventRef = Ref.create(Key.create(EventDo.class, eventId));
+        this.faroUserRef = Ref.create(Key.create(FaroUserDo.class, faroUserId));
         this.ownerId = ownerId;
         this.inviteStatus = inviteStatus;
     }
 
     public EventUserDo(final String eventId, final String faroUserId, final String ownerId){
-    	this(eventId,faroUserId);
-    	this.ownerId = ownerId;
+    	this(eventId,faroUserId, ownerId, EventInviteStatus.INVITED); // Default is invited
     }
 
     private String generateEventUserId(final String eventId, final String faroUserId){

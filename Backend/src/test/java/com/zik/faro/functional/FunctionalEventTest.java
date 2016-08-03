@@ -22,15 +22,18 @@ import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.InviteeList;
 import com.zik.faro.data.Location;
 import com.zik.faro.data.InviteeList.Invitees;
+import com.zik.faro.data.user.EventInviteStatus;
 
 public class FunctionalEventTest {
     private static URL endpoint;
     private static String token = null;
-
+    // User with whose creds we will be testing all the apis
+    private static String callerEmail = UUID.randomUUID().toString() + "@gmail.com";
+    
     @BeforeClass
     public static void init() throws Exception {
         endpoint = TestHelper.getExternalTargetEndpoint();
-        token = TestHelper.createUserAndGetToken();
+        token = TestHelper.createUserAndGetToken(callerEmail);
         //token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE0Njg1ODkwNzMsInVzZXJuYW1lIjoiNzY0ZmZlYjAtZGViMi00MTdhLTkyNzYtZWRkZmRiZGFkNzUwQGdtYWlsLmNvbSIsImVtYWlsIjoiNzY0ZmZlYjAtZGViMi00MTdhLTkyNzYtZWRkZmRiZGFkNzUwQGdtYWlsLmNvbSIsImlzcyI6ImZhcm8iLCJpYXQiOjE0NjM0MDUwNzN9.Ktv4YbXV8BrJsYSHdBikpEwINNF-q8iTLUBhzr9cVZA";
          }
     
@@ -100,6 +103,21 @@ public class FunctionalEventTest {
         Map<String,Invitees> invitees = eventInvitees.getUserStatusMap();
         // Friends + event creator are part of event invitees
         Assert.assertEquals(friends.size()+1, invitees.size());
+        
+        // Verify returned object for getInvitees API
+        // 1. Existing Faro User
+        Assert.assertEquals("Kaivan", invitees.get(faroUser1).getFirstName());
+        Assert.assertEquals("Vijay", invitees.get(faroUser1).getLastName());
+        Assert.assertEquals(EventInviteStatus.INVITED, invitees.get(faroUser1).getInviteStatus());
+        // 2. Still not a FaroUser(First name and last name should be null since user still has to register to faro)
+        Assert.assertNull(invitees.get("not_a_user@farotest.com").getFirstName());
+        Assert.assertNull(invitees.get("not_a_user@farotest.com").getLastName());
+        Assert.assertEquals(EventInviteStatus.INVITED, invitees.get("not_a_user@farotest.com").getInviteStatus());
+        // 3. Verify owner is part of it and has invite status as accepted
+        Assert.assertEquals("sachin", invitees.get(callerEmail).getFirstName());
+        Assert.assertEquals("tendulkar", invitees.get(callerEmail).getLastName());
+        Assert.assertEquals(EventInviteStatus.ACCEPTED, invitees.get(callerEmail).getInviteStatus());
+        
         
         // Remove attendee
         ClientResponse removeAttendee = TestHelper.doPOST(endpoint.toString(), "v1/event/"+ev.getEventId()+"/removeAttendee", token, friendIds[0]);
