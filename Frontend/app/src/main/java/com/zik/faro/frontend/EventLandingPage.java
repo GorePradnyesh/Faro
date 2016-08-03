@@ -13,8 +13,6 @@ import android.widget.TextView;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import com.zik.faro.data.Event;
-import com.zik.faro.data.EventInviteStatusWrapper;
-import com.zik.faro.data.EventUser;
 import com.zik.faro.data.user.EventInviteStatus;
 
 public class EventLandingPage extends Activity {
@@ -33,6 +31,7 @@ public class EventLandingPage extends Activity {
     private ImageButton eventAssignmentButton = null;
     private ImageButton activityButton = null;
     private ImageButton editButton = null;
+    private ImageButton addFriendsButton = null;
     private TextView event_status = null;
 
     private Intent AppLandingPage;
@@ -56,6 +55,8 @@ public class EventLandingPage extends Activity {
         eventAssignmentButton.setImageResource(R.drawable.assignment_icon);
         activityButton = (ImageButton)findViewById(R.id.activityImageButton);
         activityButton.setImageResource(R.drawable.activity);
+        addFriendsButton = (ImageButton)findViewById(R.id.addFriendsImageButton);
+        addFriendsButton.setImageResource(R.drawable.friend_list);
         editButton = (ImageButton)findViewById(R.id.editButton);
         editButton.setImageResource(R.drawable.edit);
 
@@ -67,6 +68,7 @@ public class EventLandingPage extends Activity {
         final Intent PollListPage = new Intent(EventLandingPage.this, PollListPage.class);
         final Intent EditEvent = new Intent(EventLandingPage.this, EditEvent.class);
         final Intent ActivityListPage = new Intent(EventLandingPage.this, ActivityListPage.class);
+        final Intent InviteFriendToEventPage = new Intent(EventLandingPage.this, InviteFriendToEventPage.class);
         final Intent CreateEventAssignment = new Intent(EventLandingPage.this, CreateNewAssignment.class);
         final Intent AssignmentLandingPage = new Intent(EventLandingPage.this, AssignmentLandingPage.class);
 
@@ -155,6 +157,15 @@ public class EventLandingPage extends Activity {
             public void onClick(View v) {
                 ActivityListPage.putExtra("eventID", event.getEventId());
                 startActivity(ActivityListPage);
+                finish();
+            }
+        });
+
+        addFriendsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                InviteFriendToEventPage.putExtra("eventID", event.getEventId());
+                startActivity(InviteFriendToEventPage);
                 finish();
             }
         });

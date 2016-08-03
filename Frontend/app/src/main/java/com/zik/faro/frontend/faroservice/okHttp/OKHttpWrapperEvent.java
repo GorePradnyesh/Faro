@@ -1,13 +1,14 @@
 package com.zik.faro.frontend.faroservice.okHttp;
 
 
-import com.google.gson.internal.Streams;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
+import com.zik.faro.data.AddFriendRequest;
 import com.zik.faro.data.Event;
 
 import com.zik.faro.data.EventInviteStatusWrapper;
+import com.zik.faro.data.InviteeList;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.auth.TokenCache;
 import com.zik.faro.frontend.faroservice.spec.EventHandler;
@@ -76,6 +77,28 @@ public class OKHttpWrapperEvent extends BaseFaroOKHttpWrapper implements EventHa
         Request request = new Request.Builder()
                 .delete()
                 .url(baseHandlerURL.toString() + eventId)
+                .addHeader("Authentication", token)
+                .build();
+
+        this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<String>(callback, String.class));
+    }
+
+    public void getEventInvitees(final BaseFaroRequestCallback<InviteeList> callback, final String eventId){
+        String token = TokenCache.getTokenCache().getToken();
+        Request request = new Request.Builder()
+                .url(baseHandlerURL.toString() + eventId + "/invitees")
+                .addHeader("Authentication", token)
+                .build();
+
+        this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<InviteeList>(callback, InviteeList.class));
+    }
+
+    public void addInviteesToEvent(final BaseFaroRequestCallback<String> callback, final String eventId, final AddFriendRequest addFriendRequest){
+        String token = TokenCache.getTokenCache().getToken();
+        String addFriendRequestPostBody = mapper.toJson(addFriendRequest);
+        Request request = new Request.Builder()
+                .url(baseHandlerURL.toString() + eventId + "/add")
+                .post(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), addFriendRequestPostBody))
                 .addHeader("Authentication", token)
                 .build();
 

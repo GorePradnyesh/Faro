@@ -85,9 +85,8 @@
             android:name=".AppLandingPage"
             android:label="@string/title_activity_app_landing_page" />
         <activity
-            android:name=".MoreOptionsPage"
-            android:label="@string/title_activity_more_options_page" />
-        <activity android:name=".InviteFriendToEventPage"></activity>
+            android:name=".InviteFriendToEventPage"
+            android:label="InviteFriendToEventPage"/>
     </application>
 
 </manifest>

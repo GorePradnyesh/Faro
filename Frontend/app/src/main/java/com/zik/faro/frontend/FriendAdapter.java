@@ -18,9 +18,12 @@ import java.util.List;
 public class FriendAdapter extends ArrayAdapter {
     public List<MinUser> list = new LinkedList<>();
 
-
     public FriendAdapter(Context context, int resource) {
         super(context, resource);
+    }
+
+    public List<MinUser> getList() {
+        return list;
     }
 
     public int getCount() {
@@ -40,6 +43,7 @@ public class FriendAdapter extends ArrayAdapter {
     static class ImgHolder{
         TextView friendName;
     }
+
 
     @Override
     public boolean isEnabled(int position)

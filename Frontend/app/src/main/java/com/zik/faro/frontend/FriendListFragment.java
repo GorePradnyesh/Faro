@@ -124,6 +124,7 @@ public class FriendListFragment extends Fragment {
                                         @Override
                                         public void run() {
                                             Log.i(TAG, "Friend invite sent Successfully");
+                                            //TODO it would be better if we return the MinUser object instead of a String
                                             MinUser minUser = new MinUser("", "", emailIDEditText.getText().toString());
                                             friendListHandler.addFriendToListAndMap(minUser);
                                             popupWindow.dismiss();
@@ -138,30 +139,6 @@ public class FriendListFragment extends Fragment {
                         }, emailIDEditText.getText().toString());
                     }
                 });
-            }
-        });
-
-        serviceHandler.getFriendsHandler().getFriends(new BaseFaroRequestCallback<List<MinUser>>() {
-            @Override
-            public void onFailure(Request request, IOException ex) {
-                Log.e(TAG, "failed to get friend list");
-            }
-
-            @Override
-            public void onResponse(final List<MinUser> minUsers, HttpError error) {
-                if (error == null ) {
-                    Runnable myRunnable = new Runnable() {
-                        @Override
-                        public void run() {
-                            Log.i(TAG, "Successfully received friends from the server!!");
-                            friendListHandler.addDownloadedFriendsToListAndMap(minUsers);
-                        }
-                    };
-                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                    mainHandler.post(myRunnable);
-                }else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
-                }
             }
         });
         return view;

@@ -18,6 +18,7 @@ import android.widget.TabHost;
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.EventInviteStatusWrapper;
+import com.zik.faro.data.MinUser;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
@@ -29,6 +30,7 @@ public class EventListFragment extends Fragment{
 
 
     static EventListHandler eventListHandler = EventListHandler.getInstance();
+    private static FriendListHandler friendListHandler = FriendListHandler.getInstance();
     private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
     private static String TAG = "EventListFragment";
 
@@ -75,6 +77,9 @@ public class EventListFragment extends Fragment{
         }
         theNotAcceptedListView.setAdapter(eventListHandler.notAcceptedEventAdapter);
 
+        if (friendListHandler.friendAdapter == null){
+            friendListHandler.friendAdapter = new FriendAdapter(getActivity(), R.layout.friend_row_style);
+        }
         //ImageButton calendar_view = (ImageButton)view.findViewById(R.id.calendarViewButton);
         //calendar_view.setImageResource(R.drawable.calendar);
 
@@ -134,6 +139,7 @@ public class EventListFragment extends Fragment{
             }
         });*/
 
+        //Make API calls to get events and also friend List for the user when he first logs in to set up the user completely
         serviceHandler.getEventHandler().getEvents(new BaseFaroRequestCallback<List<EventInviteStatusWrapper>>() {
             @Override
             public void onFailure(Request request, IOException ex) {
@@ -147,6 +153,30 @@ public class EventListFragment extends Fragment{
                         public void run() {
                             Log.i(TAG, "Successfully received events from the server!!");
                             eventListHandler.addDownloadedEventsToListAndMap(eventInviteStatusWrappers);
+                        }
+                    };
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(myRunnable);
+                }else {
+                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                }
+            }
+        });
+
+        serviceHandler.getFriendsHandler().getFriends(new BaseFaroRequestCallback<List<MinUser>>() {
+            @Override
+            public void onFailure(Request request, IOException ex) {
+                Log.e(TAG, "failed to get friend list");
+            }
+
+            @Override
+            public void onResponse(final List<MinUser> minUsers, HttpError error) {
+                if (error == null ) {
+                    Runnable myRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.i(TAG, "Successfully received friends from the server!!");
+                            friendListHandler.addDownloadedFriendsToListAndMap(minUsers);
                         }
                     };
                     Handler mainHandler = new Handler(mContext.getMainLooper());
