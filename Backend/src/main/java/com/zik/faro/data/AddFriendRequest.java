@@ -1,4 +1,4 @@
-package com.zik.faro.api.responder;
+package com.zik.faro.data;
 
 import java.util.List;
 

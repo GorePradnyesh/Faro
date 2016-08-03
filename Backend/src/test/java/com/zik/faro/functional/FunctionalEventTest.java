@@ -16,12 +16,12 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import com.zik.faro.TestHelper;
-import com.zik.faro.api.responder.AddFriendRequest;
-import com.zik.faro.api.responder.InviteeList;
-import com.zik.faro.api.responder.InviteeList.Invitees;
+import com.zik.faro.data.AddFriendRequest;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.EventInviteStatusWrapper;
+import com.zik.faro.data.InviteeList;
 import com.zik.faro.data.Location;
+import com.zik.faro.data.InviteeList.Invitees;
 
 public class FunctionalEventTest {
     private static URL endpoint;

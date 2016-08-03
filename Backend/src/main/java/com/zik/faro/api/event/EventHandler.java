@@ -17,9 +17,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 import com.sun.jersey.api.JResponse;
+import com.zik.faro.data.AddFriendRequest;
 import com.zik.faro.data.Event;
-import com.zik.faro.api.responder.AddFriendRequest;
-import com.zik.faro.api.responder.InviteeList;
+import com.zik.faro.data.InviteeList;
 import com.zik.faro.applogic.EventManagement;
 import com.zik.faro.applogic.EventUserManagement;
 import com.zik.faro.commons.Constants;
