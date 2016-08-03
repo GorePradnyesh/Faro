@@ -1,13 +1,10 @@
 package com.zik.faro.data;
 
-import com.zik.faro.data.user.EventInviteStatus;
-
-import javax.xml.bind.annotation.XmlRootElement;
-
 import java.util.HashMap;
 import java.util.Map;
 
-@XmlRootElement
+import com.zik.faro.data.user.EventInviteStatus;
+
 public class InviteeList {
 	
 	// TODO: Do we need the eventId? In the service call client already provides the eventId
@@ -30,7 +27,6 @@ public class InviteeList {
     	this.userStatusMap = userStatusMap;
     }
 
-    @XmlRootElement
     public static class Invitees {
     	public String getFirstName() {
 			return firstName;

@@ -2,9 +2,6 @@ package com.zik.faro.data;
 
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement
 public class AddFriendRequest {
 	private List<String> friendIds;
 	
