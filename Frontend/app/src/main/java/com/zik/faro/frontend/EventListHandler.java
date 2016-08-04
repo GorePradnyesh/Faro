@@ -292,7 +292,7 @@ public class EventListHandler {
         EventAdapter eventAdapter;
         eventAdapter = getEventAdapter(eventInviteStatus);
         if (eventAdapter != null) {
-            eventAdapter.list.remove(event);
+            removeEventFromList(eventID, eventAdapter.list);
             eventAdapter.notifyDataSetChanged();
         }
         eventMap.remove(event.getEventId());

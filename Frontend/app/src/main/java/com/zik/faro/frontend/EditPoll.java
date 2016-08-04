@@ -173,8 +173,8 @@ public class EditPoll extends Activity {
 
         TextView message = (TextView)container.findViewById(R.id.questionTextView);
         message.setText("Are you sure you want to delete the Poll?");
-        Button delete = (Button)container.findViewById(R.id.deleteEventPopUp);
-        Button cancel = (Button)container.findViewById(R.id.cancelEventPopUp);
+        Button delete = (Button)container.findViewById(R.id.popUpDeleteButton);
+        Button cancel = (Button)container.findViewById(R.id.popUpCancelButton);
 
         popupWindow.showAtLocation(popUpRelativeLayout, Gravity.CENTER, 0, 0);
 

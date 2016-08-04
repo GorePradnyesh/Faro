@@ -157,7 +157,6 @@ public class EventLandingPage extends Activity {
             public void onClick(View v) {
                 ActivityListPage.putExtra("eventID", event.getEventId());
                 startActivity(ActivityListPage);
-                finish();
             }
         });
 
@@ -166,7 +165,6 @@ public class EventLandingPage extends Activity {
             public void onClick(View v) {
                 InviteFriendToEventPage.putExtra("eventID", event.getEventId());
                 startActivity(InviteFriendToEventPage);
-                finish();
             }
         });
 
@@ -201,12 +199,14 @@ public class EventLandingPage extends Activity {
             statusMaybe.setVisibility(View.GONE);
             pollButton.setVisibility(View.VISIBLE);
             eventAssignmentButton.setVisibility(View.VISIBLE);
+            addFriendsButton.setVisibility(View.VISIBLE);
             activityButton.setVisibility(View.VISIBLE);
         }else{
             statusYes.setVisibility(View.VISIBLE);
             statusNo.setVisibility(View.VISIBLE);
             pollButton.setVisibility(View.GONE);
             eventAssignmentButton.setVisibility(View.GONE);
+            addFriendsButton.setVisibility(View.GONE);
             activityButton.setVisibility(View.GONE);
         }
 

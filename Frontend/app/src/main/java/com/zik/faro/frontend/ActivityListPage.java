@@ -1,8 +1,10 @@
 package com.zik.faro.frontend;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.AbsListView;
@@ -10,8 +12,15 @@ import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
+import com.squareup.okhttp.Request;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Event;
+import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
+import com.zik.faro.frontend.faroservice.FaroServiceHandler;
+import com.zik.faro.frontend.faroservice.HttpError;
+
+import java.io.IOException;
+import java.util.List;
 
 /*
  * This is the page where all the activities are listed in chronological order.
@@ -27,7 +36,11 @@ public class ActivityListPage extends android.app.Activity {
 
     static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
 
+    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+
+    private String eventID;
     Intent eventLandingPage = null;
+    private static String TAG = "ActivityListPage";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,11 +61,13 @@ public class ActivityListPage extends android.app.Activity {
         final Intent createNewActivityPage = new Intent(ActivityListPage.this, CreateNewActivity.class);
         eventLandingPage = new Intent(ActivityListPage.this, EventLandingPage.class);
 
+        final Context mContext = this;
+
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
-            String eventID = extras.getString("eventID");
+            eventID = extras.getString("eventID");
             event = eventListHandler.getEventCloneFromMap(eventID);
         }
 
@@ -65,7 +80,6 @@ public class ActivityListPage extends android.app.Activity {
                 activityLandingPage.putExtra("eventID", event.getEventId());
                 //TODO: check if startActivityForResult is a better way
                 startActivity(activityLandingPage);
-                finish();
             }
         });
 
@@ -97,17 +111,34 @@ public class ActivityListPage extends android.app.Activity {
             public void onClick(View v) {
                 createNewActivityPage.putExtra("eventID", event.getEventId());
                 startActivity(createNewActivityPage);
-                finish();
             }
         });
-    }
 
-    @Override
-    public void onBackPressed() {
-        eventLandingPage.putExtra("eventID", event.getEventId());
-        startActivity(eventLandingPage);
-        finish();
-        super.onBackPressed();
-    }
 
+        //Make API call to get all activities for this event
+        serviceHandler.getActivityHandler().getActivities(new BaseFaroRequestCallback<List<Activity>>() {
+            @Override
+            public void onFailure(Request request, IOException ex) {
+                Log.e(TAG, "failed to get activity list");
+            }
+
+            @Override
+            public void onResponse(final List<Activity> activities, HttpError error) {
+                if (error == null ) {
+                    Runnable myRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.i(TAG, "Successfully received activities from the server!!");
+                            activityListHandler.addDownloadedActivitiesToListAndMap(activities);
+                        }
+                    };
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(myRunnable);
+                }else {
+                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                }
+
+            }
+        }, eventID);
+    }
 }

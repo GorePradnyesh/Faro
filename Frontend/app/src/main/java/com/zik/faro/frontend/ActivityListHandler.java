@@ -1,8 +1,10 @@
 package com.zik.faro.frontend;
 
 
+import com.google.gson.Gson;
 import com.zik.faro.data.Activity;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -19,8 +21,6 @@ public class ActivityListHandler{
     */
     private Map<String, Activity> activityMap = new ConcurrentHashMap<>();
 
-    private static int tempActivityID = 0;
-
     private static ActivityListHandler activityListHandler = null;
     public static ActivityListHandler getInstance(){
         if (activityListHandler != null){
@@ -36,12 +36,6 @@ public class ActivityListHandler{
 
     private ActivityListHandler(){}
 
-    private String getActivityID(){
-        String activityIDStr = Integer.toString(this.tempActivityID);
-        this.tempActivityID++;
-        return activityIDStr;
-    }
-
     /*
     * Based on the start Date add new activity to the list and Map only if it lies between the first
     * and last activity retrieved in the list from the server. If it does not lie in between then
@@ -51,30 +45,13 @@ public class ActivityListHandler{
     * the above reason then once we return back from the ActivityLanding Page we remove it from the
     * Map.
     */
-    public ErrorCodes addNewActivity(Activity activity) {
-        //TODO: send new activity update to server
-        //TODO  update server and if successful then add activity to List and Map below and
-        // update the activityID in the activity.
-
-        String activityID = getActivityID();
-        if(activityID != null) {
-            activity.setId(activityID);
-
-            addNewActivityToList(activity);
-            this.activityMap.put(activityID, activity);
-
-            return ErrorCodes.SUCCESS;
-        }
-        return ErrorCodes.FAILURE;
-
-        /*TestEventCreateCallback createCallback = new TestEventCreateCallback();
-        EventCreateData eventCreateData= new EventCreateData(event.getEventName(),
-                event.getStartDate(), event.getEndDate(), null, null);
-        MainActivity.serviceHandler.getEventHandler().createEvent(createCallback, eventCreateData);
-        return ErrorCodes.SUCCESS;*/
+    public void addActivityToListAndMap(Activity activity) {
+        removeActivityFromListAndMap(activity.getId());
+        addActivityToList(activity);
+        activityMap.put(activity.getId(), activity);
     }
 
-    private void addNewActivityToList(Activity activity) {
+    private void addActivityToList(Activity activity) {
         Activity tempActivity;
         Calendar tempCalendar;
         Calendar activityCalendar;
@@ -108,11 +85,18 @@ public class ActivityListHandler{
         }
     }
 
+    public void addDownloadedActivitiesToListAndMap(List <Activity> activityList){
+        for (int i = 0; i < activityList.size(); i++){
+            addActivityToListAndMap(activityList.get(i));
+        }
+        activityAdapter.notifyDataSetChanged();
+    }
+
     /*
     * Funtion to check the sync between Map and List
     */
     private boolean isMapAndListInSync(){
-        return (this.activityMap.size() == activityAdapter.list.size());
+        return (activityMap.size() == activityAdapter.list.size());
     }
 
 
@@ -137,7 +121,7 @@ public class ActivityListHandler{
         //TODO (Code Review) add condition to not add if it lies before the first or 0th activity.
         //Cause in that case if newActivityIndex is 0 then we shouldnt add it.
         if (activityCalendar.compareTo(lastActivityInListCalendar) == 1){
-            this.activityMap.remove(activity.getId());
+            activityMap.remove(activity.getId());
         }
 
         //TODO Check for Map and List sync here. And somehow catch this error
@@ -145,16 +129,30 @@ public class ActivityListHandler{
         boolean issync = isMapAndListInSync();
     }
 
-    public Activity getActivityFromMap(String activityID){
-        return this.activityMap.get(activityID);
+    public Activity getActivityCloneFromMap(String activityID){
+        Activity activity = activityMap.get(activityID);
+        Gson gson = new Gson();
+        String json = gson.toJson(activity);
+        Activity cloneActivity = gson.fromJson(json, Activity.class);
+        return cloneActivity;
     }
 
-    public void removeActivityFromListAndMap(Activity activity){
+    public void removeActivityFromList(String activityID, List<Activity> activityList){
+        for (int i = 0; i < activityList.size(); i++){
+            Activity activity = activityList.get(i);
+            if (activityID.equals(activity.getId())){
+                activityList.remove(activity);
+                return;
+            }
+        }
+    }
+
+    public void removeActivityFromListAndMap(String activityID){
         //TODO: send update to server and if successful then delete activity from List and Map below
 
-        activityAdapter.list.remove(activity);
+        removeActivityFromList(activityID, activityAdapter.list);
         activityAdapter.notifyDataSetChanged();
-        activityMap.remove(activity.getId());
+        activityMap.remove(activityID);
     }
 
     public int getActivityListSize(){

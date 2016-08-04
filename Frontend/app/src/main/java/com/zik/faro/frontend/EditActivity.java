@@ -5,9 +5,11 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -20,14 +22,22 @@ import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.squareup.okhttp.Request;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Event;
+import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
+import com.zik.faro.frontend.faroservice.FaroServiceHandler;
+import com.zik.faro.frontend.faroservice.HttpError;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+
+import static android.widget.Toast.LENGTH_LONG;
 
 public class EditActivity extends ActionBarActivity {
 
@@ -38,6 +48,7 @@ public class EditActivity extends ActionBarActivity {
     private static Activity activity;
     private  static EventListHandler eventListHandler = EventListHandler.getInstance();
     private  static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
+    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
 
     Button startDateButton = null;
     Button startTimeButton = null;
@@ -49,8 +60,12 @@ public class EditActivity extends ActionBarActivity {
 
     private RelativeLayout popUpRelativeLayout;
 
+    private static String TAG = "EditActivity";
+
     Intent ActivityLandingPage;
     Intent ActivityListPage;
+
+    final Context mContext = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +101,7 @@ public class EditActivity extends ActionBarActivity {
             eventID = extras.getString("eventID");
             activityID = extras.getString("activityID");
             event = eventListHandler.getEventCloneFromMap(eventID);
-            activity = activityListHandler.getActivityFromMap(activityID);
+            activity = activityListHandler.getActivityCloneFromMap(activityID);
 
             if (activity != null) {
                 Gson gson = new Gson();
@@ -126,17 +141,15 @@ public class EditActivity extends ActionBarActivity {
         editActivityOK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                activityListHandler.removeActivityFromListAndMap(activity);
+                activityListHandler.removeActivityFromListAndMap(activity.getId());
 
-                ErrorCodes eventStatus;
-                eventStatus = activityListHandler.addNewActivity(cloneActivity);
+                activityListHandler.addActivityToListAndMap(cloneActivity);
                 //TODO What to do in Failure case?
-                if (eventStatus == ErrorCodes.SUCCESS) {
-                    ActivityLandingPage.putExtra("eventID", event.getEventId());
-                    ActivityLandingPage.putExtra("activityID", cloneActivity.getId());
-                    startActivity(ActivityLandingPage);
-                    finish();
-                }
+                ActivityLandingPage.putExtra("eventID", event.getEventId());
+                ActivityLandingPage.putExtra("activityID", cloneActivity.getId());
+                startActivity(ActivityLandingPage);
+                finish();
+
             }
         });
 
@@ -178,12 +191,14 @@ public class EditActivity extends ActionBarActivity {
 
     public void confirmActivityDeletePopUP(View v) {
         LayoutInflater layoutInflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        ViewGroup container = (ViewGroup) layoutInflater.inflate(R.layout.delete_activity_popup, null);
+        ViewGroup container = (ViewGroup) layoutInflater.inflate(R.layout.delete_popup, null);
         final PopupWindow popupWindow = new PopupWindow(container, RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT, true);
 
-        Button delete = (Button)container.findViewById(R.id.deleteActivityPopUp);
-        Button cancel = (Button)container.findViewById(R.id.cancelActivityPopUp);
+        TextView message = (TextView)container.findViewById(R.id.questionTextView);
+        message.setText("Are you sure you want to delete the Activity?");
+        Button delete = (Button)container.findViewById(R.id.popUpDeleteButton);
+        Button cancel = (Button)container.findViewById(R.id.popUpCancelButton);
 
         popupWindow.showAtLocation(popUpRelativeLayout, Gravity.CENTER, 0, 0);
 
@@ -199,12 +214,31 @@ public class EditActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
 
-                //TODO: Make API call and update server
-                activityListHandler.removeActivityFromListAndMap(activity);
-                ActivityListPage.putExtra("eventID", event.getEventId());
-                startActivity(ActivityListPage);
-                popupWindow.dismiss();
-                finish();
+                serviceHandler.getActivityHandler().deleteActivity(new BaseFaroRequestCallback<String>() {
+                    @Override
+                    public void onFailure(Request request, IOException ex) {
+                        Log.e(TAG, "failed to delete event");
+                    }
+
+                    @Override
+                    public void onResponse(String s, HttpError error) {
+                        if (error == null ) {
+                            Runnable myRunnable = new Runnable() {
+                                @Override
+                                public void run() {
+                                    activityListHandler.removeActivityFromListAndMap(activity.getId());
+                                    popupWindow.dismiss();
+                                    Toast.makeText(EditActivity.this, cloneActivity.getName() + "is Deleted", LENGTH_LONG).show();
+                                    finish();
+                                }
+                            };
+                            Handler mainHandler = new Handler(mContext.getMainLooper());
+                            mainHandler.post(myRunnable);
+                        }else {
+                            Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                        }
+                    }
+                }, eventID, activityID);
             }
         });
 

@@ -19,9 +19,8 @@ public class ActivityManagement {
 	
 	public static List<Activity> getActivities(String eventId){
 		List<ActivityDo> activityDoList = ActivityDatastoreImpl.loadActivitiesByEventId(eventId);
-		List<Activity>  activities = null;
+		List<Activity>  activities = new ArrayList<Activity>();
 		if(activityDoList != null && activityDoList.size() > 0){
-			activities = new ArrayList<Activity>(activityDoList.size());
 			for(ActivityDo activityDo : activityDoList){
 				activities.add(ConversionUtils.fromDo(activityDo));
 			}

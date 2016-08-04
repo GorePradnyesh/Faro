@@ -13,7 +13,7 @@ import com.zik.faro.data.Event;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-public class ActivityLandingPage extends ActionBarActivity {
+public class ActivityLandingPage extends android.app.Activity {
 
     private DateFormat sdf = new SimpleDateFormat(" EEE, MMM d, yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
@@ -21,8 +21,6 @@ public class ActivityLandingPage extends ActionBarActivity {
     private static Event event = null;
     private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
-
-    Intent ActivityListPage = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +33,6 @@ public class ActivityLandingPage extends ActionBarActivity {
         ImageButton activityAssignmentButton = (ImageButton)findViewById(R.id.activityAssignmentImageButton);
         activityAssignmentButton.setImageResource(R.drawable.assignment_icon);
 
-        ActivityListPage = new Intent(ActivityLandingPage.this, ActivityListPage.class);
         final Intent EditActivityPage = new Intent(ActivityLandingPage.this, EditActivity.class);
         final Intent CreateActivityAssignment = new Intent(ActivityLandingPage.this, CreateNewAssignment.class);
         final Intent AssignmentLandingPage = new Intent(ActivityLandingPage.this, AssignmentLandingPage.class);
@@ -47,7 +44,7 @@ public class ActivityLandingPage extends ActionBarActivity {
             String eventID = extras.getString("eventID");
             String activityID = extras.getString("activityID");
             event = eventListHandler.getEventCloneFromMap(eventID);
-            activity = activityListHandler.getActivityFromMap(activityID);
+            activity = activityListHandler.getActivityCloneFromMap(activityID);
 
             if (activityID != null){
                 TextView activityName = (TextView) findViewById(R.id.activityNameText);
@@ -83,13 +80,11 @@ public class ActivityLandingPage extends ActionBarActivity {
                     CreateActivityAssignment.putExtra("eventID", event.getEventId());
                     CreateActivityAssignment.putExtra("activityID", activity.getId());
                     startActivity(CreateActivityAssignment);
-                    finish();
                 }else{
                     AssignmentLandingPage.putExtra("eventID", event.getEventId());
                     AssignmentLandingPage.putExtra("activityID", activity.getId());
                     AssignmentLandingPage.putExtra("assignmentID", activity.getAssignment().getId());
                     startActivity(AssignmentLandingPage);
-                    finish();
                 }
 
             }
@@ -99,8 +94,7 @@ public class ActivityLandingPage extends ActionBarActivity {
     @Override
     public void onBackPressed() {
         activityListHandler.deleteActivityFromMapIfNotInList(activity);
-        ActivityListPage.putExtra("eventID", event.getEventId());
-        startActivity(ActivityListPage);
+        //TODO: Probably will need to clear the AssignmentList and Map here for the activity's assignments
         finish();
         super.onBackPressed();
     }

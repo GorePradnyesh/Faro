@@ -64,6 +64,7 @@ public class EditEvent extends Activity {
 
     private RelativeLayout popUpRelativeLayout;
 
+    private String eventID;
     private static String TAG = "EditEvent";
 
     Intent EventLanding = null;
@@ -105,7 +106,7 @@ public class EditEvent extends Activity {
         */
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
-            String eventID = extras.getString("eventID");
+            eventID = extras.getString("eventID");
             cloneEvent = eventListHandler.getEventCloneFromMap(eventID);
             if (cloneEvent != null) {
                 String ev_name = cloneEvent.getEventName();
@@ -214,8 +215,8 @@ public class EditEvent extends Activity {
 
         TextView message = (TextView)container.findViewById(R.id.questionTextView);
         message.setText("Are you sure you want to delete the Event?");
-        Button delete = (Button)container.findViewById(R.id.deleteEventPopUp);
-        Button cancel = (Button)container.findViewById(R.id.cancelEventPopUp);
+        Button delete = (Button)container.findViewById(R.id.popUpDeleteButton);
+        Button cancel = (Button)container.findViewById(R.id.popUpCancelButton);
 
         popupWindow.showAtLocation(popUpRelativeLayout, Gravity.CENTER, 0, 0);
 
@@ -231,7 +232,6 @@ public class EditEvent extends Activity {
             @Override
             public void onClick(View v) {
 
-                //TODO: Make API call and update server
                 serviceHandler.getEventHandler().deleteEvent(new BaseFaroRequestCallback<String>() {
                     @Override
                     public void onFailure(Request request, IOException ex) {
@@ -244,7 +244,7 @@ public class EditEvent extends Activity {
                             Runnable myRunnable = new Runnable() {
                                 @Override
                                 public void run() {
-                                    eventListHandler.removeEventFromListAndMap(cloneEvent.getEventId());
+                                    eventListHandler.removeEventFromListAndMap(eventID);
                                     popupWindow.dismiss();
                                     Toast.makeText(EditEvent.this, cloneEvent.getEventName() + "is Deleted", LENGTH_LONG).show();
                                     finish();
@@ -255,10 +255,8 @@ public class EditEvent extends Activity {
                         }else {
                             Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                         }
-
                     }
-                }, cloneEvent.getEventId());
-
+                }, eventID);
             }
         });
 

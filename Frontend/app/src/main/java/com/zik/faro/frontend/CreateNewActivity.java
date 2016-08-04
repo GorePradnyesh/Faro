@@ -2,10 +2,13 @@ package com.zik.faro.frontend;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,11 +17,17 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TimePicker;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+
+import com.squareup.okhttp.Request;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.Activity;
+import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
+import com.zik.faro.frontend.faroservice.FaroServiceHandler;
+import com.zik.faro.frontend.faroservice.HttpError;
 
 public class CreateNewActivity extends android.app.Activity{
 
@@ -39,6 +48,9 @@ public class CreateNewActivity extends android.app.Activity{
 
     Intent activityListPage = null;
 
+    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+    private static String TAG = "CreateNewActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,7 +60,6 @@ public class CreateNewActivity extends android.app.Activity{
         final EditText activityDescription = (EditText) findViewById(R.id.activityDescription);
 
         final Button createNewActivityOK = (Button) findViewById(R.id.createNewActivityOK);
-        final Button createNewActivityCancel = (Button) findViewById(R.id.createNewActivityCancel);
 
         startDateButton = (Button) findViewById(R.id.startDateButton);
         startTimeButton = (Button) findViewById(R.id.startTimeButton);
@@ -58,6 +69,8 @@ public class CreateNewActivity extends android.app.Activity{
 
         activityListPage = new Intent(CreateNewActivity.this, ActivityListPage.class);
         final Intent activityLanding  = new Intent(CreateNewActivity.this, ActivityLandingPage.class);
+
+        final Context mContext = this;
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
@@ -116,24 +129,34 @@ public class CreateNewActivity extends android.app.Activity{
                         endDateCalendar,
                         null);
 
-                ErrorCodes activityStatus;
-                activityStatus = activityListHandler.addNewActivity(eventActivity);
+                serviceHandler.getActivityHandler().createActivity(new BaseFaroRequestCallback<Activity>() {
+                    @Override
+                    public void onFailure(Request request, IOException ex) {
+                        Log.e(TAG, "failed to send activity create request");
+                    }
 
-                //TODO What to do in Failure case?
-                if (activityStatus == ErrorCodes.SUCCESS) {
-                    activityLanding.putExtra("eventID", event.getEventId());
-                    activityLanding.putExtra("activityID", eventActivity.getId());
-                    startActivity(activityLanding);
-                    finish();
-                }
-
-            }
-        });
-
-        createNewActivityCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
+                    @Override
+                    public void onResponse(final Activity receivedActivity, HttpError error) {
+                        if (error == null ) {
+                            Runnable myRunnable = new Runnable() {
+                                @Override
+                                public void run() {
+                                    //Since update to server successful, adding activity to List and Map below
+                                    Log.i(TAG, "Activity Create Response received Successfully");
+                                    activityListHandler.addActivityToListAndMap(receivedActivity);
+                                    activityLanding.putExtra("eventID", eventID);
+                                    activityLanding.putExtra("activityID", receivedActivity.getId());
+                                    startActivity(activityLanding);
+                                    finish();
+                                }
+                            };
+                            Handler mainHandler = new Handler(mContext.getMainLooper());
+                            mainHandler.post(myRunnable);
+                        } else {
+                            Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                        }
+                    }
+                }, eventID, eventActivity);
             }
         });
 
@@ -342,34 +365,4 @@ public class CreateNewActivity extends android.app.Activity{
             }
         }
     };
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_create_new, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onBackPressed() {
-        activityListPage.putExtra("eventID", event.getEventId());
-        startActivity(activityListPage);
-        finish();
-        super.onBackPressed();
-    }
 }

@@ -50,7 +50,7 @@ public class EditAssignment extends android.app.Activity {
 
             TextView assignmentDescription = (TextView) findViewById(R.id.assignmentDescription);
             if (activityID != null) {
-                activity = activityListHandler.getActivityFromMap(activityID);
+                activity = activityListHandler.getActivityCloneFromMap(activityID);
                 assignmentDescription.setText("Assignment for " + activity.getName());
             } else {
                 assignmentDescription.setText("Assignment for " + event.getEventName());

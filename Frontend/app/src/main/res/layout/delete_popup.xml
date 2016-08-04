@@ -26,13 +26,13 @@
                 android:layout_width="0px"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:id="@+id/deleteEventPopUp"
+                android:id="@+id/popUpDeleteButton"
                 android:text="@string/delete"/>
             <Button
                 android:layout_width="0px"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:id="@+id/cancelEventPopUp"
+                android:id="@+id/popUpCancelButton"
                 android:text="@string/Cancel"/>
         </LinearLayout>
     </RelativeLayout>
