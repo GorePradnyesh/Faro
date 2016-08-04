@@ -9,12 +9,15 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 import com.zik.faro.frontend.faroservice.auth.TokenCache;
 
 public class MoreOptionsPage extends Fragment{
 
     static EventListHandler eventListHandler = EventListHandler.getInstance();
     static FriendListHandler friendListHandler = FriendListHandler.getInstance();
+    static FaroUserContext faroUserContext = FaroUserContext.getInstance();
+    String myUserId = faroUserContext.getEmail();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -28,7 +31,7 @@ public class MoreOptionsPage extends Fragment{
         View v = inflater.inflate(R.layout.activity_more_options_page, container, false);
         Button logout = (Button)v.findViewById(R.id.logout);
         TextView tv = (TextView) v.findViewById(R.id.text);
-        tv.setText(this.getTag() + " Content");
+        tv.setText("Logged in as " + myUserId);
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

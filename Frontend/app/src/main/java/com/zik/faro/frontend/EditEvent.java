@@ -116,6 +116,7 @@ public class EditEvent extends Activity {
             }
         }
 
+        //TODO: User should warned that this can lead to mismatch with previously created activities which might not lie in the event's new time period.
         startDateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

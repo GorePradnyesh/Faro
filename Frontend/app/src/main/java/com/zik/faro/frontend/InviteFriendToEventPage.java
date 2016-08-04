@@ -154,6 +154,7 @@ public class InviteFriendToEventPage extends Activity {
                                     @Override
                                     public void run() {
                                         Log.i(TAG, "Friends successfully invited to the event");
+                                        Toast.makeText(InviteFriendToEventPage.this, "Successfully Invited friends", LENGTH_LONG).show();
                                     }
                                 };
                                 Handler mainHandler = new Handler(mContext.getMainLooper());

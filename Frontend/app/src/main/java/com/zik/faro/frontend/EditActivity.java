@@ -24,7 +24,6 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Event;
@@ -45,7 +44,6 @@ public class EditActivity extends ActionBarActivity {
     private String activityID = null;
     private static Event event;
     private static Activity cloneActivity;
-    private static Activity activity;
     private  static EventListHandler eventListHandler = EventListHandler.getInstance();
     private  static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
     private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
@@ -90,24 +88,20 @@ public class EditActivity extends ActionBarActivity {
         final EditText activityDescription = (EditText) findViewById(R.id.activityDescriptionEditText);;
 
         /*
-        * Do not remove the activity from the list and the map in the activityListHandler below.
-        * Make a clone of the activity and make changes to that.
-        * When the OK button is clicked, only then remove the activity and insert the clone.
+        * Do not remove the cloneactivity from the list and the map in the activityListHandler below.
+        * Make a clone of the cloneactivity and make changes to that.
+        * When the OK button is clicked, only then remove the cloneactivity and insert the clone.
         * This way if the user makes some changes but then clicks back without clicking OK button,
-        * the original activity is not affected.
+        * the original cloneactivity is not affected.
         */
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
             eventID = extras.getString("eventID");
             activityID = extras.getString("activityID");
             event = eventListHandler.getEventCloneFromMap(eventID);
-            activity = activityListHandler.getActivityCloneFromMap(activityID);
+            cloneActivity = activityListHandler.getActivityCloneFromMap(activityID);
 
-            if (activity != null) {
-                Gson gson = new Gson();
-                String json = gson.toJson(activity);
-
-                cloneActivity = gson.fromJson(json, Activity.class);
+            if (cloneActivity != null) {
 
                 TextView activityName = (TextView) findViewById(R.id.activityName);
                 activityName.setText(cloneActivity.getName());
@@ -136,20 +130,38 @@ public class EditActivity extends ActionBarActivity {
         });
 
         /*
-        * Since OK button is pressed we will remove the activity from the list and insert the clone.
+        * Since OK button is pressed we will remove the cloneactivity from the list and insert the clone.
         */
         editActivityOK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                activityListHandler.removeActivityFromListAndMap(activity.getId());
 
-                activityListHandler.addActivityToListAndMap(cloneActivity);
-                //TODO What to do in Failure case?
-                ActivityLandingPage.putExtra("eventID", event.getEventId());
-                ActivityLandingPage.putExtra("activityID", cloneActivity.getId());
-                startActivity(ActivityLandingPage);
-                finish();
+                serviceHandler.getActivityHandler().updateActivity(new BaseFaroRequestCallback<String>() {
+                    @Override
+                    public void onFailure(Request request, IOException ex) {
+                        Log.e(TAG, "failed to update cloneactivity");
+                    }
 
+                    @Override
+                    public void onResponse(String s, HttpError error) {
+                        if (error == null ) {
+                            Runnable myRunnable = new Runnable() {
+                                @Override
+                                public void run() {
+                                    activityListHandler.addActivityToListAndMap(cloneActivity);
+                                    ActivityLandingPage.putExtra("eventID", event.getEventId());
+                                    ActivityLandingPage.putExtra("activityID", cloneActivity.getId());
+                                    startActivity(ActivityLandingPage);
+                                    finish();
+                                }
+                            };
+                            Handler mainHandler = new Handler(mContext.getMainLooper());
+                            mainHandler.post(myRunnable);
+                        }else {
+                            Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                        }
+                    }
+                }, eventID, activityID, cloneActivity);
             }
         });
 
@@ -160,6 +172,7 @@ public class EditActivity extends ActionBarActivity {
             }
         });
 
+        //TODO: User should be allowed to set date and time only within the events date and time
         startDateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -217,7 +230,7 @@ public class EditActivity extends ActionBarActivity {
                 serviceHandler.getActivityHandler().deleteActivity(new BaseFaroRequestCallback<String>() {
                     @Override
                     public void onFailure(Request request, IOException ex) {
-                        Log.e(TAG, "failed to delete event");
+                        Log.e(TAG, "failed to delete cloneactivity");
                     }
 
                     @Override
@@ -226,7 +239,7 @@ public class EditActivity extends ActionBarActivity {
                             Runnable myRunnable = new Runnable() {
                                 @Override
                                 public void run() {
-                                    activityListHandler.removeActivityFromListAndMap(activity.getId());
+                                    activityListHandler.removeActivityFromListAndMap(activityID);
                                     popupWindow.dismiss();
                                     Toast.makeText(EditActivity.this, cloneActivity.getName() + "is Deleted", LENGTH_LONG).show();
                                     finish();
@@ -397,8 +410,8 @@ public class EditActivity extends ActionBarActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        ActivityLandingPage.putExtra("eventID", event.getEventId());
-        ActivityLandingPage.putExtra("activityID", activity.getId());
+        ActivityLandingPage.putExtra("eventID", eventID);
+        ActivityLandingPage.putExtra("activityID", activityID);
         startActivity(ActivityLandingPage);
         finish();
     }

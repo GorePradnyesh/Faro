@@ -9,6 +9,7 @@ import com.zik.faro.data.Event;
 
 import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.InviteeList;
+import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.auth.TokenCache;
 import com.zik.faro.frontend.faroservice.spec.EventHandler;
@@ -99,6 +100,20 @@ public class OKHttpWrapperEvent extends BaseFaroOKHttpWrapper implements EventHa
         Request request = new Request.Builder()
                 .url(baseHandlerURL.toString() + eventId + "/add")
                 .post(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), addFriendRequestPostBody))
+                .addHeader("Authentication", token)
+                .build();
+
+        this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<String>(callback, String.class));
+    }
+
+    @Override
+    public void updateEventUserInviteStatus(BaseFaroRequestCallback<String> callback, String eventId, EventInviteStatus inviteStatus) {
+        String token = TokenCache.getTokenCache().getToken();
+        String inviteStatusPostBody = mapper.toJson(inviteStatus);
+
+        Request request = new Request.Builder()
+                .url(baseHandlerURL.toString() + eventId + "/updateInviteStatus")
+                .post(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), inviteStatusPostBody))
                 .addHeader("Authentication", token)
                 .build();
 

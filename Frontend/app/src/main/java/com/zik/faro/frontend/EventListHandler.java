@@ -139,19 +139,16 @@ public class EventListHandler {
         eventMap.put(receivedEvent.getEventId(), eventInviteStatusWrapper);
     }
 
-    public ErrorCodes updateEventInviteStatus(final Event event, EventInviteStatus eventInviteStatus) {
-        //TODO: send new event update to server
-        //TODO  update server and if successful then add event to List and Map below and
-        // update the eventID in the Event.
-        //TODO: Server call to change the user's status for this event
-        return ErrorCodes.SUCCESS;
-    }
-
     public void addDownloadedEventsToListAndMap(List<EventInviteStatusWrapper> eventInviteStatusWrappers){
         for (int i = 0; i < eventInviteStatusWrappers.size(); i++) {
             EventInviteStatusWrapper eventInviteStatusWrapper = eventInviteStatusWrappers.get(i);
-            Event event = eventInviteStatusWrapper.getEvent();
+
+            //Ideally the server should never send us events with status as DECLINED
             EventInviteStatus eventInviteStatus = eventInviteStatusWrapper.getInviteStatus();
+            if (eventInviteStatus.equals(EventInviteStatus.DECLINED)){
+                continue;
+            }
+            Event event = eventInviteStatusWrapper.getEvent();
             addEventToListAndMap(event, eventInviteStatus);
         }
         acceptedEventAdapter.notifyDataSetChanged();
@@ -296,18 +293,6 @@ public class EventListHandler {
             eventAdapter.notifyDataSetChanged();
         }
         eventMap.remove(event.getEventId());
-    }
-
-    public void changeEventStatusToYes(Event event){
-        removeEventFromListAndMap(event.getEventId());
-        //TODO: send update to server and if successful then delete event from List and Map below
-        updateEventInviteStatus(event, EventInviteStatus.ACCEPTED);
-    }
-
-    public void changeEventStatusToMaybe(Event event){
-        removeEventFromListAndMap(event.getEventId());
-        //TODO: send update to server and if successful then delete event from List and Map below
-        updateEventInviteStatus(event, EventInviteStatus.MAYBE);
     }
 
     public int getAcceptedEventListSize(){

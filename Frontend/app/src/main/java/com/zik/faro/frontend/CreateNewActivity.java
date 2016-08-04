@@ -160,6 +160,7 @@ public class CreateNewActivity extends android.app.Activity{
             }
         });
 
+        //TODO: User should be allowed to set date and time only within the events date and time
         startDateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

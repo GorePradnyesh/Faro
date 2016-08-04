@@ -1,8 +1,11 @@
 package com.zik.faro.frontend;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -10,18 +13,28 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+
+import com.squareup.okhttp.Request;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.user.EventInviteStatus;
+import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
+import com.zik.faro.frontend.faroservice.FaroServiceHandler;
+import com.zik.faro.frontend.faroservice.HttpError;
 
 public class EventLandingPage extends Activity {
 
     public static final int NO_CHANGES = 0;
     private DateFormat sdf = new SimpleDateFormat(" EEE, MMM d, yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
-    private  static EventListHandler eventListHandler = EventListHandler.getInstance();
+    private static EventListHandler eventListHandler = EventListHandler.getInstance();
     static PollListHandler pollListHandler = PollListHandler.getInstance();
+    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+
+    private static String TAG = "EventLandingPage";
+
     private static Event event;
 
     private Button statusYes = null;
@@ -34,36 +47,38 @@ public class EventLandingPage extends Activity {
     private ImageButton addFriendsButton = null;
     private TextView event_status = null;
 
-    private Intent AppLandingPage;
+    private String eventID;
+    final Context mContext = this;
+    private Intent EventLandingPageReload;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_landing_page);
 
-        final TextView event_name = (TextView)findViewById(R.id.eventNameText);
-        event_status = (TextView)findViewById(R.id.eventStatusText);
+        final TextView event_name = (TextView) findViewById(R.id.eventNameText);
+        event_status = (TextView) findViewById(R.id.eventStatusText);
         TextView eventDescription = (TextView) findViewById(R.id.eventDescriptionTextView);
 
-        TextView startDateAndTime = (TextView)findViewById(R.id.startDateAndTimeDisplay);
+        TextView startDateAndTime = (TextView) findViewById(R.id.startDateAndTimeDisplay);
 
-        TextView endDateAndTime = (TextView)findViewById(R.id.endDateAndTimeDisplay);
+        TextView endDateAndTime = (TextView) findViewById(R.id.endDateAndTimeDisplay);
 
-        pollButton = (ImageButton)findViewById(R.id.pollImageButton);
+        pollButton = (ImageButton) findViewById(R.id.pollImageButton);
         pollButton.setImageResource(R.drawable.poll_icon);
-        eventAssignmentButton = (ImageButton)findViewById(R.id.eventAssignmentImageButton);
+        eventAssignmentButton = (ImageButton) findViewById(R.id.eventAssignmentImageButton);
         eventAssignmentButton.setImageResource(R.drawable.assignment_icon);
-        activityButton = (ImageButton)findViewById(R.id.activityImageButton);
+        activityButton = (ImageButton) findViewById(R.id.activityImageButton);
         activityButton.setImageResource(R.drawable.activity);
-        addFriendsButton = (ImageButton)findViewById(R.id.addFriendsImageButton);
+        addFriendsButton = (ImageButton) findViewById(R.id.addFriendsImageButton);
         addFriendsButton.setImageResource(R.drawable.friend_list);
-        editButton = (ImageButton)findViewById(R.id.editButton);
+        editButton = (ImageButton) findViewById(R.id.editButton);
         editButton.setImageResource(R.drawable.edit);
 
 
-        statusYes = (Button)findViewById(R.id.statusYes);
-        statusNo = (Button)findViewById(R.id.statusNo);
-        statusMaybe = (Button)findViewById(R.id.statusMaybe);
+        statusYes = (Button) findViewById(R.id.statusYes);
+        statusNo = (Button) findViewById(R.id.statusNo);
+        statusMaybe = (Button) findViewById(R.id.statusMaybe);
 
         final Intent PollListPage = new Intent(EventLandingPage.this, PollListPage.class);
         final Intent EditEvent = new Intent(EventLandingPage.this, EditEvent.class);
@@ -71,15 +86,15 @@ public class EventLandingPage extends Activity {
         final Intent InviteFriendToEventPage = new Intent(EventLandingPage.this, InviteFriendToEventPage.class);
         final Intent CreateEventAssignment = new Intent(EventLandingPage.this, CreateNewAssignment.class);
         final Intent AssignmentLandingPage = new Intent(EventLandingPage.this, AssignmentLandingPage.class);
+        EventLandingPageReload = new Intent(EventLandingPage.this, EventLandingPage.class);
 
-        AppLandingPage = new Intent(EventLandingPage.this, AppLandingPage.class);
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
         Bundle extras = getIntent().getExtras();
-        if(extras != null){
-            String eventID = extras.getString("eventID");
+        if (extras != null) {
+            eventID = extras.getString("eventID");
             event = eventListHandler.getEventCloneFromMap(eventID);
-            if(event != null) {
+            if (event != null) {
 
                 //Display elements based on Event Status
                 eventStateBasedView(event);
@@ -98,31 +113,25 @@ public class EventLandingPage extends Activity {
                 endDateAndTime.setText(sdf.format(event.getEndDate().getTime()) + " at " +
                         stf.format(event.getEndDate().getTime()));
 
+
                 statusYes.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        eventListHandler.changeEventStatusToYes(event);
-                        eventStateBasedView(event);
+                        updateUserEventInviteStatus(EventInviteStatus.ACCEPTED);
                     }
                 });
 
                 statusMaybe.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        eventListHandler.changeEventStatusToMaybe(event);
-                        eventStateBasedView(event);
+                        updateUserEventInviteStatus(EventInviteStatus.MAYBE);
                     }
                 });
 
-                //TODO Handle listener for statusNo
                 statusNo.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        //TODO: Make API call and update server
-
-                        eventListHandler.removeEventFromListAndMap(event.getEventId());
-                        startActivity(AppLandingPage);
-                        finish();
+                        updateUserEventInviteStatus(EventInviteStatus.DECLINED);
                     }
                 });
             }
@@ -143,7 +152,7 @@ public class EventLandingPage extends Activity {
                     CreateEventAssignment.putExtra("eventID", event.getEventId());
                     startActivity(CreateEventAssignment);
                     finish();
-                }else{
+                } else {
                     AssignmentLandingPage.putExtra("eventID", event.getEventId());
                     AssignmentLandingPage.putExtra("assignmentID", event.getAssignment().getId());
                     startActivity(AssignmentLandingPage);
@@ -178,6 +187,51 @@ public class EventLandingPage extends Activity {
         });
     }
 
+    private void updateUserEventInviteStatus(final EventInviteStatus eventInviteStatus) {
+        serviceHandler.getEventHandler().updateEventUserInviteStatus(new BaseFaroRequestCallback<String>() {
+            @Override
+            public void onFailure(Request request, IOException ex) {
+                Log.e(TAG, "failed to send event Invite Status");
+            }
+
+            @Override
+            public void onResponse(String s, HttpError error) {
+                if (error == null ) {
+                    //Since update to server successful
+                    Runnable myRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            switch (eventInviteStatus){
+                                case ACCEPTED:
+                                    eventListHandler.addEventToListAndMap(event, EventInviteStatus.ACCEPTED);
+                                    //Reload EventLandingPage
+                                    EventLandingPageReload.putExtra("eventID", event.getEventId());
+                                    finish();
+                                    startActivity(EventLandingPageReload);
+                                    break;
+                                case MAYBE:
+                                    eventListHandler.addEventToListAndMap(event, EventInviteStatus.MAYBE);
+                                    //Reload EventLandingPage
+                                    EventLandingPageReload.putExtra("eventID", event.getEventId());
+                                    finish();
+                                    startActivity(EventLandingPageReload);
+                                    break;
+                                case DECLINED:
+                                    eventListHandler.removeEventFromListAndMap(event.getEventId());
+                                    finish();
+                                    break;
+                            }
+                        }
+                    };
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(myRunnable);
+                } else {
+                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                }
+            }
+        }, eventID, eventInviteStatus);
+    }
+
     private void eventStateBasedView(Event event){
 
         EventInviteStatus inviteStatus = eventListHandler.getUserEventStatus(event.getEventId());
@@ -201,6 +255,7 @@ public class EventLandingPage extends Activity {
             eventAssignmentButton.setVisibility(View.VISIBLE);
             addFriendsButton.setVisibility(View.VISIBLE);
             activityButton.setVisibility(View.VISIBLE);
+            editButton.setVisibility(View.VISIBLE);
         }else{
             statusYes.setVisibility(View.VISIBLE);
             statusNo.setVisibility(View.VISIBLE);
@@ -208,6 +263,7 @@ public class EventLandingPage extends Activity {
             eventAssignmentButton.setVisibility(View.GONE);
             addFriendsButton.setVisibility(View.GONE);
             activityButton.setVisibility(View.GONE);
+            editButton.setVisibility(View.GONE);
         }
 
         if (inviteStatus == EventInviteStatus.INVITED) {
