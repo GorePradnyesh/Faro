@@ -1,5 +1,6 @@
 package com.zik.faro.applogic;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.zik.faro.commons.exceptions.DataNotFoundException;
@@ -13,6 +14,7 @@ import com.zik.faro.persistence.datastore.data.EventUserDo;
 public class EventUserManagement {
 	public static InviteeList getEventInvitees(final String eventId){
 		List<EventUserDo> eventUsers = EventUserDatastoreImpl.loadEventUserByEvent(eventId);
+		eventUsers = filterDeclinedEvents(eventUsers);
 		InviteeList invitees = new InviteeList();
 		for(EventUserDo user : eventUsers){
 			invitees.addUserStatus(new MinUser(user.getFaroUser().getFirstName(),
@@ -31,7 +33,9 @@ public class EventUserManagement {
 	}
 	
 	public static List<EventUserDo> getEventsByFaroUser(final String faroUserId){
-		return EventUserDatastoreImpl.loadEventUserByFaroUser(faroUserId);
+		List<EventUserDo> eventUsers = EventUserDatastoreImpl.loadEventUserByFaroUser(faroUserId);
+		eventUsers = filterDeclinedEvents(eventUsers);
+		return eventUsers;
 	}
 	
 	public static void removeEventUser(final String eventId, final String faroUserId){
@@ -45,4 +49,17 @@ public class EventUserManagement {
 	public static void updateEventUserOwnerId(final String eventId, final String faroUserId, String ownerId) throws DataNotFoundException, DatastoreException{
 		EventUserDatastoreImpl.updateActivity(new EventUserDo(eventId, faroUserId, ownerId, null));
 	}
+	
+	private static List<EventUserDo> filterDeclinedEvents(List<EventUserDo> eventUsers){
+    	if(eventUsers == null || eventUsers.isEmpty()){
+    		return eventUsers;
+    	}
+    	List<EventUserDo> editedList = new ArrayList<EventUserDo>();
+    	for(EventUserDo eventUser: eventUsers){
+    		if(!eventUser.getInviteStatus().equals(EventInviteStatus.DECLINED)){
+    			editedList.add(eventUser);
+    		}
+    	}
+    	return editedList;
+    }
 }
