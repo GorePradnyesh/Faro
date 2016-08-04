@@ -45,8 +45,11 @@ public class ActivityDatastoreImpl {
 				}
 	        	
 	            // Modify.
-				if(updateActivity.getDate() != null){
-					activity.setDate(updateActivity.getDate());
+				if(updateActivity.getStartDate() != null){
+					activity.setStartDate(updateActivity.getStartDate());
+				}
+				if(updateActivity.getEndDate() != null){
+					activity.setStartDate(updateActivity.getEndDate());
 				}
 				if(updateActivity.getDescription() != null && !updateActivity.getDescription().isEmpty()){
 					activity.setDescription(updateActivity.getDescription());

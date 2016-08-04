@@ -50,7 +50,8 @@ public class FunctionalActivityTest {
         Assert.assertEquals(activityRequest.getEventId(), activityResponse.getEventId());
         Assert.assertEquals(activityRequest.getDescription(), activityResponse.getDescription());
         Assert.assertEquals(activityRequest.getName(), activityResponse.getName());
-        Assert.assertEquals(activityRequest.getDate(), activityResponse.getDate());
+        Assert.assertEquals(activityRequest.getStartDate(), activityResponse.getStartDate());
+        Assert.assertEquals(activityRequest.getEndDate(), activityResponse.getEndDate());
         Assert.assertEquals(activityRequest.getLocation().locationName, activityResponse.getLocation().locationName);
         for(int i = 0 ; i < activityRequest.getAssignment().getItems().size() ; i++){
             Assert.assertEquals(activityRequest.getAssignment().getItems().get(i).getName(), activityResponse.getAssignment().getItems().get(i).getName());
@@ -93,7 +94,8 @@ public class FunctionalActivityTest {
         assertEntity(activity, activityResponse);
         // Update activity. Activity id and event id should be passed in URI. Values in activity object will not be honored
         activity.setDescription("Update activity description");
-        activity.setDate(Calendar.getInstance());
+        activity.setStartDate(Calendar.getInstance());
+        activity.setEndDate(Calendar.getInstance());
         activity.setLocation(new Location("SFO"));
         activity.getAssignment().getItems().remove("food");
         activity.getAssignment().addItem(new Item("hookah", "Kunal", 1, Unit.COUNT));

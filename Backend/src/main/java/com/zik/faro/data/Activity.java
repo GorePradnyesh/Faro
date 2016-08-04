@@ -9,24 +9,6 @@ public class Activity {
     private String name;
     private String description;
     private Location location;
-    private Calendar date;
-
-    public Calendar getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(Calendar startDate) {
-        this.startDate = startDate;
-    }
-
-    public Calendar getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(Calendar endDate) {
-        this.endDate = endDate;
-    }
-
     private Calendar startDate;
     private Calendar endDate;
 
@@ -89,14 +71,6 @@ public class Activity {
         this.location = location;
     }
 
-    public Calendar getDate() {
-        return date;
-    }
-
-    public void setDate(Calendar date) {
-        this.date = date;
-    }
-
     // for use only in conversionUtils
     public void setAssignment(final Assignment assignment){
         this.assignment = assignment;
@@ -117,4 +91,21 @@ public class Activity {
 	public void setName(String name) {
 		this.name = name;
 	}
+	
+   public Calendar getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Calendar startDate) {
+        this.startDate = startDate;
+    }
+
+    public Calendar getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Calendar endDate) {
+        this.endDate = endDate;
+    }
+
 }

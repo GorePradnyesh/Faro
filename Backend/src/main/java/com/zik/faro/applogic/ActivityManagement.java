@@ -12,7 +12,7 @@ public class ActivityManagement {
 	public static Activity createActivity(final Activity activity){
 		ActivityDo activityDo = new ActivityDo(activity.getEventId(), 
 				activity.getName(), activity.getDescription(), activity.getLocation(), 
-				activity.getDate(), activity.getAssignment());
+				activity.getStartDate(), activity.getEndDate(), activity.getAssignment());
 		ActivityDatastoreImpl.storeActivity(activityDo);
 		return ConversionUtils.fromDo(activityDo);
 	}

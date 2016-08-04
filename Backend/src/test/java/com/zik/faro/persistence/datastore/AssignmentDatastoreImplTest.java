@@ -59,6 +59,7 @@ public class AssignmentDatastoreImplTest {
     	ActivityDo activity1 = new ActivityDo(eventId, name, "dummyDescription",
                 new Location("Lake Shasta"),
                 new GregorianCalendar(),
+                new GregorianCalendar(),
                 new Assignment());
         Assignment tempAssignment = new Assignment();
         tempAssignment.addItem(new Item("blankets", "David", 4, Unit.COUNT));

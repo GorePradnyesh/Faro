@@ -77,6 +77,7 @@ public class ActivityDatastoreImplTest {
     	ActivityDo activity1 = new ActivityDo(eventId, name, "dummyDescription",
                 new Location("Lake Shasta"),
                 new GregorianCalendar(),
+                new GregorianCalendar(),
                 new Assignment());
         Assignment tempAssignment = new Assignment();
         tempAssignment.addItem(new Item("blankets", "David", 4, Unit.COUNT));
@@ -131,7 +132,7 @@ public class ActivityDatastoreImplTest {
     	EventDatastoreImpl.storeEventOnly(event);
     	
     	ActivityDo a = new ActivityDo(eventId, "TestEvent", "Testing update",
-    			new Location("San Jose"),new GregorianCalendar(), new Assignment());
+    			new Location("San Jose"),new GregorianCalendar(), new GregorianCalendar(), new Assignment());
     	ActivityDatastoreImpl.storeActivity(a);
     	
     	// Verify indeed created
@@ -139,7 +140,8 @@ public class ActivityDatastoreImplTest {
     	Assert.assertNotNull(retrievedActivity);
     	// Modify
     	a.getAssignment().addItem(new Item("Test", "123", 1, Unit.CENTIMETER));
-    	a.setDate(new GregorianCalendar());
+    	a.setStartDate(new GregorianCalendar());
+    	a.setEndDate(new GregorianCalendar());
     	a.setDescription("Description changed");
     	a.setLocation(new Location("Fremont"));
     	

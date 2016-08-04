@@ -19,7 +19,6 @@ import com.zik.faro.data.Location;
 @XmlRootElement
 @Entity
 public class ActivityDo {
-    
 
 	@Id
     private String id;
@@ -27,27 +26,33 @@ public class ActivityDo {
     private Ref<EventDo> eventId;
     private Assignment assignment;
     private String name;
-
     private String description;
     private Location location;
-    @Serialize private Calendar date;
+    @Serialize private Calendar startDate;
+    @Serialize private Calendar endDate;
     
     public ActivityDo(String eventId, String name) {
-        this(eventId, name, null, null, null, null);
+        this(eventId, name, null, null, null, null, null);
     }
 
     public ActivityDo() {    // TO Satisfy JaxB
     }
 
     public ActivityDo(String eventId, String name, String description,
-    		Location location, Calendar date, Assignment assignment) {
-        this.id = UUID.randomUUID().toString();;
+    		Location location, Calendar startDate, Calendar endDate, Assignment assignment) {
+        this(UUID.randomUUID().toString(),eventId, name, description, location, startDate, endDate, assignment);
+    }
+    
+    public ActivityDo(String id, String eventId, String name, String description, Location location, 
+    		Calendar startDate, Calendar endDate, Assignment assignment){
+    	this.id = id;
         this.eventId = Ref.create(Key.create(EventDo.class, eventId));
         this.name = name;
         this.description = description;
         this.location = location;
-        this.date = date;
         this.assignment = assignment;
+        this.startDate = startDate;
+        this.endDate = endDate;
     }
 
     // Getters and setters
@@ -80,14 +85,6 @@ public class ActivityDo {
         this.location = location;
     }
 
-    public Calendar getDate() {
-        return date;
-    }
-
-    public void setDate(Calendar date) {
-        this.date = date;
-    }
-
     public void setAssignment(final Assignment assignment){
         this.assignment = assignment;
     }
@@ -107,4 +104,26 @@ public class ActivityDo {
 	public void setName(String name) {
 		this.name = name;
 	}
+	
+
+	public Calendar getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(Calendar startDate) {
+		this.startDate = startDate;
+	}
+
+	public Calendar getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(Calendar endDate) {
+		this.endDate = endDate;
+	}
+
+	public void setEventId(Ref<EventDo> eventId) {
+		this.eventId = eventId;
+	}
+	
 }

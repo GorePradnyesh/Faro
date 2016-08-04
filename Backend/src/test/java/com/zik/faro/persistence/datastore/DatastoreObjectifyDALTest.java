@@ -398,7 +398,7 @@ public class DatastoreObjectifyDALTest {
     	String eventId = event.getEventId();
     	EventDatastoreImpl.storeEventOnly(event);
     	ActivityDo a = new ActivityDo(event.getEventId(), "TestEvent", "Testing update",
-    			new Location("San Jose"), new GregorianCalendar(), new Assignment());
+    			new Location("San Jose"), new GregorianCalendar(), new GregorianCalendar(),new Assignment());
     	DatastoreObjectifyDAL.storeObject(a);
     	
     	// Verify indeed created
@@ -407,7 +407,8 @@ public class DatastoreObjectifyDALTest {
     	Assert.assertNotNull(retrievedActivity);
     	// Modify
     	a.getAssignment().addItem(new Item("Test", "123", 1, Unit.CENTIMETER));
-    	a.setDate(new GregorianCalendar());
+    	a.setStartDate(new GregorianCalendar());
+    	a.setEndDate(new GregorianCalendar());
     	a.setDescription("Description changed");
     	a.setLocation(new Location("Fremont"));
     	
