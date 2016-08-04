@@ -119,6 +119,21 @@ public class FunctionalEventTest {
         Assert.assertEquals(EventInviteStatus.ACCEPTED, invitees.get(callerEmail).getInviteStatus());
         
         
+        // Update creators status as MAY_BE.. This is just a test. Should not happen in real
+        // Since only creators token available, playing around with his status
+        ClientResponse updateInviteStatus = TestHelper.doPOST(endpoint.toString(), "v1/event/"+ev.getEventId()+"/updateInviteStatus", token, EventInviteStatus.MAYBE);
+        Assert.assertEquals(updateInviteStatus.getStatus(), 200);
+        Assert.assertEquals(updateInviteStatus.getEntity(String.class), "OK");
+        
+        // Verify update
+        // Sleep since update is async and hence give time to persist
+        System.out.println("Sleeping for 15secs");
+        Thread.sleep(15000);
+        eventInviteesResponse = TestHelper.doGET(endpoint.toString(), "v1/event/"+ev.getEventId()+"/invitees", new MultivaluedMapImpl(), token);
+        eventInvitees = eventInviteesResponse.getEntity(InviteeList.class);
+        invitees = eventInvitees.getUserStatusMap();
+        Assert.assertEquals(EventInviteStatus.MAYBE, invitees.get(callerEmail).getInviteStatus());
+        
         // Remove attendee
         ClientResponse removeAttendee = TestHelper.doPOST(endpoint.toString(), "v1/event/"+ev.getEventId()+"/removeAttendee", token, friendIds[0]);
         Assert.assertEquals(removeAttendee.getStatus(), 200);

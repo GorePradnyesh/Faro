@@ -2,10 +2,13 @@ package com.zik.faro.applogic;
 
 import java.util.List;
 
+import com.zik.faro.commons.exceptions.DataNotFoundException;
+import com.zik.faro.commons.exceptions.DatastoreException;
 import com.zik.faro.data.InviteeList;
 import com.zik.faro.data.MinUser;
-import com.zik.faro.persistence.datastore.data.EventUserDo;
+import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.persistence.datastore.EventUserDatastoreImpl;
+import com.zik.faro.persistence.datastore.data.EventUserDo;
 
 public class EventUserManagement {
 	public static InviteeList getEventInvitees(final String eventId){
@@ -35,4 +38,11 @@ public class EventUserManagement {
 		EventUserDatastoreImpl.deleteEventUser(eventId, faroUserId);
 	}
 	
+	public static void updateEventUserInviteStatus(final String eventId, final String faroUserId, EventInviteStatus inviteStatus) throws DataNotFoundException, DatastoreException{
+		EventUserDatastoreImpl.updateActivity(new EventUserDo(eventId, faroUserId, null, inviteStatus));
+	}
+	
+	public static void updateEventUserOwnerId(final String eventId, final String faroUserId, String ownerId) throws DataNotFoundException, DatastoreException{
+		EventUserDatastoreImpl.updateActivity(new EventUserDo(eventId, faroUserId, ownerId, null));
+	}
 }

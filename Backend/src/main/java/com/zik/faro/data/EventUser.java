@@ -9,7 +9,7 @@ public class EventUser {
     private EventInviteStatus inviteStatus;
     private String ownerId;
 
-    private EventUser(){    // To satisfy JAXB
+    public EventUser(){    // To satisfy JAXB
 
     }
 

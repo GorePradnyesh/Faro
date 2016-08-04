@@ -6,8 +6,12 @@ import static com.googlecode.objectify.ObjectifyService.ofy;
 import java.util.List;
 
 import com.googlecode.objectify.Ref;
+import com.googlecode.objectify.Work;
 import com.googlecode.objectify.cmd.Query;
+import com.zik.faro.commons.exceptions.DataNotFoundException;
+import com.zik.faro.commons.exceptions.DatastoreException;
 import com.zik.faro.data.user.EventInviteStatus;
+import com.zik.faro.persistence.datastore.data.ActivityDo;
 import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.persistence.datastore.data.EventUserDo;
 import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
@@ -30,7 +34,7 @@ public class EventUserDatastoreImpl {
     	DatastoreObjectifyDAL.storeObject(eventUserRelation);
     }
 
-    public static EventUserDo loadEventUser(final String eventId, final String faroUserId){
+	public static EventUserDo loadEventUser(final String eventId, final String faroUserId){
         Ref<EventDo> eventRef = DatastoreObjectifyDAL.getRefForClassById(eventId, EventDo.class);
         Ref<FaroUserDo> faroUserRef = DatastoreObjectifyDAL.getRefForClassById(faroUserId, FaroUserDo.class);
         
@@ -40,6 +44,8 @@ public class EventUserDatastoreImpl {
         // Return the first result since there should be another record with same key.
         return eventUserQuery.first().now();
      }
+    
+    
     
     public static List<EventUserDo> loadEventUserByEvent(final String eventId){
         List<EventUserDo> eventUserList =
@@ -70,5 +76,36 @@ public class EventUserDatastoreImpl {
     public static void deleteEventUser(final String eventId, final String faroUserId){
     	EventUserDo user = new EventUserDo(eventId, faroUserId);
     	DatastoreObjectifyDAL.delelteObjectById(user.getId(), EventUserDo.class);
+    }
+    
+    public static void updateActivity(final EventUserDo eventUserDo) throws DataNotFoundException, DatastoreException{
+    	Work w = new Work<TransactionResult>() {
+	        public TransactionResult run() {
+	        	// Read from datastore
+	        	EventUserDo eventUserFromDatastore = null;
+				try {
+					eventUserFromDatastore = DatastoreObjectifyDAL.loadObjectById(eventUserDo.getId(), EventUserDo.class);
+				} catch (DataNotFoundException e) {
+					return TransactionResult.DATANOTFOUND;
+				}
+	        	
+	            // Modify.
+				if(eventUserDo.getInviteStatus() != null){
+					eventUserFromDatastore.setInviteStatus(eventUserDo.getInviteStatus());
+				}
+				
+				if(eventUserDo.getOwnerId() != null){
+					eventUserFromDatastore.setOwnerId(eventUserDo.getOwnerId());
+				}
+				
+	            // Store
+	            DatastoreObjectifyDAL.storeObject(eventUserFromDatastore);
+	            
+	            return TransactionResult.SUCCESS;
+	        }
+	    };
+	    
+    	TransactionResult result = DatastoreObjectifyDAL.update(w);
+    	DatastoreUtil.processResult(result);
     }
 }

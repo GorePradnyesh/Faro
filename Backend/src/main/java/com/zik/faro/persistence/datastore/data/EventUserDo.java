@@ -24,7 +24,7 @@ public class EventUserDo {
     private EventInviteStatus inviteStatus;
     private String ownerId;
 
-    private EventUserDo(){    // To satisfy JAXB
+    public EventUserDo(){    // To satisfy JAXB
         
     }
 
@@ -79,6 +79,10 @@ public class EventUserDo {
         return this.inviteStatus;
     }
 
+    public void setInviteStatus(EventInviteStatus inviteStatus){
+    	this.inviteStatus = inviteStatus;
+    }
+    
     public void setAccepted(){
         this.inviteStatus = EventInviteStatus.ACCEPTED;
     }

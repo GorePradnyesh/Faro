@@ -9,23 +9,32 @@ import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM_STRING;
 import static com.zik.faro.commons.Constants.EVENT_INVITEES_PATH_CONST;
 import static com.zik.faro.commons.Constants.EVENT_PATH_CONST;
 import static com.zik.faro.commons.Constants.EVENT_REMOVE_ATTENDEE_PATH_CONST;
+import static com.zik.faro.commons.Constants.UPDATE_INVITE_STATUS_PATH_CONST;
 
-import javax.ws.rs.*;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 import com.sun.jersey.api.JResponse;
-import com.zik.faro.data.AddFriendRequest;
-import com.zik.faro.data.Event;
-import com.zik.faro.data.InviteeList;
 import com.zik.faro.applogic.EventManagement;
 import com.zik.faro.applogic.EventUserManagement;
 import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.data.AddFriendRequest;
+import com.zik.faro.data.Event;
 import com.zik.faro.data.IllegalDataOperation;
+import com.zik.faro.data.InviteeList;
+import com.zik.faro.data.user.EventInviteStatus;
 
 
 @Path(EVENT_PATH_CONST + EVENT_ID_PATH_PARAM_STRING)
@@ -66,6 +75,27 @@ public class EventHandler {
         EventManagement.deleteEvent(eventId);
         EventUserManagement.deleteRelationForEvent(eventId);
         return JResponse.ok(Constants.HTTP_OK).build();
+    }
+    
+    @Path(UPDATE_INVITE_STATUS_PATH_CONST)
+    @POST
+    public JResponse<String> updateInviteStatus(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    		final EventInviteStatus inviteStatus){
+    	String userId = context.getUserPrincipal().getName();
+    	try{
+    		EventUserManagement.updateEventUserInviteStatus(eventId, userId, inviteStatus);
+    	}catch (DataNotFoundException e) {
+            Response response = Response.status(Response.Status.NOT_FOUND)
+                    .entity(e.getMessage())
+                    .build();
+            throw new WebApplicationException(response);
+        } catch (DatastoreException e) {
+        	Response response = Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                     .entity(e.getMessage())
+                     .build();
+            throw new WebApplicationException(response);
+		}
+    	return JResponse.ok(Constants.HTTP_OK).build();
     }
 
     @Path(EVENT_DISABLE_CONTROL_PATH_CONST)
