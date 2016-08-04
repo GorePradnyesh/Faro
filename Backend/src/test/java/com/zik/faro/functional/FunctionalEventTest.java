@@ -134,18 +134,33 @@ public class FunctionalEventTest {
         invitees = eventInvitees.getUserStatusMap();
         Assert.assertEquals(EventInviteStatus.MAYBE, invitees.get(callerEmail).getInviteStatus());
         
+        // DECLINE an event
+        updateInviteStatus = TestHelper.doPOST(endpoint.toString(), "v1/event/"+ev.getEventId()+"/updateInviteStatus", token, EventInviteStatus.DECLINED);
+        Assert.assertEquals(updateInviteStatus.getStatus(), 200);
+        Assert.assertEquals(updateInviteStatus.getEntity(String.class), "OK");
+        
+        // Verify DECLINE
+        // Sleep since update is async and hence give time to persist
+        System.out.println("Sleeping for 15secs");
+        Thread.sleep(15000);
+        eventInviteesResponse = TestHelper.doGET(endpoint.toString(), "v1/event/"+ev.getEventId()+"/invitees", new MultivaluedMapImpl(), token);
+        eventInvitees = eventInviteesResponse.getEntity(InviteeList.class);
+        invitees = eventInvitees.getUserStatusMap();
+        // Object itself will not be returned
+        Assert.assertNull(invitees.get(callerEmail));
+        
         // Remove attendee
         ClientResponse removeAttendee = TestHelper.doPOST(endpoint.toString(), "v1/event/"+ev.getEventId()+"/removeAttendee", token, friendIds[0]);
         Assert.assertEquals(removeAttendee.getStatus(), 200);
         Assert.assertEquals(removeAttendee.getEntity(String.class), "OK");
         
-        // Size of all eventInvitees should be 1 less after above deletion
+        // Size of all eventInvitees should be 2 less after above deletion and Decline status
         eventInviteesResponse = TestHelper.doGET(endpoint.toString(), "v1/event/"+ev.getEventId()+"/invitees", new MultivaluedMapImpl(), token);
         eventInviteesResponse = TestHelper.doGET(endpoint.toString(), "v1/event/"+ev.getEventId()+"/invitees", new MultivaluedMapImpl(), token);
         eventInviteesResponse = TestHelper.doGET(endpoint.toString(), "v1/event/"+ev.getEventId()+"/invitees", new MultivaluedMapImpl(), token);
         eventInvitees = eventInviteesResponse.getEntity(InviteeList.class);
         invitees = eventInvitees.getUserStatusMap();
-        Assert.assertEquals(friends.size(), invitees.size());
+        Assert.assertEquals(friends.size()-1, invitees.size());
         
         
     }
