@@ -2,7 +2,6 @@ package com.zik.faro.data;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 public class PollOption{
     private String id;                                 

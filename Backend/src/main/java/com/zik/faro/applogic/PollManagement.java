@@ -3,8 +3,10 @@ package com.zik.faro.applogic;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import com.zik.faro.data.Poll;
+import com.zik.faro.data.PollOption;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
 import com.zik.faro.persistence.datastore.data.PollDo;
@@ -12,6 +14,8 @@ import com.zik.faro.persistence.datastore.PollDatastoreImpl;
 
 public class PollManagement {
 	public static Poll createPoll(final Poll poll) throws DataNotFoundException{
+		// Create option ids during poll creation
+		generatePollIds(poll.getPollOptions());
 		PollDo pollDo = new PollDo(poll.getEventId(), poll.getCreatorId(), poll.getPollOptions(),
 				poll.getOwner(), poll.getDescription());
 		PollDatastoreImpl.storePoll(pollDo);
@@ -42,6 +46,14 @@ public class PollManagement {
 	
 	public static void deletePoll(final String eventId, final String pollId){
 		PollDatastoreImpl.deletePoll(eventId, pollId);
+	}
+	
+	private static void generatePollIds(List<PollOption> pollOptions){
+		if(pollOptions != null && !pollOptions.isEmpty()){
+			for(PollOption option: pollOptions){
+				option.setId(UUID.randomUUID().toString());
+			}
+		}
 	}
 	
 }

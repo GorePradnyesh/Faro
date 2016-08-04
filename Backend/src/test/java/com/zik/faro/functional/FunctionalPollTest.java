@@ -1,5 +1,5 @@
-package com.zik.faro.functional;
 
+package com.zik.faro.functional;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -57,8 +57,8 @@ public class FunctionalPollTest {
     	Assert.assertEquals(pollRequest.getPollOptions().size(), pollResponse.getPollOptions().size());
     	for(int i = 0 ; i < pollResponse.getPollOptions().size() ; i++){
     		Assert.assertEquals(pollResponse.getPollOptions().get(i).getOption(), pollRequest.getPollOptions().get(i).getOption());
+    		Assert.assertNotNull(pollResponse.getPollOptions().get(i).getId());
     		Assert.assertEquals(pollResponse.getPollOptions().get(i).getVoters().size(), pollRequest.getPollOptions().get(i).getVoters().size());
-    		Assert.assertEquals(pollResponse.getPollOptions().get(i).getId(),pollRequest.getPollOptions().get(i).getId());
     	}
     }
     
@@ -121,7 +121,7 @@ public class FunctionalPollTest {
         assertEntity(p, pollResponse);
         // Cast vote
         Set<String> voteOption = new HashSet<String>();
-        voteOption.add(pollOptions.get(1).getId());
+        voteOption.add(pollResponse.getPollOptions().get(1).getId());
         ClientResponse castVoteResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/"
         		+pollResponse.getId()+"/vote", token, voteOption);
         String http_ok = castVoteResponse.getEntity(String.class);
