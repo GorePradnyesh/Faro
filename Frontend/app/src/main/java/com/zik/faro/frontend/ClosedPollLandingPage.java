@@ -73,7 +73,7 @@ public class ClosedPollLandingPage extends ActionBarActivity {
         if(extras != null) {
             eventID = extras.getString("eventID");
             pollID = extras.getString("pollID");
-            P = pollListHandler.getPollFromMap(pollID);
+            P = pollListHandler.getPollCloneFromMap(pollID);
             E = eventListHandler.getEventCloneFromMap(eventID);
             pollOptionsList = P.getPollOptions();
             pollDesc.setText(P.getDescription());
@@ -95,7 +95,7 @@ public class ClosedPollLandingPage extends ActionBarActivity {
 
                 //Create voter count button
                 Button voterCountButton = new Button(this);
-                int votersCount = pollOption.votersCount();
+                int votersCount = pollOption.getVoters().size();
                 voterCountButton.setText("(" + Integer.toString(votersCount) + ")");
                 voterCountButton.setBackgroundColor(Color.TRANSPARENT);
                 voterCountButton.setId(i);

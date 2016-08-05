@@ -9,13 +9,12 @@ import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -28,6 +27,8 @@ import com.zik.faro.data.Activity;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
+
+import static android.widget.Toast.LENGTH_LONG;
 
 public class CreateNewActivity extends android.app.Activity{
 
@@ -193,37 +194,42 @@ public class CreateNewActivity extends android.app.Activity{
 
     }
 
-    private void setBothTimeAndDateToEventStartTimeAndDate(){
-        startDateButton.setText(sdf.format(event.getStartDate().getTime()));
-        endDateButton.setText(sdf.format(event.getStartDate().getTime()));
-        startTimeButton.setText(stf.format(event.getStartDate().getTime()));
-        endTimeButton.setText(stf.format(event.getStartDate().getTime()));
-    }
-
-    private void resetEndDateAndTimeToStartDateAndTime(){
-        endDateCalendar.set(Calendar.YEAR, startDateCalendar.get(Calendar.YEAR));
-        endDateCalendar.set(Calendar.MONTH, startDateCalendar.get(Calendar.MONTH));
-        endDateCalendar.set(Calendar.DAY_OF_MONTH, startDateCalendar.get(Calendar.DAY_OF_MONTH));
-        endDateCalendar.set(Calendar.HOUR_OF_DAY, startDateCalendar.get(Calendar.HOUR_OF_DAY));
-        endDateCalendar.set(Calendar.MINUTE, startDateCalendar.get(Calendar.MINUTE));
-        updateEndDate();
-        updateEndTime();
-    }
-
-    public void updateStartDate(){
+    private void updateStartDateCalendarDate(Calendar calendar){
+        startDateCalendar.set(calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH));
         startDateButton.setText(sdf.format(startDateCalendar.getTime()));
     }
 
-    public void updateEndDate(){
-        endDateButton.setText(sdf.format(endDateCalendar.getTime()));
-    }
-
-    public void updateStartTime(){
+    private void updateStartDateCalendarTime(Calendar calendar){
+        startDateCalendar.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY));
+        startDateCalendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE));
         startTimeButton.setText(stf.format(startDateCalendar.getTime()));
     }
 
-    public void updateEndTime(){
+    private void updateEndDateCalendarDate(Calendar calendar){
+        endDateCalendar.set(calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH));
+        endDateButton.setText(sdf.format(endDateCalendar.getTime()));
+    }
+
+    private void updateEndDateCalendarTime(Calendar calendar){
+        endDateCalendar.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY));
+        endDateCalendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE));
         endTimeButton.setText(stf.format(endDateCalendar.getTime()));
+    }
+
+    private void setBothTimeAndDateToEventStartTimeAndDate(){
+        updateStartDateCalendarDate(event.getStartDate());
+        updateStartDateCalendarTime(event.getStartDate());
+        updateEndDateCalendarDate(event.getStartDate());
+        updateEndDateCalendarTime(event.getStartDate());
+    }
+
+    private void resetEndDateAndTimeToStartDateAndTime(){
+        updateEndDateCalendarDate(startDateCalendar);
+        updateEndDateCalendarTime(startDateCalendar);
     }
 
 
@@ -262,25 +268,36 @@ public class CreateNewActivity extends android.app.Activity{
 
 
     /*
-     * Activity Start Date should lie within the range of the event dates and before the activity End
-     * Date
+     * Activity Start Date should lie within the range of the event dates
      */
-    public boolean isStartDateValid(){
-        return startDateCalendar.after(event.getStartDate()) &&
-                startDateCalendar.before(event.getEndDate()) &&
-                startDateCalendar.before(endDateCalendar);
-
+    public boolean isStartDateValid(Calendar activityStartCalendar){
+        boolean ret_val1 = (activityStartCalendar.after(event.getStartDate()) ||
+                activityStartCalendar.equals(event.getStartDate()));
+        boolean ret_val2 = activityStartCalendar.before(event.getEndDate());
+        if (!ret_val1){
+            Toast.makeText(CreateNewActivity.this, "Activity's Start Date cannot be before Event's Start Date", LENGTH_LONG).show();
+        }else if (!ret_val2){
+            Toast.makeText(CreateNewActivity.this, "Activity's Start Date cannot be on/after Event's End Date", LENGTH_LONG).show();
+        }
+        return (ret_val1 && ret_val2);
     }
 
     /*
      * Activity End Date should lie within the range of the event dates and after the activity Start
      * Date
      */
-    public boolean isEndDateValid(){
-        return endDateCalendar.after(event.getStartDate()) &&
-                endDateCalendar.before(event.getEndDate()) &&
-                startDateCalendar.before(endDateCalendar);
+    public boolean isEndDateValid(Calendar activityEndCalendar){
+        boolean ret_val1 = (startDateCalendar.before(activityEndCalendar) ||
+                startDateCalendar.equals(activityEndCalendar));
+        boolean ret_val2 = (activityEndCalendar.before(event.getEndDate()) ||
+                activityEndCalendar.equals(event.getEndDate()));
 
+        if (!ret_val1){
+            Toast.makeText(CreateNewActivity.this, "Activity's End Date cannot be before Activity's Start Date", LENGTH_LONG).show();
+        }else if (!ret_val2){
+            Toast.makeText(CreateNewActivity.this, "Activity's End Date cannot be after Event's End Date", LENGTH_LONG).show();
+        }
+        return  (ret_val2 && ret_val1);
     }
 
     /* When setting the startDate, we compare the startCalendar to the endCalendar and if the
@@ -290,17 +307,17 @@ public class CreateNewActivity extends android.app.Activity{
 
         @Override
         public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+            Calendar temp = Calendar.getInstance();
+            temp.set(year, monthOfYear, dayOfMonth,
+                    startDateCalendar.get(Calendar.HOUR_OF_DAY),
+                    startDateCalendar.get(Calendar.MINUTE));
 
-            if(isStartDateValid()) {
-                startDateCalendar.set(Calendar.YEAR, year);
-                startDateCalendar.set(Calendar.MONTH, monthOfYear);
-                startDateCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+            //If the selected startDate is not valid then reset it to the event's startDate.
+            if (isStartDateValid(temp)){
+                updateStartDateCalendarDate(temp);
             }else{
-                startDateCalendar.set(Calendar.YEAR, event.getStartDate().get(Calendar.YEAR));
-                startDateCalendar.set(Calendar.MONTH, event.getStartDate().get(Calendar.MONTH));
-                startDateCalendar.set(Calendar.DAY_OF_MONTH, event.getStartDate().get(Calendar.DAY_OF_MONTH));
+                updateStartDateCalendarDate(event.getStartDate());
             }
-            updateStartDate();
 
             if(startDateCalendar.after(endDateCalendar)){
                 resetEndDateAndTimeToStartDateAndTime();
@@ -314,16 +331,18 @@ public class CreateNewActivity extends android.app.Activity{
     TimePickerDialog.OnTimeSetListener startTime = new TimePickerDialog.OnTimeSetListener(){
         @Override
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+            Calendar temp = Calendar.getInstance();
+            temp.set(startDateCalendar.get(Calendar.YEAR),
+                    startDateCalendar.get(Calendar.MONTH),
+                    startDateCalendar.get(Calendar.DAY_OF_MONTH),
+                    hourOfDay, minute);
 
-            if(isStartDateValid()) {
-                startDateCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                startDateCalendar.set(Calendar.MINUTE, minute);
+            //If the selected startDate is not valid then reset it to the event's startDate.
+            if (isStartDateValid(temp)){
+                updateStartDateCalendarDate(temp);
             }else{
-                startDateCalendar.set(Calendar.HOUR_OF_DAY, event.getStartDate().get(Calendar.HOUR_OF_DAY));
-                startDateCalendar.set(Calendar.MINUTE, event.getStartDate().get(Calendar.MINUTE));
+                updateStartDateCalendarDate(event.getStartDate());
             }
-            updateStartTime();
-
 
             if(startDateCalendar.after(endDateCalendar)) {
                 resetEndDateAndTimeToStartDateAndTime();
@@ -339,14 +358,16 @@ public class CreateNewActivity extends android.app.Activity{
 
         @Override
         public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+            Calendar temp = Calendar.getInstance();
+            temp.set(year, monthOfYear, dayOfMonth,
+                    endDateCalendar.get(Calendar.HOUR_OF_DAY),
+                    endDateCalendar.get(Calendar.MINUTE));
 
-            if(isEndDateValid()){
-                endDateCalendar.set(Calendar.YEAR, year);
-                endDateCalendar.set(Calendar.MONTH, monthOfYear);
-                endDateCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                updateEndDate();
+            //If the selected endDate is not valid then reset it to the activity's startDate.
+            if(isEndDateValid(temp)){
+                updateEndDateCalendarDate(temp);
             }else{
-                resetEndDateAndTimeToStartDateAndTime();
+                updateEndDateCalendarDate(startDateCalendar);
             }
         }
     };
@@ -357,12 +378,17 @@ public class CreateNewActivity extends android.app.Activity{
     TimePickerDialog.OnTimeSetListener endTime = new TimePickerDialog.OnTimeSetListener(){
         @Override
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-            if(isEndDateValid()) {
-                endDateCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                endDateCalendar.set(Calendar.MINUTE, minute);
-                updateEndTime();
+            Calendar temp = Calendar.getInstance();
+            temp.set(endDateCalendar.get(Calendar.YEAR),
+                    endDateCalendar.get(Calendar.MONTH),
+                    endDateCalendar.get(Calendar.DAY_OF_MONTH),
+                    hourOfDay, minute);
+
+            //If the selected endDate is not valid then reset it to the activity's startDate.
+            if(isEndDateValid(temp)){
+                updateEndDateCalendarDate(temp);
             }else{
-                resetEndDateAndTimeToStartDateAndTime();
+                updateEndDateCalendarDate(startDateCalendar);
             }
         }
     };

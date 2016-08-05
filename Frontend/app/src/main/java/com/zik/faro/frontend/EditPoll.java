@@ -4,8 +4,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -19,26 +21,41 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.squareup.okhttp.Request;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.PollOption;
+import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
+import com.zik.faro.frontend.faroservice.FaroServiceHandler;
+import com.zik.faro.frontend.faroservice.HttpError;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
+
+import static android.widget.Toast.LENGTH_LONG;
 
 public class EditPoll extends Activity {
 
     static PollListHandler pollListHandler = PollListHandler.getInstance();
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
+    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+
     private static String eventID = null;
     private String pollID;
     private static Poll poll;
     private static Event event;
     Intent PollLandingPage;
 
+    private static String TAG = "EditPoll";
+
+
     private RelativeLayout popUpRelativeLayout;
+
+    final Context mContext = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +86,7 @@ public class EditPoll extends Activity {
         if(extras != null) {
             eventID = extras.getString("eventID");
             pollID = extras.getString("pollID");
-            poll = pollListHandler.getPollFromMap(pollID);
+            poll = pollListHandler.getPollCloneFromMap(pollID);
             event = eventListHandler.getEventCloneFromMap(eventID);
         }
 
@@ -190,9 +207,31 @@ public class EditPoll extends Activity {
             @Override
             public void onClick(View v) {
                 //TODO: Make API call and update server
-                pollListHandler.removePollFromListAndMap(poll);
-                popupWindow.dismiss();
-                finish();
+                serviceHandler.getPollHandler().deletePoll(new BaseFaroRequestCallback<String>() {
+                    @Override
+                    public void onFailure(Request request, IOException ex) {
+                        Log.e(TAG, "failed to delete poll");
+                    }
+
+                    @Override
+                    public void onResponse(String s, HttpError error) {
+                        if (error == null ) {
+                            Runnable myRunnable = new Runnable() {
+                                @Override
+                                public void run() {
+                                    pollListHandler.removePollFromListAndMap(poll);
+                                    popupWindow.dismiss();
+                                    Toast.makeText(EditPoll.this, poll.getDescription() + "is Deleted", LENGTH_LONG).show();
+                                    finish();
+                                }
+                            };
+                            Handler mainHandler = new Handler(mContext.getMainLooper());
+                            mainHandler.post(myRunnable);
+                        }else {
+                            Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                        }
+                    }
+                }, eventID, pollID);
             }
         });
 

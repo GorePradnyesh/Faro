@@ -1,6 +1,7 @@
 package com.zik.faro.frontend;
 
 import com.zik.faro.data.MinUser;
+import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 
 import java.util.List;
 import java.util.Map;
@@ -77,6 +78,28 @@ public class FriendListHandler {
         }
     }
 
+    public String getFriendFullNameFromID(String emailID) {
+        String friendFirstName = null;
+        String friendLastName = null;
+        String friendFullName = null;
 
+        FaroUserContext faroUserContext = FaroUserContext.getInstance();
+        String myUserId = faroUserContext.getEmail();
 
+        //TODO Cache my info and then retrieve FirstName and Last Name from there
+        if (emailID.equals(myUserId)){
+            return emailID;
+        }
+        MinUser minUser = friendMap.get(emailID);
+        if (minUser != null) {
+            friendFirstName = minUser.getFirstName();
+            friendLastName = minUser.getLastName();
+            if (friendLastName != null) {
+                friendFullName = friendFirstName + " " + friendLastName;
+            }else{
+                friendFullName = friendFirstName;
+            }
+        }
+        return friendFullName;
+    }
 }

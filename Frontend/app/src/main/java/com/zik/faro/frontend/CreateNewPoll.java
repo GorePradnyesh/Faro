@@ -125,19 +125,23 @@ public class CreateNewPoll extends Activity {
 
                     @Override
                     public void onResponse(final Poll receivedPoll, HttpError error) {
-                        Runnable myRunnable = new Runnable() {
-                            @Override
-                            public void run() {
-                                Log.i(TAG, "Poll Create Response received Successfully");
-                                pollListHandler.addPollToListAndMap(receivedPoll);
-                                OpenPollLandingPage.putExtra("eventID", event.getEventId());
-                                OpenPollLandingPage.putExtra("pollID", receivedPoll.getId());
-                                startActivity(OpenPollLandingPage);
-                                finish();
-                            }
-                        };
-                        Handler mainHandler = new Handler(mContext.getMainLooper());
-                        mainHandler.post(myRunnable);
+                        if (error == null ) {
+                            Runnable myRunnable = new Runnable() {
+                                @Override
+                                public void run() {
+                                    Log.i(TAG, "Poll Create Response received Successfully");
+                                    pollListHandler.addPollToListAndMap(receivedPoll);
+                                    OpenPollLandingPage.putExtra("eventID", event.getEventId());
+                                    OpenPollLandingPage.putExtra("pollID", receivedPoll.getId());
+                                    startActivity(OpenPollLandingPage);
+                                    finish();
+                                }
+                            };
+                            Handler mainHandler = new Handler(mContext.getMainLooper());
+                            mainHandler.post(myRunnable);
+                        }else {
+                            Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                        }
                     }
                 }, eventID, poll);
             }

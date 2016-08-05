@@ -2,6 +2,7 @@ package com.zik.faro.data;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 public class PollOption{
     private String id;                                 
@@ -54,8 +55,4 @@ public class PollOption{
 	public void setOption(String option) {
 		this.option = option;
 	}
-
-    public int votersCount(){
-        return voters.size();
-    }
 }
