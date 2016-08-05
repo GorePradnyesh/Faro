@@ -16,8 +16,8 @@ public class PollManagement {
 	public static Poll createPoll(final Poll poll) throws DataNotFoundException{
 		// Create option ids during poll creation
 		generatePollIds(poll.getPollOptions());
-		PollDo pollDo = new PollDo(poll.getEventId(), poll.getCreatorId(), poll.getPollOptions(),
-				poll.getOwner(), poll.getDescription());
+		PollDo pollDo = new PollDo(poll.getEventId(), poll.getCreatorId(), poll.getPollOptions(), poll.getWinnerId(), 
+				poll.getOwner(), poll.getDescription(), poll.getStatus(), poll.getDeadline(), poll.getMultiChoice());
 		PollDatastoreImpl.storePoll(pollDo);
 		return ConversionUtils.fromDo(pollDo);
 	}
