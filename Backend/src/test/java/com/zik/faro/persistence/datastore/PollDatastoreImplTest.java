@@ -20,6 +20,7 @@ import org.junit.Test;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
+import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.PollOption;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
@@ -69,13 +70,17 @@ public class PollDatastoreImplTest {
 
     private PollDo createPollObjectForEventId(final String eventId){
         List<PollOption> options = new ArrayList<>();
-        options.add(new PollOption("Shasta"));
-        PollOption vegasOption = new PollOption("Las Vegas");
+        options.add(new PollOption(UUID.randomUUID().toString(),"Shasta"));
+        PollOption vegasOption = new PollOption(UUID.randomUUID().toString(),"Las Vegas");
         vegasOption.addVoters("user1");
         vegasOption.addVoters("user2");
         options.add(vegasOption);
-        PollDo dummyPoll = new PollDo(eventId, "dummyCreator", options, "dummyOwner", "sample skeleton poll");
-        dummyPoll.setWinnerId(vegasOption.getId());
+        PollOption sfOption = new PollOption(UUID.randomUUID().toString(),"SF");
+        sfOption.addVoters("user1");
+        sfOption.addVoters("user2");
+        options.add(sfOption);
+        PollDo dummyPoll = new PollDo(eventId, "dummyCreator", options, vegasOption.getId(), "dummyOwner", "sample skeleton poll", ObjectStatus.OPEN,
+        		Calendar.getInstance(), false);
         return dummyPoll;
     }
 
@@ -138,11 +143,24 @@ public class PollDatastoreImplTest {
         Set<String> optionIds = new HashSet<String>();
         optionIds.add(poll1.getPollOptions().get(0).getId());
         optionIds.add(poll1.getPollOptions().get(1).getId());
+        System.out.println(poll1.getPollOptions());
         // Cast user3's vote to both options of the poll(Shasta and vegas)
         PollDatastoreImpl.castVote(event.getEventId(), poll1.getId(), optionIds, "user3");
         
-        // Verify. If vote went through, then count of unvoted polls will be zero
-        Assert.assertEquals(0, PollDatastoreImpl.getCountofUnvotedPolls(eventId, "user3"));
+        // Verify. If vote went through. User3 should be present in both shasta and vegas
+        PollDo returnedPollDo = PollDatastoreImpl.loadPollById(poll1.getId(), eventId);
+        Assert.assertTrue(returnedPollDo.getPollOptions().get(0).getVoters().contains("user3"));
+        Assert.assertTrue(returnedPollDo.getPollOptions().get(1).getVoters().contains("user3"));
+        Assert.assertFalse(returnedPollDo.getPollOptions().get(2).getVoters().contains("user3"));
+        
+        // CHange user3s vote and verify
+        optionIds = new HashSet<String>();
+        optionIds.add(poll1.getPollOptions().get(2).getId());
+        PollDatastoreImpl.castVote(event.getEventId(), poll1.getId(), optionIds, "user3");
+        returnedPollDo = PollDatastoreImpl.loadPollById(poll1.getId(), eventId);
+        Assert.assertFalse(returnedPollDo.getPollOptions().get(0).getVoters().contains("user3"));
+        Assert.assertFalse(returnedPollDo.getPollOptions().get(1).getVoters().contains("user3"));
+        Assert.assertTrue(returnedPollDo.getPollOptions().get(2).getVoters().contains("user3"));
     }
     
     @Test

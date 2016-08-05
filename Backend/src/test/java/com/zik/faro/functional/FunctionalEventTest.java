@@ -125,10 +125,7 @@ public class FunctionalEventTest {
         Assert.assertEquals(updateInviteStatus.getStatus(), 200);
         Assert.assertEquals(updateInviteStatus.getEntity(String.class), "OK");
         
-        // Verify update
-        // Sleep since update is async and hence give time to persist
-        System.out.println("Sleeping for 15secs");
-        Thread.sleep(15000);
+        // Verify update.. Can be consistency issue. Run dev server with -Ddatastore.default_high_rep_job_policy_unplied_job_pct=100
         eventInviteesResponse = TestHelper.doGET(endpoint.toString(), "v1/event/"+ev.getEventId()+"/invitees", new MultivaluedMapImpl(), token);
         eventInvitees = eventInviteesResponse.getEntity(InviteeList.class);
         invitees = eventInvitees.getUserStatusMap();
@@ -139,10 +136,7 @@ public class FunctionalEventTest {
         Assert.assertEquals(updateInviteStatus.getStatus(), 200);
         Assert.assertEquals(updateInviteStatus.getEntity(String.class), "OK");
         
-        // Verify DECLINE
-        // Sleep since update is async and hence give time to persist
-        System.out.println("Sleeping for 15secs");
-        Thread.sleep(15000);
+        // Verify DECLINE.. Can be consistency issue. Run dev server with -Ddatastore.default_high_rep_job_policy_unplied_job_pct=100
         eventInviteesResponse = TestHelper.doGET(endpoint.toString(), "v1/event/"+ev.getEventId()+"/invitees", new MultivaluedMapImpl(), token);
         eventInvitees = eventInviteesResponse.getEntity(InviteeList.class);
         invitees = eventInvitees.getUserStatusMap();

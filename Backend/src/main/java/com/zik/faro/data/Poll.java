@@ -119,7 +119,7 @@ public class Poll {
 		this.pollOptions = pollOptions;
 	}
 
-    public boolean isMultiChoice() {
+    public boolean getMultiChoice() {
         return multiChoice;
     }
 

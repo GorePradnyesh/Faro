@@ -10,6 +10,7 @@ import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Parent;
+import com.googlecode.objectify.annotation.Serialize;
 import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.PollOption;
 
@@ -26,24 +27,30 @@ public class PollDo {
     private String owner;
     private String description;
     private ObjectStatus status;
-    private Calendar deadline;                // Will not be used in V1.
+    @Serialize private Calendar deadline;                // Will not be used in V1.
+    private boolean multiChoice = false;
 
     public PollDo(){ //to satisfy jaxb;
     }
 
-    public PollDo(String eventId, String creator, List<PollOption> pollOptions, String owner, String description) {
-    	this(UUID.randomUUID().toString(),eventId, creator, pollOptions,
-    			owner, description);
+    public PollDo(String eventId, String creator, List<PollOption> pollOptions, String winnerId, String owner, 
+    		String description, ObjectStatus status, Calendar deadline, boolean multiChoice) {
+    	this(UUID.randomUUID().toString(),eventId, creator, pollOptions, winnerId,
+    			owner, description, status, deadline, multiChoice);
     }
     
-    public PollDo(String id, String eventId, String creator, List<PollOption> pollOptions, String owner, String description){
+    public PollDo(String id, String eventId, String creator, List<PollOption> pollOptions, String winnerId, 
+    		String owner, String description, ObjectStatus status, Calendar deadline, boolean multiChoice){
     	this.id = id;
     	this.eventId = Ref.create(Key.create(EventDo.class, eventId));
         this.creatorId = creator;
         this.pollOptions = pollOptions;
+        this.winnerId = winnerId;
         this.owner = owner;
         this.description = description;
         this.status = ObjectStatus.OPEN;
+        this.deadline = deadline;
+        this.multiChoice = multiChoice;
     }
 
     public String getId() {
@@ -120,5 +127,13 @@ public class PollDo {
 
 	public void setPollOptions(List<PollOption> pollOptions) {
 		this.pollOptions = pollOptions;
+	}
+
+	public boolean getMultiChoice() {
+		return multiChoice;
+	}
+
+	public void setMultiChoice(boolean multiChoice) {
+		this.multiChoice = multiChoice;
 	}
 }

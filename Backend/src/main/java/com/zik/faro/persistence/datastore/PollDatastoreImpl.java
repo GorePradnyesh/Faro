@@ -66,6 +66,8 @@ public class PollDatastoreImpl {
 					for(PollOption pollOption : poll.getPollOptions()){
 						if(options.contains(pollOption.getId())){
 							pollOption.getVoters().add(userId);
+						}else{
+							pollOption.getVoters().remove(userId);
 						}
 					}
 	                
