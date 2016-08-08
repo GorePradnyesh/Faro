@@ -88,7 +88,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/endDateTimeLayout">
+        android:layout_below="@+id/endDateTimeLayout"
+        android:id="@+id/linearLayout">
         <ImageButton
             android:layout_width="0px"
             android:layout_height="wrap_content"
@@ -144,6 +145,23 @@
             android:clickable="true"
             android:text="@string/MAYBE"/>
     </LinearLayout>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Photos"
+        android:id="@+id/photosButton"
+        android:layout_below="@+id/linearLayout"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Take Photo"
+        android:id="@+id/cameraButton"
+        android:layout_below="@+id/photosButton"
+        android:layout_alignStart="@+id/photosButton"
+        android:layout_marginTop="32dp" />
 
 </RelativeLayout>
 

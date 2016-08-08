@@ -3,26 +3,39 @@ package com.zik.faro.frontend;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.support.v4.content.FileProvider;
+import android.util.Log;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 
 import com.squareup.okhttp.Request;
+import java.util.Date;
+
 import com.zik.faro.data.Event;
 import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
+
+import static android.os.Environment.getExternalStoragePublicDirectory;
 
 public class EventLandingPage extends Activity {
 
@@ -33,7 +46,6 @@ public class EventLandingPage extends Activity {
     static PollListHandler pollListHandler = PollListHandler.getInstance();
     private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
 
-    private static String TAG = "EventLandingPage";
 
     private static Event event;
 
@@ -45,11 +57,19 @@ public class EventLandingPage extends Activity {
     private ImageButton activityButton = null;
     private ImageButton editButton = null;
     private ImageButton addFriendsButton = null;
+    private Button photosButton = null;
+    private Button cameraButton = null;
     private TextView event_status = null;
 
     private String eventID;
     final Context mContext = this;
     private Intent EventLandingPageReload;
+
+    private static final int REQUEST_TAKE_PHOTO = 1;
+    private static final String TAG = "EventLandingPage";
+
+    private static final String CAPTURED_PHOTO_PATH_KEY = "capturedPhotoPath";
+    private String mCurrentPhotoPath = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +94,8 @@ public class EventLandingPage extends Activity {
         addFriendsButton.setImageResource(R.drawable.friend_list);
         editButton = (ImageButton) findViewById(R.id.editButton);
         editButton.setImageResource(R.drawable.edit);
+        photosButton = (Button)findViewById(R.id.photosButton);
+        cameraButton = (Button)findViewById(R.id.cameraButton);
 
 
         statusYes = (Button) findViewById(R.id.statusYes);
@@ -185,6 +207,116 @@ public class EventLandingPage extends Activity {
                 finish();
             }
         });
+
+        photosButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent imagesViewIntent = new Intent(EventLandingPage.this, ImageGridView.class);
+                imagesViewIntent.putExtra("eventID", event.getEventId());
+                imagesViewIntent.putExtra("eventName", event.getEventName());
+                startActivity(imagesViewIntent);
+                finish();
+            }
+        });
+
+        cameraButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                dispatchTakePictureIntent();
+            }
+        });
+    }
+
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+                Log.e(TAG, "could not create image file to save photo to be taken");
+            }
+
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                // TODO : Use FileProvider to get URI for the file
+                // which can be used by the camera App
+
+                /*Uri photoURI = FileProvider.getUriForFile(this,
+                        "com.zik.faro.fileprovider",
+                        photoFile);*/
+                Uri photoURI = Uri.fromFile(photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+            }
+        }
+    }
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = MessageFormat.format("FARO_JPEG_{0}_", timeStamp);
+        File storageDir = getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = image.getAbsolutePath();
+        return image;
+    }
+
+    private void galleryAddPic() {
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        File imageFile = new File(mCurrentPhotoPath);
+        Uri photoURI = Uri.fromFile(imageFile);
+        mediaScanIntent.setData(photoURI);
+        this.sendBroadcast(mediaScanIntent);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
+            Log.i(TAG, "Photo captured successfully. uri : Add photo to gallery");
+            if (mCurrentPhotoPath != null) {
+                Log.i(TAG, "mCurrentPhotoPath = " + mCurrentPhotoPath);
+                galleryAddPic();
+                uploadPhoto(mCurrentPhotoPath, event.getEventName());
+            } else {
+                Log.e(TAG, "mCurrentPhotoPath = " + mCurrentPhotoPath);
+            }
+        }
+    }
+
+    public void uploadPhoto(String photoPath, String eventName) {
+        String accessTokenString = "EAACEdEose0cBAARRS6q7Qs5GLEtHyzffEoqw1RKGkTo7kqAwdaXxtbkdDbCDOKY3Vz1OHv1JRruZCg1dAK" +
+                "e3cvLuJCgpPXAhxgvsLh1OCZCH5dq6iubbf9ccKKhXpS11ZCWLXuDzT7undtsLYgTj4lfdHYMS5pAk9nPcDagJgZDZD";
+        String userId = "10155071787680006";
+        FbGraphApiService fbGraphApiService = new FbGraphApiService(accessTokenString, userId);
+        fbGraphApiService.uploadPhoto(photoPath, eventName);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        // Save the user's current state
+        savedInstanceState.putString(CAPTURED_PHOTO_PATH_KEY, mCurrentPhotoPath);
+
+        // Always call the superclass so it can save the view hierarchy state
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        // Always call the superclass so it can restore the view hierarchy
+        super.onRestoreInstanceState(savedInstanceState);
+        mCurrentPhotoPath = savedInstanceState.getString(CAPTURED_PHOTO_PATH_KEY);
     }
 
     private void updateUserEventInviteStatus(final EventInviteStatus eventInviteStatus) {

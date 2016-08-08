@@ -125,6 +125,12 @@ public class LoginActivity extends Activity {
 
         Log.i(TAG, MessageFormat.format("username :{0} password :{1}", email, password));
 
+        if (BuildConfig.DEBUG) {
+            Log.i(TAG, "Buld config is debug. Skip authentication.");
+            // Go to event list page
+            startActivity(new Intent(LoginActivity.this, AppLandingPage.class));
+        }
+
         if (validate(email, password)) {
             serviceHandler.getLoginHandler().login(new BaseFaroRequestCallback<String>() {
                 @Override

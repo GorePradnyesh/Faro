@@ -70,6 +70,8 @@
     <string name="start_position">startPosition</string>
     <string name="search_results">Search Results</string>
 
+    <string name="facebook_app_id">545550208965496</string>
+
     <!-- Error messages -->
     <string name="video_error_media_load_timeout">Media loading timed out</string>
     <string name="video_error_server_inaccessible">Media server was not reachable</string>
@@ -109,4 +111,5 @@
     <string name="title_activity_invite_friend_page">InviteFriendPage</string>
     <string name="friends">Friends</string>
     <string name="add">Add</string>
+    <string name="title_activity_grid_view">GridView</string>
 </resources>
