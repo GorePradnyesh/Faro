@@ -112,7 +112,7 @@ public class EditPoll extends Activity {
         oldPollOptionsList.setAdapter(oldPollOptionsAdapter);*/
 
         pollDescription.setText(poll.getDescription());
-        isMultiChoice.setChecked(poll.isMultiChoice());
+        isMultiChoice.setChecked(poll.getMultiChoice());
 
         //Enable the addNewOptionButton only after Users enters an Option
         optionText.addTextChangedListener(new TextWatcher() {

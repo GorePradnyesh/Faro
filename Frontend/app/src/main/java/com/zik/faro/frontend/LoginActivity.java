@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,6 +31,7 @@ public class LoginActivity extends Activity {
     private String TAG = "LoginActivity";
 
     protected static final String baseUrl = "http://10.0.2.2:8080/v1/";
+    private String baseUrl2 = "http://10.0.2.2:8080/v1/";;
     private static FaroServiceHandler serviceHandler;
 
     private EditText emailTextBox;
@@ -38,10 +41,22 @@ public class LoginActivity extends Activity {
 
     static FaroCache faroCache;
 
+    private Intent AppLandingPageIntent;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // Init the activity
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
+
+        // Bind the data fields with the corresponding View components
+        emailTextBox = (EditText)findViewById(R.id.TFEmail);
+        passwordTextBox = (EditText)findViewById(R.id.TFPassword);
+
+        final EditText serverIPAddressEditText = (EditText)findViewById(R.id.ipAddress);
+        final String serverIPAddress  = serverIPAddressEditText.getText().toString();
+
+        AppLandingPageIntent = new Intent(LoginActivity.this, AppLandingPage.class);
 
         // Setup token cache
         TokenCache tokenCache = TokenCache.getOrCreateTokenCache(LoginActivity.this);
@@ -51,6 +66,28 @@ public class LoginActivity extends Activity {
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
+
+        serverIPAddressEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (serverIPAddressEditText.getText().toString().trim().isEmpty()){
+                    baseUrl2 = "http://10.0.2.2:8080/v1/";
+                }else{
+                    baseUrl2 = "http://" + serverIPAddressEditText.getText().toString() + ":8080/v1/";
+                }
+            }
+        });
+
         String token = null;
         try {
             token = tokenCache.getToken();
@@ -58,7 +95,8 @@ public class LoginActivity extends Activity {
                 String email = faroCache.loadFaroCacheFromDisk("email");
                 if (email != null){
                     faroUserContext.setEmail(email);
-                    startActivity(new Intent(LoginActivity.this, AppLandingPage.class));
+                    AppLandingPageIntent.putExtra("baseUrl", baseUrl2);
+                    startActivity(AppLandingPageIntent);
                     finish();
                 }else{
                     Log.e(TAG, "email not found");
@@ -69,20 +107,6 @@ public class LoginActivity extends Activity {
             Log.i(TAG, "token = " + token);
         } catch (Exception e) {
             Log.i(TAG, "Could not obtain valid token");
-        }
-
-        setContentView(R.layout.activity_login);
-
-        // Bind the data fields with the corresponding View components
-        emailTextBox = (EditText)findViewById(R.id.TFEmail);
-        passwordTextBox = (EditText)findViewById(R.id.TFPassword);
-
-        // Create Faro service handler
-        try {
-            Log.i(TAG, "baseUrl : " +  baseUrl);
-            serviceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
-        } catch (MalformedURLException e) {
-            Log.e(TAG, "failed to obtain servicehandler", e);
         }
     }
 
@@ -125,6 +149,13 @@ public class LoginActivity extends Activity {
 
         Log.i(TAG, MessageFormat.format("username :{0} password :{1}", email, password));
 
+        // Create Faro service handler
+        try {
+            serviceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl2));
+        } catch (MalformedURLException e) {
+            Log.e(TAG, "failed to obtain servicehandler", e);
+        }
+
         if (validate(email, password)) {
             serviceHandler.getLoginHandler().login(new BaseFaroRequestCallback<String>() {
                 @Override
@@ -139,7 +170,8 @@ public class LoginActivity extends Activity {
                         faroUserContext.setEmail(email);
                         faroCache.saveFaroCacheToDisk("email", email);
                         // Go to event list page
-                        startActivity(new Intent(LoginActivity.this, AppLandingPage.class));
+                        AppLandingPageIntent.putExtra("baseUrl", baseUrl2);
+                        startActivity(AppLandingPageIntent);
                         finish();
                     } else {
                         Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());

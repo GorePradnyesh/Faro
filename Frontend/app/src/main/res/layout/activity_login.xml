@@ -40,6 +40,13 @@
         android:layout_below="@+id/textView3"
         android:layout_alignParentStart="true" />
 
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/ipAddress"
+        android:hint="Enter IP Address"
+        android:layout_below="@+id/TFPassword"/>
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -47,7 +54,7 @@
         android:id="@+id/BLogin"
         android:layout_marginTop="47dp"
         android:onClick="onLoginClick"
-        android:layout_below="@+id/TFPassword"
+        android:layout_below="@+id/ipAddress"
         android:layout_alignEnd="@+id/textView3" />
 
     <Button

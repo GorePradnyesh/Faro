@@ -58,7 +58,7 @@ public class EventListHandler {
     */
     private Map<String, EventInviteStatusWrapper> eventMap = new ConcurrentHashMap<>();
 
-    public static final FaroServiceHandler serviceHandler = CreateFaroServiceHandler();
+    public static FaroServiceHandler serviceHandler;
 
     protected static final String baseUrl = "http://10.0.2.2:8080/v1/";
     private static String TAG = "EventListHandler";
@@ -72,6 +72,17 @@ public class EventListHandler {
             Log.e(TAG, "failed to obtain servicehandler", e);
         }
         return innerServiceHandler;
+    }
+
+    public static final void CreateFaroServiceHandler(String baseUrl)
+    {
+        FaroServiceHandler innerServiceHandler = null;
+        try {
+            innerServiceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
+        } catch (MalformedURLException e) {
+            Log.e(TAG, "failed to obtain servicehandler", e);
+        }
+        serviceHandler =  innerServiceHandler;
     }
 
     //TODO Function call to remove items from the List and Map when user keeps scrolling and caches
@@ -165,7 +176,7 @@ public class EventListHandler {
         eventAdapter = getEventAdapter(eventInviteStatus);
 
         eventCalendar = event.getStartDate();
-        
+
         assert (eventAdapter != null);
         int lastEventIndex = eventAdapter.list.size() - 1;
         for (index = lastEventIndex; index >= 0; index--) {

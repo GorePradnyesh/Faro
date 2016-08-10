@@ -135,7 +135,7 @@ public class OpenPollLandingPage extends Activity {
             ScrollView checkboxScrollView = (ScrollView) findViewById(R.id.checkboxScrollView);
 
             //Depending on the type of clonePoll it will be displayed differently
-            if(!clonePoll.isMultiChoice()) {
+            if(!clonePoll.getMultiChoice()) {
                 //Disable visibility for radio ScrollView
                 radioScrollView.setVisibility(View.GONE);
                 /*
@@ -264,7 +264,7 @@ public class OpenPollLandingPage extends Activity {
         votePoll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!clonePoll.isMultiChoice()) {
+                if(!clonePoll.getMultiChoice()) {
                     if (originalSelectedPollMap.isEmpty() && selectedPollMap.isEmpty()){
                         Toast.makeText(OpenPollLandingPage.this, "Select atleast one option to Vote", LENGTH_LONG).show();
                     }else if(originalSelectedPollMap.equals(selectedPollMap)){

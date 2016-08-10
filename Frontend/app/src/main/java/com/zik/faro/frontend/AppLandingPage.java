@@ -18,6 +18,9 @@ public class AppLandingPage extends FragmentActivity{
     https://maxalley.wordpress.com/2013/05/18/android-creating-a-tab-layout-with-fragmenttabhost-and-fragments/
     https://maxalley.wordpress.com/2014/09/08/android-styling-a-tab-layout-with-fragmenttabhost-and-fragments/
      */
+
+    private static EventListHandler eventListHandler = EventListHandler.getInstance();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,6 +28,11 @@ public class AppLandingPage extends FragmentActivity{
 
         final Intent CreateNewEventIntent = new Intent(this, CreateNewEvent.class);
 
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            String baseUrl = extras.getString("baseUrl");
+            eventListHandler.CreateFaroServiceHandler(baseUrl);
+        }
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
         mTabHost = (FragmentTabHost) findViewById(android.R.id.tabhost);
