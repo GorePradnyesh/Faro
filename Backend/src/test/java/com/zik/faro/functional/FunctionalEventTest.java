@@ -22,6 +22,7 @@ import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.InviteeList;
 import com.zik.faro.data.Location;
 import com.zik.faro.data.InviteeList.Invitees;
+import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.user.EventInviteStatus;
 
 public class FunctionalEventTest {
@@ -45,6 +46,8 @@ public class FunctionalEventTest {
     	for(int i = 0 ; i < 10; i++){
     		Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(),
                     Calendar.getInstance(), "Description", false, null, new Location("Random Location"),null, null, "Mafia god");
+    		new Event("MySampleEvent", Calendar.getInstance(),
+                    Calendar.getInstance(), false, "Description", null, new Location("Random Location"), null);
         	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);
             Event event = response.getEntity(Event.class);
             assertEntity(eventCreateData, event);
@@ -224,6 +227,11 @@ public class FunctionalEventTest {
         Assert.assertEquals(expected.getLocation().locationName, actual.getLocation().locationName);
         Assert.assertNotNull(actual.getEventId());
         Assert.assertTrue(!actual.getControlFlag());
+        Assert.assertNotNull(actual.getAssignment());
+        Assert.assertNotNull(actual.getAssignment().getId());
+        Assert.assertEquals(expected.getEventDescription(), actual.getEventDescription());
+        Assert.assertNotNull(actual.getEventCreatorId());
+        Assert.assertEquals(ObjectStatus.OPEN, actual.getStatus());
     }
     
 }
