@@ -49,9 +49,6 @@ public class ActivityListPage extends android.app.Activity {
 
         ListView activityList  = (ListView)findViewById(R.id.activityList);
         activityList.setBackgroundColor(Color.BLACK);
-        if (activityListHandler.activityAdapter == null) {
-            activityListHandler.activityAdapter = new ActivityAdapter(this, R.layout.activity_row_style);
-        }
         activityList.setAdapter(activityListHandler.activityAdapter);
 
         ImageButton addActivity = (ImageButton)findViewById(R.id.addNewActivityButton);

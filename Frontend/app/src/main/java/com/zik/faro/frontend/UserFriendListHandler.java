@@ -7,25 +7,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class FriendListHandler {
-    private static FriendListHandler friendListHandler = null;
+public class UserFriendListHandler {
+    private static UserFriendListHandler userFriendListHandler = null;
 
-    public static FriendListHandler getInstance(){
-        if (friendListHandler != null){
-            return friendListHandler;
+    public static UserFriendListHandler getInstance(){
+        if (userFriendListHandler != null){
+            return userFriendListHandler;
         }
-        synchronized (FriendListHandler.class)
+        synchronized (UserFriendListHandler.class)
         {
-            if (friendListHandler == null){
-                friendListHandler = new FriendListHandler();
+            if (userFriendListHandler == null){
+                userFriendListHandler = new UserFriendListHandler();
             }
-            return friendListHandler;
+            return userFriendListHandler;
         }
     }
 
-    private FriendListHandler(){}
+    private UserFriendListHandler(){}
 
-    public FriendAdapter friendAdapter;
+    public UserFriendAdapter userFriendAdapter;
 
     /*
     * Map of friends needed to access friends downloaded from the server in O(1) time. The Key to the
@@ -33,11 +33,11 @@ public class FriendListHandler {
     */
     private Map<String, MinUser> friendMap = new ConcurrentHashMap<>();
 
-    private static String TAG = "FriendListHandler";
+    private static String TAG = "UserFriendListHandler";
 
     private void addFriendToList(MinUser minUser){
-        friendAdapter.insert(minUser, 0);
-        friendAdapter.notifyDataSetChanged();
+        userFriendAdapter.insert(minUser, 0);
+        userFriendAdapter.notifyDataSetChanged();
     }
 
     public void addFriendToListAndMap(MinUser minUser){
@@ -49,7 +49,6 @@ public class FriendListHandler {
         addFriendToList(minUser);
         friendMap.put(minUser.getEmail(), minUser);
     }
-
 
     public void addDownloadedFriendsToListAndMap(List<MinUser> minUserList){
         for (int i = 0; i < minUserList.size(); i++){
@@ -63,15 +62,15 @@ public class FriendListHandler {
         if (minUser == null){
             return;
         }
-        friendAdapter.list.remove(minUser);
-        friendAdapter.notifyDataSetChanged();
+        userFriendAdapter.list.remove(minUser);
+        userFriendAdapter.notifyDataSetChanged();
         friendMap.remove(emailID);
     }
 
     public void clearFriendListAndMap(){
-        if (friendAdapter != null){
-            friendAdapter.list.clear();
-            friendAdapter.notifyDataSetChanged();
+        if (userFriendAdapter != null){
+            userFriendAdapter.list.clear();
+            userFriendAdapter.notifyDataSetChanged();
         }
         if (friendMap != null){
             friendMap.clear();

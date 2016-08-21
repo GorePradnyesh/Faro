@@ -32,7 +32,6 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,7 +61,7 @@ public class OpenPollLandingPage extends Activity {
     static FaroUserContext faroUserContext = FaroUserContext.getInstance();
     String myUserId = faroUserContext.getEmail();
     private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
-    private static FriendListHandler friendListHandler = FriendListHandler.getInstance();
+    private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
 
     //Maps to manage Multichoice polls
     private Map<Integer, PollOption> selectedPollMap = new ConcurrentHashMap<>();
@@ -135,7 +134,7 @@ public class OpenPollLandingPage extends Activity {
             ScrollView checkboxScrollView = (ScrollView) findViewById(R.id.checkboxScrollView);
 
             //Depending on the type of clonePoll it will be displayed differently
-            if(!clonePoll.getMultiChoice()) {
+            if(clonePoll.getMultiChoice()) {
                 //Disable visibility for radio ScrollView
                 radioScrollView.setVisibility(View.GONE);
                 /*
@@ -264,7 +263,7 @@ public class OpenPollLandingPage extends Activity {
         votePoll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!clonePoll.getMultiChoice()) {
+                if(clonePoll.getMultiChoice()) {
                     if (originalSelectedPollMap.isEmpty() && selectedPollMap.isEmpty()){
                         Toast.makeText(OpenPollLandingPage.this, "Select atleast one option to Vote", LENGTH_LONG).show();
                     }else if(originalSelectedPollMap.equals(selectedPollMap)){
@@ -423,7 +422,7 @@ public class OpenPollLandingPage extends Activity {
         voters.add("Voters are:");
         ListView voterList = (ListView) container.findViewById(R.id.votersList);
         for (String temp : pollOption.getVoters()) {
-            String friendName = friendListHandler.getFriendFullNameFromID(temp);
+            String friendName = userFriendListHandler.getFriendFullNameFromID(temp);
 
             voters.add(friendName);
         }

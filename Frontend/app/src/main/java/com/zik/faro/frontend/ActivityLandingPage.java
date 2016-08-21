@@ -86,7 +86,6 @@ public class ActivityLandingPage extends android.app.Activity {
                     AssignmentLandingPage.putExtra("assignmentID", activity.getAssignment().getId());
                     startActivity(AssignmentLandingPage);
                 }
-
             }
         });
     }

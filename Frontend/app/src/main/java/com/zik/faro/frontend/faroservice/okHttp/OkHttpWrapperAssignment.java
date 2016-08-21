@@ -22,7 +22,7 @@ public class OkHttpWrapperAssignment extends BaseFaroOKHttpWrapper implements As
     final URL getEventsUrl;
     public OkHttpWrapperAssignment (final URL baseUrl){
         super(baseUrl, "event");
-        this.getEventsUrl = super.constructUrl(baseUrl, "events");
+        this.getEventsUrl = super.constructUrl(baseUrl, "event");
     }
 
     @Override

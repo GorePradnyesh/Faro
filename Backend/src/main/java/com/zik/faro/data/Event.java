@@ -31,7 +31,7 @@ public class Event {
         this.controlFlag = controlFlag;
         this.expenseGroup = expenseGroup;
         this.location = location;
-        this.status = ObjectStatus.OPEN;
+        this.status = objectStatus;
         this.assignment = assignment;
         this.eventCreatorId = eventCreatorId;
     }

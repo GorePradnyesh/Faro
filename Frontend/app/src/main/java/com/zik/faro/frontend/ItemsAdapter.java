@@ -1,13 +1,11 @@
 package com.zik.faro.frontend;
 
 import android.content.Context;
-import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -23,6 +21,8 @@ public class ItemsAdapter extends ArrayAdapter {
     public List<Item> list = new LinkedList<>();
 
     private Context context;
+
+    private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
 
     public ItemsAdapter(Context context, int resource) {
         super(context, resource);
@@ -77,29 +77,33 @@ public class ItemsAdapter extends ArrayAdapter {
 
         switch ((String)parent.getTag()){
             case "CreateNewAssignment":
-                row = inflater.inflate(R.layout.assignment_create_item_row_style, parent, false);
+                if (item.getId() != null){
+                    row = inflater.inflate(R.layout.item_cant_edit_row_style, parent, false);
+                }else{
+                    row = inflater.inflate(R.layout.item_can_edit_row_style, parent, false);
+                    holder.DELETE_ITEM = (ImageButton) row.findViewById(R.id.deleteItem);
+                    holder.DELETE_ITEM.setImageResource(R.drawable.delete);
+                    holder.DELETE_ITEM.setId(position);
+                    holder.DELETE_ITEM.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            ImageButton imageButton = (ImageButton) v;
+                            int viewPosition = imageButton.getId();
+                            Item removeItem = (Item) getItem(viewPosition);
+                            list.remove(removeItem);
+                            notifyDataSetChanged();
+                        }
+                    });
+                }
                 holder.ITEM_NAME = (TextView) row.findViewById(R.id.itemName);
-                holder.DELETE_ITEM = (ImageButton) row.findViewById(R.id.deleteItem);
                 holder.ITEM_COUNT = (TextView) row.findViewById(R.id.itemCount);
                 holder.ITEM_UNIT = (TextView) row.findViewById(R.id.itemUnit);
                 holder.ASSIGNEE_NAME = (TextView) row.findViewById(R.id.asigneeName);
                 row.setTag(holder);
 
                 holder.ITEM_NAME.setText(item.getName());
-                holder.DELETE_ITEM.setImageResource(R.drawable.delete);
-                holder.DELETE_ITEM.setId(position);
-                holder.DELETE_ITEM.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        ImageButton imageButton = (ImageButton) v;
-                        int viewPosition = imageButton.getId();
-                        Item removeItem = (Item) getItem(viewPosition);
-                        list.remove(removeItem);
-                        notifyDataSetChanged();
-                    }
-                });
                 break;
-            case "AssignmentLandingPage":
+            case "AssignmentLandingPageIntent":
                 row = inflater.inflate(R.layout.assignment_update_item_row_style, parent, false);
                 holder.ITEM_CHECKBOX = (CheckBox) row.findViewById(R.id.itemCheckBox);
                 holder.ITEM_COUNT = (TextView) row.findViewById(R.id.itemCount);
@@ -137,7 +141,7 @@ public class ItemsAdapter extends ArrayAdapter {
                 break;
             case "EditAssignment":
                 if (item.getStatus().equals(ActionStatus.INCOMPLETE)) {
-                    row = inflater.inflate(R.layout.assignment_create_item_row_style, parent, false);
+                    row = inflater.inflate(R.layout.item_cant_edit_row_style, parent, false);
                     holder.ITEM_NAME = (TextView) row.findViewById(R.id.itemName);
                     holder.DELETE_ITEM = (ImageButton) row.findViewById(R.id.deleteItem);
                 }else{
@@ -169,7 +173,8 @@ public class ItemsAdapter extends ArrayAdapter {
         holder.ITEM_COUNT.setText(String.valueOf(item.getCount()));
         holder.ITEM_UNIT.setText(item.getUnit().toString());
         //Change below to get the Name of the assignee
-        holder.ASSIGNEE_NAME.setText(item.getAssigneeId());
+        String fullName = eventFriendListHandler.getFriendFullNameFromID(item.getAssigneeId());
+        holder.ASSIGNEE_NAME.setText(fullName);
 
         return row;
     }

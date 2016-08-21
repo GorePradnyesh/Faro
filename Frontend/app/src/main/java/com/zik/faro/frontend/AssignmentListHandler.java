@@ -1,14 +1,37 @@
 package com.zik.faro.frontend;
 
-
+import com.google.gson.Gson;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Assignment;
+import com.zik.faro.data.Event;
 import com.zik.faro.data.Poll;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AssignmentListHandler {
+
+    /*
+     *This is a Singleton class
+     */
+    private static AssignmentListHandler assignmentListHandler = null;
+
+    public static AssignmentListHandler getInstance(){
+        if (assignmentListHandler != null){
+            return assignmentListHandler;
+        }
+        synchronized (AssignmentListHandler.class)
+        {
+            if(assignmentListHandler == null) {
+                assignmentListHandler = new AssignmentListHandler();
+            }
+            return assignmentListHandler;
+        }
+    }
+
+    private AssignmentListHandler(){}
+
     public AssignmentAdapter assignmentAdapter;
 
     /*
@@ -17,59 +40,43 @@ public class AssignmentListHandler {
     */
     private Map<String, Assignment> assignmentMap = new ConcurrentHashMap<>();
 
-    private static int tempAssignmentID = 0;
+    public void addAssignmentToListAndMap(Assignment assignment) {
+        removeAssignmentFromListAndMap(assignment.getId());
+        addAssignmentToList(assignment);
+        assignmentMap.put(assignment.getId(), assignment);
+    }
 
-    private static AssignmentListHandler assignmentListHandler = null;
-    public static AssignmentListHandler getInstance(){
-        if (assignmentListHandler != null){
-            return assignmentListHandler;
-        }
-        synchronized (AssignmentListHandler.class)
-        {
-            if(assignmentListHandler == null)
-                assignmentListHandler = new AssignmentListHandler();
-            return assignmentListHandler;
+    public void addDownloadedAssignmentsToListAndMap(List<Assignment> assignmentList){
+        for (int i = 0; i < assignmentList.size(); i++){
+            Assignment assignment = assignmentList.get(i);
+            addAssignmentToListAndMap(assignment);
         }
     }
 
-    private AssignmentListHandler(){}
-
-    private String getAssignmentID(){
-        String assignmentIDStr = Integer.toString(this.tempAssignmentID);
-        this.tempAssignmentID++;
-        return assignmentIDStr;
-    }
-
-    public ErrorCodes addNewAssignment(Assignment assignment) {
-        //TODO: send update to server and if successful then add assignment to List and Map below and
-        // update the assignmentID in the Assignment.
-        String assignmentID = getAssignmentID();
-
-        if(assignmentID != null) {
-            assignment.setId(assignmentID);
-            assignmentAdapter.insert(assignment, 0);
-            assignmentAdapter.notifyDataSetChanged();
-            this.assignmentMap.put(assignmentID, assignment);
-            return ErrorCodes.SUCCESS;
-        }
-        return ErrorCodes.FAILURE;
-    }
-
-    public void deleteAssignment(Assignment assignment){
-        //TODO: send update to server and if successful then delete assignment from List and Map below
-            assignmentAdapter.list.remove(assignment);
-            this.assignmentMap.remove(assignment.getId());
-            assignmentAdapter.notifyDataSetChanged();
-    }
-
-    public void removeAssignmentForEditing (Assignment assignment){
-        assignmentAdapter.list.remove(assignment);
+    public void addAssignmentToList(Assignment assignment){
+        assignmentAdapter.insert(assignment, 0);
         assignmentAdapter.notifyDataSetChanged();
-        assignmentMap.remove(assignment.getId());
     }
 
-    public Assignment getAssignmentFromMap(String assignmentID){
-        return this.assignmentMap.get(assignmentID);
+    public Assignment getAssignmentCloneFromMap(String assignmentID){
+        Assignment assignment = assignmentMap.get(assignmentID);
+        Gson gson = new Gson();
+        String json = gson.toJson(assignment);
+        Assignment cloneAssignment = gson.fromJson(json, Assignment.class);
+        return cloneAssignment;
     }
 
+    public void removeAssignmentFromList(String assignmentID){
+        for (int i = 0; i < assignmentAdapter.list.size(); i++){
+            Assignment assignment = assignmentAdapter.list.get(i);
+            if (assignment.getId().equals(assignmentID)){
+                assignmentAdapter.list.remove(assignment);
+            }
+        }
+    }
+
+    public void removeAssignmentFromListAndMap (String assignmentID){
+        removeAssignmentFromList(assignmentID);
+        assignmentMap.remove(assignmentID);
+    }
 }

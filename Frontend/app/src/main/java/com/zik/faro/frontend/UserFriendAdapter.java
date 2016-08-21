@@ -9,16 +9,15 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 
-import com.zik.faro.data.Event;
 import com.zik.faro.data.MinUser;
 
 import java.util.LinkedList;
 import java.util.List;
 
-public class FriendAdapter extends ArrayAdapter {
+public class UserFriendAdapter extends ArrayAdapter {
     public List<MinUser> list = new LinkedList<>();
 
-    public FriendAdapter(Context context, int resource) {
+    public UserFriendAdapter(Context context, int resource) {
         super(context, resource);
     }
 
@@ -55,7 +54,7 @@ public class FriendAdapter extends ArrayAdapter {
     @Override
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         View row = convertView;
-        FriendAdapter.ImgHolder holder = new FriendAdapter.ImgHolder();
+        UserFriendAdapter.ImgHolder holder = new UserFriendAdapter.ImgHolder();
 
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);

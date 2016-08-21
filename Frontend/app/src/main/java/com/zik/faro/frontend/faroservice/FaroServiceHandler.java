@@ -6,8 +6,10 @@ import com.zik.faro.frontend.faroservice.okHttp.OKHttpWrapperFriends;
 import com.zik.faro.frontend.faroservice.okHttp.OKHttpWrapperLogin;
 import com.zik.faro.frontend.faroservice.okHttp.OKHttpWrapperPoll;
 import com.zik.faro.frontend.faroservice.okHttp.OKHttpWrapperSignup;
+import com.zik.faro.frontend.faroservice.okHttp.OkHttpWrapperAssignment;
 import com.zik.faro.frontend.faroservice.okHttp.OkHttpWrapperProfile;
 import com.zik.faro.frontend.faroservice.spec.ActivityHandler;
+import com.zik.faro.frontend.faroservice.spec.AssignmentHandler;
 import com.zik.faro.frontend.faroservice.spec.EventHandler;
 import com.zik.faro.frontend.faroservice.spec.FriendsHandler;
 import com.zik.faro.frontend.faroservice.spec.LoginHandler;
@@ -25,6 +27,7 @@ public class FaroServiceHandler {
     private ActivityHandler     activityHandler;
     private PollHandler         pollHandler;
     private FriendsHandler      friendsHandler;
+    private AssignmentHandler   assignmentHandler;
 
     private FaroServiceHandler(){}
 
@@ -37,6 +40,7 @@ public class FaroServiceHandler {
         serviceHandler.pollHandler = new OKHttpWrapperPoll(baseUrl);
         serviceHandler.activityHandler = new OKHttpWrapperActivity(baseUrl);
         serviceHandler.friendsHandler = new OKHttpWrapperFriends(baseUrl);
+        serviceHandler.assignmentHandler = new OkHttpWrapperAssignment(baseUrl);
         return serviceHandler;
     }
 
@@ -66,5 +70,9 @@ public class FaroServiceHandler {
 
     public FriendsHandler getFriendsHandler() {
         return friendsHandler;
+    }
+
+    public AssignmentHandler getAssignmentHandler() {
+        return assignmentHandler;
     }
 }

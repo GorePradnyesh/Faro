@@ -62,7 +62,7 @@ public class CreateNewPoll extends Activity {
         PollListPage = new Intent(CreateNewPoll.this, PollListPage.class);
         final Intent OpenPollLandingPage = new Intent(CreateNewPoll.this, OpenPollLandingPage.class);
 
-        final PollOptionsAdapter pollOptionsAdapter = new PollOptionsAdapter(this, R.layout.poll_create_new_page_row_style);
+        final PollOptionsAdapter pollOptionsAdapter = new PollOptionsAdapter(this, R.layout.poll_option_can_edit_row_style);
         pollOptionsList.setAdapter(pollOptionsAdapter);
 
         Bundle extras = getIntent().getExtras();

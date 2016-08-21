@@ -16,7 +16,7 @@ public class InviteeList {
 
 
     public void addUserStatus(final MinUser minUser, final EventInviteStatus status){
-        this.userStatusMap.put(minUser.getEmail(), new Invitees(minUser.getFirstName(), minUser.getLastName(), minUser.getExpenseUserId(), status));
+        this.userStatusMap.put(minUser.getEmail(), new Invitees(minUser.getFirstName(), minUser.getLastName(), minUser.getEmail(), minUser.getExpenseUserId(), status));
     }
     
     public Map<String,Invitees> getUserStatusMap(){
@@ -60,15 +60,25 @@ public class InviteeList {
 			this.inviteStatus = inviteStatus;
 		}
 
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
 		private String firstName;
     	private String lastName;
+        private String email;
     	private String expenseId;
     	private EventInviteStatus inviteStatus;
     	private Invitees(){}
     	
-    	public Invitees(final String firstName, final String lastName, final String expenseId, final EventInviteStatus inviteStatus){
+    	public Invitees(final String firstName, final String lastName, final String email, final String expenseId, final EventInviteStatus inviteStatus){
     		this.firstName = firstName;
     		this.lastName = lastName;
+            this.email = email;
     		this.expenseId = expenseId;
     		this.inviteStatus = inviteStatus;
     	}
