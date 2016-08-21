@@ -5,7 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -22,12 +24,19 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.squareup.okhttp.Request;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.PollOption;
+import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
+import com.zik.faro.frontend.faroservice.FaroServiceHandler;
+import com.zik.faro.frontend.faroservice.HttpError;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static android.widget.Toast.LENGTH_LONG;
 
@@ -36,10 +45,11 @@ public class PickPollWinner extends Activity {
     private static String eventID = null;
     private static String pollID = null;
     private static String calledFrom = null;
-    private static Poll P;
-    private static Event E;
+    private static Poll clonePoll;
+    private static Event cloneEvent;
     private static PollListHandler pollListHandler = PollListHandler.getInstance();
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
+    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
 
     List<PollOption> pollOptionsList;
 
@@ -54,6 +64,8 @@ public class PickPollWinner extends Activity {
 
     Intent OpenPollLandingPage = null;
     Intent ClosedPollLandingPage = null;
+
+    private static String TAG = "OpenPollLandingPage";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,16 +85,18 @@ public class PickPollWinner extends Activity {
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
+        final Context mContext = this;
+
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
             eventID = extras.getString("eventID");
             pollID = extras.getString("pollID");
             calledFrom = extras.getString("calledFrom");
-            P = pollListHandler.getPollFromMap(pollID);
-            E = eventListHandler.getEventCloneFromMap(eventID);
+            clonePoll = pollListHandler.getPollCloneFromMap(pollID);
+            cloneEvent = eventListHandler.getEventCloneFromMap(eventID);
 
-            pollOptionsList = P.getPollOptions();
-            pollDesc.setText(P.getDescription());
+            pollOptionsList = clonePoll.getPollOptions();
+            pollDesc.setText(clonePoll.getDescription());
 
             LinearLayout voterButtonLinearLayout = (LinearLayout) findViewById(R.id.voterButtonLinearLayout);
             RadioGroup pollOptionsRadioGroup = (RadioGroup) findViewById(R.id.pollOptionsRadioGroup);
@@ -96,7 +110,7 @@ public class PickPollWinner extends Activity {
                 PollOption pollOption = pollOptionsList.get(i);
                 button.setText(pollOption.getOption());
                 button.setId(i);
-                if((pollOption.getId().equals(P.getWinnerId()))){
+                if((pollOption.getId().equals(clonePoll.getWinnerId()))){
                     button.setChecked(true);
                     pollOptionWinnerPosition = i;
                     previousPollOptionWinnerPosition = i;
@@ -114,7 +128,7 @@ public class PickPollWinner extends Activity {
 
                 //Create voter count button
                 Button voterCountButton = new Button(this);
-                int votersCount = pollOption.votersCount();
+                int votersCount = pollOption.getVoters().size();
                 voterCountButton.setText("(" + Integer.toString(votersCount) + ")");
                 voterCountButton.setBackgroundColor(Color.TRANSPARENT);
                 voterCountButton.setId(i);
@@ -145,15 +159,13 @@ public class PickPollWinner extends Activity {
                     }else if (pollOptionWinnerPosition.equals(previousPollOptionWinnerPosition)){
                         Toast.makeText(PickPollWinner.this, "Winner not changed", LENGTH_LONG).show();
                     }else{
-                        List<PollOption> pollOptions = P.getPollOptions();
-                        PollOption pollOption = pollOptions.get(pollOptionWinnerPosition);
-                        if (!(pollOption.getId().equals(P.getWinnerId()))) {
-                            //TODO: Make an API call to update server
+                        PollOption winnerPollOption = pollOptionsList.get(pollOptionWinnerPosition);
+                        if (!(winnerPollOption.getId().equals(clonePoll.getWinnerId()))) {
 
-                            P.setWinnerId(pollOption.getId());
-                            pollListHandler.changePollStatusToClosed(P);
-                            ClosedPollLandingPage.putExtra("eventID", E.getEventId());
-                            ClosedPollLandingPage.putExtra("pollID", P.getId());
+                            clonePoll.setWinnerId(winnerPollOption.getId());
+                            pollListHandler.changePollStatusToClosed(clonePoll);
+                            ClosedPollLandingPage.putExtra("eventID", cloneEvent.getEventId());
+                            ClosedPollLandingPage.putExtra("pollID", clonePoll.getId());
                             startActivity(ClosedPollLandingPage);
                             finish();
                         }
@@ -193,29 +205,18 @@ public class PickPollWinner extends Activity {
         });
     }
 
-    //**********************************************************************************************
-    //**********************************************************************************************
-    //**********************************************************************************************
-    //**********************************************************************************************
-    //This would probably lead to increase in stack size for Intents since the previous intents are
-    //not popped out of the stack. Check how to see the stack size of the intents.
     @Override
     public void onBackPressed() {
         super.onBackPressed();
         if (calledFrom.equals("OpenPollLandingPage")) {
-            OpenPollLandingPage.putExtra("eventID", E.getEventId());
-            OpenPollLandingPage.putExtra("pollID", P.getId());
+            OpenPollLandingPage.putExtra("eventID", cloneEvent.getEventId());
+            OpenPollLandingPage.putExtra("pollID", clonePoll.getId());
             startActivity(OpenPollLandingPage);
         }else if (calledFrom.equals("ClosedPollLandingPage")){  //Can happen when need to change winner of a closed Poll
-            ClosedPollLandingPage.putExtra("eventID", E.getEventId());
-            ClosedPollLandingPage.putExtra("pollID", P.getId());
+            ClosedPollLandingPage.putExtra("eventID", cloneEvent.getEventId());
+            ClosedPollLandingPage.putExtra("pollID", clonePoll.getId());
             startActivity(ClosedPollLandingPage);
         }
         finish();
     }
-    //**********************************************************************************************
-    //**********************************************************************************************
-    //**********************************************************************************************
-    //**********************************************************************************************
-
 }

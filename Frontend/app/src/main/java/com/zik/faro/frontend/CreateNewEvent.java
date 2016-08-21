@@ -20,6 +20,7 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 
 import java.io.IOException;
@@ -34,6 +35,8 @@ import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
+
+import static android.widget.Toast.LENGTH_LONG;
 
 
 /*
@@ -52,6 +55,7 @@ public class CreateNewEvent extends Activity {
 
     private Calendar startDateCalendar = Calendar.getInstance();
     private Calendar endDateCalendar = Calendar.getInstance();
+    private Calendar currentCalendar = Calendar.getInstance();
     private Button startDateButton = null;
     private Button startTimeButton = null;
     private Button endTimeButton = null;
@@ -209,21 +213,42 @@ public class CreateNewEvent extends Activity {
         setBothTimeAndDateToDefault();
     }
 
-    private void setBothTimeAndDateToDefault(){
+    private void updateStartDateCalendarDate(Calendar calendar){
+        startDateCalendar.set(calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH));
         startDateButton.setText(sdf.format(startDateCalendar.getTime()));
-        endDateButton.setText(sdf.format(startDateCalendar.getTime()));
+    }
+    private void updateStartDateCalendarTime(Calendar calendar){
+        startDateCalendar.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY));
+        startDateCalendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE));
         startTimeButton.setText(stf.format(startDateCalendar.getTime()));
-        endTimeButton.setText(stf.format(startDateCalendar.getTime()));
+    }
+
+    private void updateEndDateCalendarDate(Calendar calendar){
+        endDateCalendar.set(calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH));
+        endDateButton.setText(sdf.format(endDateCalendar.getTime()));
+    }
+
+    private void updateEndDateCalendarTime(Calendar calendar){
+        endDateCalendar.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY));
+        endDateCalendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE));
+        endTimeButton.setText(stf.format(endDateCalendar.getTime()));
+    }
+
+    private void setBothTimeAndDateToDefault(){
+        Calendar temp = Calendar.getInstance();
+        updateStartDateCalendarDate(temp);
+        updateStartDateCalendarTime(temp);
+        updateEndDateCalendarDate(temp);
+        updateEndDateCalendarTime(temp);
     }
 
     private void resetEndDateAndTimeToStartDateAndTime(){
-        endDateCalendar.set(Calendar.YEAR, startDateCalendar.get(Calendar.YEAR));
-        endDateCalendar.set(Calendar.MONTH, startDateCalendar.get(Calendar.MONTH));
-        endDateCalendar.set(Calendar.DAY_OF_MONTH, startDateCalendar.get(Calendar.DAY_OF_MONTH));
-        endDateCalendar.set(Calendar.HOUR_OF_DAY, startDateCalendar.get(Calendar.HOUR_OF_DAY));
-        endDateCalendar.set(Calendar.MINUTE, startDateCalendar.get(Calendar.MINUTE));
-        updateEndDate();
-        updateEndTime();
+        updateEndDateCalendarDate(startDateCalendar);
+        updateEndDateCalendarTime(startDateCalendar);
     }
 
     private void updateStartDate(){
@@ -278,78 +303,115 @@ public class CreateNewEvent extends Activity {
     }
 
 
-    /* When setting the startDate, we compare the startCalendar to the endCalendar and if the
-    * startCalendar is after the endCalendar then we set the endDate same as the startDate
-    */
+    //startDate of the event should not be before current time
+    public boolean isStartDateValid(Calendar eventStartCalendar){
+        boolean ret_value = eventStartCalendar.after(currentCalendar);
+        if (!ret_value) {
+            Toast.makeText(CreateNewEvent.this, "Event's Start Date cannot be before current time", LENGTH_LONG).show();
+        }
+        return ret_value;
+
+    }
+
+    //End Date of the event cannot be before Start date
+    public boolean isEndDateValid(Calendar eventEndCalendar){
+        boolean ret_value = (startDateCalendar.before(eventEndCalendar) ||
+                startDateCalendar.equals(eventEndCalendar));
+        if (!ret_value){
+            Toast.makeText(CreateNewEvent.this, "Event's End Date cannot be before Event's Start date", LENGTH_LONG).show();
+        }
+        return ret_value;
+    }
+
     private DatePickerDialog.OnDateSetListener startDate = new DatePickerDialog.OnDateSetListener(){
 
         @Override
         public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
 
-            startDateCalendar.set(Calendar.YEAR, year);
-            startDateCalendar.set(Calendar.MONTH, monthOfYear);
-            startDateCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-            updateStartDate();
+            Calendar temp = Calendar.getInstance();
+            temp.set(year, monthOfYear, dayOfMonth,
+                    startDateCalendar.get(Calendar.HOUR_OF_DAY),
+                    startDateCalendar.get(Calendar.MINUTE));
 
-            if(startDateCalendar.after(endDateCalendar)){
+            //Event start date cannot be before current time
+            if (isStartDateValid(temp)) {
+                updateStartDateCalendarDate(temp);
+            }else{
+                updateStartDateCalendarDate(currentCalendar);
+            }
+
+            /* When setting the startTime, we compare the startCalendar to the endCalendar and if the
+             * startCalendar is after the endCalendar then we set the endTime same as the startTime
+             */
+            if (startDateCalendar.after(endDateCalendar)){
                 resetEndDateAndTimeToStartDateAndTime();
             }
         }
     };
 
-    /* When setting the startTime, we compare the startCalendar to the endCalendar and if the
-    * startCalendar is after the endCalendar then we set the endTime same as the startTime
-    */
+
     private TimePickerDialog.OnTimeSetListener startTime = new TimePickerDialog.OnTimeSetListener(){
         @Override
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+            Calendar temp = Calendar.getInstance();
+            temp.set(startDateCalendar.get(Calendar.YEAR),
+                    startDateCalendar.get(Calendar.MONTH),
+                    startDateCalendar.get(Calendar.DAY_OF_MONTH),
+                    hourOfDay, minute);
 
-            startDateCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
-            startDateCalendar.set(Calendar.MINUTE, minute);
-            updateStartTime();
+            //Event start date cannot be before current time
+            if (isStartDateValid(temp)) {
+                updateStartDateCalendarDate(temp);
+            }else{
+                updateStartDateCalendarDate(currentCalendar);
+            }
 
-            if(startDateCalendar.after(endDateCalendar)) {
+            /* When setting the startTime, we compare the startCalendar to the endCalendar and if the
+             * startCalendar is after the endCalendar then we set the endTime same as the startTime
+             */
+            if (startDateCalendar.after(endDateCalendar)){
                 resetEndDateAndTimeToStartDateAndTime();
             }
         }
     };
 
-    /* When setting the endDate, we compare the startCalendar to the endCalendar and if the
-    * startCalendar is after the endCalendar then we set the endDate same as the startDate
-    */
 
     private DatePickerDialog.OnDateSetListener endDate = new DatePickerDialog.OnDateSetListener(){
 
         @Override
         public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+            Calendar temp = Calendar.getInstance();
+            temp.set(year, monthOfYear, dayOfMonth,
+                    endDateCalendar.get(Calendar.HOUR_OF_DAY),
+                    endDateCalendar.get(Calendar.MINUTE));
 
-            endDateCalendar.set(Calendar.YEAR, year);
-            endDateCalendar.set(Calendar.MONTH, monthOfYear);
-            endDateCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-
-            if(startDateCalendar.after(endDateCalendar)){
+            /* When setting the endDate, we compare the startCalendar to the temp and if the
+             * startCalendar is after the endCalendar then we set the endDate same as the startDate
+             */
+            if(!isEndDateValid(temp)){
                 resetEndDateAndTimeToStartDateAndTime();
-            }else {
-                updateEndDate();
+            }else{
+                updateEndDateCalendarDate(temp);
             }
-
-
         }
     };
 
-    /* When setting the endTime, we compare the startCalendar to the endCalendar and if the
-    * startCalendar is after the endCalendar then we set the endTime same as the startTime
-    */
     private TimePickerDialog.OnTimeSetListener endTime = new TimePickerDialog.OnTimeSetListener(){
         @Override
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-            endDateCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
-            endDateCalendar.set(Calendar.MINUTE, minute);
+            Calendar temp = Calendar.getInstance();
+            temp.set(endDateCalendar.get(Calendar.YEAR),
+                    endDateCalendar.get(Calendar.MONTH),
+                    endDateCalendar.get(Calendar.DAY_OF_MONTH),
+                    hourOfDay, minute);
 
-            if(startDateCalendar.after(endDateCalendar)){
+            /* When setting the endDate, we compare the startCalendar to the temp and if the
+             * startCalendar is after the endCalendar then we set the endDate same as the startDate
+             */
+            if(!isEndDateValid(temp)){
                 resetEndDateAndTimeToStartDateAndTime();
-            }else {
-                updateEndTime();
+            }else{
+                updateEndDateCalendarDate(temp);
             }
         }
     };

@@ -140,4 +140,11 @@ public class SignupActivity extends Activity {
             }, newFaroUser, password);
         }
     }
+
+    @Override
+    public void onBackPressed() {
+        startActivity(new Intent(SignupActivity.this, LoginActivity.class));
+        finish();
+        super.onBackPressed();
+    }
 }

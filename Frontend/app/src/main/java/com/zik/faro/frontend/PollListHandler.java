@@ -4,35 +4,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.google.gson.Gson;
 import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.Poll;
 
 
 public class PollListHandler {
-    private static final int MAX_POLLS_PAGE_SIZE = 100;
-    private static final int MAX_TOTAL_POLLS_IN_CACHE = 200;
-    public static final int MAX_TOTAL_POLLS_PER_EVENT = 200;
-
-
-    public PollAdapter openPollsAdapter;
-    public PollAdapter closedPollsAdapter;
-
-    //TODO Function call to remove items from the List and Map when user keeps scrolling and caches
-    // lot of polls. Have a Max limit on number of polls we will cache else will use up a lot of
-    // memory and battery. Use MAX_TOTAL_POLLS_IN_CACHE to set the max polls we will cache
 
     /*
-    * Map of events needed to access events downloaded from the server in O(1) time. The Key to the
-    * Map is the eventID String which returns the Event as the value
-    */
-    private Map<String, Poll> pollMap = new ConcurrentHashMap<>();
-
-    public Poll getPollFromMap(String pollID){
-        return pollMap.get(pollID);
-    }
-
-    private static int tempPollID = 0;
-
+     * This is a Singleton class
+     */
     private static PollListHandler pollListHandler = null;
     public static PollListHandler getInstance(){
         if (pollListHandler != null){
@@ -47,31 +28,36 @@ public class PollListHandler {
         }
     }
 
-    private String getPollID(){
-        String pollIDStr = Integer.toString(tempPollID);
-        tempPollID++;
-        return pollIDStr;
+    private PollListHandler(){}
+
+    private static final int MAX_POLLS_PAGE_SIZE = 100;
+    private static final int MAX_TOTAL_POLLS_IN_CACHE = 200;
+    public static final int MAX_TOTAL_POLLS_PER_EVENT = 200;
+
+
+    public PollAdapter openPollsAdapter;
+    public PollAdapter closedPollsAdapter;
+
+    /*
+    * Map of Polls needed to access polls downloaded from the server in O(1) time. The Key to the
+    * Map is the pollID String which returns the Poll as the value
+    */
+    private Map<String, Poll> pollMap = new ConcurrentHashMap<>();
+
+    public Poll getPollCloneFromMap(String pollID){
+        Poll poll = pollMap.get(pollID);
+        Gson gson = new Gson();
+        String json = gson.toJson(poll);
+        Poll clonePoll = gson.fromJson(json, Poll.class);
+        return clonePoll;
     }
 
-    public ErrorCodes addNewPoll(Poll poll) {
-        //TODO: send update to server and if successful then add poll to List and Map below and
-        // update the pollID in the Poll.
-        /*String pollID = getPollID();
-        for (Integer i = 0; i < poll.getPollOptions().size(); i++){
-            PollOption pollOption = poll.getPollOptions().get(i);
-            pollOption.setId(UUID.randomUUID().toString());
-        }*/
 
-        /*if(pollID != null) {
-            poll.setId(pollID);
-            conditionallyAddNewPollToList(poll);
-            pollMap.put(pollID, poll);
-            return ErrorCodes.SUCCESS;
-        }
-        return ErrorCodes.FAILURE;*/
-        conditionallyAddNewPollToList(poll);
-        return ErrorCodes.SUCCESS;
-    }
+    //TODO Function call to remove items from the List and Map when user keeps scrolling and caches
+    // lot of polls. Have a Max limit on number of polls we will cache else will use up a lot of
+    // memory and battery. Use MAX_TOTAL_POLLS_IN_CACHE to set the max polls we will cache
+
+
 
     public void addPollToListAndMap(Poll poll){
         removePollFromListAndMap(poll);
@@ -139,7 +125,7 @@ public class PollListHandler {
 
         //TODO: send update to server and if successful then delete poll from List and Map below
 
-        addNewPoll(poll);
+        addPollToListAndMap(poll);
     }
 
     public void changePollStatusToOpen(Poll poll){
@@ -148,7 +134,7 @@ public class PollListHandler {
 
         //TODO: send update to server and if successful then delete poll from List and Map below
 
-        addNewPoll(poll);
+        addPollToListAndMap(poll);
     }
 
     public void clearPollListsAndMap(){

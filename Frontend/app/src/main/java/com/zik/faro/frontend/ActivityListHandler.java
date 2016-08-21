@@ -158,4 +158,13 @@ public class ActivityListHandler{
     public int getActivityListSize(){
         return activityAdapter.list.size();
     }
+
+    public void clearActivityListAndMap(){
+        if (activityAdapter != null){
+            activityAdapter.list.clear();
+        }
+        if (activityMap != null){
+            activityMap.clear();
+        }
+    }
 }

@@ -44,6 +44,8 @@ public class EventLandingPage extends Activity {
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
     static PollListHandler pollListHandler = PollListHandler.getInstance();
+    private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
+
     private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
 
 
@@ -413,11 +415,12 @@ public class EventLandingPage extends Activity {
         }
     }
 
-    //Clear all event related datastructures
+    //TODO Clear all event related datastructures
     @Override
     public void onBackPressed() {
         eventListHandler.deleteEventFromMapIfNotInList(event);
         pollListHandler.clearPollListsAndMap();
+        activityListHandler.clearActivityListAndMap();
         finish();
         super.onBackPressed();
     }
