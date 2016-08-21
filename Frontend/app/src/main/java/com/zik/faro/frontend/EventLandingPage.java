@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat;
 
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.Event;
+import com.zik.faro.data.InviteeList;
 import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
@@ -30,14 +31,16 @@ public class EventLandingPage extends Activity {
     private DateFormat sdf = new SimpleDateFormat(" EEE, MMM d, yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
-    static PollListHandler pollListHandler = PollListHandler.getInstance();
+    private static PollListHandler pollListHandler = PollListHandler.getInstance();
     private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
+    private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
+    private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
 
     private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
 
     private static String TAG = "EventLandingPage";
 
-    private static Event event;
+    private static Event cloneEvent;
 
     private Button statusYes = null;
     private Button statusNo = null;
@@ -47,7 +50,6 @@ public class EventLandingPage extends Activity {
     private ImageButton activityButton = null;
     private ImageButton editButton = null;
     private ImageButton addFriendsButton = null;
-    private TextView event_status = null;
 
     private String eventID;
     final Context mContext = this;
@@ -59,7 +61,6 @@ public class EventLandingPage extends Activity {
         setContentView(R.layout.activity_event_landing_page);
 
         final TextView event_name = (TextView) findViewById(R.id.eventNameText);
-        event_status = (TextView) findViewById(R.id.eventStatusText);
         TextView eventDescription = (TextView) findViewById(R.id.eventDescriptionTextView);
 
         TextView startDateAndTime = (TextView) findViewById(R.id.startDateAndTimeDisplay);
@@ -95,25 +96,25 @@ public class EventLandingPage extends Activity {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             eventID = extras.getString("eventID");
-            event = eventListHandler.getEventCloneFromMap(eventID);
-            if (event != null) {
+            cloneEvent = eventListHandler.getEventCloneFromMap(eventID);
+            if (cloneEvent != null) {
 
                 //Display elements based on Event Status
-                eventStateBasedView(event);
+                eventStateBasedView(cloneEvent);
 
                 controlFlagBasedView();
 
-                String ev_name = event.getEventName();
+                String ev_name = cloneEvent.getEventName();
                 event_name.setText(ev_name);
 
-                String eventDescr = event.getEventDescription();
+                String eventDescr = cloneEvent.getEventDescription();
                 eventDescription.setText(eventDescr);
 
-                startDateAndTime.setText(sdf.format(event.getStartDate().getTime()) + " at " +
-                        stf.format(event.getStartDate().getTime()));
+                startDateAndTime.setText(sdf.format(cloneEvent.getStartDate().getTime()) + " at " +
+                        stf.format(cloneEvent.getStartDate().getTime()));
 
-                endDateAndTime.setText(sdf.format(event.getEndDate().getTime()) + " at " +
-                        stf.format(event.getEndDate().getTime()));
+                endDateAndTime.setText(sdf.format(cloneEvent.getEndDate().getTime()) + " at " +
+                        stf.format(cloneEvent.getEndDate().getTime()));
 
 
                 statusYes.setOnClickListener(new View.OnClickListener() {
@@ -136,13 +137,16 @@ public class EventLandingPage extends Activity {
                         updateUserEventInviteStatus(EventInviteStatus.DECLINED);
                     }
                 });
+
+                assignmentListHandler.addAssignmentToListAndMap(cloneEvent.getAssignment());
+
             }
         }
 
         pollButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PollListPage.putExtra("eventID", event.getEventId());
+                PollListPage.putExtra("eventID", eventID);
                 startActivity(PollListPage);
             }
         });
@@ -150,23 +154,16 @@ public class EventLandingPage extends Activity {
         eventAssignmentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (event.getAssignment() == null) {
-                    CreateEventAssignment.putExtra("eventID", event.getEventId());
-                    startActivity(CreateEventAssignment);
-                    finish();
-                } else {
-                    AssignmentLandingPage.putExtra("eventID", event.getEventId());
-                    AssignmentLandingPage.putExtra("assignmentID", event.getAssignment().getId());
-                    startActivity(AssignmentLandingPage);
-                    finish();
-                }
+                AssignmentLandingPage.putExtra("eventID", eventID);
+                AssignmentLandingPage.putExtra("assignmentID", cloneEvent.getAssignment().getId());
+                startActivity(AssignmentLandingPage);
             }
         });
 
         activityButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ActivityListPage.putExtra("eventID", event.getEventId());
+                ActivityListPage.putExtra("eventID", eventID);
                 startActivity(ActivityListPage);
             }
         });
@@ -174,26 +171,51 @@ public class EventLandingPage extends Activity {
         addFriendsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                InviteFriendToEventPage.putExtra("eventID", event.getEventId());
+                InviteFriendToEventPage.putExtra("eventID", eventID);
                 startActivity(InviteFriendToEventPage);
+                finish();
             }
         });
 
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EditEvent.putExtra("eventID", event.getEventId());
+                EditEvent.putExtra("eventID", eventID);
                 startActivity(EditEvent);
                 finish();
             }
         });
+
+        serviceHandler.getEventHandler().getEventInvitees(new BaseFaroRequestCallback<InviteeList>() {
+            @Override
+            public void onFailure(Request request, IOException ex) {
+                Log.e(TAG, "failed to get cloneEvent Invitees");
+            }
+
+            @Override
+            public void onResponse(final InviteeList inviteeList, HttpError error) {
+                if (error == null ) {
+                    Runnable myRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.i(TAG, "Successfully received Invitee List for the cloneEvent");
+                            eventFriendListHandler.addDownloadedFriendsToListAndMap(inviteeList);
+                        }
+                    };
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(myRunnable);
+                }else {
+                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                }
+            }
+        }, eventID);
     }
 
     private void updateUserEventInviteStatus(final EventInviteStatus eventInviteStatus) {
         serviceHandler.getEventHandler().updateEventUserInviteStatus(new BaseFaroRequestCallback<String>() {
             @Override
             public void onFailure(Request request, IOException ex) {
-                Log.e(TAG, "failed to send event Invite Status");
+                Log.e(TAG, "failed to send cloneEvent Invite Status");
             }
 
             @Override
@@ -205,21 +227,21 @@ public class EventLandingPage extends Activity {
                         public void run() {
                             switch (eventInviteStatus){
                                 case ACCEPTED:
-                                    eventListHandler.addEventToListAndMap(event, EventInviteStatus.ACCEPTED);
+                                    eventListHandler.addEventToListAndMap(cloneEvent, EventInviteStatus.ACCEPTED);
                                     //Reload EventLandingPage
-                                    EventLandingPageReload.putExtra("eventID", event.getEventId());
+                                    EventLandingPageReload.putExtra("eventID", eventID);
                                     finish();
                                     startActivity(EventLandingPageReload);
                                     break;
                                 case MAYBE:
-                                    eventListHandler.addEventToListAndMap(event, EventInviteStatus.MAYBE);
+                                    eventListHandler.addEventToListAndMap(cloneEvent, EventInviteStatus.MAYBE);
                                     //Reload EventLandingPage
-                                    EventLandingPageReload.putExtra("eventID", event.getEventId());
+                                    EventLandingPageReload.putExtra("eventID", eventID);
                                     finish();
                                     startActivity(EventLandingPageReload);
                                     break;
                                 case DECLINED:
-                                    eventListHandler.removeEventFromListAndMap(event.getEventId());
+                                    eventListHandler.removeEventFromListAndMap(eventID);
                                     finish();
                                     break;
                             }
@@ -236,18 +258,7 @@ public class EventLandingPage extends Activity {
 
     private void eventStateBasedView(Event event){
 
-        EventInviteStatus inviteStatus = eventListHandler.getUserEventStatus(event.getEventId());
-        switch (inviteStatus) {
-            case ACCEPTED:
-                event_status.setText("Accepted");
-                break;
-            case MAYBE:
-                event_status.setText("Maybe");
-                break;
-            case INVITED:
-                event_status.setText("Not responded");
-                break;
-        }
+        EventInviteStatus inviteStatus = eventListHandler.getUserEventStatus(eventID);
         
         if (inviteStatus == EventInviteStatus.ACCEPTED){
             statusYes.setVisibility(View.GONE);
@@ -276,19 +287,20 @@ public class EventLandingPage extends Activity {
     }
 
     private void controlFlagBasedView() {
-        if(event.getEventCreatorId() == null) {
-            if (event.getControlFlag()) {
+        if(cloneEvent.getEventCreatorId() == null) {
+            if (cloneEvent.getControlFlag()) {
                 editButton.setVisibility(View.GONE);
             }
         }
     }
 
-    //TODO Clear all event related datastructures
+    //TODO Clear all cloneEvent related datastructures
     @Override
     public void onBackPressed() {
-        eventListHandler.deleteEventFromMapIfNotInList(event);
+        eventListHandler.deleteEventFromMapIfNotInList(cloneEvent);
         pollListHandler.clearPollListsAndMap();
         activityListHandler.clearActivityListAndMap();
+        eventFriendListHandler.clearFriendListAndMap();
         finish();
         super.onBackPressed();
     }

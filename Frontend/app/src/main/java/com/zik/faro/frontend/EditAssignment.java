@@ -27,7 +27,7 @@ import java.util.List;
 
 public class EditAssignment extends android.app.Activity {
 
-    private static Event event;
+    private static Event cloneEvent;
     private static Activity activity = null;
     private static Assignment assignment = null;
     String activityID = null;
@@ -46,18 +46,18 @@ public class EditAssignment extends android.app.Activity {
         if (extras != null) {
             eventID = extras.getString("eventID");
             activityID = extras.getString("activityID");
-            event = eventListHandler.getEventCloneFromMap(eventID);
+            cloneEvent = eventListHandler.getEventCloneFromMap(eventID);
 
             TextView assignmentDescription = (TextView) findViewById(R.id.assignmentDescription);
             if (activityID != null) {
                 activity = activityListHandler.getActivityCloneFromMap(activityID);
                 assignmentDescription.setText("Assignment for " + activity.getName());
             } else {
-                assignmentDescription.setText("Assignment for " + event.getEventName());
+                assignmentDescription.setText("Assignment for " + cloneEvent.getEventName());
             }
         }
 
-        final EditText itemEditText = (EditText)findViewById(R.id.itemEditText);
+        final EditText itemEditText = (EditText)findViewById(R.id.itemNameEditText);
         final EditText itemCountEditText = (EditText)findViewById(R.id.itemCount);
         itemCountEditText.setText("0");
 
@@ -93,7 +93,7 @@ public class EditAssignment extends android.app.Activity {
 
         ListView itemList = (ListView)findViewById(R.id.itemList);
         itemList.setTag("EditAssignment");
-        final ItemsAdapter itemsAdapter = new ItemsAdapter(this, R.layout.assignment_create_item_row_style);
+        final ItemsAdapter itemsAdapter = new ItemsAdapter(this, R.layout.item_cant_edit_row_style);
         itemList.setAdapter(itemsAdapter);
 
         final Intent AssignmentLandingPage = new Intent(EditAssignment.this, AssignmentLandingPage.class);
@@ -102,7 +102,7 @@ public class EditAssignment extends android.app.Activity {
         if (activityID != null) {
             assignment = activity.getAssignment();
         } else {
-            assignment = event.getAssignment();
+            assignment = cloneEvent.getAssignment();
         }
         List<Item> items = assignment.getItems();
 
@@ -176,7 +176,7 @@ public class EditAssignment extends android.app.Activity {
                 assignment.setItems(itemsAdapter.list);
 
                 AssignmentLandingPage.putExtra("assignmentID", assignment.getId());
-                AssignmentLandingPage.putExtra("eventID", event.getEventId());
+                AssignmentLandingPage.putExtra("eventID", cloneEvent.getEventId());
                 AssignmentLandingPage.putExtra("activityID", activityID);
                 startActivity(AssignmentLandingPage);
             }

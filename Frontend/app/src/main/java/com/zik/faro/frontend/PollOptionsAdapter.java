@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import java.util.LinkedList;
 import java.util.List;
-import com.zik.faro.data.Poll;
+
 import com.zik.faro.data.PollOption;
 
 
@@ -56,15 +56,14 @@ public class PollOptionsAdapter extends ArrayAdapter {
         ImgHolder holder = new ImgHolder();
 
         PollOption pollOption = (PollOption) getItem(position);
+        LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         if (pollOption.getId() != null){
-            LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            row = inflater.inflate(R.layout.poll_cant_edit_row_style, parent, false);
+            row = inflater.inflate(R.layout.poll_option_cant_edit_row_style, parent, false);
             holder.OPTION_DESCRPTN = (TextView)row.findViewById(R.id.optionDescription);
             row.setTag(holder);
         }else {
-            LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            row = inflater.inflate(R.layout.poll_create_new_page_row_style, parent, false);
+            row = inflater.inflate(R.layout.poll_option_can_edit_row_style, parent, false);
             holder.OPTION_DESCRPTN = (TextView)row.findViewById(R.id.optionDescription);
             holder.DELETE_OPTION = (ImageButton) row.findViewById(R.id.deleteOption);
             row.setTag(holder);

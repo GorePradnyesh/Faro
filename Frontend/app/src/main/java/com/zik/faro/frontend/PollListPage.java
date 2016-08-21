@@ -79,15 +79,9 @@ public class PollListPage extends Activity {
 
         ListView openPollsListView  = (ListView)findViewById(R.id.openPollsList);
         openPollsListView.setBackgroundColor(Color.BLACK);
-        if (pollListHandler.openPollsAdapter == null) {
-            pollListHandler.openPollsAdapter = new PollAdapter(this, R.layout.poll_list_page_row_style);
-        }
 
         ListView closedPollsListView  = (ListView)findViewById(R.id.closedPollsList);
         closedPollsListView.setBackgroundColor(Color.BLACK);
-        if (pollListHandler.closedPollsAdapter == null) {
-            pollListHandler.closedPollsAdapter = new PollAdapter(this, R.layout.poll_list_page_row_style);
-        }
 
         openPollsListView.setAdapter(pollListHandler.openPollsAdapter);
         closedPollsListView.setAdapter(pollListHandler.closedPollsAdapter);

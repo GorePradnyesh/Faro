@@ -22,6 +22,7 @@ public class AssignmentLandingPage extends Activity{
     private static com.zik.faro.data.Activity activity = null;
     String activityID = null;
     String eventID = null;
+    String assignmentID = null;
     private static Assignment assignment = null;
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
@@ -41,8 +42,8 @@ public class AssignmentLandingPage extends Activity{
             event = eventListHandler.getEventCloneFromMap(eventID);
 
             activityID = extras.getString("activityID");
-            String assignmentID = extras.getString("assignmentID");
-            assignment = assignmentListHandler.getAssignmentFromMap(assignmentID);
+            assignmentID = extras.getString("assignmentID");
+            assignment = assignmentListHandler.getAssignmentCloneFromMap(assignmentID);
 
             final TextView assignmentDescription = (TextView) findViewById(R.id.assignmentDescription);
             if (activityID != null) {
@@ -59,11 +60,11 @@ public class AssignmentLandingPage extends Activity{
 
             EventLandingPage = new Intent(AssignmentLandingPage.this, EventLandingPage.class);
             ActivityLandingPage = new Intent(AssignmentLandingPage.this, ActivityLandingPage.class);
-            final Intent EditAssignmentPage = new Intent(AssignmentLandingPage.this, EditAssignment.class);
+            final Intent EditAssignmentPage = new Intent(AssignmentLandingPage.this, CreateNewAssignment.class);
 
 
             itemList = (ListView) findViewById(R.id.itemList);
-            itemList.setTag("AssignmentLandingPage");
+            itemList.setTag("AssignmentLandingPageIntent");
             final ItemsAdapter itemsAdapter = new ItemsAdapter(this, R.layout.assignment_update_item_row_style);
             itemList.setAdapter(itemsAdapter);
 
@@ -101,12 +102,11 @@ public class AssignmentLandingPage extends Activity{
                 public void onClick(View v) {
                     EditAssignmentPage.putExtra("eventID", eventID);
                     EditAssignmentPage.putExtra("activityID", activityID);
+                    EditAssignmentPage.putExtra("assignmentID", assignmentID);
                     startActivity(EditAssignmentPage);
                     finish();
                 }
             });
-
-
         }
     }
 
@@ -119,9 +119,6 @@ public class AssignmentLandingPage extends Activity{
             startActivity(ActivityLandingPage);
             finish();
         } else {
-            EventLandingPage.putExtra("eventID", eventID);
-            startActivity(EventLandingPage);
-            finish();
         }
     }
 }

@@ -25,20 +25,11 @@
         android:paddingBottom="0dp"/>
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:id="@+id/eventStatusText"
-        android:layout_below="@+id/eventNameText"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="20dp" />
-
-    <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:id="@+id/eventDescriptionTextView"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:layout_below="@+id/eventStatusText"
+        android:layout_below="@+id/eventNameText"
         android:layout_alignParentStart="true"
         android:layout_marginTop="10dp"/>
 

@@ -137,6 +137,11 @@ public class ActivityListHandler{
         return cloneActivity;
     }
 
+    public Activity getOriginalActivityFromMap (String activityID){
+        Activity activity = activityMap.get(activityID);
+        return activity;
+    }
+
     public void removeActivityFromList(String activityID, List<Activity> activityList){
         for (int i = 0; i < activityList.size(); i++){
             Activity activity = activityList.get(i);

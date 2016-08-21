@@ -2,8 +2,9 @@ package com.zik.faro.frontend;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -17,11 +18,9 @@ import com.squareup.okhttp.Request;
 import com.zik.faro.data.AddFriendRequest;
 import com.zik.faro.data.InviteeList;
 import com.zik.faro.data.MinUser;
-import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
-import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,19 +32,20 @@ import static android.widget.Toast.LENGTH_LONG;
 
 public class InviteFriendToEventPage extends Activity {
 
-    private static FriendListHandler friendListHandler = FriendListHandler.getInstance();
+    private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
     static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
-    static FaroUserContext faroUserContext = FaroUserContext.getInstance();
+    private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
+
     private List <MinUser> friendList;
     private static final Integer FRIEND_ROW_HEIGHT = 100;
     private static String TAG = "InviteFriendToEventPage";
     private String eventID;
-    private Map<String, InviteeList.Invitees>originalInviteeMap = new ConcurrentHashMap<>();
     private Map<String, String>inviteNewInviteesMap = new ConcurrentHashMap<>();
 
     private Map<String, String>unInviteInviteesMap = new ConcurrentHashMap<>();
 
+    private Intent EventLandingPageIntent = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,69 +59,46 @@ public class InviteFriendToEventPage extends Activity {
             eventID = extras.getString("eventID");
         }
 
-        final String myUserId = faroUserContext.getEmail();
+        EventLandingPageIntent = new Intent(InviteFriendToEventPage.this, EventLandingPage.class);
 
-        //TODO: API call to get event Invites and store them in inviteesList
-        serviceHandler.getEventHandler().getEventInvitees(new BaseFaroRequestCallback<InviteeList>() {
-            @Override
-            public void onFailure(Request request, IOException ex) {
-                Log.e(TAG, "failed to get event Invitees");
-            }
-
-            @Override
-            public void onResponse(final InviteeList inviteeList, HttpError error) {
-                if (error == null ) {
-                    Runnable myRunnable = new Runnable() {
-                        @Override
-                        public void run() {
-                            Log.i(TAG, "Successfully received Invitee List for the event");
-                            originalInviteeMap = inviteeList.getUserStatusMap();
-
-                            LinearLayout pickFriendsCheckboxList = (LinearLayout) findViewById(R.id.pickFriendsCheckboxList);
-                            int friendListSize = friendListHandler.friendAdapter.getCount();
-                            friendList = friendListHandler.friendAdapter.getList();
-                            for (int i = 0; i < friendListSize; i++){
-                                final CheckBox checkBox = new CheckBox(mContext);
-                                MinUser minUser = friendList.get(i);
-                                checkBox.setText(minUser.getFirstName());
-                                checkBox.setId(i);
-                                if (originalInviteeMap.containsKey(minUser.getEmail())){
-                                    checkBox.setChecked(true);
-                                }
-                                checkBox.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        CheckBox clickedCheckBox = (CheckBox)v;
-                                        int id = clickedCheckBox.getId();
-                                        MinUser selectedMinUser = friendList.get(id);
-                                        if (clickedCheckBox.isChecked()){
-                                            inviteNewInviteesMap.put(selectedMinUser.getEmail(), selectedMinUser.getEmail());
-                                            unInviteInviteesMap.remove(selectedMinUser.getEmail());
-                                            Log.d(TAG, "Add Invitee to inviteNewInviteesMap and remove from unInviteInviteesMap");
-                                        }else{
-                                            unInviteInviteesMap.put(selectedMinUser.getEmail(), selectedMinUser.getEmail());
-                                            inviteNewInviteesMap.remove(selectedMinUser.getEmail());
-                                            Log.d(TAG, "Add Invitee to unInviteInviteesMap and remove from inviteNewInviteesMap");
-                                        }
-                                    }
-                                });
-
-                                //Insert checkBox into pickFriendsCheckboxList
-                                RelativeLayout.LayoutParams checkBoxparams = new RelativeLayout.LayoutParams(
-                                        RelativeLayout.LayoutParams.MATCH_PARENT, FRIEND_ROW_HEIGHT);
-                                pickFriendsCheckboxList.addView(checkBox, checkBoxparams);
-                            }
-                        }
-                    };
-                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                    mainHandler.post(myRunnable);
-                }else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+        LinearLayout pickFriendsCheckboxList = (LinearLayout) findViewById(R.id.pickFriendsCheckboxList);
+        int friendListSize = userFriendListHandler.userFriendAdapter.getCount();
+        friendList = userFriendListHandler.userFriendAdapter.getList();
+        for (int i = 0; i < friendListSize; i++){
+            final CheckBox checkBox = new CheckBox(mContext);
+            MinUser minUser = friendList.get(i);
+            checkBox.setText(minUser.getFirstName());
+            checkBox.setId(i);
+            if (eventFriendListHandler.isFriendInvitedToEvent(minUser.getEmail())){
+                checkBox.setChecked(true);
+                if (eventFriendListHandler.isFriendComingToEvent(minUser.getEmail())){
+                    checkBox.setBackgroundColor(Color.GREEN);
                 }
             }
-        }, eventID);
 
+            checkBox.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    CheckBox clickedCheckBox = (CheckBox)v;
+                    int id = clickedCheckBox.getId();
+                    MinUser selectedMinUser = friendList.get(id);
+                    if (clickedCheckBox.isChecked()){
+                        inviteNewInviteesMap.put(selectedMinUser.getEmail(), selectedMinUser.getEmail());
+                        unInviteInviteesMap.remove(selectedMinUser.getEmail());
+                        Log.d(TAG, "Add Invitee to inviteNewInviteesMap and remove from unInviteInviteesMap");
+                    }else{
+                        unInviteInviteesMap.put(selectedMinUser.getEmail(), selectedMinUser.getEmail());
+                        inviteNewInviteesMap.remove(selectedMinUser.getEmail());
+                        Log.d(TAG, "Add Invitee to unInviteInviteesMap and remove from inviteNewInviteesMap");
+                    }
+                }
+            });
 
+            //Insert checkBox into pickFriendsCheckboxList
+            RelativeLayout.LayoutParams checkBoxparams = new RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.MATCH_PARENT, FRIEND_ROW_HEIGHT);
+            pickFriendsCheckboxList.addView(checkBox, checkBoxparams);
+        }
 
         Button updateInviteeList = (Button) findViewById(R.id.addFriends);
 
@@ -134,7 +111,7 @@ public class InviteFriendToEventPage extends Activity {
                 if (!inviteNewInviteesMap.isEmpty()){
 
                     //Getting the keys i.e. the emailIDs from the map and creating a list
-                    List <String>inviteNewInviteesIDList = new ArrayList<String>();
+                    final List <String>inviteNewInviteesIDList = new ArrayList<String>();
                     inviteNewInviteesIDList.addAll(inviteNewInviteesMap.keySet());
 
                     AddFriendRequest addFriendRequest = new AddFriendRequest();
@@ -150,11 +127,14 @@ public class InviteFriendToEventPage extends Activity {
                         @Override
                         public void onResponse(String s, HttpError error) {
                             if (error == null ) {
-                                Runnable myRunnable = new Runnable() {
+                                final Runnable myRunnable = new Runnable() {
                                     @Override
                                     public void run() {
                                         Log.i(TAG, "Friends successfully invited to the event");
                                         Toast.makeText(InviteFriendToEventPage.this, "Successfully Invited friends", LENGTH_LONG).show();
+                                        EventLandingPageIntent.putExtra("eventID", eventID);
+                                        startActivity(EventLandingPageIntent);
+                                        finish();
                                     }
                                 };
                                 Handler mainHandler = new Handler(mContext.getMainLooper());
@@ -170,6 +150,13 @@ public class InviteFriendToEventPage extends Activity {
                 }
             }
         });
+    }
 
+    @Override
+    public void onBackPressed() {
+        EventLandingPageIntent.putExtra("eventID", eventID);
+        startActivity(EventLandingPageIntent);
+        finish();
+        super.onBackPressed();
     }
 }

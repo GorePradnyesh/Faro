@@ -73,12 +73,12 @@ public class EventListHandler {
         }
         return innerServiceHandler;
     }
-
-    public static final void CreateFaroServiceHandler(String baseUrl)
+    
+    public static final void CreateFaroServiceHandler(String baseUrl1)
     {
         FaroServiceHandler innerServiceHandler = null;
         try {
-            innerServiceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
+            innerServiceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl1));
         } catch (MalformedURLException e) {
             Log.e(TAG, "failed to obtain servicehandler", e);
         }
@@ -273,6 +273,12 @@ public class EventListHandler {
         return cloneEvent;
     }
 
+    public Event getOriginalEventFromMap (String eventID){
+        EventInviteStatusWrapper eventInviteStatusWrapper = eventMap.get(eventID);
+        Event event = eventInviteStatusWrapper.getEvent();
+        return event;
+    }
+
     public EventInviteStatus getUserEventStatus(String eventId) {
         EventInviteStatusWrapper eventInviteStatusWrapper = eventMap.get(eventId);
         return eventInviteStatusWrapper.getInviteStatus();
@@ -293,9 +299,8 @@ public class EventListHandler {
         if (eventInviteStatusWrapper == null){
             return;
         }
-        Event event = eventInviteStatusWrapper.getEvent();
 
-        EventInviteStatus eventInviteStatus = getUserEventStatus(event.getEventId());
+        EventInviteStatus eventInviteStatus = getUserEventStatus(eventID);
 
         EventAdapter eventAdapter;
         eventAdapter = getEventAdapter(eventInviteStatus);
@@ -303,7 +308,7 @@ public class EventListHandler {
             removeEventFromList(eventID, eventAdapter.list);
             eventAdapter.notifyDataSetChanged();
         }
-        eventMap.remove(event.getEventId());
+        eventMap.remove(eventID);
     }
 
     public int getAcceptedEventListSize(){

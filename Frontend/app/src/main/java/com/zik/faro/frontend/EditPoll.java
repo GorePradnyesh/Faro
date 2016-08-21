@@ -91,7 +91,7 @@ public class EditPoll extends Activity {
         }
 
 
-        final PollOptionsAdapter editPollOptionsAdapter = new PollOptionsAdapter(this, R.layout.poll_create_new_page_row_style);
+        final PollOptionsAdapter editPollOptionsAdapter = new PollOptionsAdapter(this, R.layout.poll_option_can_edit_row_style);
         editPollOptionsListView.setAdapter(editPollOptionsAdapter);
         for (Integer i = 0; i < poll.getPollOptions().size(); i++){
             PollOption pollOption = poll.getPollOptions().get(i);

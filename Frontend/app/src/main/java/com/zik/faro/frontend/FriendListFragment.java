@@ -27,11 +27,10 @@ import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 
 import java.io.IOException;
-import java.util.List;
 
 public class FriendListFragment extends Fragment {
 
-    private static FriendListHandler friendListHandler = FriendListHandler.getInstance();
+    private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
 
     static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
@@ -51,10 +50,7 @@ public class FriendListFragment extends Fragment {
 
         ListView friendListView  = (ListView)view.findViewById(R.id.friendList);
         friendListView.setBackgroundColor(Color.BLACK);
-        if (friendListHandler.friendAdapter == null){
-            friendListHandler.friendAdapter = new FriendAdapter(getActivity(), R.layout.friend_row_style);
-        }
-        friendListView.setAdapter(friendListHandler.friendAdapter);
+        friendListView.setAdapter(userFriendListHandler.userFriendAdapter);
 
         final Context mContext = this.getActivity();
 
@@ -126,7 +122,7 @@ public class FriendListFragment extends Fragment {
                                             Log.i(TAG, "Friend invite sent Successfully");
                                             //TODO it would be better if we return the MinUser object instead of a String
                                             MinUser minUser = new MinUser("", "", emailIDEditText.getText().toString());
-                                            friendListHandler.addFriendToListAndMap(minUser);
+                                            userFriendListHandler.addFriendToListAndMap(minUser);
                                             popupWindow.dismiss();
                                         }
                                     };

@@ -30,7 +30,7 @@ public class EventListFragment extends Fragment{
 
 
     static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static FriendListHandler friendListHandler = FriendListHandler.getInstance();
+    private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
     private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
     private static String TAG = "EventListFragment";
 
@@ -65,21 +65,12 @@ public class EventListFragment extends Fragment{
 
         ListView theAcceptedListView  = (ListView)view.findViewById(R.id.acceptedList);
         theAcceptedListView.setBackgroundColor(Color.BLACK);
-        if (eventListHandler.acceptedEventAdapter == null) {
-            eventListHandler.acceptedEventAdapter = new EventAdapter(getActivity(), R.layout.event_row_style);
-        }
         theAcceptedListView.setAdapter(eventListHandler.acceptedEventAdapter);
 
         ListView theNotAcceptedListView  = (ListView)view.findViewById(R.id.notAcceptedList);
         theNotAcceptedListView.setBackgroundColor(Color.BLACK);
-        if (eventListHandler.notAcceptedEventAdapter == null) {
-            eventListHandler.notAcceptedEventAdapter = new EventAdapter(getActivity(), R.layout.event_row_style);
-        }
         theNotAcceptedListView.setAdapter(eventListHandler.notAcceptedEventAdapter);
 
-        if (friendListHandler.friendAdapter == null){
-            friendListHandler.friendAdapter = new FriendAdapter(getActivity(), R.layout.friend_row_style);
-        }
         //ImageButton calendar_view = (ImageButton)view.findViewById(R.id.calendarViewButton);
         //calendar_view.setImageResource(R.drawable.calendar);
 
@@ -176,7 +167,7 @@ public class EventListFragment extends Fragment{
                         @Override
                         public void run() {
                             Log.i(TAG, "Successfully received friends from the server!!");
-                            friendListHandler.addDownloadedFriendsToListAndMap(minUsers);
+                            userFriendListHandler.addDownloadedFriendsToListAndMap(minUsers);
                         }
                     };
                     Handler mainHandler = new Handler(mContext.getMainLooper());
