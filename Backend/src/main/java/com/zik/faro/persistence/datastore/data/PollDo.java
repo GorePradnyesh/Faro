@@ -128,6 +128,10 @@ public class PollDo {
 	public void setPollOptions(List<PollOption> pollOptions) {
 		this.pollOptions = pollOptions;
 	}
+	
+	public void addPollOptions(PollOption pollOption){
+		this.pollOptions.add(pollOption);
+	}
 
 	public boolean getMultiChoice() {
 		return multiChoice;

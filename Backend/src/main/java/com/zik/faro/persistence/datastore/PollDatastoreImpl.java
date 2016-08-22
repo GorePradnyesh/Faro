@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Set;
 
 import com.googlecode.objectify.Work;
-import com.zik.faro.data.PollOption;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.data.PollOption;
 import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.persistence.datastore.data.PollDo;
 
@@ -69,6 +69,58 @@ public class PollDatastoreImpl {
 						}else{
 							pollOption.getVoters().remove(userId);
 						}
+					}
+	                
+	                storePoll(poll);
+				} catch (DataNotFoundException e) {
+					return new TransactionResult<PollDo>(null, TransactionStatus.DATANOTFOUND);
+				}
+				return new TransactionResult<PollDo>(poll, TransactionStatus.SUCCESS);
+			}
+		};
+        TransactionResult<PollDo> result = DatastoreObjectifyDAL.update(w);
+        DatastoreUtil.processResult(result);
+        return result.getEntity();
+    }
+    
+    public static PollDo updatePoll(final String eventId, final String pollId,
+    		final PollDo updatePoll, final String userId) throws DatastoreException, DataNotFoundException{
+    	Work w = new Work<TransactionResult<PollDo>>() {
+    		
+			@Override
+			public TransactionResult<PollDo> run(){
+				PollDo poll;
+				try {
+					poll = loadPollById(pollId, eventId);
+					
+					if(updatePoll.getCreatorId() != null){
+						poll.setCreatorId(updatePoll.getCreatorId());
+					}
+					
+					if(updatePoll.getDeadline() != null){
+						poll.setDeadline(updatePoll.getDeadline());
+					}
+					
+					if(updatePoll.getDescription() != null){
+						poll.setDescription(updatePoll.getDescription());
+					}
+					
+					if(updatePoll.getOwner() != null){
+						poll.setOwner(updatePoll.getOwner());
+					}
+					
+					if(updatePoll.getPollOptions() != null && !updatePoll.getPollOptions().isEmpty()){
+						for(PollOption option: updatePoll.getPollOptions()){
+							poll.addPollOptions(option);
+						}
+					}
+					
+					if(updatePoll.getStatus() != null){
+						poll.setStatus(updatePoll.getStatus());
+					}
+					
+					if(updatePoll.getWinnerId() != null){
+						poll.setWinnerId(updatePoll.getWinnerId());
 					}
 	                
 	                storePoll(poll);

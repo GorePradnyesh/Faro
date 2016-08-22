@@ -1,17 +1,7 @@
 package com.zik.faro.api.poll;
 
 
-import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM;
-import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM_STRING;
-import static com.zik.faro.commons.Constants.EVENT_PATH_CONST;
-import static com.zik.faro.commons.Constants.HTTP_OK;
-import static com.zik.faro.commons.Constants.POLL_CLOSE_PATH_CONST;
-import static com.zik.faro.commons.Constants.POLL_CREATE_PATH_CONST;
-import static com.zik.faro.commons.Constants.POLL_ID_PATH_PARAM;
-import static com.zik.faro.commons.Constants.POLL_ID_PATH_PARAM_STRING;
-import static com.zik.faro.commons.Constants.POLL_PATH_CONST;
-import static com.zik.faro.commons.Constants.POLL_UNVOTED_COUNT_CONST;
-import static com.zik.faro.commons.Constants.POLL_VOTE_PATH_CONST;
+import static com.zik.faro.commons.Constants.*;
 
 import java.util.Set;
 
@@ -112,6 +102,31 @@ public class PollHandler {
             throw new WebApplicationException(response);
 		}
         return JResponse.ok(HTTP_OK).build();
+    }
+    
+    @Path(POLL_ID_PATH_PARAM_STRING + POLL_UPDATE_PATH_CONST)
+    @POST
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public JResponse<Poll> updatePoll(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+                          @PathParam(POLL_ID_PATH_PARAM) final String pollId,
+                          // Ids of poll options
+                          Poll poll){
+        String userId = context.getUserPrincipal().getName();
+        Poll updatedPoll;
+        try {
+			updatedPoll = PollManagement.update(eventId, pollId, poll, userId);
+		} catch (DatastoreException e) {
+			Response response = Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.entity(e.getMessage())
+					.build();
+            throw new WebApplicationException(response);
+		} catch (DataNotFoundException e) {
+			Response response = Response.status(Response.Status.NOT_FOUND)
+					.entity(e.getMessage())
+					.build();
+            throw new WebApplicationException(response);
+		}
+        return JResponse.ok(updatedPoll).build();
     }
 
     @Path(POLL_ID_PATH_PARAM_STRING + POLL_CLOSE_PATH_CONST)

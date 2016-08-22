@@ -44,6 +44,12 @@ public class PollManagement {
 		PollDatastoreImpl.castVote(eventId, pollId, options, userId);
 	}
 	
+	public static Poll update(final String eventId, final String pollId,
+    		final Poll poll, final String userId ) throws DatastoreException, DataNotFoundException{
+		PollDo pollDo = ConversionUtils.toDo(poll);
+		return ConversionUtils.fromDo(PollDatastoreImpl.updatePoll(eventId, pollId, pollDo, userId));
+	}
+	
 	public static void deletePoll(final String eventId, final String pollId){
 		PollDatastoreImpl.deletePoll(eventId, pollId);
 	}

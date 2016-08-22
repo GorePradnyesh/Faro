@@ -137,6 +137,33 @@ public class FunctionalPollTest {
     	
     }
     
+    public static void updatePollTest() throws Exception{
+    	List<PollOption> pollOptions = new ArrayList<PollOption>();
+    	pollOptions.add(new PollOption("Italian"));
+    	pollOptions.add(new PollOption("Indian"));
+    	pollOptions.add(new PollOption("Burmese"));
+    	Poll p = new Poll(eventId, "Kaivan", true, pollOptions, "Kaivan", "Dinner cuisine", ObjectStatus.OPEN);
+    	//new Poll(eventId, creator, multiChoice, pollOptions, owner, description, status)
+    	
+    	// Create sample poll
+    	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/create", token, p);
+        Poll pollResponse = response.getEntity(Poll.class);
+        assertEntity(p, pollResponse);
+        // Add poll options
+        List<PollOption> newOptions = new ArrayList<PollOption>();
+        newOptions.add(new PollOption("Chinese"));
+        Poll update = new Poll();
+        update.setPollOptions(newOptions);
+        update.setEventId(eventId);
+        update.setId(pollResponse.getId());
+        ClientResponse updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/"
+        		+pollResponse.getId()+"/updatePoll", token, update);
+        Poll updatedPollResponse = updateResponse.getEntity(Poll.class);
+        Assert.assertEquals(200, updateResponse.getStatus());
+        Assert.assertEquals(4,updatedPollResponse.getPollOptions().size());
+    	
+    }
+    
     public static void getPolls() throws Exception{
     	ClientResponse readResponse = TestHelper.doGET(endpoint.toString(), "v1/event/"+eventId+"/polls", new MultivaluedMapImpl(), token);
         List<Poll> polls = readResponse.getEntity(new GenericType<List<Poll>>(){});
@@ -149,5 +176,6 @@ public class FunctionalPollTest {
     	getUnvotedCountTest();
     	castVoteTest();
     	getPolls();
+    	updatePollTest();
     }
 }
