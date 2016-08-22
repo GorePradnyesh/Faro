@@ -20,14 +20,14 @@ import org.junit.Test;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
-import com.zik.faro.data.ObjectStatus;
-import com.zik.faro.data.PollOption;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
-import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.data.Location;
-import com.zik.faro.persistence.datastore.data.PollDo;
+import com.zik.faro.data.ObjectStatus;
+import com.zik.faro.data.PollOption;
 import com.zik.faro.data.expense.ExpenseGroup;
+import com.zik.faro.persistence.datastore.data.EventDo;
+import com.zik.faro.persistence.datastore.data.PollDo;
 
 public class PollDatastoreImplTest {
 
@@ -161,6 +161,39 @@ public class PollDatastoreImplTest {
         Assert.assertFalse(returnedPollDo.getPollOptions().get(0).getVoters().contains("user3"));
         Assert.assertFalse(returnedPollDo.getPollOptions().get(1).getVoters().contains("user3"));
         Assert.assertTrue(returnedPollDo.getPollOptions().get(2).getVoters().contains("user3"));
+    }
+    
+    @Test
+    public void testUpdatePoll() throws DataNotFoundException, DatastoreException{
+    	EventDo event = createEvent();
+    	String eventId = event.getEventId();
+        PollDo poll1 = createPollObjectForEventId(eventId);
+        PollDatastoreImpl.storePoll(poll1);
+        
+        // Update poll 
+        PollDo updateObj = new PollDo();
+        updateObj.setId(poll1.getId()); updateObj.setEventId(poll1.getEventId());
+        updateObj.setCreatorId("Updated creator");
+        updateObj.setDeadline(Calendar.getInstance());
+        updateObj.setDescription("Updated description");
+        updateObj.setStatus(ObjectStatus.CLOSED);
+        updateObj.setWinnerId("Updated poll winner");
+        //updateObj.setMultiChoice(true);
+        updateObj.addPollOptions(new PollOption(UUID.randomUUID().toString(), "Bombay"));
+        
+        // Call update API
+        PollDatastoreImpl.updatePoll(updateObj.getEventId(), updateObj.getId(), updateObj, null);
+        
+        // Verify. 
+        PollDo returnedPollDo = PollDatastoreImpl.loadPollById(poll1.getId(), eventId);
+        Assert.assertEquals(returnedPollDo.getDescription(), updateObj.getDescription());
+        Assert.assertEquals(returnedPollDo.getCreatorId(), updateObj.getCreatorId());
+        Assert.assertEquals(returnedPollDo.getDeadline(), updateObj.getDeadline());
+        Assert.assertEquals(returnedPollDo.getStatus(), updateObj.getStatus());
+        Assert.assertEquals(returnedPollDo.getWinnerId(), updateObj.getWinnerId());
+        //Assert.assertTrue(returnedPollDo.getMultiChoice());
+        Assert.assertEquals(4, returnedPollDo.getPollOptions().size());
+        
     }
     
     @Test

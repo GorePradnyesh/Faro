@@ -44,6 +44,48 @@ public class EventDatastoreImpl {
         DatastoreUtil.processResult(result);
         return result.getEntity();
     }
+    
+    public static EventDo updateEvent(final String eventId, final EventDo updateObj) throws DataNotFoundException, DatastoreException{
+        Work w = new Work<TransactionResult<EventDo>>() {
+			
+			@Override
+			public TransactionResult<EventDo> run() {
+				EventDo event;
+				try {
+					event = DatastoreObjectifyDAL.loadObjectById(eventId, EventDo.class);
+				} catch (DataNotFoundException e) {
+					return new TransactionResult<EventDo>(null, TransactionStatus.DATANOTFOUND);
+				}
+				
+				if(updateObj.getEndDate() != null){
+					event.setEndDate(updateObj.getEndDate());
+				}
+				if(updateObj.getStartDate() != null){
+					event.setStartDate(updateObj.getStartDate());
+				}
+				if(updateObj.getEventDescription() != null){
+					event.setEventDescription(updateObj.getEventDescription());
+				}
+				if(updateObj.getEventName() != null){
+					event.setEventName(updateObj.getEventName());
+				}
+				if(updateObj.getLocation() != null){
+					event.setLocation(updateObj.getLocation());
+				}
+				if(updateObj.getStatus() != null){
+					event.setStatus(updateObj.getStatus());
+				}
+				if(updateObj.getExpenseGroup() != null){
+					event.setExpenseGroup(updateObj.getExpenseGroup());
+				}
+                DatastoreObjectifyDAL.storeObject(event);
+                return new TransactionResult<EventDo>(event, TransactionStatus.SUCCESS);
+			}
+		};
+        TransactionResult<EventDo> result = DatastoreObjectifyDAL.update(w);
+        DatastoreUtil.processResult(result);
+        return result.getEntity();
+    }
 
     public static void deleteEvent(final String eventId) {
         DatastoreObjectifyDAL.delelteObjectById(eventId, EventDo.class);

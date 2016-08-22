@@ -13,14 +13,19 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
+import com.zik.faro.commons.exceptions.DatastoreException;
 import com.zik.faro.persistence.datastore.data.EventDo;
+import com.zik.faro.persistence.datastore.data.PollDo;
 import com.zik.faro.data.Location;
+import com.zik.faro.data.ObjectStatus;
+import com.zik.faro.data.PollOption;
 import com.zik.faro.data.expense.ExpenseGroup;
 
 public class EventDatastoreImplTest {
 
     private static final LocalServiceTestHelper helper =
-            new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+    		new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig()
+            .setDefaultHighRepJobPolicyUnappliedJobPercentage(100));
     
 
     static{
@@ -66,5 +71,38 @@ public class EventDatastoreImplTest {
         Assert.assertEquals(loadedEvent.getExpenseGroup().groupName, testEvent.getExpenseGroup().groupName);
         Assert.assertEquals(loadedEvent.isControlFlag(), testEvent.isControlFlag());
         
+    }
+    
+    @Test
+    public void testUpdateEvent() throws DataNotFoundException, DatastoreException{
+    	EventDo testEvent = new EventDo("Lake Shasta "+ UUID.randomUUID().toString(),
+        		Calendar.getInstance(),
+        		Calendar.getInstance(),
+                false,
+                new ExpenseGroup("Lake Shasta", "shasta123"),
+                new Location("Lake Shasta"));
+    	EventDatastoreImpl.storeEventOnly(testEvent);
+        // Update Event
+    	EventDo updateObj = new EventDo();
+    	updateObj.setEventId(testEvent.getEventId());
+    	
+    	updateObj.setEndDate(Calendar.getInstance());
+        updateObj.setEventDescription("Updated description");
+        updateObj.setEventName("Updated event name");
+        updateObj.setLocation(new Location("Crater Lake"));
+        updateObj.setStartDate(Calendar.getInstance());
+        updateObj.setStatus(ObjectStatus.CLOSED);
+        
+        // Call update API
+        EventDatastoreImpl.updateEvent(updateObj.getEventId(), updateObj);
+        
+        // Verify. 
+        EventDo returnedEventDo = EventDatastoreImpl.loadEventByID(updateObj.getEventId());
+        Assert.assertEquals(updateObj.getEventDescription(), returnedEventDo.getEventDescription());
+        Assert.assertEquals(updateObj.getEventName(), returnedEventDo.getEventName());
+        Assert.assertEquals(updateObj.getEndDate(), returnedEventDo.getEndDate());
+        Assert.assertEquals(updateObj.getStartDate(), returnedEventDo.getStartDate());
+        Assert.assertEquals(updateObj.getStatus(), returnedEventDo.getStatus());
+        Assert.assertEquals(updateObj.getLocation(), returnedEventDo.getLocation());
     }
 }
