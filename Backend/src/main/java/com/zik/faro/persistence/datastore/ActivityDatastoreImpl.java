@@ -34,14 +34,14 @@ public class ActivityDatastoreImpl {
     }
     
 	public static ActivityDo updateActivity(final ActivityDo updateActivity, final String eventId) throws DataNotFoundException{
-    	Work w = new Work<TransactionResult>() {
-	        public TransactionResult run() {
+    	Work w = new Work<TransactionResult<ActivityDo>>() {
+	        public TransactionResult<ActivityDo> run() {
 	        	// Read from datastore
 	        	ActivityDo activity = null;
 				try {
 					activity = loadActivityById(updateActivity.getId(), eventId);
 				} catch (DataNotFoundException e) {
-					return TransactionResult.DATANOTFOUND;
+					return new TransactionResult<ActivityDo>(null, TransactionStatus.DATANOTFOUND);
 				}
 	        	
 	            // Modify.
@@ -49,7 +49,7 @@ public class ActivityDatastoreImpl {
 					activity.setStartDate(updateActivity.getStartDate());
 				}
 				if(updateActivity.getEndDate() != null){
-					activity.setStartDate(updateActivity.getEndDate());
+					activity.setEndDate(updateActivity.getEndDate());
 				}
 				if(updateActivity.getDescription() != null && !updateActivity.getDescription().isEmpty()){
 					activity.setDescription(updateActivity.getDescription());
@@ -57,21 +57,22 @@ public class ActivityDatastoreImpl {
 				if(updateActivity.getLocation() != null){
 					activity.setLocation(updateActivity.getLocation());
 				}
-				if(updateActivity.getAssignment() != null){
-					activity.setAssignment(updateActivity.getAssignment());
+				
+				if(updateActivity.getName() != null){
+					activity.setName(updateActivity.getName());
 				}
 				
 	            // Store
 	            storeActivity(activity);
-	            return TransactionResult.SUCCESS;
+	            return new TransactionResult<ActivityDo>(activity, TransactionStatus.SUCCESS);
 	        }
 	    };
 	    
-    	TransactionResult result = DatastoreObjectifyDAL.update(w);
-    	if(result.equals(TransactionResult.DATANOTFOUND)){
+    	TransactionResult<ActivityDo> result = DatastoreObjectifyDAL.update(w);
+    	if(result.getStatus().equals(TransactionStatus.DATANOTFOUND)){
     		throw new DataNotFoundException("Activity not found");
     	}
-    	return updateActivity;
+    	return result.getEntity();
     }
 	
 	

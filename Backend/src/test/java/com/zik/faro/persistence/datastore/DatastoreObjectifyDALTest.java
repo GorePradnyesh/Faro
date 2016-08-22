@@ -406,7 +406,6 @@ public class DatastoreObjectifyDALTest {
     			event.getEventId(), ActivityDo.class, a.getId());
     	Assert.assertNotNull(retrievedActivity);
     	// Modify
-    	a.getAssignment().addItem(new Item("Test", "123", 1, Unit.CENTIMETER));
     	a.setStartDate(new GregorianCalendar());
     	a.setEndDate(new GregorianCalendar());
     	a.setDescription("Description changed");
@@ -419,7 +418,6 @@ public class DatastoreObjectifyDALTest {
     	Assert.assertNotNull(retrievedActivity);
     	
     	// Verify
-    	Assert.assertEquals(retrievedActivity.getAssignment().getItems().get(0).getAssigneeId(), "123");
     	Assert.assertEquals(retrievedActivity.getLocation().locationName, "Fremont");
     	Assert.assertEquals(retrievedActivity.getDescription(), "Description changed");
     	

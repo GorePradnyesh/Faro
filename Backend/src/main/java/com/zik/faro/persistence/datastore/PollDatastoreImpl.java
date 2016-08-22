@@ -51,12 +51,12 @@ public class PollDatastoreImpl {
     	return count;
     }
     
-    public static void castVote(final String eventId, final String pollId,
+    public static PollDo castVote(final String eventId, final String pollId,
     		final Set<String> options, final String userId) throws DatastoreException, DataNotFoundException{
-    	Work<TransactionResult> w = new Work<TransactionResult>() {
+    	Work w = new Work<TransactionResult<PollDo>>() {
     		
 			@Override
-			public TransactionResult run(){
+			public TransactionResult<PollDo> run(){
 				PollDo poll;
 				try {
 					poll = loadPollById(pollId, eventId);
@@ -73,13 +73,14 @@ public class PollDatastoreImpl {
 	                
 	                storePoll(poll);
 				} catch (DataNotFoundException e) {
-					return TransactionResult.DATANOTFOUND;
+					return new TransactionResult<PollDo>(null, TransactionStatus.DATANOTFOUND);
 				}
-				return TransactionResult.SUCCESS;
+				return new TransactionResult<PollDo>(poll, TransactionStatus.SUCCESS);
 			}
 		};
-        TransactionResult result = DatastoreObjectifyDAL.update(w);
+        TransactionResult<PollDo> result = DatastoreObjectifyDAL.update(w);
         DatastoreUtil.processResult(result);
+        return result.getEntity();
     }
     
     public static void deletePoll(final String eventId, final String pollId){

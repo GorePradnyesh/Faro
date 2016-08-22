@@ -24,24 +24,25 @@ public class EventDatastoreImpl {
         return event;
     }
 
-    public static void disableEventControlFlag(final String eventId) throws DataNotFoundException, DatastoreException{
-        Work w = new Work<TransactionResult>() {
+    public static EventDo disableEventControlFlag(final String eventId) throws DataNotFoundException, DatastoreException{
+        Work w = new Work<TransactionResult<EventDo>>() {
 			
 			@Override
-			public TransactionResult run() {
+			public TransactionResult<EventDo> run() {
 				EventDo event;
 				try {
 					event = DatastoreObjectifyDAL.loadObjectById(eventId, EventDo.class);
 				} catch (DataNotFoundException e) {
-					return TransactionResult.DATANOTFOUND;
+					return new TransactionResult<EventDo>(null, TransactionStatus.DATANOTFOUND);
 				}
                 event.setControlFlag(true);
                 DatastoreObjectifyDAL.storeObject(event);
-                return TransactionResult.SUCCESS;
+                return new TransactionResult<EventDo>(event, TransactionStatus.SUCCESS);
 			}
 		};
-        TransactionResult result = DatastoreObjectifyDAL.update(w);
+        TransactionResult<EventDo> result = DatastoreObjectifyDAL.update(w);
         DatastoreUtil.processResult(result);
+        return result.getEntity();
     }
 
     public static void deleteEvent(final String eventId) {

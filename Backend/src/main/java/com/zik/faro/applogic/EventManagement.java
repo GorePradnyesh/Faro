@@ -40,10 +40,11 @@ public class EventManagement {
         return ConversionUtils.fromDo(event);
     }
 
-    public static void disableEventControls(final String userId, final String eventId) throws DataNotFoundException, DatastoreException {
+    public static Event disableEventControls(final String userId, final String eventId) throws DataNotFoundException, DatastoreException {
         //TODO: Validate that the user has permissions to modify event, from the EventUser table
     	//TODO: Validate if the user is the owner of the event
-        EventDatastoreImpl.disableEventControlFlag(eventId);
+        EventDo eventDo = EventDatastoreImpl.disableEventControlFlag(eventId);
+        return ConversionUtils.fromDo(eventDo);
     }
     
     public static void addFriendToEvent(final String eventId, final String userId, 

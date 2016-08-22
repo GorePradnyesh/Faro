@@ -33,7 +33,7 @@ public class PollDatastoreImplTest {
 
 	private static final LocalServiceTestHelper helper =
             new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig()
-                    .setDefaultHighRepJobPolicyUnappliedJobPercentage(50));
+                    .setDefaultHighRepJobPolicyUnappliedJobPercentage(100));
 
     static{
         ObjectifyService.register(PollDo.class);

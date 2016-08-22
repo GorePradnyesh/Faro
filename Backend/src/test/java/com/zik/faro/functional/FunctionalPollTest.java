@@ -19,6 +19,7 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 import com.zik.faro.TestHelper;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.Location;
+import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.PollOption;
 
@@ -113,7 +114,8 @@ public class FunctionalPollTest {
     	pollOptions.add(new PollOption("Italian"));
     	pollOptions.add(new PollOption("Indian"));
     	pollOptions.add(new PollOption("Burmese"));
-    	Poll p = new Poll(eventId, "Kaivan", pollOptions, "Kaivan", "Dinner cuisine");
+    	Poll p = new Poll(eventId, "Kaivan", true, pollOptions, "Kaivan", "Dinner cuisine", ObjectStatus.OPEN);
+    	//new Poll(eventId, creator, multiChoice, pollOptions, owner, description, status)
     	
     	// Create sample poll
     	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/create", token, p);

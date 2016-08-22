@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.zik.faro.data.Activity;
+import com.zik.faro.data.Assignment;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.persistence.datastore.data.ActivityDo;
 import com.zik.faro.persistence.datastore.ActivityDatastoreImpl;
@@ -12,7 +13,7 @@ public class ActivityManagement {
 	public static Activity createActivity(final Activity activity){
 		ActivityDo activityDo = new ActivityDo(activity.getEventId(), 
 				activity.getName(), activity.getDescription(), activity.getLocation(), 
-				activity.getStartDate(), activity.getEndDate(), activity.getAssignment());
+				activity.getStartDate(), activity.getEndDate(), new Assignment());
 		ActivityDatastoreImpl.storeActivity(activityDo);
 		return ConversionUtils.fromDo(activityDo);
 	}
@@ -40,4 +41,6 @@ public class ActivityManagement {
 		ActivityDo updateActivityDo = ConversionUtils.toDo(updateActivity);
 		return ConversionUtils.fromDo(ActivityDatastoreImpl.updateActivity(updateActivityDo, eventId));
 	}
+	
+	
 }
