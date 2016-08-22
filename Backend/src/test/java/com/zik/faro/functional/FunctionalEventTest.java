@@ -209,6 +209,39 @@ public class FunctionalEventTest {
     	Assert.assertEquals(15, events.size());
     }
     
+    public void updateEvent() throws Exception{
+    	// Create
+    	Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(),
+                Calendar.getInstance(), "Description", false, null, new Location("NYC"),null, null, "Mafia god");
+    	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);
+        Event ev = response.getEntity(Event.class);
+    	
+    	// Read
+    	ClientResponse response1 = TestHelper.doGET(endpoint.toString(), "v1/event/"+ ev.getEventId()+"/details", new MultivaluedMapImpl(), token);
+        Event eventDetails = response1.getEntity(Event.class);
+        assertEntity(eventCreateData, eventDetails);
+        
+        // Update
+        Event updateObj = new Event();
+        updateObj.setEventId(eventDetails.getEventId());
+        
+        updateObj.setEndDate(Calendar.getInstance());
+        updateObj.setEventDescription("Updated description");
+        updateObj.setEventName("Updated event name");
+        updateObj.setLocation(new Location("Crater Lake"));
+        updateObj.setStartDate(Calendar.getInstance());
+        updateObj.setStatus(ObjectStatus.CLOSED);
+        
+        ClientResponse updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventDetails.getEventId()+"/updateEvent", token, updateObj);
+        ev = updateResponse.getEntity(Event.class);
+        Assert.assertEquals(updateObj.getEndDate(), ev.getEndDate());
+        Assert.assertEquals(updateObj.getStartDate(), ev.getStartDate());
+        Assert.assertEquals(updateObj.getEventDescription(), ev.getEventDescription());
+        Assert.assertEquals(updateObj.getEventName(), ev.getEventName());
+        Assert.assertEquals(updateObj.getStatus(), ev.getStatus());
+        Assert.assertEquals(updateObj.getLocation().locationName, ev.getLocation().locationName);
+    }
+    
     @Test
     public void allTest() throws Exception{
     	System.out.println(token);
@@ -217,6 +250,7 @@ public class FunctionalEventTest {
     	disableEventControl();
     	getEvents();
     	getEventInvitees();
+    	updateEvent();
     }
 
     

@@ -103,6 +103,6 @@ public class EventDatastoreImplTest {
         Assert.assertEquals(updateObj.getEndDate(), returnedEventDo.getEndDate());
         Assert.assertEquals(updateObj.getStartDate(), returnedEventDo.getStartDate());
         Assert.assertEquals(updateObj.getStatus(), returnedEventDo.getStatus());
-        Assert.assertEquals(updateObj.getLocation(), returnedEventDo.getLocation());
+        Assert.assertEquals(updateObj.getLocation().locationName, returnedEventDo.getLocation().locationName);
     }
 }

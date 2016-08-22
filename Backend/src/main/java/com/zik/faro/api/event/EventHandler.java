@@ -1,15 +1,6 @@
 package com.zik.faro.api.event;
 
-import static com.zik.faro.commons.Constants.COUNT_PARAM;
-import static com.zik.faro.commons.Constants.EVENT_ADD_FRIENDS_CONST;
-import static com.zik.faro.commons.Constants.EVENT_DETAILS_PATH_CONST;
-import static com.zik.faro.commons.Constants.EVENT_DISABLE_CONTROL_PATH_CONST;
-import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM;
-import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM_STRING;
-import static com.zik.faro.commons.Constants.EVENT_INVITEES_PATH_CONST;
-import static com.zik.faro.commons.Constants.EVENT_PATH_CONST;
-import static com.zik.faro.commons.Constants.EVENT_REMOVE_ATTENDEE_PATH_CONST;
-import static com.zik.faro.commons.Constants.UPDATE_INVITE_STATUS_PATH_CONST;
+import static com.zik.faro.commons.Constants.*;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -98,6 +89,26 @@ public class EventHandler {
     	return JResponse.ok(Constants.HTTP_OK).build();
     }
 
+    @Path(EVENT_UPDATE_PATH_CONST)
+    @POST
+    public JResponse<Event> updateEvent(@PathParam(EVENT_ID_PATH_PARAM) final String eventId, final Event updateObj){
+        // TODO: Validation to make sure only event owner can update
+    	String userId = context.getUserPrincipal().getName();
+        try {
+        	return JResponse.ok(EventManagement.updateEvent(updateObj, eventId)).build();
+        } catch (DataNotFoundException e) {
+            Response response = Response.status(Response.Status.NOT_FOUND)
+                    .entity(e.getMessage())
+                    .build();
+            throw new WebApplicationException(response);
+        } catch (DatastoreException e) {
+        	Response response = Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                     .entity(e.getMessage())
+                     .build();
+            throw new WebApplicationException(response);
+		}
+    }
+    
     @Path(EVENT_DISABLE_CONTROL_PATH_CONST)
     @POST
     public JResponse<String> disableEventControl(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){

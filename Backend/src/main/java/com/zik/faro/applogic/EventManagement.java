@@ -47,6 +47,13 @@ public class EventManagement {
         return ConversionUtils.fromDo(eventDo);
     }
     
+    public static Event updateEvent(final Event updateObj, final String eventId) throws DataNotFoundException, DatastoreException {
+        //TODO: Validate that the user has permissions to modify event, from the EventUser table
+    	//TODO: Validate if the user is the owner of the event
+    	EventDo eventDo = ConversionUtils.toDo(updateObj);
+    	return ConversionUtils.fromDo(EventDatastoreImpl.updateEvent(eventId, eventDo));
+    }
+    
     public static void addFriendToEvent(final String eventId, final String userId, 
     		final AddFriendRequest friendRequest) throws DataNotFoundException, IllegalDataOperation{
     	FaroUser existingUser = UserManagement.loadFaroUser(userId);

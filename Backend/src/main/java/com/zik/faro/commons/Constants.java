@@ -50,6 +50,7 @@ public final class Constants {
     public static final String UPDATE_INVITE_STATUS_PATH_CONST                 = "/updateInviteStatus";
     public static final String EVENT_CREATE_PATH_CONST                          = "/create";
     public static final String EVENT_ADD_FRIENDS_CONST							= "/add";
+    public static final String EVENT_UPDATE_PATH_CONST							= "/updateEvent";
 
     public static final String ACTIVITY_PATH_CONST                              = "/activity";
     public static final String ACTIVITIES_PATH_CONST                            = "/activities";
