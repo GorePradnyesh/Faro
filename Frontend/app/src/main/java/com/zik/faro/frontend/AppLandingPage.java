@@ -20,6 +20,11 @@ public class AppLandingPage extends FragmentActivity{
      */
 
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
+    private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
+    private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
+    private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
+    static PollListHandler pollListHandler = PollListHandler.getInstance();
+    private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +37,42 @@ public class AppLandingPage extends FragmentActivity{
         if (extras != null) {
             String baseUrl = extras.getString("baseUrl");
             eventListHandler.CreateFaroServiceHandler(baseUrl);
+        }
+
+        //Creating the Adapters for all
+        if (eventListHandler.acceptedEventAdapter == null) {
+            eventListHandler.acceptedEventAdapter = new EventAdapter(this, R.layout.event_row_style);
+        }
+
+        if (eventListHandler.notAcceptedEventAdapter == null) {
+            eventListHandler.notAcceptedEventAdapter = new EventAdapter(this, R.layout.event_row_style);
+        }
+
+        if (userFriendListHandler.userFriendAdapter == null){
+            userFriendListHandler.userFriendAdapter = new UserFriendAdapter(this, R.layout.friend_row_style);
+        }
+
+        if (activityListHandler.activityAdapter == null) {
+            activityListHandler.activityAdapter = new ActivityAdapter(this, R.layout.activity_row_style);
+        }
+
+        if (assignmentListHandler.assignmentAdapter == null) {
+            assignmentListHandler.assignmentAdapter = new AssignmentAdapter(this, R.layout.event_row_style);
+        }
+
+        if (eventFriendListHandler.acceptedFriendAdapter == null){
+            eventFriendListHandler.acceptedFriendAdapter = new EventFriendAdapter(this, R.layout.friend_row_style);
+        }
+        if (eventFriendListHandler.notAcceptedFriendAdapter == null){
+            eventFriendListHandler.notAcceptedFriendAdapter = new EventFriendAdapter(this, R.layout.friend_row_style);
+        }
+
+        if (pollListHandler.openPollsAdapter == null) {
+            pollListHandler.openPollsAdapter = new PollAdapter(this, R.layout.poll_list_page_row_style);
+        }
+
+        if (pollListHandler.closedPollsAdapter == null) {
+            pollListHandler.closedPollsAdapter = new PollAdapter(this, R.layout.poll_list_page_row_style);
         }
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));

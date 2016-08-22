@@ -18,7 +18,7 @@
             android:layout_width="0px"
             android:layout_height="wrap_content"
             android:layout_weight="2"
-            android:id="@+id/itemEditText"
+            android:id="@+id/itemNameEditText"
             android:hint="@string/add_item" />
         <EditText
             android:layout_width="0px"

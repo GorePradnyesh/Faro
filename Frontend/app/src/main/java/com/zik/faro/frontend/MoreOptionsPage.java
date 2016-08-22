@@ -15,7 +15,7 @@ import com.zik.faro.frontend.faroservice.auth.TokenCache;
 public class MoreOptionsPage extends Fragment{
 
     static EventListHandler eventListHandler = EventListHandler.getInstance();
-    static FriendListHandler friendListHandler = FriendListHandler.getInstance();
+    static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
     static FaroUserContext faroUserContext = FaroUserContext.getInstance();
     String myUserId = faroUserContext.getEmail();
 
@@ -37,7 +37,7 @@ public class MoreOptionsPage extends Fragment{
             public void onClick(View v) {
                 //Clear all App related info here
                 eventListHandler.clearListAndMapOnLogout();
-                friendListHandler.clearFriendListAndMap();
+                userFriendListHandler.clearFriendListAndMap();
                 TokenCache.getTokenCache().deleteToken();
                 startActivity(LoginActivity);
                 getActivity().finish();

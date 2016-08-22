@@ -31,7 +31,7 @@ public class LoginActivity extends Activity {
     private String TAG = "LoginActivity";
 
     protected static final String baseUrl = "http://10.0.2.2:8080/v1/";
-    private String baseUrl2 = "http://10.0.2.2:8080/v1/";;
+    private String baseUrl2 = "http://10.0.2.2:8080/v1/";
     private static FaroServiceHandler serviceHandler;
 
     private EditText emailTextBox;
@@ -54,7 +54,6 @@ public class LoginActivity extends Activity {
         passwordTextBox = (EditText)findViewById(R.id.TFPassword);
 
         final EditText serverIPAddressEditText = (EditText)findViewById(R.id.ipAddress);
-        final String serverIPAddress  = serverIPAddressEditText.getText().toString();
 
         AppLandingPageIntent = new Intent(LoginActivity.this, AppLandingPage.class);
 

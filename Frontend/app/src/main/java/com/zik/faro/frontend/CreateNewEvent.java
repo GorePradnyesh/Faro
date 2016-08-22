@@ -52,6 +52,7 @@ public class CreateNewEvent extends Activity {
 
     //public static final int NO_CHANGES = 0;
     static EventListHandler eventListHandler = EventListHandler.getInstance();
+    static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
 
     private Calendar startDateCalendar = Calendar.getInstance();
     private Calendar endDateCalendar = Calendar.getInstance();
@@ -167,6 +168,7 @@ public class CreateNewEvent extends Activity {
                                     //Since update to server successful, adding event to List and Map below
                                     Log.i(TAG, "Event Create Response received Successfully");
                                     eventListHandler.addEventToListAndMap(receivedEvent, EventInviteStatus.ACCEPTED);
+                                    assignmentListHandler.addAssignmentToListAndMap(receivedEvent.getAssignment());
                                     EventLanding.putExtra("eventID", receivedEvent.getEventId());
                                     startActivity(EventLanding);
                                     finish();
