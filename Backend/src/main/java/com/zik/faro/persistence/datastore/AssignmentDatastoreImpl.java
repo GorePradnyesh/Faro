@@ -138,7 +138,7 @@ public class AssignmentDatastoreImpl {
         		}
         	}
         	if(removeItem){
-        		existingList.remove(i+1);
+        		existingList.remove(i);
         	}
         	existingList.add(item);
         }

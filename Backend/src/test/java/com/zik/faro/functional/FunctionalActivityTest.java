@@ -65,7 +65,7 @@ public class FunctionalActivityTest {
     }
     
     @SuppressWarnings("deprecation")
-    private static void assertCreatedEntity(Activity activityRequest, Activity activityResponse){
+    public static void assertCreatedEntity(Activity activityRequest, Activity activityResponse){
         Assert.assertNotNull(activityResponse.getId());
         Assert.assertEquals(activityRequest.getEventId(), activityResponse.getEventId());
         Assert.assertEquals(activityRequest.getDescription(), activityResponse.getDescription());

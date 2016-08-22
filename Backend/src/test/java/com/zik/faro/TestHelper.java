@@ -154,6 +154,31 @@ public class TestHelper {
     	
     }
     
+    public static ClientResponse doPOST(String uri, String path, String authToken,
+    		Object postData, MultivaluedMap<String, String> queryParams) throws IOException{
+    	
+    	Client client = RestClient.getInstance().getClient();
+        WebResource webResource = client.resource(uri);
+        String data;
+        if(postData.getClass().equals(String.class)){
+        	data = (String) postData;
+        }else{
+        	data = mapper.writeValueAsString(postData);
+        }
+         
+        System.out.println(data);
+        ClientResponse response = webResource
+                .path(path)
+                .queryParams(queryParams)
+                .header("Content-Type", MediaType.APPLICATION_JSON_TYPE)
+                .header("authentication", authToken)
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .post(ClientResponse.class,data);
+        Assert.assertNotNull(response);
+        return response;
+    	
+    }
+    
     public static ClientResponse doGET(String uri, String path,
     		MultivaluedMap<String, String> queryParams, String authToken) throws IOException{
     	Client client = RestClient.getInstance().getClient();
