@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.zik.faro.data.ActionStatus;
 import com.zik.faro.data.Item;
+import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -21,6 +22,8 @@ public class ItemsAdapter extends ArrayAdapter {
     public List<Item> list = new LinkedList<>();
 
     private Context context;
+
+    FaroUserContext faroUserContext = FaroUserContext.getInstance();
 
     private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
 
@@ -33,10 +36,6 @@ public class ItemsAdapter extends ArrayAdapter {
         return this.list.size();
     }
 
-    public void insert(Item item, int index) {
-        list.add(index, item);
-        //super.insert(item, index);
-    }
 
     public void insertAtBeginning(Item item){
         list.add(0, item);
@@ -76,14 +75,16 @@ public class ItemsAdapter extends ArrayAdapter {
         ImgHolder holder = new ImgHolder();
 
         switch ((String)parent.getTag()){
-            case "CreateNewAssignment":
-                if (item.getId() != null){
+            case "EditAssignment":
+             /*   if (item.getId() != null){
                     row = inflater.inflate(R.layout.item_cant_edit_row_style, parent, false);
-                }else{
+                }else{*/
                     row = inflater.inflate(R.layout.item_can_edit_row_style, parent, false);
                     holder.DELETE_ITEM = (ImageButton) row.findViewById(R.id.deleteItem);
                     holder.DELETE_ITEM.setImageResource(R.drawable.delete);
                     holder.DELETE_ITEM.setId(position);
+                    holder.DELETE_ITEM.setFocusable(false);
+                    holder.DELETE_ITEM.setFocusableInTouchMode(false);
                     holder.DELETE_ITEM.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -94,7 +95,7 @@ public class ItemsAdapter extends ArrayAdapter {
                             notifyDataSetChanged();
                         }
                     });
-                }
+                //}
                 holder.ITEM_NAME = (TextView) row.findViewById(R.id.itemName);
                 holder.ITEM_COUNT = (TextView) row.findViewById(R.id.itemCount);
                 holder.ITEM_UNIT = (TextView) row.findViewById(R.id.itemUnit);
@@ -103,7 +104,7 @@ public class ItemsAdapter extends ArrayAdapter {
 
                 holder.ITEM_NAME.setText(item.getName());
                 break;
-            case "AssignmentLandingPageIntent":
+            case "AssignmentLandingPageTabsIntent":
                 row = inflater.inflate(R.layout.assignment_update_item_row_style, parent, false);
                 holder.ITEM_CHECKBOX = (CheckBox) row.findViewById(R.id.itemCheckBox);
                 holder.ITEM_COUNT = (TextView) row.findViewById(R.id.itemCount);
@@ -111,63 +112,46 @@ public class ItemsAdapter extends ArrayAdapter {
                 holder.ASSIGNEE_NAME = (TextView) row.findViewById(R.id.asigneeName);
                 row.setTag(holder);
 
-                holder.ITEM_CHECKBOX.setText(item.getName());
-                holder.ITEM_CHECKBOX.setId(position);
-                if (item.getStatus() == ActionStatus.COMPLETE) {
-                    holder.ITEM_CHECKBOX.setChecked(true);
-                }else{
-                    holder.ITEM_CHECKBOX.setChecked(false);
-                }
-                holder.ITEM_CHECKBOX.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        CheckBox clickedCheckBox = (CheckBox)v;
-                        int viewPosition = clickedCheckBox.getId();
-                        if (clickedCheckBox.isChecked()){
-                            Item clickedItem = (Item) getItem(viewPosition);
-                            clickedItem.setStatus(ActionStatus.COMPLETE);
-                            list.remove(clickedItem);
-                            list.add(clickedItem);
-                            notifyDataSetChanged();
-                        }else{
-                            Item clickedItem = (Item) getItem(viewPosition);
-                            clickedItem.setStatus(ActionStatus.INCOMPLETE);
-                            list.remove(clickedItem);
-                            list.add(0, clickedItem);
-                            notifyDataSetChanged();
-                        }
+                String myUserId = faroUserContext.getEmail();
+                if(myUserId.equals(item.getAssigneeId())){
+                    holder.ITEM_CHECKBOX.setText(item.getName());
+                    holder.ITEM_CHECKBOX.setId(position);
+                    if (item.getStatus() == ActionStatus.COMPLETE) {
+                        holder.ITEM_CHECKBOX.setChecked(true);
+                    }else{
+                        holder.ITEM_CHECKBOX.setChecked(false);
                     }
-                });
-                break;
-            case "EditAssignment":
-                if (item.getStatus().equals(ActionStatus.INCOMPLETE)) {
-                    row = inflater.inflate(R.layout.item_cant_edit_row_style, parent, false);
-                    holder.ITEM_NAME = (TextView) row.findViewById(R.id.itemName);
-                    holder.DELETE_ITEM = (ImageButton) row.findViewById(R.id.deleteItem);
-                }else{
-                    row = inflater.inflate(R.layout.assignment_edit_completed_item_row_style, parent, false);
-                    holder.ITEM_NAME = (TextView) row.findViewById(R.id.itemName);
-                }
-                holder.ITEM_NAME.setText(item.getName());
-                holder.ITEM_COUNT = (TextView) row.findViewById(R.id.itemCount);
-                holder.ITEM_UNIT = (TextView) row.findViewById(R.id.itemUnit);
-                holder.ASSIGNEE_NAME = (TextView) row.findViewById(R.id.asigneeName);
-                row.setTag(holder);
-
-                if (item.getStatus().equals(ActionStatus.INCOMPLETE)) {
-                    holder.DELETE_ITEM.setImageResource(R.drawable.delete);
-                    holder.DELETE_ITEM.setId(position);
-                    holder.DELETE_ITEM.setOnClickListener(new View.OnClickListener() {
+                    holder.ITEM_CHECKBOX.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            ImageButton imageButton = (ImageButton) v;
-                            int viewPosition = imageButton.getId();
-                            Item removeItem = (Item) getItem(viewPosition);
-                            list.remove(removeItem);
-                            notifyDataSetChanged();
+                            CheckBox clickedCheckBox = (CheckBox)v;
+                            int viewPosition = clickedCheckBox.getId();
+                            if (clickedCheckBox.isChecked()){
+                                Item clickedItem = (Item) getItem(viewPosition);
+                                clickedItem.setStatus(ActionStatus.COMPLETE);
+                                list.remove(clickedItem);
+                                insertAtEnd(clickedItem);
+                                notifyDataSetChanged();
+                            }else{
+                                Item clickedItem = (Item) getItem(viewPosition);
+                                clickedItem.setStatus(ActionStatus.INCOMPLETE);
+                                list.remove(clickedItem);
+                                insertAtBeginning(clickedItem);
+                                notifyDataSetChanged();
+                            }
                         }
                     });
+                }else{
+                    holder.ITEM_CHECKBOX.setText(item.getName());
+                    holder.ITEM_CHECKBOX.setId(position);
+                    holder.ITEM_CHECKBOX.setClickable(false);
+                    if (item.getStatus() == ActionStatus.COMPLETE) {
+                        holder.ITEM_CHECKBOX.setChecked(true);
+                    }else{
+                        holder.ITEM_CHECKBOX.setChecked(false);
+                    }
                 }
+                break;
         }
 
         holder.ITEM_COUNT.setText(String.valueOf(item.getCount()));

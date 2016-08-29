@@ -31,7 +31,6 @@ public class EventAdapter extends ArrayAdapter {
 
     public void insert(Event event, int index) {
         list.add(index, event);
-        super.insert(event, index);
     }
 
     @Override

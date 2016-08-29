@@ -7,7 +7,6 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTabHost;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 
 public class AppLandingPage extends FragmentActivity{
@@ -23,8 +22,9 @@ public class AppLandingPage extends FragmentActivity{
     private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
     private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
     private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
-    static PollListHandler pollListHandler = PollListHandler.getInstance();
+    private static PollListHandler pollListHandler = PollListHandler.getInstance();
     private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
+    private static MyItemListHandler myItemListHandler = MyItemListHandler.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +75,10 @@ public class AppLandingPage extends FragmentActivity{
             pollListHandler.closedPollsAdapter = new PollAdapter(this, R.layout.poll_list_page_row_style);
         }
 
+        if (myItemListHandler.myItemsAdapter == null) {
+            myItemListHandler.myItemsAdapter = new ItemsAdapter(this, R.layout.assignment_update_item_row_style);
+        }
+
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
         mTabHost = (FragmentTabHost) findViewById(android.R.id.tabhost);
         mTabHost.setup(this, getSupportFragmentManager(), android.R.id.tabcontent);
@@ -104,7 +108,7 @@ public class AppLandingPage extends FragmentActivity{
     }
 
     private View getTabIndicator(Context context, int icon) {
-        View view = LayoutInflater.from(context).inflate(R.layout.tab_layout, null);
+        View view = LayoutInflater.from(context).inflate(R.layout.app_landing_tab_layout, null);
         ImageView iv = (ImageView) view.findViewById(R.id.imageView);
         iv.setImageResource(icon);
         return view;

@@ -16,6 +16,7 @@ import android.widget.TextView;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.Event;
@@ -35,6 +36,7 @@ public class EventLandingPage extends Activity {
     private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
     private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
     private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
+    private static MyItemListHandler myItemListHandler = MyItemListHandler.getInstance();
 
     private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
 
@@ -87,8 +89,7 @@ public class EventLandingPage extends Activity {
         final Intent EditEvent = new Intent(EventLandingPage.this, EditEvent.class);
         final Intent ActivityListPage = new Intent(EventLandingPage.this, ActivityListPage.class);
         final Intent InviteFriendToEventPage = new Intent(EventLandingPage.this, InviteFriendToEventPage.class);
-        final Intent CreateEventAssignment = new Intent(EventLandingPage.this, CreateNewAssignment.class);
-        final Intent AssignmentLandingPage = new Intent(EventLandingPage.this, AssignmentLandingPage.class);
+        final Intent AssignmentLandingPageTabsIntent = new Intent(EventLandingPage.this, AssignmentLandingPageTabs.class);
         EventLandingPageReload = new Intent(EventLandingPage.this, EventLandingPage.class);
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
@@ -138,78 +139,105 @@ public class EventLandingPage extends Activity {
                     }
                 });
 
+                pollButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        PollListPage.putExtra("eventID", eventID);
+                        startActivity(PollListPage);
+                    }
+                });
+
+                eventAssignmentButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        AssignmentLandingPageTabsIntent.putExtra("eventID", eventID);
+                        AssignmentLandingPageTabsIntent.putExtra("assignmentID", cloneEvent.getAssignment().getId());
+                        startActivity(AssignmentLandingPageTabsIntent);
+                    }
+                });
+
+                activityButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ActivityListPage.putExtra("eventID", eventID);
+                        startActivity(ActivityListPage);
+                    }
+                });
+
+                addFriendsButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        InviteFriendToEventPage.putExtra("eventID", eventID);
+                        startActivity(InviteFriendToEventPage);
+                        finish();
+                    }
+                });
+
+                editButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        EditEvent.putExtra("eventID", eventID);
+                        startActivity(EditEvent);
+                        finish();
+                    }
+                });
+
+                serviceHandler.getEventHandler().getEventInvitees(new BaseFaroRequestCallback<InviteeList>() {
+                    @Override
+                    public void onFailure(Request request, IOException ex) {
+                        Log.e(TAG, "failed to get cloneEvent Invitees");
+                    }
+
+                    @Override
+                    public void onResponse(final InviteeList inviteeList, HttpError error) {
+                        if (error == null) {
+                            Runnable myRunnable = new Runnable() {
+                                @Override
+                                public void run() {
+                                    Log.i(TAG, "Successfully received Invitee List for the cloneEvent");
+                                    eventFriendListHandler.addDownloadedFriendsToListAndMap(inviteeList);
+                                }
+                            };
+                            Handler mainHandler = new Handler(mContext.getMainLooper());
+                            mainHandler.post(myRunnable);
+                        } else {
+                            Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                        }
+                    }
+                }, eventID);
+
+                //Add event's assignment to the Assignment Handler
                 assignmentListHandler.addAssignmentToListAndMap(cloneEvent.getAssignment());
 
+                //Make API call to get all activities for this event
+                serviceHandler.getActivityHandler().getActivities(new BaseFaroRequestCallback<List<com.zik.faro.data.Activity>>() {
+                    @Override
+                    public void onFailure(Request request, IOException ex) {
+                        Log.e(TAG, "failed to get activity list");
+                    }
+
+                    @Override
+                    public void onResponse(final List<com.zik.faro.data.Activity> activities, HttpError error) {
+                        if (error == null) {
+                            Runnable myRunnable = new Runnable() {
+                                @Override
+                                public void run() {
+                                    Log.i(TAG, "Successfully received activities from the server!!");
+                                    activityListHandler.addDownloadedActivitiesToListAndMap(activities);
+                                }
+                            };
+                            Handler mainHandler = new Handler(mContext.getMainLooper());
+                            mainHandler.post(myRunnable);
+                        } else {
+                            Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                        }
+
+                    }
+                }, eventID);
             }
         }
-
-        pollButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                PollListPage.putExtra("eventID", eventID);
-                startActivity(PollListPage);
-            }
-        });
-
-        eventAssignmentButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AssignmentLandingPage.putExtra("eventID", eventID);
-                AssignmentLandingPage.putExtra("assignmentID", cloneEvent.getAssignment().getId());
-                startActivity(AssignmentLandingPage);
-            }
-        });
-
-        activityButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ActivityListPage.putExtra("eventID", eventID);
-                startActivity(ActivityListPage);
-            }
-        });
-
-        addFriendsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                InviteFriendToEventPage.putExtra("eventID", eventID);
-                startActivity(InviteFriendToEventPage);
-                finish();
-            }
-        });
-
-        editButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                EditEvent.putExtra("eventID", eventID);
-                startActivity(EditEvent);
-                finish();
-            }
-        });
-
-        serviceHandler.getEventHandler().getEventInvitees(new BaseFaroRequestCallback<InviteeList>() {
-            @Override
-            public void onFailure(Request request, IOException ex) {
-                Log.e(TAG, "failed to get cloneEvent Invitees");
-            }
-
-            @Override
-            public void onResponse(final InviteeList inviteeList, HttpError error) {
-                if (error == null ) {
-                    Runnable myRunnable = new Runnable() {
-                        @Override
-                        public void run() {
-                            Log.i(TAG, "Successfully received Invitee List for the cloneEvent");
-                            eventFriendListHandler.addDownloadedFriendsToListAndMap(inviteeList);
-                        }
-                    };
-                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                    mainHandler.post(myRunnable);
-                }else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
-                }
-            }
-        }, eventID);
     }
+
 
     private void updateUserEventInviteStatus(final EventInviteStatus eventInviteStatus) {
         serviceHandler.getEventHandler().updateEventUserInviteStatus(new BaseFaroRequestCallback<String>() {
@@ -301,6 +329,8 @@ public class EventLandingPage extends Activity {
         pollListHandler.clearPollListsAndMap();
         activityListHandler.clearActivityListAndMap();
         eventFriendListHandler.clearFriendListAndMap();
+        assignmentListHandler.clearAssignmentListAndMap();
+        myItemListHandler.clearMyItemsList();
         finish();
         super.onBackPressed();
     }

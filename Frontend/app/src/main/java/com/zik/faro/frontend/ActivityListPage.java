@@ -110,32 +110,5 @@ public class ActivityListPage extends android.app.Activity {
                 startActivity(createNewActivityPage);
             }
         });
-
-
-        //Make API call to get all activities for this event
-        serviceHandler.getActivityHandler().getActivities(new BaseFaroRequestCallback<List<Activity>>() {
-            @Override
-            public void onFailure(Request request, IOException ex) {
-                Log.e(TAG, "failed to get activity list");
-            }
-
-            @Override
-            public void onResponse(final List<Activity> activities, HttpError error) {
-                if (error == null ) {
-                    Runnable myRunnable = new Runnable() {
-                        @Override
-                        public void run() {
-                            Log.i(TAG, "Successfully received activities from the server!!");
-                            activityListHandler.addDownloadedActivitiesToListAndMap(activities);
-                        }
-                    };
-                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                    mainHandler.post(myRunnable);
-                }else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
-                }
-
-            }
-        }, eventID);
     }
 }

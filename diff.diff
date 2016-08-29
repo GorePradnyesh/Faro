@@ -1,0 +1,1332 @@
+diff --git a/Backend/src/main/java/com/zik/faro/data/Item.java b/Backend/src/main/java/com/zik/faro/data/Item.java
+index 4d97300..95683b2 100644
+--- a/Backend/src/main/java/com/zik/faro/data/Item.java
++++ b/Backend/src/main/java/com/zik/faro/data/Item.java
+@@ -25,7 +25,7 @@ public class Item {
+     public Item(String name, String assigneeId, int count, Unit unit) throws IllegalDataOperation {
+         this(name,assigneeId,count,unit,Identifier.createUniqueIdentifierString());
+     }
+-    
++
+     public String getId() {
+         return id;
+     }
+diff --git a/Frontend/app/src/main/AndroidManifest.xml b/Frontend/app/src/main/AndroidManifest.xml
+index 93a52c1..4719e1b 100644
+--- a/Frontend/app/src/main/AndroidManifest.xml
++++ b/Frontend/app/src/main/AndroidManifest.xml
+@@ -73,12 +73,6 @@
+             android:name=".EditActivity"
+             android:label="@string/title_activity_edit" />
+         <activity
+-            android:name=".CreateNewAssignment"
+-            android:label="@string/title_activity_create_new_assignment" />
+-        <activity
+-            android:name=".AssignmentLandingPage"
+-            android:label="@string/title_activity_assignment_landing_page" />
+-        <activity
+             android:name=".EditAssignment"
+             android:label="@string/title_activity_edit_assignment" />
+         <activity
+@@ -87,6 +81,9 @@
+         <activity
+             android:name=".InviteFriendToEventPage"
+             android:label="InviteFriendToEventPage" />
++        <activity
++            android:name=".AssignmentLandingPageTabs"
++            android:label="AssignmentLandingPageTabs" />
+     </application>
+ 
+ </manifest>
+\ No newline at end of file
+diff --git a/Frontend/app/src/main/java/com/zik/faro/frontend/ActivityAdapter.java b/Frontend/app/src/main/java/com/zik/faro/frontend/ActivityAdapter.java
+index 90306fa..b4b5efd 100644
+--- a/Frontend/app/src/main/java/com/zik/faro/frontend/ActivityAdapter.java
++++ b/Frontend/app/src/main/java/com/zik/faro/frontend/ActivityAdapter.java
+@@ -34,7 +34,6 @@ public class ActivityAdapter extends ArrayAdapter{
+ 
+     public void insert(Activity activity, int index) {
+         list.add(index, activity);
+-        super.insert(activity, index);
+     }
+ 
+     @Override
+diff --git a/Frontend/app/src/main/java/com/zik/faro/frontend/ActivityLandingPage.java b/Frontend/app/src/main/java/com/zik/faro/frontend/ActivityLandingPage.java
+index a213942..6281b7d 100644
+--- a/Frontend/app/src/main/java/com/zik/faro/frontend/ActivityLandingPage.java
++++ b/Frontend/app/src/main/java/com/zik/faro/frontend/ActivityLandingPage.java
+@@ -2,7 +2,6 @@ package com.zik.faro.frontend;
+ 
+ import android.content.Intent;
+ import android.os.Bundle;
+-import android.support.v7.app.ActionBarActivity;
+ import android.view.View;
+ import android.widget.ImageButton;
+ import android.widget.TextView;
+@@ -17,10 +16,11 @@ public class ActivityLandingPage extends android.app.Activity {
+ 
+     private DateFormat sdf = new SimpleDateFormat(" EEE, MMM d, yyyy");
+     private DateFormat stf = new SimpleDateFormat("hh:mm a");
+-    private static Activity activity = null;
+-    private static Event event = null;
++    private static Activity cloneActivity = null;
++    private static Event cloneEvent = null;
+     private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
+     private static EventListHandler eventListHandler = EventListHandler.getInstance();
++    private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
+ 
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+@@ -34,8 +34,7 @@ public class ActivityLandingPage extends android.app.Activity {
+         activityAssignmentButton.setImageResource(R.drawable.assignment_icon);
+ 
+         final Intent EditActivityPage = new Intent(ActivityLandingPage.this, EditActivity.class);
+-        final Intent CreateActivityAssignment = new Intent(ActivityLandingPage.this, CreateNewAssignment.class);
+-        final Intent AssignmentLandingPage = new Intent(ActivityLandingPage.this, AssignmentLandingPage.class);
++        final Intent AssignmentLandingPageTabs = new Intent(ActivityLandingPage.this, AssignmentLandingPageTabs.class);
+ 
+         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
+ 
+@@ -43,31 +42,32 @@ public class ActivityLandingPage extends android.app.Activity {
+         if(extras != null) {
+             String eventID = extras.getString("eventID");
+             String activityID = extras.getString("activityID");
+-            event = eventListHandler.getEventCloneFromMap(eventID);
+-            activity = activityListHandler.getActivityCloneFromMap(activityID);
++            cloneEvent = eventListHandler.getEventCloneFromMap(eventID);
++            cloneActivity = activityListHandler.getActivityCloneFromMap(activityID);
+ 
+             if (activityID != null){
+                 TextView activityName = (TextView) findViewById(R.id.activityNameText);
+-                activityName.setText(activity.getName());
++                activityName.setText(cloneActivity.getName());
+ 
+                 TextView activityDescription = (TextView) findViewById(R.id.activityDescriptionTextView);
+-                activityDescription.setText(activity.getDescription());
++                activityDescription.setText(cloneActivity.getDescription());
+ 
+                 TextView startDateAndTime = (TextView)findViewById(R.id.startDateAndTimeDisplay);
+-                startDateAndTime.setText(sdf.format(activity.getStartDate().getTime()) + " at " +
+-                        stf.format(activity.getStartDate().getTime()));
++                startDateAndTime.setText(sdf.format(cloneActivity.getStartDate().getTime()) + " at " +
++                        stf.format(cloneActivity.getStartDate().getTime()));
+ 
+                 TextView endDateAndTime = (TextView)findViewById(R.id.endDateAndTimeDisplay);
+-                endDateAndTime.setText(sdf.format(activity.getEndDate().getTime()) + " at " +
+-                        stf.format(activity.getEndDate().getTime()));
++                endDateAndTime.setText(sdf.format(cloneActivity.getEndDate().getTime()) + " at " +
++                        stf.format(cloneActivity.getEndDate().getTime()));
+             }
++            assignmentListHandler.addAssignmentToListAndMap(cloneActivity.getAssignment());
+         }
+ 
+         editButton.setOnClickListener(new View.OnClickListener() {
+             @Override
+             public void onClick(View v) {
+-                EditActivityPage.putExtra("eventID", event.getEventId());
+-                EditActivityPage.putExtra("activityID", activity.getId());
++                EditActivityPage.putExtra("eventID", cloneEvent.getEventId());
++                EditActivityPage.putExtra("activityID", cloneActivity.getId());
+                 startActivity(EditActivityPage);
+                 finish();
+             }
+@@ -76,24 +76,18 @@ public class ActivityLandingPage extends android.app.Activity {
+         activityAssignmentButton.setOnClickListener(new View.OnClickListener() {
+             @Override
+             public void onClick(View v) {
+-                if (activity.getAssignment() == null) {
+-                    CreateActivityAssignment.putExtra("eventID", event.getEventId());
+-                    CreateActivityAssignment.putExtra("activityID", activity.getId());
+-                    startActivity(CreateActivityAssignment);
+-                }else{
+-                    AssignmentLandingPage.putExtra("eventID", event.getEventId());
+-                    AssignmentLandingPage.putExtra("activityID", activity.getId());
+-                    AssignmentLandingPage.putExtra("assignmentID", activity.getAssignment().getId());
+-                    startActivity(AssignmentLandingPage);
+-                }
++                AssignmentLandingPageTabs.putExtra("eventID", cloneEvent.getEventId());
++                AssignmentLandingPageTabs.putExtra("activityID", cloneActivity.getId());
++                AssignmentLandingPageTabs.putExtra("assignmentID", cloneActivity.getAssignment().getId());
++                startActivity(AssignmentLandingPageTabs);
+             }
+         });
+     }
+ 
+     @Override
+     public void onBackPressed() {
+-        activityListHandler.deleteActivityFromMapIfNotInList(activity);
+-        //TODO: Probably will need to clear the AssignmentList and Map here for the activity's assignments
++        activityListHandler.deleteActivityFromMapIfNotInList(cloneActivity);
++        //TODO: Probably will need to clear the AssignmentList and Map here for the cloneActivity's assignments
+         finish();
+         super.onBackPressed();
+     }
+diff --git a/Frontend/app/src/main/java/com/zik/faro/frontend/ActivityListHandler.java b/Frontend/app/src/main/java/com/zik/faro/frontend/ActivityListHandler.java
+index 963e21c..6b5b08c 100644
+--- a/Frontend/app/src/main/java/com/zik/faro/frontend/ActivityListHandler.java
++++ b/Frontend/app/src/main/java/com/zik/faro/frontend/ActivityListHandler.java
+@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
+ public class ActivityListHandler{
+     public static final int MAX_ACTIVITIES_PAGE_SIZE = 100;
+     private static final int MAX_TOTAL_ACTIVITIES_IN_CACHE = 500;
+-
++    private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
+ 
+     public ActivityAdapter activityAdapter;
+ 
+@@ -87,7 +87,9 @@ public class ActivityListHandler{
+ 
+     public void addDownloadedActivitiesToListAndMap(List <Activity> activityList){
+         for (int i = 0; i < activityList.size(); i++){
+-            addActivityToListAndMap(activityList.get(i));
++            Activity activity = activityList.get(i);
++            addActivityToListAndMap(activity);
++            assignmentListHandler.addAssignmentToListAndMap(activity.getAssignment());
+         }
+         activityAdapter.notifyDataSetChanged();
+     }
+diff --git a/Frontend/app/src/main/java/com/zik/faro/frontend/ActivityListPage.java b/Frontend/app/src/main/java/com/zik/faro/frontend/ActivityListPage.java
+index 5f78e5c..828422d 100644
+--- a/Frontend/app/src/main/java/com/zik/faro/frontend/ActivityListPage.java
++++ b/Frontend/app/src/main/java/com/zik/faro/frontend/ActivityListPage.java
+@@ -110,32 +110,5 @@ public class ActivityListPage extends android.app.Activity {
+                 startActivity(createNewActivityPage);
+             }
+         });
+-
+-
+-        //Make API call to get all activities for this event
+-        serviceHandler.getActivityHandler().getActivities(new BaseFaroRequestCallback<List<Activity>>() {
+-            @Override
+-            public void onFailure(Request request, IOException ex) {
+-                Log.e(TAG, "failed to get activity list");
+-            }
+-
+-            @Override
+-            public void onResponse(final List<Activity> activities, HttpError error) {
+-                if (error == null ) {
+-                    Runnable myRunnable = new Runnable() {
+-                        @Override
+-                        public void run() {
+-                            Log.i(TAG, "Successfully received activities from the server!!");
+-                            activityListHandler.addDownloadedActivitiesToListAndMap(activities);
+-                        }
+-                    };
+-                    Handler mainHandler = new Handler(mContext.getMainLooper());
+-                    mainHandler.post(myRunnable);
+-                }else {
+-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+-                }
+-
+-            }
+-        }, eventID);
+     }
+ }
+diff --git a/Frontend/app/src/main/java/com/zik/faro/frontend/AppLandingPage.java b/Frontend/app/src/main/java/com/zik/faro/frontend/AppLandingPage.java
+index ee9a3c8..c6ce003 100644
+--- a/Frontend/app/src/main/java/com/zik/faro/frontend/AppLandingPage.java
++++ b/Frontend/app/src/main/java/com/zik/faro/frontend/AppLandingPage.java
+@@ -7,7 +7,6 @@ import android.support.v4.app.FragmentActivity;
+ import android.support.v4.app.FragmentTabHost;
+ import android.view.LayoutInflater;
+ import android.view.View;
+-import android.widget.Button;
+ import android.widget.ImageView;
+ 
+ public class AppLandingPage extends FragmentActivity{
+@@ -23,8 +22,9 @@ public class AppLandingPage extends FragmentActivity{
+     private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
+     private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
+     private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
+-    static PollListHandler pollListHandler = PollListHandler.getInstance();
++    private static PollListHandler pollListHandler = PollListHandler.getInstance();
+     private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
++    private static MyItemListHandler myItemListHandler = MyItemListHandler.getInstance();
+ 
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+@@ -75,6 +75,10 @@ public class AppLandingPage extends FragmentActivity{
+             pollListHandler.closedPollsAdapter = new PollAdapter(this, R.layout.poll_list_page_row_style);
+         }
+ 
++        if (myItemListHandler.myItemsAdapter == null) {
++            myItemListHandler.myItemsAdapter = new ItemsAdapter(this, R.layout.assignment_update_item_row_style);
++        }
++
+         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
+         mTabHost = (FragmentTabHost) findViewById(android.R.id.tabhost);
+         mTabHost.setup(this, getSupportFragmentManager(), android.R.id.tabcontent);
+@@ -104,7 +108,7 @@ public class AppLandingPage extends FragmentActivity{
+     }
+ 
+     private View getTabIndicator(Context context, int icon) {
+-        View view = LayoutInflater.from(context).inflate(R.layout.tab_layout, null);
++        View view = LayoutInflater.from(context).inflate(R.layout.app_landing_tab_layout, null);
+         ImageView iv = (ImageView) view.findViewById(R.id.imageView);
+         iv.setImageResource(icon);
+         return view;
+diff --git a/Frontend/app/src/main/java/com/zik/faro/frontend/AssignmentAdapter.java b/Frontend/app/src/main/java/com/zik/faro/frontend/AssignmentAdapter.java
+index c0f0afd..9b2bbe7 100644
+--- a/Frontend/app/src/main/java/com/zik/faro/frontend/AssignmentAdapter.java
++++ b/Frontend/app/src/main/java/com/zik/faro/frontend/AssignmentAdapter.java
+@@ -25,7 +25,6 @@ public class AssignmentAdapter extends ArrayAdapter{
+ 
+     public void insert(Assignment assignment, int index) {
+         list.add(index, assignment);
+-        super.insert(assignment, index);
+     }
+ 
+     static class ImgHolder{
+diff --git a/Frontend/app/src/main/java/com/zik/faro/frontend/AssignmentLandingPage.java b/Frontend/app/src/main/java/com/zik/faro/frontend/AssignmentLandingPage.java
+index 6171a9d..c2fb028 100644
+--- a/Frontend/app/src/main/java/com/zik/faro/frontend/AssignmentLandingPage.java
++++ b/Frontend/app/src/main/java/com/zik/faro/frontend/AssignmentLandingPage.java
+@@ -1,124 +1,158 @@
+ package com.zik.faro.frontend;
+ 
+-import android.app.Activity;
++import android.content.Context;
+ import android.content.Intent;
+ import android.os.Bundle;
++import android.os.Handler;
++import android.support.v4.app.Fragment;
++import android.util.Log;
++import android.view.LayoutInflater;
+ import android.view.View;
++import android.view.ViewGroup;
+ import android.widget.Button;
+ import android.widget.ImageButton;
+ import android.widget.ListView;
+ import android.widget.TextView;
+ 
++import com.squareup.okhttp.Request;
+ import com.zik.faro.data.ActionStatus;
+ import com.zik.faro.data.Assignment;
+ import com.zik.faro.data.Event;
+ import com.zik.faro.data.Item;
++import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
++import com.zik.faro.frontend.faroservice.FaroServiceHandler;
++import com.zik.faro.frontend.faroservice.HttpError;
+ 
++import java.io.IOException;
+ import java.util.List;
+ 
+-public class AssignmentLandingPage extends Activity{
++public class AssignmentLandingPage extends Fragment{
+ 
+-    private static Event event;
+-    private static com.zik.faro.data.Activity activity = null;
++    private static Event originalEvent;
++    private static com.zik.faro.data.Activity originalActivity = null;
+     String activityID = null;
+     String eventID = null;
+     String assignmentID = null;
+-    private static Assignment assignment = null;
++    private static Assignment cloneAssignment = null;
++
+     private static EventListHandler eventListHandler = EventListHandler.getInstance();
+     private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
+     private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
++    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
++
++    private static String TAG = "AssignmentLandingPage";
+ 
+     ListView itemList;
+     Intent EventLandingPage;
+     Intent ActivityLandingPage;
+ 
+     @Override
+-    protected void onCreate(Bundle savedInstanceState) {
++    public void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+-        setContentView(R.layout.activity_assignment_landing_page);
+-        Bundle extras = getIntent().getExtras();
+-        if(extras != null) {
+-            eventID = extras.getString("eventID");
+-            event = eventListHandler.getEventCloneFromMap(eventID);
+-
+-            activityID = extras.getString("activityID");
+-            assignmentID = extras.getString("assignmentID");
+-            assignment = assignmentListHandler.getAssignmentCloneFromMap(assignmentID);
+-
+-            final TextView assignmentDescription = (TextView) findViewById(R.id.assignmentDescription);
+-            if (activityID != null) {
+-                activity = activityListHandler.getActivityCloneFromMap(activityID);
+-                assignmentDescription.setText("Assignment for " + activity.getName());
+-            } else {
+-                assignmentDescription.setText("Assignment for " + event.getEventName());
+-            }
++    }
+ 
+-            ImageButton editButton = (ImageButton) findViewById(R.id.editButton);
+-            editButton.setImageResource(R.drawable.edit);
++    @Override
++    public View onCreateView(LayoutInflater inflater, ViewGroup container,
++                             Bundle savedInstanceState) {
++        View view = inflater.inflate(R.layout.activity_assignment_landing_page, container, false);
++        super.onCreate(savedInstanceState);
+ 
+-            Button updateAssignment = (Button) findViewById(R.id.updateAssignment);
++        eventID = getArguments().getString("eventID");
++        activityID = getArguments().getString("activityID");
++        assignmentID = getArguments().getString("assignmentID");
+ 
+-            EventLandingPage = new Intent(AssignmentLandingPage.this, EventLandingPage.class);
+-            ActivityLandingPage = new Intent(AssignmentLandingPage.this, ActivityLandingPage.class);
+-            final Intent EditAssignmentPage = new Intent(AssignmentLandingPage.this, CreateNewAssignment.class);
++        final Context mContext = this.getActivity();
+ 
++        cloneAssignment = assignmentListHandler.getAssignmentCloneFromMap(assignmentID);
+ 
+-            itemList = (ListView) findViewById(R.id.itemList);
+-            itemList.setTag("AssignmentLandingPageIntent");
+-            final ItemsAdapter itemsAdapter = new ItemsAdapter(this, R.layout.assignment_update_item_row_style);
+-            itemList.setAdapter(itemsAdapter);
++        originalEvent = eventListHandler.getOriginalEventFromMap(eventID);
++        final TextView assignmentDescription = (TextView) view.findViewById(R.id.assignmentDescription);
++        if (activityID != null) {
++            originalActivity = activityListHandler.getOriginalActivityFromMap(activityID);
++            assignmentDescription.setText("Assignment for " + originalActivity.getName());
++        } else {
++            assignmentDescription.setText("Assignment for " + originalEvent.getEventName());
++        }
+ 
+-            List<Item> items = assignment.getItems();
+-            for (Integer i = items.size() - 1; i >= 0; i--) {
+-                Item item = items.get(i);
+-                if (item.getStatus().equals(ActionStatus.COMPLETE)) {
+-                    itemsAdapter.insertAtEnd(item);
+-                } else {
+-                    itemsAdapter.insertAtBeginning(item);
+-                }
+-            }
++        ImageButton editButton = (ImageButton) view.findViewById(R.id.editButton);
++        editButton.setImageResource(R.drawable.edit);
+ 
+-            updateAssignment.setOnClickListener(new View.OnClickListener() {
+-                @Override
+-                public void onClick(View v) {
+-                    //TODO Update the server with the update for the items
+-                    assignment.setItems(itemsAdapter.list);
+-                    if (activityID != null) {
+-                        ActivityLandingPage.putExtra("eventID", eventID);
+-                        ActivityLandingPage.putExtra("activityID", activityID);
+-                        startActivity(ActivityLandingPage);
+-                        finish();
+-                    } else {
+-                        EventLandingPage.putExtra("eventID", eventID);
+-                        startActivity(EventLandingPage);
+-                        finish();
++        Button updateAssignment = (Button) view.findViewById(R.id.updateAssignment);
+ 
+-                    }
+-                }
+-            });
+-
+-            editButton.setOnClickListener(new View.OnClickListener() {
+-                @Override
+-                public void onClick(View v) {
+-                    EditAssignmentPage.putExtra("eventID", eventID);
+-                    EditAssignmentPage.putExtra("activityID", activityID);
+-                    EditAssignmentPage.putExtra("assignmentID", assignmentID);
+-                    startActivity(EditAssignmentPage);
+-                    finish();
+-                }
+-            });
+-        }
+-    }
++        EventLandingPage = new Intent(getActivity(), EventLandingPage.class);
++        ActivityLandingPage = new Intent(getActivity(), ActivityLandingPage.class);
++        final Intent EditAssignmentPage = new Intent(getActivity(), EditAssignment.class);
++        final Intent AssignmentLandingPageReloadIntent = new Intent(getActivity(), AssignmentLandingPageTabs.class);
+ 
+-    @Override
+-    public void onBackPressed() {
+-        super.onBackPressed();
+-        if (activityID != null) {
+-            ActivityLandingPage.putExtra("eventID", eventID);
+-            ActivityLandingPage.putExtra("activityID", activityID);
+-            startActivity(ActivityLandingPage);
+-            finish();
+-        } else {
++
++        itemList = (ListView) view.findViewById(R.id.itemList);
++        itemList.setTag("AssignmentLandingPageTabsIntent");
++        final ItemsAdapter itemsAdapter = new ItemsAdapter(getActivity(), R.layout.assignment_update_item_row_style);
++        itemList.setAdapter(itemsAdapter);
++
++        List<Item> items = cloneAssignment.getItems();
++        for (Integer i = items.size() - 1; i >= 0; i--) {
++            Item item = items.get(i);
++            if (item.getStatus().equals(ActionStatus.COMPLETE)) {
++                itemsAdapter.insertAtEnd(item);
++            } else {
++                itemsAdapter.insertAtBeginning(item);
++            }
+         }
++
++        updateAssignment.setOnClickListener(new View.OnClickListener() {
++            @Override
++            public void onClick(View v) {
++                serviceHandler.getAssignmentHandler().updateAssignment(new BaseFaroRequestCallback<String>() {
++                    @Override
++                    public void onFailure(Request request, IOException ex) {
++                        Log.e(TAG, "failed to send new item list");
++                    }
++
++                    @Override
++                    public void onResponse(String s, HttpError error) {
++                        if (error == null ) {
++                            Runnable myRunnable = new Runnable() {
++                                @Override
++                                public void run() {
++                                    Log.i(TAG, "Successfully updated items list to server");
++                                    cloneAssignment.setItems(itemsAdapter.list);
++                                    assignmentListHandler.removeAssignmentFromListAndMap(cloneAssignment.getId());
++                                    if (activityID != null){
++                                        originalActivity.setAssignment(cloneAssignment);
++                                    }else{
++                                        originalEvent.setAssignment(cloneAssignment);
++                                    }
++                                    assignmentListHandler.addAssignmentToListAndMap(cloneAssignment);
++                                    //Reload AssignmentLandingPage
++                                    AssignmentLandingPageReloadIntent.putExtra("eventID", eventID);
++                                    AssignmentLandingPageReloadIntent.putExtra("activityID", activityID);
++                                    AssignmentLandingPageReloadIntent.putExtra("assignmentID", assignmentID);
++                                    getActivity().finish();
++                                    startActivity(AssignmentLandingPageReloadIntent);
++                                }
++                            };
++                            Handler mainHandler = new Handler(mContext.getMainLooper());
++                            mainHandler.post(myRunnable);
++                        }else {
++                            Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
++                        }
++
++                    }
++                }, eventID, cloneAssignment.getId(), activityID, itemsAdapter.list);
++            }
++        });
++
++        editButton.setOnClickListener(new View.OnClickListener() {
++            @Override
++            public void onClick(View v) {
++                EditAssignmentPage.putExtra("eventID", eventID);
++                EditAssignmentPage.putExtra("activityID", activityID);
++                EditAssignmentPage.putExtra("assignmentID", assignmentID);
++                startActivity(EditAssignmentPage);
++                getActivity().finish();
++            }
++        });
++        return view;
+     }
+ }
+diff --git a/Frontend/app/src/main/java/com/zik/faro/frontend/AssignmentLandingPageTabs.java b/Frontend/app/src/main/java/com/zik/faro/frontend/AssignmentLandingPageTabs.java
+index c24fcf4..a4d4163 100644
+--- a/Frontend/app/src/main/java/com/zik/faro/frontend/AssignmentLandingPageTabs.java
++++ b/Frontend/app/src/main/java/com/zik/faro/frontend/AssignmentLandingPageTabs.java
+@@ -1,8 +1,56 @@
+ package com.zik.faro.frontend;
+ 
+-/**
+- * Created by nakulshah on 8/26/16.
+- */
+ 
+-public class AssignmentLandingPageTabs {
++import android.content.Context;
++import android.os.Bundle;
++import android.support.v4.app.Fragment;
++import android.support.v4.app.FragmentActivity;
++import android.support.v4.app.FragmentManager;
++import android.support.v4.app.FragmentTabHost;
++import android.view.LayoutInflater;
++import android.view.View;
++import android.widget.TextView;
++
++public class AssignmentLandingPageTabs extends FragmentActivity {
++    private FragmentTabHost mTabHost;
++
++
++    String activityID = null;
++    String eventID = null;
++    String assignmentID = null;
++
++    @Override
++    protected void onCreate(Bundle savedInstanceState) {
++        super.onCreate(savedInstanceState);
++        setContentView(R.layout.activity_assignment_landing_page_tabs);
++
++        Bundle extras = getIntent().getExtras();
++        if(extras != null) {
++            eventID = extras.getString("eventID");
++            activityID = extras.getString("activityID");
++            assignmentID = extras.getString("assignmentID");
++
++            Bundle bundle = new Bundle();
++            bundle.putString("eventID", eventID);
++            bundle.putString("activityID", activityID);
++            bundle.putString("assignmentID", assignmentID);
++
++            Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
++            mTabHost = (FragmentTabHost) findViewById(android.R.id.tabhost);
++            mTabHost.setup(this, getSupportFragmentManager(), android.R.id.tabcontent);
++            mTabHost.addTab(
++                    mTabHost.newTabSpec("tab1").setIndicator(getTabIndicator(mTabHost.getContext(), "All Items")),
++                    AssignmentLandingPage.class, bundle);
++            mTabHost.addTab(
++                    mTabHost.newTabSpec("tab2").setIndicator(getTabIndicator(mTabHost.getContext(), "My Items")),
++                    MoreOptionsPage.class, bundle);
++        }
++    }
++
++    private View getTabIndicator(Context context, String tabText) {
++        View view = LayoutInflater.from(context).inflate(R.layout.assignment_landing_tab_layout, null);
++        TextView tabTextView = (TextView)view.findViewById(R.id.tabTextView);
++        tabTextView.setText(tabText);
++        return view;
++    }
+ }
+diff --git a/Frontend/app/src/main/java/com/zik/faro/frontend/AssignmentListHandler.java b/Frontend/app/src/main/java/com/zik/faro/frontend/AssignmentListHandler.java
+index 9d345a1..eec1c61 100644
+--- a/Frontend/app/src/main/java/com/zik/faro/frontend/AssignmentListHandler.java
++++ b/Frontend/app/src/main/java/com/zik/faro/frontend/AssignmentListHandler.java
+@@ -1,10 +1,9 @@
+ package com.zik.faro.frontend;
+ 
+ import com.google.gson.Gson;
+-import com.zik.faro.data.Activity;
+ import com.zik.faro.data.Assignment;
+-import com.zik.faro.data.Event;
+-import com.zik.faro.data.Poll;
++import com.zik.faro.data.Item;
++import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
+ 
+ import java.util.List;
+ import java.util.Map;
+@@ -34,6 +33,9 @@ public class AssignmentListHandler {
+ 
+     public AssignmentAdapter assignmentAdapter;
+ 
++    FaroUserContext faroUserContext = FaroUserContext.getInstance();
++    private static MyItemListHandler myItemListHandler = MyItemListHandler.getInstance();
++
+     /*
+     * Map of assignments needed to access assignments downloaded from the server in O(1) time. The Key to the
+     * Map is the assignmentID String which returns the Assignment as the value
+@@ -41,9 +43,17 @@ public class AssignmentListHandler {
+     private Map<String, Assignment> assignmentMap = new ConcurrentHashMap<>();
+ 
+     public void addAssignmentToListAndMap(Assignment assignment) {
++        String myUserId = faroUserContext.getEmail();
+         removeAssignmentFromListAndMap(assignment.getId());
+         addAssignmentToList(assignment);
+         assignmentMap.put(assignment.getId(), assignment);
++        for (int i = 0; i < assignment.getItems().size(); i++){
++            Item item = assignment.getItems().get(i);
++            if (item.getAssigneeId().equals(myUserId)){
++                myItemListHandler.addMyItemToList(item);
++            }
++        }
++
+     }
+ 
+     public void addDownloadedAssignmentsToListAndMap(List<Assignment> assignmentList){
+@@ -79,4 +89,13 @@ public class AssignmentListHandler {
+         removeAssignmentFromList(assignmentID);
+         assignmentMap.remove(assignmentID);
+     }
++
++    public void clearAssignmentListAndMap(){
++        if (assignmentAdapter != null){
++            assignmentAdapter.list.clear();
++        }
++        if (assignmentMap != null){
++            assignmentMap.clear();
++        }
++    }
+ }
+diff --git a/Frontend/app/src/main/java/com/zik/faro/frontend/EditAssignment.java b/Frontend/app/src/main/java/com/zik/faro/frontend/EditAssignment.java
+index 33f36c4..d06efb6 100644
+--- a/Frontend/app/src/main/java/com/zik/faro/frontend/EditAssignment.java
++++ b/Frontend/app/src/main/java/com/zik/faro/frontend/EditAssignment.java
+@@ -57,14 +57,16 @@ public class EditAssignment extends android.app.Activity {
+     private String assignmentID = null;
+     private Unit selectedUnit;
+ 
+-    Intent AssignmentLandingPageIntent;
++    Intent AssignmentLandingPageTabsIntent;
++
++    ArrayList <String> itemUnitArray = new ArrayList<>();
+ 
+     private static String TAG = "EditAssignment";
+ 
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+-        setContentView(R.layout.activity_create_new_assignment);
++        setContentView(R.layout.activity_edit_assignment);
+ 
+         Bundle extras = getIntent().getExtras();
+         if(extras != null) {
+@@ -89,14 +91,14 @@ public class EditAssignment extends android.app.Activity {
+             final EditText itemCountEditText = (EditText)findViewById(R.id.itemCount);
+             itemCountEditText.setText("0");
+ 
+-            Spinner inviteeSpinner = (Spinner) findViewById(R.id.inviteeSpinner);
+-            Spinner itemUnitSpinner = (Spinner) findViewById(R.id.itemUnitSpinner);
++            final Spinner inviteeSpinner = (Spinner) findViewById(R.id.inviteeSpinner);
++            final Spinner itemUnitSpinner = (Spinner) findViewById(R.id.itemUnitSpinner);
+ 
+             inviteeSpinner.setAdapter(eventFriendListHandler.acceptedFriendAdapter);
+ 
+             final Context mContext = this;
+ 
+-            ArrayList <String> itemUnitArray = new ArrayList<>();
++
+             for (Unit unit : Unit.values()){
+                 itemUnitArray.add(unit.toString());
+             }
+@@ -113,6 +115,20 @@ public class EditAssignment extends android.app.Activity {
+             final ItemsAdapter itemsAdapter = new ItemsAdapter(this, R.layout.item_cant_edit_row_style);
+             itemList.setAdapter(itemsAdapter);
+ 
++
++            itemList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
++                @Override
++                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
++                    Item item = (Item)parent.getItemAtPosition(position);
++                    if (item.getStatus().equals(ActionStatus.INCOMPLETE)){
++                        itemNameEditText.setText(item.getName());
++                        itemCountEditText.setText(Integer.toString(item.getCount()));
++                        inviteeSpinner.setSelection(getAssigneePositionInList(item.getAssigneeId()));
++                        itemUnitSpinner.setSelection(getUnitPositionInList(item.getUnit()));
++                    }
++                }
++            });
++
+             for (Integer i = cloneAssignment.getItems().size() - 1; i >= 0; i--) {
+                 Item item = cloneAssignment.getItems().get(i);
+                 if (item.getStatus() == ActionStatus.COMPLETE) {
+@@ -127,7 +143,7 @@ public class EditAssignment extends android.app.Activity {
+                 createNewAssignmentOK.setEnabled(true);
+             }
+ 
+-            AssignmentLandingPageIntent = new Intent(EditAssignment.this, AssignmentLandingPage.class);
++            AssignmentLandingPageTabsIntent = new Intent(EditAssignment.this, AssignmentLandingPageTabs.class);
+ 
+             //Enable the addNewItem only after Users enters an item
+             itemNameEditText.addTextChangedListener(new TextWatcher() {
+@@ -225,10 +241,10 @@ public class EditAssignment extends android.app.Activity {
+                                             originalEvent.setAssignment(cloneAssignment);
+                                         }
+                                         assignmentListHandler.addAssignmentToListAndMap(cloneAssignment);
+-                                        AssignmentLandingPageIntent.putExtra("eventID", eventID);
+-                                        AssignmentLandingPageIntent.putExtra("activityID", activityID);
+-                                        AssignmentLandingPageIntent.putExtra("assignmentID", assignmentID);
+-                                        startActivity(AssignmentLandingPageIntent);
++                                        AssignmentLandingPageTabsIntent.putExtra("eventID", eventID);
++                                        AssignmentLandingPageTabsIntent.putExtra("activityID", activityID);
++                                        AssignmentLandingPageTabsIntent.putExtra("assignmentID", assignmentID);
++                                        startActivity(AssignmentLandingPageTabsIntent);
+                                         finish();
+                                     }
+                                 };
+@@ -247,13 +263,35 @@ public class EditAssignment extends android.app.Activity {
+         }
+     }
+ 
++    public int getAssigneePositionInList(String assigneeID){
++        int i = 0;
++        for (i = 0; i < eventFriendListHandler.acceptedFriendAdapter.list.size(); i++){
++            InviteeList.Invitees invitees = eventFriendListHandler.acceptedFriendAdapter.list.get(i);
++            if (invitees.getEmail().equals(assigneeID)){
++                break;
++            }
++        }
++        return i;
++    }
++
++    public int getUnitPositionInList(Unit unit){
++        int i = 0;
++        for (i = 0; i < itemUnitArray.size(); i++){
++            String unitString = itemUnitArray.get(i);
++            if (unitString.equals(unit.toString())){
++                break;
++            }
++        }
++        return i;
++    }
++
+     @Override
+     public void onBackPressed() {
+         super.onBackPressed();
+-        AssignmentLandingPageIntent.putExtra("eventID", eventID);
+-        AssignmentLandingPageIntent.putExtra("activityID", activityID);
+-        AssignmentLandingPageIntent.putExtra("assignmentID", assignmentID);
+-        startActivity(AssignmentLandingPageIntent);
++        AssignmentLandingPageTabsIntent.putExtra("eventID", eventID);
++        AssignmentLandingPageTabsIntent.putExtra("activityID", activityID);
++        AssignmentLandingPageTabsIntent.putExtra("assignmentID", assignmentID);
++        startActivity(AssignmentLandingPageTabsIntent);
+         finish();
+     }
+ 
+diff --git a/Frontend/app/src/main/java/com/zik/faro/frontend/EventAdapter.java b/Frontend/app/src/main/java/com/zik/faro/frontend/EventAdapter.java
+index 8e0c9b6..c074744 100644
+--- a/Frontend/app/src/main/java/com/zik/faro/frontend/EventAdapter.java
++++ b/Frontend/app/src/main/java/com/zik/faro/frontend/EventAdapter.java
+@@ -31,7 +31,6 @@ public class EventAdapter extends ArrayAdapter {
+ 
+     public void insert(Event event, int index) {
+         list.add(index, event);
+-        super.insert(event, index);
+     }
+ 
+     @Override
+diff --git a/Frontend/app/src/main/java/com/zik/faro/frontend/EventFriendAdapter.java b/Frontend/app/src/main/java/com/zik/faro/frontend/EventFriendAdapter.java
+index 684fdff..0c8d3e7 100644
+--- a/Frontend/app/src/main/java/com/zik/faro/frontend/EventFriendAdapter.java
++++ b/Frontend/app/src/main/java/com/zik/faro/frontend/EventFriendAdapter.java
+@@ -31,7 +31,6 @@ public class EventFriendAdapter extends ArrayAdapter {
+ 
+     public void insert(InviteeList.Invitees invitees, int index) {
+         list.add(index, invitees);
+-        super.insert(invitees, index);
+     }
+ 
+     @Override
+diff --git a/Frontend/app/src/main/java/com/zik/faro/frontend/EventLandingPage.java b/Frontend/app/src/main/java/com/zik/faro/frontend/EventLandingPage.java
+index 776cfcb..e741690 100644
+--- a/Frontend/app/src/main/java/com/zik/faro/frontend/EventLandingPage.java
++++ b/Frontend/app/src/main/java/com/zik/faro/frontend/EventLandingPage.java
+@@ -16,6 +16,7 @@ import android.widget.TextView;
+ import java.io.IOException;
+ import java.text.DateFormat;
+ import java.text.SimpleDateFormat;
++import java.util.List;
+ 
+ import com.squareup.okhttp.Request;
+ import com.zik.faro.data.Event;
+@@ -35,6 +36,7 @@ public class EventLandingPage extends Activity {
+     private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
+     private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
+     private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
++    private static MyItemListHandler myItemListHandler = MyItemListHandler.getInstance();
+ 
+     private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+ 
+@@ -87,8 +89,7 @@ public class EventLandingPage extends Activity {
+         final Intent EditEvent = new Intent(EventLandingPage.this, EditEvent.class);
+         final Intent ActivityListPage = new Intent(EventLandingPage.this, ActivityListPage.class);
+         final Intent InviteFriendToEventPage = new Intent(EventLandingPage.this, InviteFriendToEventPage.class);
+-        final Intent CreateEventAssignment = new Intent(EventLandingPage.this, CreateNewAssignment.class);
+-        final Intent AssignmentLandingPage = new Intent(EventLandingPage.this, AssignmentLandingPage.class);
++        final Intent AssignmentLandingPageTabsIntent = new Intent(EventLandingPage.this, AssignmentLandingPageTabs.class);
+         EventLandingPageReload = new Intent(EventLandingPage.this, EventLandingPage.class);
+ 
+         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
+@@ -138,79 +139,106 @@ public class EventLandingPage extends Activity {
+                     }
+                 });
+ 
+-                assignmentListHandler.addAssignmentToListAndMap(cloneEvent.getAssignment());
++                pollButton.setOnClickListener(new View.OnClickListener() {
++                    @Override
++                    public void onClick(View v) {
++                        PollListPage.putExtra("eventID", eventID);
++                        startActivity(PollListPage);
++                    }
++                });
+ 
+-            }
+-        }
++                eventAssignmentButton.setOnClickListener(new View.OnClickListener() {
++                    @Override
++                    public void onClick(View v) {
++                        AssignmentLandingPageTabsIntent.putExtra("eventID", eventID);
++                        AssignmentLandingPageTabsIntent.putExtra("assignmentID", cloneEvent.getAssignment().getId());
++                        startActivity(AssignmentLandingPageTabsIntent);
++                    }
++                });
+ 
+-        pollButton.setOnClickListener(new View.OnClickListener() {
+-            @Override
+-            public void onClick(View v) {
+-                PollListPage.putExtra("eventID", eventID);
+-                startActivity(PollListPage);
+-            }
+-        });
++                activityButton.setOnClickListener(new View.OnClickListener() {
++                    @Override
++                    public void onClick(View v) {
++                        ActivityListPage.putExtra("eventID", eventID);
++                        startActivity(ActivityListPage);
++                    }
++                });
+ 
+-        eventAssignmentButton.setOnClickListener(new View.OnClickListener() {
+-            @Override
+-            public void onClick(View v) {
+-                AssignmentLandingPage.putExtra("eventID", eventID);
+-                AssignmentLandingPage.putExtra("assignmentID", cloneEvent.getAssignment().getId());
+-                startActivity(AssignmentLandingPage);
+-            }
+-        });
++                addFriendsButton.setOnClickListener(new View.OnClickListener() {
++                    @Override
++                    public void onClick(View v) {
++                        InviteFriendToEventPage.putExtra("eventID", eventID);
++                        startActivity(InviteFriendToEventPage);
++                        finish();
++                    }
++                });
+ 
+-        activityButton.setOnClickListener(new View.OnClickListener() {
+-            @Override
+-            public void onClick(View v) {
+-                ActivityListPage.putExtra("eventID", eventID);
+-                startActivity(ActivityListPage);
+-            }
+-        });
++                editButton.setOnClickListener(new View.OnClickListener() {
++                    @Override
++                    public void onClick(View v) {
++                        EditEvent.putExtra("eventID", eventID);
++                        startActivity(EditEvent);
++                        finish();
++                    }
++                });
+ 
+-        addFriendsButton.setOnClickListener(new View.OnClickListener() {
+-            @Override
+-            public void onClick(View v) {
+-                InviteFriendToEventPage.putExtra("eventID", eventID);
+-                startActivity(InviteFriendToEventPage);
+-                finish();
+-            }
+-        });
++                serviceHandler.getEventHandler().getEventInvitees(new BaseFaroRequestCallback<InviteeList>() {
++                    @Override
++                    public void onFailure(Request request, IOException ex) {
++                        Log.e(TAG, "failed to get cloneEvent Invitees");
++                    }
+ 
+-        editButton.setOnClickListener(new View.OnClickListener() {
+-            @Override
+-            public void onClick(View v) {
+-                EditEvent.putExtra("eventID", eventID);
+-                startActivity(EditEvent);
+-                finish();
+-            }
+-        });
++                    @Override
++                    public void onResponse(final InviteeList inviteeList, HttpError error) {
++                        if (error == null) {
++                            Runnable myRunnable = new Runnable() {
++                                @Override
++                                public void run() {
++                                    Log.i(TAG, "Successfully received Invitee List for the cloneEvent");
++                                    eventFriendListHandler.addDownloadedFriendsToListAndMap(inviteeList);
++                                }
++                            };
++                            Handler mainHandler = new Handler(mContext.getMainLooper());
++                            mainHandler.post(myRunnable);
++                        } else {
++                            Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
++                        }
++                    }
++                }, eventID);
+ 
+-        serviceHandler.getEventHandler().getEventInvitees(new BaseFaroRequestCallback<InviteeList>() {
+-            @Override
+-            public void onFailure(Request request, IOException ex) {
+-                Log.e(TAG, "failed to get cloneEvent Invitees");
+-            }
++                //Add event's assignment to the Assignment Handler
++                assignmentListHandler.addAssignmentToListAndMap(cloneEvent.getAssignment());
+ 
+-            @Override
+-            public void onResponse(final InviteeList inviteeList, HttpError error) {
+-                if (error == null ) {
+-                    Runnable myRunnable = new Runnable() {
+-                        @Override
+-                        public void run() {
+-                            Log.i(TAG, "Successfully received Invitee List for the cloneEvent");
+-                            eventFriendListHandler.addDownloadedFriendsToListAndMap(inviteeList);
++                //Make API call to get all activities for this event
++                serviceHandler.getActivityHandler().getActivities(new BaseFaroRequestCallback<List<com.zik.faro.data.Activity>>() {
++                    @Override
++                    public void onFailure(Request request, IOException ex) {
++                        Log.e(TAG, "failed to get activity list");
++                    }
++
++                    @Override
++                    public void onResponse(final List<com.zik.faro.data.Activity> activities, HttpError error) {
++                        if (error == null) {
++                            Runnable myRunnable = new Runnable() {
++                                @Override
++                                public void run() {
++                                    Log.i(TAG, "Successfully received activities from the server!!");
++                                    activityListHandler.addDownloadedActivitiesToListAndMap(activities);
++                                }
++                            };
++                            Handler mainHandler = new Handler(mContext.getMainLooper());
++                            mainHandler.post(myRunnable);
++                        } else {
++                            Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                         }
+-                    };
+-                    Handler mainHandler = new Handler(mContext.getMainLooper());
+-                    mainHandler.post(myRunnable);
+-                }else {
+-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+-                }
++
++                    }
++                }, eventID);
+             }
+-        }, eventID);
++        }
+     }
+ 
++
+     private void updateUserEventInviteStatus(final EventInviteStatus eventInviteStatus) {
+         serviceHandler.getEventHandler().updateEventUserInviteStatus(new BaseFaroRequestCallback<String>() {
+             @Override
+@@ -301,6 +329,8 @@ public class EventLandingPage extends Activity {
+         pollListHandler.clearPollListsAndMap();
+         activityListHandler.clearActivityListAndMap();
+         eventFriendListHandler.clearFriendListAndMap();
++        assignmentListHandler.clearAssignmentListAndMap();
++        myItemListHandler.clearMyItemsList();
+         finish();
+         super.onBackPressed();
+     }
+diff --git a/Frontend/app/src/main/java/com/zik/faro/frontend/ItemsAdapter.java b/Frontend/app/src/main/java/com/zik/faro/frontend/ItemsAdapter.java
+index e260521..068f831 100644
+--- a/Frontend/app/src/main/java/com/zik/faro/frontend/ItemsAdapter.java
++++ b/Frontend/app/src/main/java/com/zik/faro/frontend/ItemsAdapter.java
+@@ -11,6 +11,7 @@ import android.widget.TextView;
+ 
+ import com.zik.faro.data.ActionStatus;
+ import com.zik.faro.data.Item;
++import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
+ 
+ import java.util.LinkedList;
+ import java.util.List;
+@@ -22,6 +23,8 @@ public class ItemsAdapter extends ArrayAdapter {
+ 
+     private Context context;
+ 
++    FaroUserContext faroUserContext = FaroUserContext.getInstance();
++
+     private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
+ 
+     public ItemsAdapter(Context context, int resource) {
+@@ -33,10 +36,6 @@ public class ItemsAdapter extends ArrayAdapter {
+         return this.list.size();
+     }
+ 
+-    public void insert(Item item, int index) {
+-        list.add(index, item);
+-        //super.insert(item, index);
+-    }
+ 
+     public void insertAtBeginning(Item item){
+         list.add(0, item);
+@@ -76,14 +75,16 @@ public class ItemsAdapter extends ArrayAdapter {
+         ImgHolder holder = new ImgHolder();
+ 
+         switch ((String)parent.getTag()){
+-            case "CreateNewAssignment":
+-                if (item.getId() != null){
++            case "EditAssignment":
++             /*   if (item.getId() != null){
+                     row = inflater.inflate(R.layout.item_cant_edit_row_style, parent, false);
+-                }else{
++                }else{*/
+                     row = inflater.inflate(R.layout.item_can_edit_row_style, parent, false);
+                     holder.DELETE_ITEM = (ImageButton) row.findViewById(R.id.deleteItem);
+                     holder.DELETE_ITEM.setImageResource(R.drawable.delete);
+                     holder.DELETE_ITEM.setId(position);
++                    holder.DELETE_ITEM.setFocusable(false);
++                    holder.DELETE_ITEM.setFocusableInTouchMode(false);
+                     holder.DELETE_ITEM.setOnClickListener(new View.OnClickListener() {
+                         @Override
+                         public void onClick(View v) {
+@@ -94,7 +95,7 @@ public class ItemsAdapter extends ArrayAdapter {
+                             notifyDataSetChanged();
+                         }
+                     });
+-                }
++                //}
+                 holder.ITEM_NAME = (TextView) row.findViewById(R.id.itemName);
+                 holder.ITEM_COUNT = (TextView) row.findViewById(R.id.itemCount);
+                 holder.ITEM_UNIT = (TextView) row.findViewById(R.id.itemUnit);
+@@ -103,7 +104,7 @@ public class ItemsAdapter extends ArrayAdapter {
+ 
+                 holder.ITEM_NAME.setText(item.getName());
+                 break;
+-            case "AssignmentLandingPageIntent":
++            case "AssignmentLandingPageTabsIntent":
+                 row = inflater.inflate(R.layout.assignment_update_item_row_style, parent, false);
+                 holder.ITEM_CHECKBOX = (CheckBox) row.findViewById(R.id.itemCheckBox);
+                 holder.ITEM_COUNT = (TextView) row.findViewById(R.id.itemCount);
+@@ -111,63 +112,46 @@ public class ItemsAdapter extends ArrayAdapter {
+                 holder.ASSIGNEE_NAME = (TextView) row.findViewById(R.id.asigneeName);
+                 row.setTag(holder);
+ 
+-                holder.ITEM_CHECKBOX.setText(item.getName());
+-                holder.ITEM_CHECKBOX.setId(position);
+-                if (item.getStatus() == ActionStatus.COMPLETE) {
+-                    holder.ITEM_CHECKBOX.setChecked(true);
+-                }else{
+-                    holder.ITEM_CHECKBOX.setChecked(false);
+-                }
+-                holder.ITEM_CHECKBOX.setOnClickListener(new View.OnClickListener() {
+-                    @Override
+-                    public void onClick(View v) {
+-                        CheckBox clickedCheckBox = (CheckBox)v;
+-                        int viewPosition = clickedCheckBox.getId();
+-                        if (clickedCheckBox.isChecked()){
+-                            Item clickedItem = (Item) getItem(viewPosition);
+-                            clickedItem.setStatus(ActionStatus.COMPLETE);
+-                            list.remove(clickedItem);
+-                            list.add(clickedItem);
+-                            notifyDataSetChanged();
+-                        }else{
+-                            Item clickedItem = (Item) getItem(viewPosition);
+-                            clickedItem.setStatus(ActionStatus.INCOMPLETE);
+-                            list.remove(clickedItem);
+-                            list.add(0, clickedItem);
+-                            notifyDataSetChanged();
+-                        }
++                String myUserId = faroUserContext.getEmail();
++                if(myUserId.equals(item.getAssigneeId())){
++                    holder.ITEM_CHECKBOX.setText(item.getName());
++                    holder.ITEM_CHECKBOX.setId(position);
++                    if (item.getStatus() == ActionStatus.COMPLETE) {
++                        holder.ITEM_CHECKBOX.setChecked(true);
++                    }else{
++                        holder.ITEM_CHECKBOX.setChecked(false);
+                     }
+-                });
+-                break;
+-            case "EditAssignment":
+-                if (item.getStatus().equals(ActionStatus.INCOMPLETE)) {
+-                    row = inflater.inflate(R.layout.item_cant_edit_row_style, parent, false);
+-                    holder.ITEM_NAME = (TextView) row.findViewById(R.id.itemName);
+-                    holder.DELETE_ITEM = (ImageButton) row.findViewById(R.id.deleteItem);
+-                }else{
+-                    row = inflater.inflate(R.layout.assignment_edit_completed_item_row_style, parent, false);
+-                    holder.ITEM_NAME = (TextView) row.findViewById(R.id.itemName);
+-                }
+-                holder.ITEM_NAME.setText(item.getName());
+-                holder.ITEM_COUNT = (TextView) row.findViewById(R.id.itemCount);
+-                holder.ITEM_UNIT = (TextView) row.findViewById(R.id.itemUnit);
+-                holder.ASSIGNEE_NAME = (TextView) row.findViewById(R.id.asigneeName);
+-                row.setTag(holder);
+-
+-                if (item.getStatus().equals(ActionStatus.INCOMPLETE)) {
+-                    holder.DELETE_ITEM.setImageResource(R.drawable.delete);
+-                    holder.DELETE_ITEM.setId(position);
+-                    holder.DELETE_ITEM.setOnClickListener(new View.OnClickListener() {
++                    holder.ITEM_CHECKBOX.setOnClickListener(new View.OnClickListener() {
+                         @Override
+                         public void onClick(View v) {
+-                            ImageButton imageButton = (ImageButton) v;
+-                            int viewPosition = imageButton.getId();
+-                            Item removeItem = (Item) getItem(viewPosition);
+-                            list.remove(removeItem);
+-                            notifyDataSetChanged();
++                            CheckBox clickedCheckBox = (CheckBox)v;
++                            int viewPosition = clickedCheckBox.getId();
++                            if (clickedCheckBox.isChecked()){
++                                Item clickedItem = (Item) getItem(viewPosition);
++                                clickedItem.setStatus(ActionStatus.COMPLETE);
++                                list.remove(clickedItem);
++                                insertAtEnd(clickedItem);
++                                notifyDataSetChanged();
++                            }else{
++                                Item clickedItem = (Item) getItem(viewPosition);
++                                clickedItem.setStatus(ActionStatus.INCOMPLETE);
++                                list.remove(clickedItem);
++                                insertAtBeginning(clickedItem);
++                                notifyDataSetChanged();
++                            }
+                         }
+                     });
++                }else{
++                    holder.ITEM_CHECKBOX.setText(item.getName());
++                    holder.ITEM_CHECKBOX.setId(position);
++                    holder.ITEM_CHECKBOX.setClickable(false);
++                    if (item.getStatus() == ActionStatus.COMPLETE) {
++                        holder.ITEM_CHECKBOX.setChecked(true);
++                    }else{
++                        holder.ITEM_CHECKBOX.setChecked(false);
++                    }
+                 }
++                break;
+         }
+ 
+         holder.ITEM_COUNT.setText(String.valueOf(item.getCount()));
+diff --git a/Frontend/app/src/main/java/com/zik/faro/frontend/MyItemListHandler.java b/Frontend/app/src/main/java/com/zik/faro/frontend/MyItemListHandler.java
+index 00b928b..ba92d83 100644
+--- a/Frontend/app/src/main/java/com/zik/faro/frontend/MyItemListHandler.java
++++ b/Frontend/app/src/main/java/com/zik/faro/frontend/MyItemListHandler.java
+@@ -3,8 +3,14 @@ package com.zik.faro.frontend;
+ import com.zik.faro.data.ActionStatus;
+ import com.zik.faro.data.Assignment;
+ import com.zik.faro.data.Item;
++import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
++
++import java.util.List;
+ 
+ public class MyItemListHandler {
++    private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
++    FaroUserContext faroUserContext = FaroUserContext.getInstance();
++
+     /*
+      *This is a Singleton class
+      */
+@@ -45,7 +51,9 @@ public class MyItemListHandler {
+         }
+     }
+ 
+-    public void addMyItemsFromDownloadedAssignments(){
+-
++    public void clearMyItemsList(){
++        if (myItemsAdapter != null) {
++            myItemsAdapter.list.clear();
++        }
+     }
+ }
+diff --git a/Frontend/app/src/main/java/com/zik/faro/frontend/PollAdapter.java b/Frontend/app/src/main/java/com/zik/faro/frontend/PollAdapter.java
+index 7cdffca..39b7529 100644
+--- a/Frontend/app/src/main/java/com/zik/faro/frontend/PollAdapter.java
++++ b/Frontend/app/src/main/java/com/zik/faro/frontend/PollAdapter.java
+@@ -25,7 +25,6 @@ public class PollAdapter extends ArrayAdapter {
+ 
+     public void insert(Poll poll, int index) {
+         list.add(index, poll);
+-        super.insert(poll, index);
+     }
+ 
+     @Override
+diff --git a/Frontend/app/src/main/java/com/zik/faro/frontend/PollOptionsAdapter.java b/Frontend/app/src/main/java/com/zik/faro/frontend/PollOptionsAdapter.java
+index 85ebcaf..848d1fd 100644
+--- a/Frontend/app/src/main/java/com/zik/faro/frontend/PollOptionsAdapter.java
++++ b/Frontend/app/src/main/java/com/zik/faro/frontend/PollOptionsAdapter.java
+@@ -31,7 +31,6 @@ public class PollOptionsAdapter extends ArrayAdapter {
+ 
+     public void insert(PollOption pollOption, int index) {
+         list.add(index, pollOption);
+-        super.insert(pollOption, index);
+     }
+ 
+     @Override
+diff --git a/Frontend/app/src/main/java/com/zik/faro/frontend/UserFriendAdapter.java b/Frontend/app/src/main/java/com/zik/faro/frontend/UserFriendAdapter.java
+index 51db1f5..f3d03f9 100644
+--- a/Frontend/app/src/main/java/com/zik/faro/frontend/UserFriendAdapter.java
++++ b/Frontend/app/src/main/java/com/zik/faro/frontend/UserFriendAdapter.java
+@@ -31,7 +31,6 @@ public class UserFriendAdapter extends ArrayAdapter {
+ 
+     public void insert(MinUser minUser, int index) {
+         list.add(index, minUser);
+-        super.insert(minUser, index);
+     }
+ 
+     @Override
+diff --git a/Frontend/app/src/main/res/layout/activity_assignment_landing_page_tabs.xml b/Frontend/app/src/main/res/layout/activity_assignment_landing_page_tabs.xml
+index 3509b84..0107aa2 100644
+--- a/Frontend/app/src/main/res/layout/activity_assignment_landing_page_tabs.xml
++++ b/Frontend/app/src/main/res/layout/activity_assignment_landing_page_tabs.xml
+@@ -1,6 +1,23 @@
+ <?xml version="1.0" encoding="utf-8"?>
+-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+-    android:orientation="vertical" android:layout_width="match_parent"
++<RelativeLayout
++    xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:tools="http://schemas.android.com/tools"
++    android:layout_width="match_parent"
+     android:layout_height="match_parent">
+-
+-</LinearLayout>
+\ No newline at end of file
++    <LinearLayout
++        xmlns:android="http://schemas.android.com/apk/res/android"
++        android:layout_width="match_parent"
++        android:layout_height="match_parent"
++        android:orientation="vertical">
++        <FrameLayout
++            android:id="@android:id/tabcontent"
++            android:layout_width="match_parent"
++            android:layout_height="0dip"
++            android:layout_weight="1"/>
++        <android.support.v4.app.FragmentTabHost
++            android:id="@android:id/tabhost"
++            android:layout_width="match_parent"
++            android:layout_height="wrap_content"
++            android:layout_weight="0"/>
++    </LinearLayout>
++</RelativeLayout>
+\ No newline at end of file
+diff --git a/Frontend/app/src/main/res/layout/assignment_landing_tab_layout.xml b/Frontend/app/src/main/res/layout/assignment_landing_tab_layout.xml
+index 3509b84..589dfa5 100644
+--- a/Frontend/app/src/main/res/layout/assignment_landing_tab_layout.xml
++++ b/Frontend/app/src/main/res/layout/assignment_landing_tab_layout.xml
+@@ -1,6 +1,10 @@
+ <?xml version="1.0" encoding="utf-8"?>
+ <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+-    android:orientation="vertical" android:layout_width="match_parent"
+-    android:layout_height="match_parent">
+-
++    android:layout_width="fill_parent"
++    android:layout_height="fill_parent"
++    android:orientation="vertical">
++    <TextView android:id="@+id/tabTextView"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:layout_gravity="center_horizontal" />
+ </LinearLayout>
+\ No newline at end of file
+diff --git a/Frontend/app/src/main/res/layout/item_can_edit_row_style.xml b/Frontend/app/src/main/res/layout/item_can_edit_row_style.xml
+index 5d76ff9..ebd150f 100644
+--- a/Frontend/app/src/main/res/layout/item_can_edit_row_style.xml
++++ b/Frontend/app/src/main/res/layout/item_can_edit_row_style.xml
+@@ -22,4 +22,8 @@
+         android:layout_height="wrap_content"
+         android:layout_weight="1"
+         android:id="@+id/asigneeName"/>
++    <ImageButton
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:id="@+id/deleteItem"/>
+ </LinearLayout>
+\ No newline at end of file
+diff --git a/Frontend/app/src/main/res/layout/item_cant_edit_row_style.xml b/Frontend/app/src/main/res/layout/item_cant_edit_row_style.xml
+index ebd150f..5d76ff9 100644
+--- a/Frontend/app/src/main/res/layout/item_cant_edit_row_style.xml
++++ b/Frontend/app/src/main/res/layout/item_cant_edit_row_style.xml
+@@ -22,8 +22,4 @@
+         android:layout_height="wrap_content"
+         android:layout_weight="1"
+         android:id="@+id/asigneeName"/>
+-    <ImageButton
+-        android:layout_width="wrap_content"
+-        android:layout_height="wrap_content"
+-        android:id="@+id/deleteItem"/>
+ </LinearLayout>
+\ No newline at end of file
+diff --git a/Frontend/app/src/main/res/values/strings.xml b/Frontend/app/src/main/res/values/strings.xml
+index 013448a..54a4168 100644
+--- a/Frontend/app/src/main/res/values/strings.xml
++++ b/Frontend/app/src/main/res/values/strings.xml
+@@ -96,7 +96,6 @@
+     <string name="multi_choice">Multi-Choice?</string>
+     <string name="poll_description">Poll Description</string>
+     <string name="poll_option">Poll Option</string>
+-    <string name="title_activity_create_new_assignment">CreateNewAssignment</string>
+     <string name="add_item">Add Item</string>
+     <string name="title_activity_edit_assignment">EditAssignment</string>
+     <string name="title_activity_more_options">MoreOptions</string>

@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ActivityListHandler{
     public static final int MAX_ACTIVITIES_PAGE_SIZE = 100;
     private static final int MAX_TOTAL_ACTIVITIES_IN_CACHE = 500;
-
+    private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
 
     public ActivityAdapter activityAdapter;
 
@@ -87,7 +87,9 @@ public class ActivityListHandler{
 
     public void addDownloadedActivitiesToListAndMap(List <Activity> activityList){
         for (int i = 0; i < activityList.size(); i++){
-            addActivityToListAndMap(activityList.get(i));
+            Activity activity = activityList.get(i);
+            addActivityToListAndMap(activity);
+            assignmentListHandler.addAssignmentToListAndMap(activity.getAssignment());
         }
         activityAdapter.notifyDataSetChanged();
     }

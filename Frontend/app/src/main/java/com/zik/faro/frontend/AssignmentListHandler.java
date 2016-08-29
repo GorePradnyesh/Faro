@@ -1,10 +1,9 @@
 package com.zik.faro.frontend;
 
 import com.google.gson.Gson;
-import com.zik.faro.data.Activity;
 import com.zik.faro.data.Assignment;
-import com.zik.faro.data.Event;
-import com.zik.faro.data.Poll;
+import com.zik.faro.data.Item;
+import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 
 import java.util.List;
 import java.util.Map;
@@ -34,6 +33,9 @@ public class AssignmentListHandler {
 
     public AssignmentAdapter assignmentAdapter;
 
+    FaroUserContext faroUserContext = FaroUserContext.getInstance();
+    private static MyItemListHandler myItemListHandler = MyItemListHandler.getInstance();
+
     /*
     * Map of assignments needed to access assignments downloaded from the server in O(1) time. The Key to the
     * Map is the assignmentID String which returns the Assignment as the value
@@ -41,9 +43,17 @@ public class AssignmentListHandler {
     private Map<String, Assignment> assignmentMap = new ConcurrentHashMap<>();
 
     public void addAssignmentToListAndMap(Assignment assignment) {
+        String myUserId = faroUserContext.getEmail();
         removeAssignmentFromListAndMap(assignment.getId());
         addAssignmentToList(assignment);
         assignmentMap.put(assignment.getId(), assignment);
+        for (int i = 0; i < assignment.getItems().size(); i++){
+            Item item = assignment.getItems().get(i);
+            if (item.getAssigneeId().equals(myUserId)){
+                myItemListHandler.addMyItemToList(item);
+            }
+        }
+
     }
 
     public void addDownloadedAssignmentsToListAndMap(List<Assignment> assignmentList){
@@ -78,5 +88,14 @@ public class AssignmentListHandler {
     public void removeAssignmentFromListAndMap (String assignmentID){
         removeAssignmentFromList(assignmentID);
         assignmentMap.remove(assignmentID);
+    }
+
+    public void clearAssignmentListAndMap(){
+        if (assignmentAdapter != null){
+            assignmentAdapter.list.clear();
+        }
+        if (assignmentMap != null){
+            assignmentMap.clear();
+        }
     }
 }

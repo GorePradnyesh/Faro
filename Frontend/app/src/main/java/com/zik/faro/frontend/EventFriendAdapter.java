@@ -31,7 +31,6 @@ public class EventFriendAdapter extends ArrayAdapter {
 
     public void insert(InviteeList.Invitees invitees, int index) {
         list.add(index, invitees);
-        super.insert(invitees, index);
     }
 
     @Override

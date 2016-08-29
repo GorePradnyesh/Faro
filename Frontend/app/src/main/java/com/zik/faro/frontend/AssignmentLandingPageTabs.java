@@ -1,0 +1,56 @@
+package com.zik.faro.frontend;
+
+
+import android.content.Context;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTabHost;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.TextView;
+
+public class AssignmentLandingPageTabs extends FragmentActivity {
+    private FragmentTabHost mTabHost;
+
+
+    String activityID = null;
+    String eventID = null;
+    String assignmentID = null;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_assignment_landing_page_tabs);
+
+        Bundle extras = getIntent().getExtras();
+        if(extras != null) {
+            eventID = extras.getString("eventID");
+            activityID = extras.getString("activityID");
+            assignmentID = extras.getString("assignmentID");
+
+            Bundle bundle = new Bundle();
+            bundle.putString("eventID", eventID);
+            bundle.putString("activityID", activityID);
+            bundle.putString("assignmentID", assignmentID);
+
+            Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
+            mTabHost = (FragmentTabHost) findViewById(android.R.id.tabhost);
+            mTabHost.setup(this, getSupportFragmentManager(), android.R.id.tabcontent);
+            mTabHost.addTab(
+                    mTabHost.newTabSpec("tab1").setIndicator(getTabIndicator(mTabHost.getContext(), "All Items")),
+                    AssignmentLandingPage.class, bundle);
+            mTabHost.addTab(
+                    mTabHost.newTabSpec("tab2").setIndicator(getTabIndicator(mTabHost.getContext(), "My Items")),
+                    MoreOptionsPage.class, bundle);
+        }
+    }
+
+    private View getTabIndicator(Context context, String tabText) {
+        View view = LayoutInflater.from(context).inflate(R.layout.assignment_landing_tab_layout, null);
+        TextView tabTextView = (TextView)view.findViewById(R.id.tabTextView);
+        tabTextView.setText(tabText);
+        return view;
+    }
+}

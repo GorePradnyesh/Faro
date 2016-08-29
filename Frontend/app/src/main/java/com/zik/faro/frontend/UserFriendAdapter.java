@@ -31,7 +31,6 @@ public class UserFriendAdapter extends ArrayAdapter {
 
     public void insert(MinUser minUser, int index) {
         list.add(index, minUser);
-        super.insert(minUser, index);
     }
 
     @Override

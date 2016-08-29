@@ -31,7 +31,6 @@ public class PollOptionsAdapter extends ArrayAdapter {
 
     public void insert(PollOption pollOption, int index) {
         list.add(index, pollOption);
-        super.insert(pollOption, index);
     }
 
     @Override

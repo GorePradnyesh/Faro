@@ -25,7 +25,7 @@ public class Item {
     public Item(String name, String assigneeId, int count, Unit unit) throws IllegalDataOperation {
         this(name,assigneeId,count,unit,Identifier.createUniqueIdentifierString());
     }
-    
+
     public String getId() {
         return id;
     }

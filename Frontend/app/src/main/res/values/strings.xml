@@ -96,7 +96,6 @@
     <string name="multi_choice">Multi-Choice?</string>
     <string name="poll_description">Poll Description</string>
     <string name="poll_option">Poll Option</string>
-    <string name="title_activity_create_new_assignment">CreateNewAssignment</string>
     <string name="add_item">Add Item</string>
     <string name="title_activity_edit_assignment">EditAssignment</string>
     <string name="title_activity_more_options">MoreOptions</string>

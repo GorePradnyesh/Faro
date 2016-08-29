@@ -25,7 +25,6 @@ public class AssignmentAdapter extends ArrayAdapter{
 
     public void insert(Assignment assignment, int index) {
         list.add(index, assignment);
-        super.insert(assignment, index);
     }
 
     static class ImgHolder{
