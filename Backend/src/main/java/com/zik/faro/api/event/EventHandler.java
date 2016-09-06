@@ -91,6 +91,7 @@ public class EventHandler {
 
     @Path(EVENT_UPDATE_PATH_CONST)
     @POST
+	@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public JResponse<Event> updateEvent(@PathParam(EVENT_ID_PATH_PARAM) final String eventId, final Event updateObj){
         // TODO: Validation to make sure only event owner can update
     	String userId = context.getUserPrincipal().getName();

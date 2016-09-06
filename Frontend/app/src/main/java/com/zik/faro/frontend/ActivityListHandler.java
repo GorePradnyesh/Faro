@@ -49,6 +49,7 @@ public class ActivityListHandler{
         removeActivityFromListAndMap(activity.getId());
         addActivityToList(activity);
         activityMap.put(activity.getId(), activity);
+        assignmentListHandler.addAssignmentToListAndMap(activity.getAssignment(), activity.getId());
     }
 
     private void addActivityToList(Activity activity) {
@@ -85,11 +86,10 @@ public class ActivityListHandler{
         }
     }
 
-    public void addDownloadedActivitiesToListAndMap(List <Activity> activityList){
+    public void addDownloadedActivitiesToListAndMap(List <Activity> activityList, String eventID){
         for (int i = 0; i < activityList.size(); i++){
             Activity activity = activityList.get(i);
             addActivityToListAndMap(activity);
-            assignmentListHandler.addAssignmentToListAndMap(activity.getAssignment());
         }
         activityAdapter.notifyDataSetChanged();
     }

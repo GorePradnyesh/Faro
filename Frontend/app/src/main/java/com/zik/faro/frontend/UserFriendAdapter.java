@@ -11,6 +11,8 @@ import android.widget.TextView;
 
 import com.zik.faro.data.MinUser;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -31,6 +33,12 @@ public class UserFriendAdapter extends ArrayAdapter {
 
     public void insert(MinUser minUser, int index) {
         list.add(index, minUser);
+        Collections.sort(list, new Comparator<MinUser>() {
+            @Override
+            public int compare(MinUser lhs, MinUser rhs) {
+                return lhs.getFirstName().compareTo(rhs.getFirstName());
+            }
+        });
     }
 
     @Override

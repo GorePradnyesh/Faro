@@ -62,6 +62,8 @@ public class EditPoll extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_poll);
 
+        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
+
         final TextView pollDescription = (TextView) findViewById(R.id.pollDescription);
         final CheckBox isMultiChoice = (CheckBox)findViewById(R.id.multiChoiceFlag);
         final EditText optionText = (EditText)findViewById(R.id.pollOptionEditText);

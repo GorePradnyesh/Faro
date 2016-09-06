@@ -24,7 +24,6 @@ public class AppLandingPage extends FragmentActivity{
     private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
     private static PollListHandler pollListHandler = PollListHandler.getInstance();
     private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
-    private static MyItemListHandler myItemListHandler = MyItemListHandler.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,10 +72,6 @@ public class AppLandingPage extends FragmentActivity{
 
         if (pollListHandler.closedPollsAdapter == null) {
             pollListHandler.closedPollsAdapter = new PollAdapter(this, R.layout.poll_list_page_row_style);
-        }
-
-        if (myItemListHandler.myItemsAdapter == null) {
-            myItemListHandler.myItemsAdapter = new ItemsAdapter(this, R.layout.assignment_update_item_row_style);
         }
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));

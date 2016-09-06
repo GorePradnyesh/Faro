@@ -168,7 +168,6 @@ public class CreateNewEvent extends Activity {
                                     //Since update to server successful, adding event to List and Map below
                                     Log.i(TAG, "Event Create Response received Successfully");
                                     eventListHandler.addEventToListAndMap(receivedEvent, EventInviteStatus.ACCEPTED);
-                                    assignmentListHandler.addAssignmentToListAndMap(receivedEvent.getAssignment());
                                     EventLanding.putExtra("eventID", receivedEvent.getEventId());
                                     startActivity(EventLanding);
                                     finish();

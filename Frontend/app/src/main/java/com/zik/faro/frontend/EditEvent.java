@@ -68,7 +68,6 @@ public class EditEvent extends Activity {
     private static String TAG = "EditEvent";
 
     Intent EventLanding = null;
-    Intent AppLandingPage = null;
 
     final Context mContext = this;
 
@@ -91,9 +90,6 @@ public class EditEvent extends Activity {
         popUpRelativeLayout = (RelativeLayout) findViewById(R.id.editEventPage);
 
         EventLanding = new Intent(EditEvent.this, EventLandingPage.class);
-        //AppLandingPage = new Intent(EditEvent.this, AppLandingPage.class);
-
-
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
@@ -153,7 +149,7 @@ public class EditEvent extends Activity {
             public void onClick(View v) {
 
                 //TODO: the below call is creating a new event instead of editing the same event. FIX THIS!!
-                serviceHandler.getEventHandler().createEvent(new BaseFaroRequestCallback<Event>() {
+                serviceHandler.getEventHandler().updateEvent(new BaseFaroRequestCallback<Event>() {
                     @Override
                     public void onFailure(Request request, IOException ex) {
                         Log.e(TAG, "failed to send event create request");
@@ -180,7 +176,7 @@ public class EditEvent extends Activity {
                             Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                         }
                     }
-                }, cloneEvent);
+                }, cloneEvent.getEventId(), cloneEvent);
             }
         });
 

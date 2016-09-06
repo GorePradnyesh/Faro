@@ -51,6 +51,8 @@ public class ClosedPollLandingPage extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_closed_poll_landing_page);
 
+        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
+
         final TextView pollDesc = (TextView)findViewById(R.id.pollDescription);
         final TextView winnerPollOptionTV = (TextView) findViewById(R.id.winnerPollOptionTextView);
 

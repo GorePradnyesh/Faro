@@ -36,7 +36,6 @@ public class EventLandingPage extends Activity {
     private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
     private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
     private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
-    private static MyItemListHandler myItemListHandler = MyItemListHandler.getInstance();
 
     private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
 
@@ -89,7 +88,7 @@ public class EventLandingPage extends Activity {
         final Intent EditEvent = new Intent(EventLandingPage.this, EditEvent.class);
         final Intent ActivityListPage = new Intent(EventLandingPage.this, ActivityListPage.class);
         final Intent InviteFriendToEventPage = new Intent(EventLandingPage.this, InviteFriendToEventPage.class);
-        final Intent AssignmentLandingPageTabsIntent = new Intent(EventLandingPage.this, AssignmentLandingPageTabs.class);
+        final Intent AssignmentLandingPageTabsIntent = new Intent(EventLandingPage.this, AssignmentLandingPage.class);
         EventLandingPageReload = new Intent(EventLandingPage.this, EventLandingPage.class);
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
@@ -207,7 +206,7 @@ public class EventLandingPage extends Activity {
                 }, eventID);
 
                 //Add event's assignment to the Assignment Handler
-                assignmentListHandler.addAssignmentToListAndMap(cloneEvent.getAssignment());
+                assignmentListHandler.addAssignmentToListAndMap(cloneEvent.getAssignment(), null);
 
                 //Make API call to get all activities for this event
                 serviceHandler.getActivityHandler().getActivities(new BaseFaroRequestCallback<List<com.zik.faro.data.Activity>>() {
@@ -223,7 +222,7 @@ public class EventLandingPage extends Activity {
                                 @Override
                                 public void run() {
                                     Log.i(TAG, "Successfully received activities from the server!!");
-                                    activityListHandler.addDownloadedActivitiesToListAndMap(activities);
+                                    activityListHandler.addDownloadedActivitiesToListAndMap(activities, eventID);
                                 }
                             };
                             Handler mainHandler = new Handler(mContext.getMainLooper());
@@ -330,7 +329,6 @@ public class EventLandingPage extends Activity {
         activityListHandler.clearActivityListAndMap();
         eventFriendListHandler.clearFriendListAndMap();
         assignmentListHandler.clearAssignmentListAndMap();
-        myItemListHandler.clearMyItemsList();
         finish();
         super.onBackPressed();
     }

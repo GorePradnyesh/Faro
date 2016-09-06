@@ -107,7 +107,7 @@ public class OKHttpWrapperEvent extends BaseFaroOKHttpWrapper implements EventHa
     }
 
     @Override
-    public void updateEventUserInviteStatus(BaseFaroRequestCallback<String> callback, String eventId, EventInviteStatus inviteStatus) {
+    public void updateEventUserInviteStatus(final BaseFaroRequestCallback<String> callback, String eventId, EventInviteStatus inviteStatus) {
         String token = TokenCache.getTokenCache().getToken();
         String inviteStatusPostBody = mapper.toJson(inviteStatus);
 
@@ -118,5 +118,18 @@ public class OKHttpWrapperEvent extends BaseFaroOKHttpWrapper implements EventHa
                 .build();
 
         this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<String>(callback, String.class));
+    }
+
+    @Override
+    public void updateEvent(final BaseFaroRequestCallback<Event> callback, String eventId, Event event) {
+        String token = TokenCache.getTokenCache().getToken();
+        String eventPostBody = mapper.toJson(event);
+        Request request = new Request.Builder()
+                .url(baseHandlerURL.toString() + eventId + "/updateEvent")
+                .post(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), eventPostBody))
+                .addHeader("Authentication", token)
+                .build();
+
+        this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<Event>(callback, Event.class));
     }
 }

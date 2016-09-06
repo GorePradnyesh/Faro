@@ -27,12 +27,18 @@ import com.zik.faro.data.IllegalDataOperation;
 import com.zik.faro.data.InviteeList;
 import com.zik.faro.data.Item;
 import com.zik.faro.data.Unit;
+import com.zik.faro.frontend.data.ItemParentInfo;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static android.widget.Toast.LENGTH_LONG;
 
@@ -57,16 +63,24 @@ public class EditAssignment extends android.app.Activity {
     private String assignmentID = null;
     private Unit selectedUnit;
 
+    private HashSet<Item> newItemSet = new HashSet<>();
+    private HashSet<Item> originalItemSet = new HashSet<>();
+
     Intent AssignmentLandingPageTabsIntent;
 
     ArrayList <String> itemUnitArray = new ArrayList<>();
 
     private static String TAG = "EditAssignment";
 
+    private int editItemPosition = -1;
+    private boolean addEditedItem = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_assignment);
+
+        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
@@ -110,7 +124,7 @@ public class EditAssignment extends android.app.Activity {
             addNewItemButton.setImageResource(R.drawable.plus);
             addNewItemButton.setEnabled(false);
 
-            ListView itemList = (ListView)findViewById(R.id.itemList);
+            final ListView itemList = (ListView)findViewById(R.id.itemList);
             itemList.setTag("EditAssignment");
             final ItemsAdapter itemsAdapter = new ItemsAdapter(this, R.layout.item_cant_edit_row_style);
             itemList.setAdapter(itemsAdapter);
@@ -119,23 +133,29 @@ public class EditAssignment extends android.app.Activity {
             itemList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Item item = (Item)parent.getItemAtPosition(position);
+                    ItemParentInfo itemParentInfo = (ItemParentInfo) parent.getItemAtPosition(position);
+                    Item item = itemParentInfo.getItem();
                     if (item.getStatus().equals(ActionStatus.INCOMPLETE)){
                         itemNameEditText.setText(item.getName());
                         itemCountEditText.setText(Integer.toString(item.getCount()));
                         inviteeSpinner.setSelection(getAssigneePositionInList(item.getAssigneeId()));
                         itemUnitSpinner.setSelection(getUnitPositionInList(item.getUnit()));
+                        itemsAdapter.removeFromPosition(position);
+                        editItemPosition = position;
+                        addEditedItem = true;
                     }
                 }
             });
 
             for (Integer i = cloneAssignment.getItems().size() - 1; i >= 0; i--) {
                 Item item = cloneAssignment.getItems().get(i);
+                ItemParentInfo itemParentInfo = new ItemParentInfo(item, eventID, activityID, assignmentID);
                 if (item.getStatus() == ActionStatus.COMPLETE) {
-                    itemsAdapter.insertAtEnd(item);
+                    itemsAdapter.insertAtEnd(itemParentInfo);
                 } else {
-                    itemsAdapter.insertAtBeginning(item);
+                    itemsAdapter.insertAtBeginning(itemParentInfo);
                 }
+                originalItemSet.add(item);
             }
 
             final Button createNewAssignmentOK = (Button) findViewById(R.id.createNewAssignmentOK);
@@ -143,7 +163,7 @@ public class EditAssignment extends android.app.Activity {
                 createNewAssignmentOK.setEnabled(true);
             }
 
-            AssignmentLandingPageTabsIntent = new Intent(EditAssignment.this, AssignmentLandingPageTabs.class);
+            AssignmentLandingPageTabsIntent = new Intent(EditAssignment.this, AssignmentLandingPage.class);
 
             //Enable the addNewItem only after Users enters an item
             itemNameEditText.addTextChangedListener(new TextWatcher() {
@@ -200,7 +220,15 @@ public class EditAssignment extends android.app.Activity {
                     } catch (IllegalDataOperation illegalDataOperation) {
                         illegalDataOperation.printStackTrace();
                     }
-                    itemsAdapter.insertAtBeginning(item);
+
+                    ItemParentInfo itemParentInfo = new ItemParentInfo(item, eventID, activityID, assignmentID);
+                    if (addEditedItem){
+                        addEditedItem = false;
+                        itemsAdapter.insertAtPosition(itemParentInfo, editItemPosition);
+                        editItemPosition = -1;
+                    }else {
+                        itemsAdapter.insertAtBeginning(itemParentInfo);
+                    }
                     itemsAdapter.notifyDataSetChanged();
                     itemNameEditText.setText("");
                     itemCountEditText.setText("0");
@@ -214,10 +242,27 @@ public class EditAssignment extends android.app.Activity {
             createNewAssignmentOK.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (itemsAdapter.getCount() < 1){
+
+                    if (itemsAdapter.getCount() == 0 && originalItemSet.size() == 0){
                         Toast.makeText(EditAssignment.this, "Add atleast one item to create an Assignment", LENGTH_LONG).show();
                         createNewAssignmentOK.setEnabled(false);
                         return;
+                    }
+
+                    final List<Item> updatedItemList = new LinkedList<>();
+                    if (itemsAdapter.getCount() == 0){
+                        Toast.makeText(EditAssignment.this, "Deleting all the previous assignments", LENGTH_LONG).show();
+                    }else {
+                        for (int i = 0; i < itemsAdapter.list.size(); i++) {
+                            updatedItemList.add(itemsAdapter.list.get(i).getItem());
+                            newItemSet.add(itemsAdapter.list.get(i).getItem());
+                        }
+
+                        if (originalItemSet.equals(newItemSet)){
+                            Toast.makeText(EditAssignment.this, "No change made to assignment List", LENGTH_LONG).show();
+                            newItemSet.clear();
+                            return;
+                        }
                     }
 
                     serviceHandler.getAssignmentHandler().updateAssignment(new BaseFaroRequestCallback<String>() {
@@ -233,14 +278,14 @@ public class EditAssignment extends android.app.Activity {
                                     @Override
                                     public void run() {
                                         Log.i(TAG, "Successfully updated items list to server");
-                                        cloneAssignment.setItems(itemsAdapter.list);
+                                        cloneAssignment.setItems(updatedItemList);
                                         assignmentListHandler.removeAssignmentFromListAndMap(cloneAssignment.getId());
                                         if (activityID != null){
                                             originalActivity.setAssignment(cloneAssignment);
                                         }else{
                                             originalEvent.setAssignment(cloneAssignment);
                                         }
-                                        assignmentListHandler.addAssignmentToListAndMap(cloneAssignment);
+                                        assignmentListHandler.addAssignmentToListAndMap(cloneAssignment, activityID);
                                         AssignmentLandingPageTabsIntent.putExtra("eventID", eventID);
                                         AssignmentLandingPageTabsIntent.putExtra("activityID", activityID);
                                         AssignmentLandingPageTabsIntent.putExtra("assignmentID", assignmentID);
@@ -255,7 +300,7 @@ public class EditAssignment extends android.app.Activity {
                             }
 
                         }
-                    }, eventID, cloneAssignment.getId(), activityID, itemsAdapter.list);
+                    }, eventID, cloneAssignment.getId(), activityID, updatedItemList);
                 }
             });
 

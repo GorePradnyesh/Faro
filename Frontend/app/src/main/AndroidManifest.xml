@@ -82,7 +82,7 @@
             android:name=".InviteFriendToEventPage"
             android:label="InviteFriendToEventPage" />
         <activity
-            android:name=".AssignmentLandingPageTabs"
+            android:name=".AssignmentLandingPage"
             android:label="AssignmentLandingPageTabs" />
     </application>
 

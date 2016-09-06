@@ -349,7 +349,7 @@ public class OpenPollLandingPage extends Activity {
                         //TODO *************Above code not required if we get back the updated Poll object from server. We can simply reload the page after that
 
 
-                        Toast.makeText(OpenPollLandingPage.this, "Selected option is " + pollOptionsList.get(selectedRadioOption), LENGTH_LONG).show();
+                        Toast.makeText(OpenPollLandingPage.this, "Selected option is " + pollOptionsList.get(selectedRadioOption).getOption(), LENGTH_LONG).show();
 
                         Set<String> options = new HashSet<String>();
                         options.add((pollOptionsList.get(selectedRadioOption)).getId());

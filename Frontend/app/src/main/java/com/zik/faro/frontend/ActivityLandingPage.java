@@ -20,7 +20,6 @@ public class ActivityLandingPage extends android.app.Activity {
     private static Event cloneEvent = null;
     private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +33,7 @@ public class ActivityLandingPage extends android.app.Activity {
         activityAssignmentButton.setImageResource(R.drawable.assignment_icon);
 
         final Intent EditActivityPage = new Intent(ActivityLandingPage.this, EditActivity.class);
-        final Intent AssignmentLandingPageTabs = new Intent(ActivityLandingPage.this, AssignmentLandingPageTabs.class);
+        final Intent AssignmentLandingPageIntent = new Intent(ActivityLandingPage.this, AssignmentLandingPage.class);
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
@@ -60,7 +59,6 @@ public class ActivityLandingPage extends android.app.Activity {
                 endDateAndTime.setText(sdf.format(cloneActivity.getEndDate().getTime()) + " at " +
                         stf.format(cloneActivity.getEndDate().getTime()));
             }
-            assignmentListHandler.addAssignmentToListAndMap(cloneActivity.getAssignment());
         }
 
         editButton.setOnClickListener(new View.OnClickListener() {
@@ -76,10 +74,10 @@ public class ActivityLandingPage extends android.app.Activity {
         activityAssignmentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AssignmentLandingPageTabs.putExtra("eventID", cloneEvent.getEventId());
-                AssignmentLandingPageTabs.putExtra("activityID", cloneActivity.getId());
-                AssignmentLandingPageTabs.putExtra("assignmentID", cloneActivity.getAssignment().getId());
-                startActivity(AssignmentLandingPageTabs);
+                AssignmentLandingPageIntent.putExtra("eventID", cloneEvent.getEventId());
+                AssignmentLandingPageIntent.putExtra("activityID", cloneActivity.getId());
+                AssignmentLandingPageIntent.putExtra("assignmentID", cloneActivity.getAssignment().getId());
+                startActivity(AssignmentLandingPageIntent);
             }
         });
     }

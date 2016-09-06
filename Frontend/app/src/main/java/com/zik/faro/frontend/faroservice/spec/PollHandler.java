@@ -13,5 +13,6 @@ public interface PollHandler {
     void getUnvotedCount(final BaseFaroRequestCallback<Integer> callback, String eventId);
     void castVote(final BaseFaroRequestCallback<String> callback, final String eventId, final String pollId, Set<String> options);
     void closePoll(final BaseFaroRequestCallback<String> callback, final String eventId, final String pollId);
-    void deletePoll(final BaseFaroRequestCallback<String> callback, final String eventId, final String pollId);   
+    void deletePoll(final BaseFaroRequestCallback<String> callback, final String eventId, final String pollId);
+    void updatePoll(final BaseFaroRequestCallback<Poll> callback, final String eventId, final String pollId, Poll poll);
 }
