@@ -30,8 +30,7 @@ public class ClosedPollLandingPage extends ActionBarActivity {
 
     private static String eventID = null;
     private static String pollID = null;
-    private static Poll P;
-    private static Event E;
+    private static Poll clonePoll;
     private static PollListHandler pollListHandler = PollListHandler.getInstance();
     private  static EventListHandler eventListHandler = EventListHandler.getInstance();
 
@@ -67,7 +66,7 @@ public class ClosedPollLandingPage extends ActionBarActivity {
         popupHeight = (int) (dm.heightPixels * 0.8);
 
         OpenPollLandingPage = new Intent(ClosedPollLandingPage.this, OpenPollLandingPage.class);
-        PickPollWinner = new Intent(ClosedPollLandingPage.this, PickPollWinner.class);
+        PickPollWinner = new Intent(ClosedPollLandingPage.this, PickPollWinnerPage.class);
         PollListPage = new Intent(ClosedPollLandingPage.this, PollListPage.class);
 
 
@@ -75,22 +74,21 @@ public class ClosedPollLandingPage extends ActionBarActivity {
         if(extras != null) {
             eventID = extras.getString("eventID");
             pollID = extras.getString("pollID");
-            P = pollListHandler.getPollCloneFromMap(pollID);
-            E = eventListHandler.getEventCloneFromMap(eventID);
-            pollOptionsList = P.getPollOptions();
-            pollDesc.setText(P.getDescription());
+            clonePoll = pollListHandler.getPollCloneFromMap(pollID);
+            pollOptionsList = clonePoll.getPollOptions();
+            pollDesc.setText(clonePoll.getDescription());
 
             LinearLayout pollOptionsTextList = (LinearLayout) findViewById(R.id.pollOptionsTextList);
             LinearLayout voterButtonLinearLayout = (LinearLayout) findViewById(R.id.voterButtonLinearLayout);
             for (Integer i = 0; i < pollOptionsList.size(); i++) {
-                //Create TextView to display poll Option
+                //Create TextView to display Poll Option
                 final TextView textView = new TextView(this);
                 PollOption pollOption = pollOptionsList.get(i);
 
                 textView.setText(pollOption.getOption());
                 textView.setGravity(Gravity.CENTER_VERTICAL);
                 //Setting the TextView to display the winning Option
-                if ((pollOption.getId().equals(P.getWinnerId()))){
+                if ((pollOption.getId().equals(clonePoll.getWinnerId()))){
                     winnerPollOptionTV.setText("Winner is: " + pollOption.getOption());
                     textView.setTextColor(Color.RED);
                 }
@@ -124,8 +122,8 @@ public class ClosedPollLandingPage extends ActionBarActivity {
             changeWinner.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    PickPollWinner.putExtra("eventID", E.getEventId());
-                    PickPollWinner.putExtra("pollID", P.getId());
+                    PickPollWinner.putExtra("eventID", eventID);
+                    PickPollWinner.putExtra("pollID", pollID);
                     PickPollWinner.putExtra("calledFrom", "ClosedPollLandingPage");
                     startActivity(PickPollWinner);
                     finish();
@@ -137,10 +135,10 @@ public class ClosedPollLandingPage extends ActionBarActivity {
                 public void onClick(View v) {
                     //TODO update server of reopening the Poll
 
-                    P.setWinnerId(null);
-                    pollListHandler.changePollStatusToOpen(P);
-                    OpenPollLandingPage.putExtra("eventID", E.getEventId());
-                    OpenPollLandingPage.putExtra("pollID", P.getId());
+                    clonePoll.setWinnerId(null);
+                    pollListHandler.changePollStatusToOpen(clonePoll);
+                    OpenPollLandingPage.putExtra("eventID", eventID);
+                    OpenPollLandingPage.putExtra("pollID", pollID);
                     startActivity(OpenPollLandingPage);
                     finish();
                 }

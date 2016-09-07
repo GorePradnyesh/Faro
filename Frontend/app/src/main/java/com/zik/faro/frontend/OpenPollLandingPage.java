@@ -108,7 +108,7 @@ public class OpenPollLandingPage extends Activity {
         popupHeight = (int) (dm.heightPixels * 0.8);
 
         PollListPage = new Intent(OpenPollLandingPage.this, PollListPage.class);
-        PickPollWinner = new Intent(OpenPollLandingPage.this, PickPollWinner.class);
+        PickPollWinner = new Intent(OpenPollLandingPage.this, PickPollWinnerPage.class);
         EditPollPage = new Intent(OpenPollLandingPage.this, EditPoll.class);
         OpenPollLandingPageReload = new Intent(OpenPollLandingPage.this, OpenPollLandingPage.class);
         final Context mContext = this;

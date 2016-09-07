@@ -58,7 +58,7 @@
             android:label="@string/title_activity_create_new" />
         <activity android:name=".EditPoll" />
         <activity
-            android:name=".PickPollWinner"
+            android:name=".PickPollWinnerPage"
             android:label="@string/title_activity_pick_poll_winner" />
         <activity
             android:name=".ClosedPollLandingPage"

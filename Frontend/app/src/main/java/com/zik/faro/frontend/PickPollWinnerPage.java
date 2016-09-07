@@ -26,6 +26,7 @@ import android.widget.Toast;
 
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.Event;
+import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.PollOption;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
@@ -34,24 +35,22 @@ import com.zik.faro.frontend.faroservice.HttpError;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static android.widget.Toast.LENGTH_LONG;
 
-public class PickPollWinner extends Activity {
+public class PickPollWinnerPage extends Activity {
 
     private static String eventID = null;
     private static String pollID = null;
     private static String calledFrom = null;
     private static Poll clonePoll;
-    private static Event cloneEvent;
+
     private static PollListHandler pollListHandler = PollListHandler.getInstance();
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
 
-    List<PollOption> pollOptionsList;
+    private List<PollOption> pollOptionsList;
 
     private static final Integer INVALID_SELECTED_INDEX = -1;
     private Integer pollOptionWinnerPosition = INVALID_SELECTED_INDEX;
@@ -75,8 +74,8 @@ public class PickPollWinner extends Activity {
         final TextView pollDesc = (TextView)findViewById(R.id.pollDescription);
         final Button selectWinner = (Button) findViewById(R.id.selectWinner);
 
-        OpenPollLandingPage = new Intent(PickPollWinner.this, OpenPollLandingPage.class);
-        ClosedPollLandingPage = new Intent(PickPollWinner.this, ClosedPollLandingPage.class);
+        OpenPollLandingPage = new Intent(PickPollWinnerPage.this, OpenPollLandingPage.class);
+        ClosedPollLandingPage = new Intent(PickPollWinnerPage.this, ClosedPollLandingPage.class);
 
         DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
@@ -93,7 +92,6 @@ public class PickPollWinner extends Activity {
             pollID = extras.getString("pollID");
             calledFrom = extras.getString("calledFrom");
             clonePoll = pollListHandler.getPollCloneFromMap(pollID);
-            cloneEvent = eventListHandler.getEventCloneFromMap(eventID);
 
             pollOptionsList = clonePoll.getPollOptions();
             pollDesc.setText(clonePoll.getDescription());
@@ -155,20 +153,43 @@ public class PickPollWinner extends Activity {
                 public void onClick(View v) {
                     if (previousPollOptionWinnerPosition.equals(INVALID_SELECTED_INDEX) &&
                             pollOptionWinnerPosition.equals(INVALID_SELECTED_INDEX)){
-                        Toast.makeText(PickPollWinner.this, "Pick a winner", LENGTH_LONG).show();
+                        Toast.makeText(PickPollWinnerPage.this, "Pick a winner", LENGTH_LONG).show();
                     }else if (pollOptionWinnerPosition.equals(previousPollOptionWinnerPosition)){
-                        Toast.makeText(PickPollWinner.this, "Winner not changed", LENGTH_LONG).show();
+                        Toast.makeText(PickPollWinnerPage.this, "Winner not changed", LENGTH_LONG).show();
                     }else{
                         PollOption winnerPollOption = pollOptionsList.get(pollOptionWinnerPosition);
-                        if (!(winnerPollOption.getId().equals(clonePoll.getWinnerId()))) {
+                        Poll updatePoll = new Poll(eventID, clonePoll.getCreatorId(), clonePoll.getMultiChoice(), null,
+                                clonePoll.getOwner(), clonePoll.getDescription(), ObjectStatus.CLOSED);
+                        updatePoll.setWinnerId(winnerPollOption.getId());
 
-                            clonePoll.setWinnerId(winnerPollOption.getId());
-                            pollListHandler.changePollStatusToClosed(clonePoll);
-                            ClosedPollLandingPage.putExtra("eventID", cloneEvent.getEventId());
-                            ClosedPollLandingPage.putExtra("pollID", clonePoll.getId());
-                            startActivity(ClosedPollLandingPage);
-                            finish();
-                        }
+                        serviceHandler.getPollHandler().updatePoll(new BaseFaroRequestCallback<Poll>() {
+                            @Override
+                            public void onFailure(Request request, IOException ex) {
+                                Log.e(TAG, "failed to send Poll update request");
+                            }
+
+                            @Override
+                            public void onResponse(final Poll receivedPoll, HttpError error) {
+                                if (error == null ) {
+                                    Runnable myRunnable = new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Log.i(TAG, "Poll Update Response received Successfully");
+                                            pollListHandler.removePollFromListAndMap(clonePoll);
+                                            pollListHandler.addPollToListAndMap(receivedPoll);
+                                            ClosedPollLandingPage.putExtra("eventID", eventID);
+                                            ClosedPollLandingPage.putExtra("pollID", pollID);
+                                            startActivity(ClosedPollLandingPage);
+                                            finish();
+                                        }
+                                    };
+                                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                                    mainHandler.post(myRunnable);
+                                }else {
+                                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                                }
+                            }
+                        }, eventID, pollID, updatePoll);
                     }
                 }
             });
@@ -190,7 +211,7 @@ public class PickPollWinner extends Activity {
         for (String temp : pollOption.getVoters()) {
             voters.add(temp);
         }
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(PickPollWinner.this, android.R.layout.simple_spinner_item, voters);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(PickPollWinnerPage.this, android.R.layout.simple_spinner_item, voters);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         voterList.setAdapter(adapter);
 
@@ -209,12 +230,12 @@ public class PickPollWinner extends Activity {
     public void onBackPressed() {
         super.onBackPressed();
         if (calledFrom.equals("OpenPollLandingPage")) {
-            OpenPollLandingPage.putExtra("eventID", cloneEvent.getEventId());
-            OpenPollLandingPage.putExtra("pollID", clonePoll.getId());
+            OpenPollLandingPage.putExtra("eventID", eventID);
+            OpenPollLandingPage.putExtra("pollID", pollID);
             startActivity(OpenPollLandingPage);
         }else if (calledFrom.equals("ClosedPollLandingPage")){  //Can happen when need to change winner of a closed Poll
-            ClosedPollLandingPage.putExtra("eventID", cloneEvent.getEventId());
-            ClosedPollLandingPage.putExtra("pollID", clonePoll.getId());
+            ClosedPollLandingPage.putExtra("eventID", eventID);
+            ClosedPollLandingPage.putExtra("pollID", pollID);
             startActivity(ClosedPollLandingPage);
         }
         finish();
