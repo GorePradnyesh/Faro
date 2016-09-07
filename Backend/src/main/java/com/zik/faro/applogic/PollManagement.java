@@ -46,6 +46,7 @@ public class PollManagement {
 	
 	public static Poll update(final String eventId, final String pollId,
     		final Poll poll, final String userId ) throws DatastoreException, DataNotFoundException{
+		generatePollIds(poll.getPollOptions());
 		PollDo pollDo = ConversionUtils.toDo(poll);
 		return ConversionUtils.fromDo(PollDatastoreImpl.updatePoll(eventId, pollId, pollDo, userId));
 	}
@@ -57,7 +58,9 @@ public class PollManagement {
 	private static void generatePollIds(List<PollOption> pollOptions){
 		if(pollOptions != null && !pollOptions.isEmpty()){
 			for(PollOption option: pollOptions){
-				option.setId(UUID.randomUUID().toString());
+				if(option.getId() == null || option.getId().isEmpty()){
+					option.setId(UUID.randomUUID().toString());
+				}
 			}
 		}
 	}

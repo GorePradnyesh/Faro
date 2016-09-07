@@ -161,7 +161,9 @@ public class FunctionalPollTest {
         Poll updatedPollResponse = updateResponse.getEntity(Poll.class);
         Assert.assertEquals(200, updateResponse.getStatus());
         Assert.assertEquals(4,updatedPollResponse.getPollOptions().size());
-    	
+    	for(int i = 0; i < updatedPollResponse.getPollOptions().size(); i++){
+    		Assert.assertNotNull(updatedPollResponse.getPollOptions().get(i).getId());
+    	}
     }
     
     public static void getPolls() throws Exception{
