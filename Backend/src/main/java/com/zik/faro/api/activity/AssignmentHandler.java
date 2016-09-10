@@ -32,7 +32,9 @@ import com.zik.faro.applogic.AssignmentManagement;
 import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.data.Activity;
 import com.zik.faro.data.Assignment;
+import com.zik.faro.data.Event;
 import com.zik.faro.data.Item;
 
 @Path(EVENT_PATH_CONST + EVENT_ID_PATH_PARAM_STRING + ASSIGNMENT_PATH_CONST)
@@ -101,15 +103,17 @@ public class AssignmentHandler {
     @Path(ASSIGNMENT_ID_PATH_PARAM_STRING+ASSIGNMENT_UPDATE_PATH_CONST)
     @POST
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public JResponse<String> updateAssignment(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public JResponse<List<Item>> updateAssignment(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
     		@QueryParam(ACTIVITY_ID_PATH_PARAM) final String activityId,
     		final List<Item> items){
     	
 		try {
 			if(activityId == null || activityId.isEmpty()){
-				AssignmentManagement.updateEventItems(eventId, items);
+				Event updatedEvent = AssignmentManagement.updateEventItems(eventId, items);
+				return JResponse.ok(updatedEvent.getAssignment().getItems()).build();
 			}else{
-				AssignmentManagement.updateActivityItems(eventId, activityId, items);
+				Activity updatedActivity = AssignmentManagement.updateActivityItems(eventId, activityId, items);
+				return JResponse.ok(updatedActivity.getAssignment().getItems()).build();
 			}
 		} catch (DataNotFoundException e) {
 			Response response = Response.status(Response.Status.NOT_FOUND)
@@ -122,7 +126,6 @@ public class AssignmentHandler {
                     .build();
             throw new WebApplicationException(response);
 		}
-    	return JResponse.ok(HTTP_OK).build();
     }
     
 

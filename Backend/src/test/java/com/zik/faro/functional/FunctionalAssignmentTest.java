@@ -13,6 +13,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import com.zik.faro.TestHelper;
 import com.zik.faro.data.ActionStatus;
@@ -71,8 +72,9 @@ public class FunctionalAssignmentTest {
     	List<Item> items = new ArrayList<Item>();
     	items.add(new Item("food", "Gaurav", 2, Unit.COUNT) );
     	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/assignment/"+eventDetails.getAssignment().getId()+"/updateItems", token, items);
-    	String updateResponse = response.getEntity(String.class);
-    	Assert.assertEquals("OK", updateResponse);
+    	List<Item> updatedItems = response.getEntity(new GenericType<List<Item>>(){});
+    	Assert.assertEquals(items.size(), updatedItems.size());
+    	items = updatedItems;
     	
     	// Verify
     	response1 = TestHelper.doGET(endpoint.toString(), "v1/event/"+ eventId+"/details", new MultivaluedMapImpl(), token);
@@ -82,8 +84,9 @@ public class FunctionalAssignmentTest {
         
         items.get(0).setCount(5);
         response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/assignment/"+eventDetails.getAssignment().getId()+"/updateItems", token, items);
-    	updateResponse = response.getEntity(String.class);
-    	Assert.assertEquals("OK", updateResponse);
+    	updatedItems = response.getEntity(new GenericType<List<Item>>(){});
+    	assertTodo(items, updatedItems);
+    	items = updatedItems;
     	
     	// Verify
     	response1 = TestHelper.doGET(endpoint.toString(), "v1/event/"+ eventId+"/details", new MultivaluedMapImpl(), token);
@@ -97,8 +100,9 @@ public class FunctionalAssignmentTest {
     	
     	items.add(new Item("drinks", "Kunal", 3, Unit.COUNT));
     	response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/assignment/"+eventDetails.getAssignment().getId()+"/updateItems", token, items);
-    	updateResponse = response.getEntity(String.class);
-    	Assert.assertEquals("OK", updateResponse);
+    	updatedItems = response.getEntity(new GenericType<List<Item>>(){});
+    	Assert.assertEquals(items.size(), updatedItems.size());
+    	items=updatedItems;
     	
     	// Verify
     	response1 = TestHelper.doGET(endpoint.toString(), "v1/event/"+ eventId+"/details", new MultivaluedMapImpl(), token);
@@ -128,8 +132,9 @@ public class FunctionalAssignmentTest {
     	items.add(new Item("food", "Gaurav", 2, Unit.COUNT) );
     	response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/assignment/"+activityResponse.getAssignment().getId()+
     			"/updateItems", token, items, map);
-    	String updateResponse = response.getEntity(String.class);
-    	Assert.assertEquals("OK", updateResponse);
+    	List<Item> updatedItems = response.getEntity(new GenericType<List<Item>>(){});
+    	Assert.assertEquals(items.size(), updatedItems.size());
+    	items = updatedItems;
     	
     	// Verify
     	response = TestHelper.doGET(endpoint.toString(), "v1/event/"+ eventId+"/activity/"+activityResponse.getId(), new MultivaluedMapImpl(), token);
@@ -140,8 +145,9 @@ public class FunctionalAssignmentTest {
         items.get(0).setCount(5);
         response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/assignment/"+activityResponse.getAssignment().getId()+
     			"/updateItems", token, items, map);
-    	updateResponse = response.getEntity(String.class);
-    	Assert.assertEquals("OK", updateResponse);
+        updatedItems = response.getEntity(new GenericType<List<Item>>(){});
+        assertTodo(items, updatedItems);
+        items=updatedItems;
     	
     	// Verify
     	response = TestHelper.doGET(endpoint.toString(), "v1/event/"+ eventId+"/activity/"+activityResponse.getId(), new MultivaluedMapImpl(), token);
@@ -156,8 +162,9 @@ public class FunctionalAssignmentTest {
     	items.add(new Item("drinks", "Kunal", 3, Unit.COUNT));
     	response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/assignment/"+activityResponse.getAssignment().getId()+
     			"/updateItems", token, items, map);
-    	updateResponse = response.getEntity(String.class);
-    	Assert.assertEquals("OK", updateResponse);
+    	updatedItems = response.getEntity(new GenericType<List<Item>>(){});
+    	Assert.assertEquals(items.size(), updatedItems.size());
+    	items = updatedItems;
     	
     	// Verify
     	response = TestHelper.doGET(endpoint.toString(), "v1/event/"+ eventId+"/activity/"+activityResponse.getId(), new MultivaluedMapImpl(), token);
