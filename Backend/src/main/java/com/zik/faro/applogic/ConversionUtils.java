@@ -58,7 +58,7 @@ public class ConversionUtils {
 	public static Activity fromDo(ActivityDo activityDo){
 		Activity activity = new Activity();
 		activity.setAssignment(activityDo.getAssignment());
-		activity.setStartDate(activityDo.getEndDate());
+		activity.setStartDate(activityDo.getStartDate());
 		activity.setEndDate(activityDo.getEndDate());
 		activity.setDescription(activityDo.getDescription());
 		activity.setLocation(activityDo.getLocation());
