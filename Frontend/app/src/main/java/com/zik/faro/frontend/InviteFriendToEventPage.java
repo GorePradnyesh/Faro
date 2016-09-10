@@ -150,6 +150,9 @@ public class InviteFriendToEventPage extends Activity {
         });
     }
 
+    /*TODO to add alphabet based scroll bar check out the following link
+    * https://www.youtube.com/watch?v=l6EAOIXy0JA
+    */
     private void searchFriendInList(String textToSearch){
 
         LinearLayout pickFriendsCheckboxList = (LinearLayout) findViewById(R.id.pickFriendsCheckboxList);

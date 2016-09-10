@@ -75,6 +75,10 @@ public class AppLandingPage extends FragmentActivity{
         }
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
+
+        /*TODO For styling the tab layout checkout the following link
+        * https://maxalley.wordpress.com/2014/09/08/android-styling-a-tab-layout-with-fragmenttabhost-and-fragments/
+        */
         mTabHost = (FragmentTabHost) findViewById(android.R.id.tabhost);
         mTabHost.setup(this, getSupportFragmentManager(), android.R.id.tabcontent);
         mTabHost.addTab(

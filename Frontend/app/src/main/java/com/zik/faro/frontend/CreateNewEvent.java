@@ -92,6 +92,9 @@ public class CreateNewEvent extends Activity {
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
+        /*TODO For location search bar try out the following link
+        * https://developer.android.com/training/location/display-address.html
+        */
         eventName.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -252,23 +255,6 @@ public class CreateNewEvent extends Activity {
         updateEndDateCalendarTime(startDateCalendar);
     }
 
-    private void updateStartDate(){
-        startDateButton.setText(sdf.format(startDateCalendar.getTime()));
-    }
-
-    private void updateEndDate(){
-        endDateButton.setText(sdf.format(endDateCalendar.getTime()));
-    }
-
-    private void updateStartTime(){
-        startTimeButton.setText(stf.format(startDateCalendar.getTime()));
-    }
-
-    private void updateEndTime(){
-        endTimeButton.setText(stf.format(endDateCalendar.getTime()));
-    }
-
-
     private void setStartDate(){
         new DatePickerDialog(CreateNewEvent.this,
                 startDate,
@@ -278,6 +264,14 @@ public class CreateNewEvent extends Activity {
 
     }
 
+    private void setStartTime(){
+        new TimePickerDialog(CreateNewEvent.this,
+                startTime,
+                startDateCalendar.get(Calendar.HOUR_OF_DAY),
+                startDateCalendar.get(Calendar.MINUTE),
+                false).show();
+    }
+
     private void setEndDate(){
         new DatePickerDialog(CreateNewEvent.this,
                 endDate,
@@ -285,14 +279,6 @@ public class CreateNewEvent extends Activity {
                 endDateCalendar.get(Calendar.MONTH),
                 endDateCalendar.get(Calendar.DAY_OF_MONTH)).show();
 
-    }
-
-    private void setStartTime(){
-        new TimePickerDialog(CreateNewEvent.this,
-                startTime,
-                startDateCalendar.get(Calendar.HOUR_OF_DAY),
-                startDateCalendar.get(Calendar.MINUTE),
-                false).show();
     }
 
     private void setEndTime(){
@@ -305,17 +291,16 @@ public class CreateNewEvent extends Activity {
 
 
     //startDate of the event should not be before current time
-    public boolean isStartDateValid(Calendar eventStartCalendar){
+    private boolean isStartDateValid(Calendar eventStartCalendar){
         boolean ret_value = eventStartCalendar.after(currentCalendar);
         if (!ret_value) {
             Toast.makeText(CreateNewEvent.this, "Event's Start Date cannot be before current time", LENGTH_LONG).show();
         }
         return ret_value;
-
     }
 
     //End Date of the event cannot be before Start date
-    public boolean isEndDateValid(Calendar eventEndCalendar){
+    private boolean isEndDateValid(Calendar eventEndCalendar){
         boolean ret_value = (startDateCalendar.before(eventEndCalendar) ||
                 startDateCalendar.equals(eventEndCalendar));
         if (!ret_value){
@@ -362,9 +347,9 @@ public class CreateNewEvent extends Activity {
 
             //Event start date cannot be before current time
             if (isStartDateValid(temp)) {
-                updateStartDateCalendarDate(temp);
+                updateStartDateCalendarTime(temp);
             }else{
-                updateStartDateCalendarDate(currentCalendar);
+                updateStartDateCalendarTime(currentCalendar);
             }
 
             /* When setting the startTime, we compare the startCalendar to the endCalendar and if the
@@ -389,10 +374,10 @@ public class CreateNewEvent extends Activity {
             /* When setting the endDate, we compare the startCalendar to the temp and if the
              * startCalendar is after the endCalendar then we set the endDate same as the startDate
              */
-            if(!isEndDateValid(temp)){
-                resetEndDateAndTimeToStartDateAndTime();
-            }else{
+            if(isEndDateValid(temp)){
                 updateEndDateCalendarDate(temp);
+            }else{
+                resetEndDateAndTimeToStartDateAndTime();
             }
         }
     };
@@ -409,10 +394,10 @@ public class CreateNewEvent extends Activity {
             /* When setting the endDate, we compare the startCalendar to the temp and if the
              * startCalendar is after the endCalendar then we set the endDate same as the startDate
              */
-            if(!isEndDateValid(temp)){
-                resetEndDateAndTimeToStartDateAndTime();
+            if(isEndDateValid(temp)){
+                updateEndDateCalendarTime(temp);
             }else{
-                updateEndDateCalendarDate(temp);
+                resetEndDateAndTimeToStartDateAndTime();
             }
         }
     };
