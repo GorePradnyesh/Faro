@@ -10,8 +10,8 @@ import static com.zik.faro.commons.Constants.ASSIGNMENT_UPDATE_PATH_CONST;
 import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM;
 import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM_STRING;
 import static com.zik.faro.commons.Constants.EVENT_PATH_CONST;
-import static com.zik.faro.commons.Constants.HTTP_OK;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -97,24 +97,26 @@ public class AssignmentHandler {
     	return JResponse.ok(Constants.HTTP_OK).build();
     }
     
-    // If activityId is present in queryparam, update is for assignment of the activityId
-    // present in the request.
-    // Else update is for assignment at event level
     @Path(ASSIGNMENT_ID_PATH_PARAM_STRING+ASSIGNMENT_UPDATE_PATH_CONST)
     @POST
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public JResponse<List<Item>> updateAssignment(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
-    		@QueryParam(ACTIVITY_ID_PATH_PARAM) final String activityId,
-    		final List<Item> items){
-    	
+    public JResponse<Map<String,List<Item>>> updateAssignment(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    		final Map<String,List<Item>> items){
+    	Map<String, List<Item>> responseMap = new HashMap<String,List<Item>>();
 		try {
-			if(activityId == null || activityId.isEmpty()){
-				Event updatedEvent = AssignmentManagement.updateEventItems(eventId, items);
-				return JResponse.ok(updatedEvent.getAssignment().getItems()).build();
-			}else{
-				Activity updatedActivity = AssignmentManagement.updateActivityItems(eventId, activityId, items);
-				return JResponse.ok(updatedActivity.getAssignment().getItems()).build();
+			// Check if map contains eventLevel todo:
+			if(items.containsKey(eventId)){
+				Event updatedEvent = AssignmentManagement.updateEventItems(eventId, items.get(eventId));
+				responseMap.put(eventId, updatedEvent.getAssignment().getItems());
 			}
+			for(String activityId: items.keySet()){
+				// Skip event id's todo list processed above
+				if(!activityId.equals(eventId)){
+					Activity updatedActivity = AssignmentManagement.updateActivityItems(eventId, activityId, items.get(activityId));
+					responseMap.put(activityId, updatedActivity.getAssignment().getItems());
+				}
+			}
+			return JResponse.ok(responseMap).build();
 		} catch (DataNotFoundException e) {
 			Response response = Response.status(Response.Status.NOT_FOUND)
                     .entity(e.getMessage())
@@ -126,7 +128,7 @@ public class AssignmentHandler {
                     .build();
             throw new WebApplicationException(response);
 		}
-    }
+	}
     
 
     @XmlRootElement
