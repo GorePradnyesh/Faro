@@ -24,6 +24,7 @@ import com.zik.faro.data.ActionStatus;
 import com.zik.faro.persistence.datastore.data.ActivityDo;
 import com.zik.faro.data.Assignment;
 import com.zik.faro.persistence.datastore.data.EventDo;
+import com.zik.faro.data.Identifier;
 import com.zik.faro.data.Item;
 import com.zik.faro.data.Location;
 import com.zik.faro.data.Unit;
@@ -62,8 +63,8 @@ public class AssignmentDatastoreImplTest {
                 new GregorianCalendar(),
                 new Assignment());
         Assignment tempAssignment = new Assignment();
-        tempAssignment.addItem(new Item("blankets", "David", 4, Unit.COUNT));
-        tempAssignment.addItem(new Item("rice", "Roger", 10, Unit.LB));
+        tempAssignment.addItem(new Item("blankets", "David", 4, Unit.COUNT, Identifier.createUniqueIdentifierString()));
+        tempAssignment.addItem(new Item("rice", "Roger", 10, Unit.LB, Identifier.createUniqueIdentifierString()));
         activity1.setAssignment(tempAssignment);
         return activity1;
     }
@@ -151,8 +152,8 @@ public class AssignmentDatastoreImplTest {
 	
 	private List<Item> getItems(Assignment assignment) throws IllegalDataOperation{
 		List<Item> items = new ArrayList<Item>();
-		items.add(new Item("Tomatoes", "12345", 1, Unit.KG));
-		items.add(new Item("Onions", "123456", 1, Unit.KG));
+		items.add(new Item("Tomatoes", "12345", 1, Unit.KG, Identifier.createUniqueIdentifierString()));
+		items.add(new Item("Onions", "123456", 1, Unit.KG, Identifier.createUniqueIdentifierString()));
 		items.add(new Item("TODO name changed", "David", 4, Unit.COUNT, assignment.getItems().get(0).getId()));
 		return items;
 	}
@@ -161,7 +162,7 @@ public class AssignmentDatastoreImplTest {
 	public void updateEventLevelAssignmentItems() throws IllegalDataOperation, DataNotFoundException, DatastoreException{
 		EventDo event = new EventDo("TestEvent", Calendar.getInstance(), Calendar.getInstance(), false, null, new Location("San Jose"));
 		Assignment eventAssignment = new Assignment();
-		eventAssignment.addItem(new Item("Kaivan", "420", 3, Unit.KG));
+		eventAssignment.addItem(new Item("Kaivan", "420", 3, Unit.KG, Identifier.createUniqueIdentifierString()));
 		event.setAssignment(eventAssignment);
     	EventDatastoreImpl.storeEventOnly(event);
 		List<Item> items = getItems(event.getAssignment());
