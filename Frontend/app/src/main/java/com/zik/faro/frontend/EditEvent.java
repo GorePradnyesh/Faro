@@ -49,18 +49,22 @@ import static android.widget.Toast.LENGTH_LONG;
 * variables.*/
 public class EditEvent extends Activity {
 
-    Button startDateButton = null;
-    Button startTimeButton = null;
-    Button endTimeButton = null;
-    Button endDateButton = null;
+    private Button startDateButton = null;
+    private Button startTimeButton = null;
+    private Button endTimeButton = null;
+    private Button endDateButton = null;
 
-    DateFormat sdf = new SimpleDateFormat("MMM dd yyyy");
-    DateFormat stf = new SimpleDateFormat("hh:mm a");
+    private DateFormat sdf = new SimpleDateFormat("MMM dd yyyy");
+    private DateFormat stf = new SimpleDateFormat("hh:mm a");
 
 
     private  static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
     private static Event cloneEvent;
+
+    private Calendar startDateCalendar = Calendar.getInstance();
+    private Calendar endDateCalendar = Calendar.getInstance();
+    private Calendar currentCalendar = Calendar.getInstance();
 
     private RelativeLayout popUpRelativeLayout;
 
@@ -147,8 +151,9 @@ public class EditEvent extends Activity {
         editEventOK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                cloneEvent.setStartDate(startDateCalendar);
+                cloneEvent.setEndDate(endDateCalendar);
 
-                //TODO: the below call is creating a new event instead of editing the same event. FIX THIS!!
                 serviceHandler.getEventHandler().updateEvent(new BaseFaroRequestCallback<Event>() {
                     @Override
                     public void onFailure(Request request, IOException ex) {
@@ -204,7 +209,7 @@ public class EditEvent extends Activity {
         });
     }
 
-    public void confirmEventDeletePopUP(View v) {
+    private void confirmEventDeletePopUP(View v) {
         LayoutInflater layoutInflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         ViewGroup container = (ViewGroup) layoutInflater.inflate(R.layout.delete_popup, null);
         final PopupWindow popupWindow = new PopupWindow(container, RelativeLayout.LayoutParams.WRAP_CONTENT,
@@ -265,172 +270,187 @@ public class EditEvent extends Activity {
         });
     }
 
+    private void updateStartDateCalendarDate(Calendar calendar){
+        startDateCalendar.set(calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH));
+        startDateButton.setText(sdf.format(startDateCalendar.getTime()));
+    }
+    private void updateStartDateCalendarTime(Calendar calendar){
+        startDateCalendar.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY));
+        startDateCalendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE));
+        startTimeButton.setText(stf.format(startDateCalendar.getTime()));
+    }
+
+    private void updateEndDateCalendarDate(Calendar calendar){
+        endDateCalendar.set(calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH));
+        endDateButton.setText(sdf.format(endDateCalendar.getTime()));
+    }
+
+    private void updateEndDateCalendarTime(Calendar calendar){
+        endDateCalendar.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY));
+        endDateCalendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE));
+        endTimeButton.setText(stf.format(endDateCalendar.getTime()));
+    }
+
     private void setBothTimeAndDateToEventDates(){
-        startDateButton.setText(sdf.format(cloneEvent.getStartDate().getTime()));
-        endDateButton.setText(sdf.format(cloneEvent.getEndDate().getTime()));
-        startTimeButton.setText(stf.format(cloneEvent.getStartDate().getTime()));
-        endTimeButton.setText(stf.format(cloneEvent.getEndDate().getTime()));
+        updateStartDateCalendarDate(cloneEvent.getStartDate());
+        updateStartDateCalendarTime(cloneEvent.getStartDate());
+        updateEndDateCalendarDate(cloneEvent.getEndDate());
+        updateEndDateCalendarTime(cloneEvent.getEndDate());
     }
 
     private void resetEndDateAndTimeToStartDateAndTime(){
-        cloneEvent.getEndDate().set(Calendar.YEAR, cloneEvent.getStartDate().get(Calendar.YEAR));
-        cloneEvent.getEndDate().set(Calendar.MONTH, cloneEvent.getStartDate().get(Calendar.MONTH));
-        cloneEvent.getEndDate().set(Calendar.DAY_OF_MONTH, cloneEvent.getStartDate().get(Calendar.DAY_OF_MONTH));
-        cloneEvent.getEndDate().set(Calendar.HOUR_OF_DAY, cloneEvent.getStartDate().get(Calendar.HOUR_OF_DAY));
-        cloneEvent.getEndDate().set(Calendar.MINUTE, cloneEvent.getStartDate().get(Calendar.MINUTE));
-        updateEndDateButton();
-        updateEndTimeButton();
+        updateEndDateCalendarDate(startDateCalendar);
+        updateEndDateCalendarTime(startDateCalendar);
     }
 
-    public void updateStartDateButton(){
-        startDateButton.setText(sdf.format(cloneEvent.getStartDate().getTime()));
-    }
-
-    public void updateEndDateButton(){
-        endDateButton.setText(sdf.format(cloneEvent.getEndDate().getTime()));
-    }
-
-    public void updateStartTimeButton(){
-        startTimeButton.setText(stf.format(cloneEvent.getStartDate().getTime()));
-    }
-
-    public void updateEndTimeButton(){
-        endTimeButton.setText(stf.format(cloneEvent.getEndDate().getTime()));
-    }
-
-
-    public void setStartDate(){
+    private void setStartDate(){
         new DatePickerDialog(EditEvent.this,
                 startDate,
-                cloneEvent.getStartDate().get(Calendar.YEAR),
-                cloneEvent.getStartDate().get(Calendar.MONTH),
-                cloneEvent.getStartDate().get(Calendar.DAY_OF_MONTH)).show();
-
+                startDateCalendar.get(Calendar.YEAR),
+                startDateCalendar.get(Calendar.MONTH),
+                startDateCalendar.get(Calendar.DAY_OF_MONTH)).show();
     }
 
-    public void setEndDate(){
-        new DatePickerDialog(EditEvent.this,
-                endDate,
-                cloneEvent.getEndDate().get(Calendar.YEAR),
-                cloneEvent.getEndDate().get(Calendar.MONTH),
-                cloneEvent.getEndDate().get(Calendar.DAY_OF_MONTH)).show();
-
-    }
-
-    public void setStartTime(){
+    private void setStartTime(){
         new TimePickerDialog(EditEvent.this,
                 startTime,
-                cloneEvent.getStartDate().get(Calendar.HOUR_OF_DAY),
-                cloneEvent.getStartDate().get(Calendar.MINUTE),
+                startDateCalendar.get(Calendar.HOUR_OF_DAY),
+                startDateCalendar.get(Calendar.MINUTE),
                 false).show();
     }
 
-    public void setEndTime(){
+    private void setEndDate(){
+        new DatePickerDialog(EditEvent.this,
+                endDate,
+                endDateCalendar.get(Calendar.YEAR),
+                endDateCalendar.get(Calendar.MONTH),
+                endDateCalendar.get(Calendar.DAY_OF_MONTH)).show();
+
+    }
+
+    private void setEndTime(){
         new TimePickerDialog(EditEvent.this,
                 endTime,
-                cloneEvent.getStartDate().get(Calendar.HOUR_OF_DAY),
-                cloneEvent.getStartDate().get(Calendar.MINUTE),
+                endDateCalendar.get(Calendar.HOUR_OF_DAY),
+                endDateCalendar.get(Calendar.MINUTE),
                 false).show();
     }
 
+    //startDate of the event should not be before current time
+    private boolean isStartDateValid(Calendar eventStartCalendar){
+        boolean ret_value = eventStartCalendar.after(currentCalendar);
+        if (!ret_value) {
+            Toast.makeText(EditEvent.this, "Event's Start Date cannot be before current time", LENGTH_LONG).show();
+        }
+        return ret_value;
+    }
 
-    /* When setting the startDate, we compare the startCalendar to the endCalendar and if the
-    * startCalendar is after the endCalendar then we set the endDate same as the startDate
-    */
-    DatePickerDialog.OnDateSetListener startDate = new DatePickerDialog.OnDateSetListener(){
+    //End Date of the event cannot be before Start date
+    private boolean isEndDateValid(Calendar eventEndCalendar){
+        boolean ret_value = (startDateCalendar.before(eventEndCalendar) ||
+                startDateCalendar.equals(eventEndCalendar));
+        if (!ret_value){
+            Toast.makeText(EditEvent.this, "Event's End Date cannot be before Event's Start date", LENGTH_LONG).show();
+        }
+        return ret_value;
+    }
+
+    private DatePickerDialog.OnDateSetListener startDate = new DatePickerDialog.OnDateSetListener(){
 
         @Override
         public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
 
-            cloneEvent.getStartDate().set(Calendar.YEAR, year);
-            cloneEvent.getStartDate().set(Calendar.MONTH, monthOfYear);
-            cloneEvent.getStartDate().set(Calendar.DAY_OF_MONTH, dayOfMonth);
-            updateStartDateButton();
+            Calendar temp = Calendar.getInstance();
+            temp.set(year, monthOfYear, dayOfMonth,
+                    startDateCalendar.get(Calendar.HOUR_OF_DAY),
+                    startDateCalendar.get(Calendar.MINUTE));
 
-            if(cloneEvent.getStartDate().after(cloneEvent.getEndDate())){
+            //Event start date cannot be before current time
+            if (isStartDateValid(temp)) {
+                updateStartDateCalendarDate(temp);
+            }else{
+                updateStartDateCalendarDate(currentCalendar);
+            }
+
+            /* When setting the startTime, we compare the startCalendar to the endCalendar and if the
+             * startCalendar is after the endCalendar then we set the endTime same as the startTime
+             */
+            if (startDateCalendar.after(endDateCalendar)){
                 resetEndDateAndTimeToStartDateAndTime();
             }
         }
     };
 
-    /* When setting the startTime, we compare the startCalendar to the endCalendar and if the
-    * startCalendar is after the endCalendar then we set the endTime same as the startTime
-    */
-    TimePickerDialog.OnTimeSetListener startTime = new TimePickerDialog.OnTimeSetListener(){
+
+    private TimePickerDialog.OnTimeSetListener startTime = new TimePickerDialog.OnTimeSetListener(){
         @Override
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+            Calendar temp = Calendar.getInstance();
+            temp.set(startDateCalendar.get(Calendar.YEAR),
+                    startDateCalendar.get(Calendar.MONTH),
+                    startDateCalendar.get(Calendar.DAY_OF_MONTH),
+                    hourOfDay, minute);
 
-            cloneEvent.getStartDate().set(Calendar.HOUR_OF_DAY, hourOfDay);
-            cloneEvent.getStartDate().set(Calendar.MINUTE, minute);
-            updateStartTimeButton();
+            //Event start date cannot be before current time
+            if (isStartDateValid(temp)) {
+                updateStartDateCalendarTime(temp);
+            }else{
+                updateStartDateCalendarTime(currentCalendar);
+            }
 
-            if(cloneEvent.getStartDate().after(cloneEvent.getEndDate())) {
+            /* When setting the startTime, we compare the startCalendar to the endCalendar and if the
+             * startCalendar is after the endCalendar then we set the endTime same as the startTime
+             */
+            if (startDateCalendar.after(endDateCalendar)){
                 resetEndDateAndTimeToStartDateAndTime();
             }
         }
     };
 
-    /* When setting the endDate, we compare the startCalendar to the endCalendar and if the
-    * startCalendar is after the endCalendar then we set the endDate same as the startDate
-    */
 
-    DatePickerDialog.OnDateSetListener endDate = new DatePickerDialog.OnDateSetListener(){
+    private DatePickerDialog.OnDateSetListener endDate = new DatePickerDialog.OnDateSetListener(){
 
         @Override
         public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+            Calendar temp = Calendar.getInstance();
+            temp.set(year, monthOfYear, dayOfMonth,
+                    endDateCalendar.get(Calendar.HOUR_OF_DAY),
+                    endDateCalendar.get(Calendar.MINUTE));
 
-            cloneEvent.getEndDate().set(Calendar.YEAR, year);
-            cloneEvent.getEndDate().set(Calendar.MONTH, monthOfYear);
-            cloneEvent.getEndDate().set(Calendar.DAY_OF_MONTH, dayOfMonth);
-
-            if(cloneEvent.getStartDate().after(cloneEvent.getEndDate())){
+            /* When setting the endDate, we compare the startCalendar to the temp and if the
+             * startCalendar is after the endCalendar then we set the endDate same as the startDate
+             */
+            if(isEndDateValid(temp)){
+                updateEndDateCalendarDate(temp);
+            }else{
                 resetEndDateAndTimeToStartDateAndTime();
-            }else {
-                updateEndDateButton();
             }
-
-
         }
     };
 
-    /* When setting the endTime, we compare the startCalendar to the endCalendar and if the
-    * startCalendar is after the endCalendar then we set the endTime same as the startTime
-    */
-    TimePickerDialog.OnTimeSetListener endTime = new TimePickerDialog.OnTimeSetListener(){
+    private TimePickerDialog.OnTimeSetListener endTime = new TimePickerDialog.OnTimeSetListener(){
         @Override
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-            cloneEvent.getEndDate().set(Calendar.HOUR_OF_DAY, hourOfDay);
-            cloneEvent.getEndDate().set(Calendar.MINUTE, minute);
+            Calendar temp = Calendar.getInstance();
+            temp.set(endDateCalendar.get(Calendar.YEAR),
+                    endDateCalendar.get(Calendar.MONTH),
+                    endDateCalendar.get(Calendar.DAY_OF_MONTH),
+                    hourOfDay, minute);
 
-            if(cloneEvent.getStartDate().after(cloneEvent.getEndDate())){
+            /* When setting the endDate, we compare the startCalendar to the temp and if the
+             * startCalendar is after the endCalendar then we set the endDate same as the startDate
+             */
+            if(isEndDateValid(temp)){
+                updateEndDateCalendarTime(temp);
+            }else{
                 resetEndDateAndTimeToStartDateAndTime();
-            }else {
-                updateEndTimeButton();
             }
         }
     };
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_edit_event, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     @Override
     public void onBackPressed() {
