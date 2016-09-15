@@ -42,7 +42,7 @@ public class EditPoll extends Activity {
 
     private static PollListHandler pollListHandler = PollListHandler.getInstance();
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+    private static FaroServiceHandler serviceHandler;
 
     private static String eventID = null;
     private String pollID;
@@ -59,6 +59,8 @@ public class EditPoll extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_poll);
+
+        serviceHandler = eventListHandler.serviceHandler;
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 

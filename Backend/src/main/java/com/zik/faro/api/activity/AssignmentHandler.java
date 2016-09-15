@@ -97,7 +97,7 @@ public class AssignmentHandler {
     	return JResponse.ok(Constants.HTTP_OK).build();
     }
     
-    @Path(ASSIGNMENT_ID_PATH_PARAM_STRING+ASSIGNMENT_UPDATE_PATH_CONST)
+    @Path(ASSIGNMENT_UPDATE_PATH_CONST)
     @POST
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public JResponse<Map<String,List<Item>>> updateAssignment(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,

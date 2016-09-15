@@ -11,6 +11,8 @@ import android.widget.TextView;
 import com.zik.faro.data.InviteeList;
 import com.zik.faro.data.MinUser;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -31,6 +33,12 @@ public class EventFriendAdapter extends ArrayAdapter {
 
     public void insert(InviteeList.Invitees invitees, int index) {
         list.add(index, invitees);
+        Collections.sort(list, new Comparator<InviteeList.Invitees>() {
+            @Override
+            public int compare(InviteeList.Invitees lhs, InviteeList.Invitees rhs) {
+                return lhs.getFirstName().compareTo(rhs.getFirstName());
+            }
+        });
     }
 
     @Override

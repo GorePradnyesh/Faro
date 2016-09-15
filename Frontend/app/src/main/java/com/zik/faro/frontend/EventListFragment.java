@@ -31,7 +31,7 @@ public class EventListFragment extends Fragment{
 
     static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+    private static FaroServiceHandler serviceHandler;
     private static String TAG = "EventListFragment";
 
     @Override
@@ -49,6 +49,9 @@ public class EventListFragment extends Fragment{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        serviceHandler = eventListHandler.serviceHandler;
+
         View view = inflater.inflate(R.layout.fragment_event_list, container, false);
         TabHost eventTabHost = (TabHost)view.findViewById(R.id.eventTabHost);
         eventTabHost.setup();

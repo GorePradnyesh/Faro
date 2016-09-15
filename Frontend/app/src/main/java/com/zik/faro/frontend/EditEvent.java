@@ -59,7 +59,7 @@ public class EditEvent extends Activity {
 
 
     private  static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+    private static FaroServiceHandler serviceHandler;
     private static Event cloneEvent;
 
     private Calendar startDateCalendar = Calendar.getInstance();
@@ -79,6 +79,8 @@ public class EditEvent extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_event);
+
+        serviceHandler = eventListHandler.serviceHandler;
 
         startDateButton = (Button) findViewById(R.id.startDateButton);
         startTimeButton = (Button) findViewById(R.id.startTimeButton);

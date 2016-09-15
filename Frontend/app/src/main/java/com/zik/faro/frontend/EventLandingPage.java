@@ -37,7 +37,7 @@ public class EventLandingPage extends Activity {
     private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
     private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
 
-    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+    private static FaroServiceHandler serviceHandler;
 
     private static String TAG = "EventLandingPage";
 
@@ -60,6 +60,8 @@ public class EventLandingPage extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_landing_page);
+
+        serviceHandler = eventListHandler.serviceHandler;
 
         final TextView event_name = (TextView) findViewById(R.id.eventNameText);
         TextView eventDescription = (TextView) findViewById(R.id.eventDescriptionTextView);
@@ -206,7 +208,8 @@ public class EventLandingPage extends Activity {
                 }, eventID);
 
                 //Add event's assignment to the Assignment Handler
-                assignmentListHandler.addAssignmentToListAndMap(cloneEvent.getAssignment(), null);
+                Event originalEvent = eventListHandler.getOriginalEventFromMap(eventID);
+                assignmentListHandler.addAssignmentToListAndMap(originalEvent.getAssignment(), null);
 
                 //Make API call to get all activities for this event
                 serviceHandler.getActivityHandler().getActivities(new BaseFaroRequestCallback<List<com.zik.faro.data.Activity>>() {

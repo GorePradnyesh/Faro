@@ -13,7 +13,6 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.ActionStatus;
 import com.zik.faro.data.Activity;
@@ -21,28 +20,25 @@ import com.zik.faro.data.Assignment;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.Item;
 import com.zik.faro.frontend.data.AssignmentParentInfo;
-import com.zik.faro.frontend.data.ItemParentInfo;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class MyAssignmentsFragment extends Fragment{
 
     private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+    private static FaroServiceHandler serviceHandler;
     private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
 
     private ListView itemList;
-    private Map<String, List<Item>> assignmentToItemListMap = new HashMap<>();
+    private Map<String, List<Item>> activityToItemListMap = new HashMap<>();
 
     String eventID = null;
     String passedActivityID = null;
@@ -63,6 +59,8 @@ public class MyAssignmentsFragment extends Fragment{
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.my_assignments_fragment, container, false);
         super.onCreate(savedInstanceState);
+
+        serviceHandler = eventListHandler.serviceHandler;
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(getActivity()));
 
@@ -96,68 +94,65 @@ public class MyAssignmentsFragment extends Fragment{
                 Item cloneItem = cloneAssignment.getItems().get(j);
 
                 if (cloneItem.getAssigneeId().equals(myUserID)){
-                    ItemParentInfo itemParentInfo = new ItemParentInfo(cloneItem, eventID,
-                            assignmentParentInfo.getActivityID(), assignment.getId());
                     if (cloneItem.getStatus().equals(ActionStatus.COMPLETE)) {
-                        myItemsAdapter.insertAtEnd(itemParentInfo);
+                        myItemsAdapter.insertAtEnd(cloneItem);
                     } else {
-                        myItemsAdapter.insertAtBeginning(itemParentInfo);
+                        myItemsAdapter.insertAtBeginning(cloneItem);
                     }
                 }
             }
-            assignmentToItemListMap.put(assignment.getId(), cloneAssignment.getItems());
+            if (assignmentParentInfo.getActivityID() != null) {
+                activityToItemListMap.put(assignmentParentInfo.getActivityID(), cloneAssignment.getItems());
+            }else{
+                activityToItemListMap.put(eventID, cloneAssignment.getItems());
+            }
         }
 
         updateAssignment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                serviceHandler.getAssignmentHandler().updateAssignment(new BaseFaroRequestCallback<Map<String, List<Item>>>() {
+                    @Override
+                    public void onFailure(Request request, IOException ex) {
+                        Log.e(TAG, "failed to send new item list");
+                    }
 
-                for(Map.Entry<String, List<Item>> entry: assignmentToItemListMap.entrySet()){
-                    String assignmentID = entry.getKey();
-                    final Assignment assignment = assignmentListHandler.getOriginalAssignmentFromMap(assignmentID);
-
-                    final List<Item> updatedItemList = entry.getValue();
-                    final String activityID = assignmentListHandler.getActivityIDForAssignmentID(assignmentID);
-
-                    serviceHandler.getAssignmentHandler().updateAssignment(new BaseFaroRequestCallback<String>() {
-                        @Override
-                        public void onFailure(Request request, IOException ex) {
-                            Log.e(TAG, "failed to send new item list");
-                        }
-
-                        @Override
-                        public void onResponse(String s, HttpError error) {
-                            if (error == null ) {
-                                Runnable myRunnable = new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Log.i(TAG, "Successfully updated items list to server");
-                                        assignment.setItems(updatedItemList);
-                                        assignment.getItems();
+                    @Override
+                    public void onResponse(final Map<String, List<Item>> stringListMap, HttpError error) {
+                        if (error == null ) {
+                            Runnable myRunnable = new Runnable() {
+                                @Override
+                                public void run() {
+                                    for(Map.Entry<String, List<Item>> entry: stringListMap.entrySet()){
+                                        String activityID = entry.getKey();
+                                        Assignment originalAssignment;
+                                        if (activityID.equals(eventID)){
+                                            Event originalEvent = eventListHandler.getOriginalEventFromMap(eventID);
+                                            originalAssignment = originalEvent.getAssignment();
+                                            originalAssignment.setItems(entry.getValue());
+                                        }else {
+                                            Activity originalActivity = activityListHandler.getOriginalActivityFromMap(activityID);
+                                            originalAssignment = originalActivity.getAssignment();
+                                            originalAssignment.setItems(entry.getValue());
+                                        }
                                     }
-                                };
-                                Handler mainHandler = new Handler(mContext.getMainLooper());
-                                mainHandler.post(myRunnable);
-                            }else {
-                                Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
-                            }
+                                    Log.i(TAG, "Successfully updated items list to server");
+
+                                    //Reload AssignmentLandingFragment
+                                    AssignmentLandingPageReloadIntent.putExtra("eventID", eventID);
+                                    AssignmentLandingPageReloadIntent.putExtra("activityID", passedActivityID);
+                                    AssignmentLandingPageReloadIntent.putExtra("assignmentID", passedAssignmentID);
+                                    getActivity().finish();
+                                    startActivity(AssignmentLandingPageReloadIntent);
+                                }
+                            };
+                            Handler mainHandler = new Handler(mContext.getMainLooper());
+                            mainHandler.post(myRunnable);
+                        }else {
+                            Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                         }
-                    }, eventID, assignmentID, activityID, updatedItemList);
-                }
-
-
-                //Reload AssignmentLandingFragment
-                /*TODO Reload only after all the updates to server have been done. If we reload before that then
-                * there are chances that since the server has not responded the local object will not be updated
-                * hence will show stale data. But this will automatically be corrected when the server responds.
-                * But during that small amount of time the user will see stale data.
-                * Could not implement this since require a shared variable between threads to identify the number
-                * of updates done/remaining before we call reload the page.*/
-                AssignmentLandingPageReloadIntent.putExtra("eventID", eventID);
-                AssignmentLandingPageReloadIntent.putExtra("activityID", passedActivityID);
-                AssignmentLandingPageReloadIntent.putExtra("assignmentID", passedAssignmentID);
-                getActivity().finish();
-                startActivity(AssignmentLandingPageReloadIntent);
+                    }
+                }, eventID, activityToItemListMap);
             }
         });
 

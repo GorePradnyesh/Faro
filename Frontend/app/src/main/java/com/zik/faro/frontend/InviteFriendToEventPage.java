@@ -38,7 +38,7 @@ public class InviteFriendToEventPage extends Activity {
 
     private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
     static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+    private static FaroServiceHandler serviceHandler;
     private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
 
     private List <MinUser> friendList;
@@ -57,6 +57,8 @@ public class InviteFriendToEventPage extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_invite_friend_to_event_page);
+
+        serviceHandler = eventListHandler.serviceHandler;
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 

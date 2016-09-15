@@ -86,18 +86,19 @@
         android:id="@+id/bottomLayout">
 
         <Button
-            style="?android:attr/buttonStyleSmall"
             android:layout_width="0px"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:clickable="true"
             android:text="@string/OK"
-            android:id="@+id/editEventOK" />
+            android:id="@+id/editEventOK"
+            android:enabled="true"/>
 
         <Button
-            style="?android:attr/buttonStyleSmall"
             android:layout_width="0px"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:clickable="true"
             android:text="Delete Event"
             android:id="@+id/deleteEvent"/>
     </LinearLayout>

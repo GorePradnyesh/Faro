@@ -19,14 +19,14 @@ import com.zik.faro.data.ActionStatus;
 import com.zik.faro.data.Assignment;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.Item;
-import com.zik.faro.frontend.data.ItemParentInfo;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 
 import java.io.IOException;
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AssignmentLandingFragment extends Fragment{
 
@@ -40,7 +40,7 @@ public class AssignmentLandingFragment extends Fragment{
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
     private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+    private static FaroServiceHandler serviceHandler;
 
     private static String TAG = "AssgnmntLandingFrgmnt";
 
@@ -56,6 +56,8 @@ public class AssignmentLandingFragment extends Fragment{
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.assignment_landing_fragment, container, false);
         super.onCreate(savedInstanceState);
+
+        serviceHandler = eventListHandler.serviceHandler;
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(getActivity()));
 
@@ -92,32 +94,47 @@ public class AssignmentLandingFragment extends Fragment{
         final List<Item> cloneItemsList = cloneAssignment.getItems();
         for (Integer i = cloneItemsList.size() - 1; i >= 0; i--) {
             Item item = cloneItemsList.get(i);
-            ItemParentInfo itemParentInfo = new ItemParentInfo(item, eventID, activityID, assignmentID);
             if (item.getStatus().equals(ActionStatus.COMPLETE)) {
-                itemsAdapter.insertAtEnd(itemParentInfo);
+                itemsAdapter.insertAtEnd(item);
             } else {
-                itemsAdapter.insertAtBeginning(itemParentInfo);
+                itemsAdapter.insertAtBeginning(item);
             }
         }
 
         updateAssignment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                serviceHandler.getAssignmentHandler().updateAssignment(new BaseFaroRequestCallback<String>() {
+
+                Map<String, List<Item>> itemListMap = new HashMap<String, List<Item>>();
+                if (activityID != null) {
+                    itemListMap.put(activityID, cloneItemsList);
+                }else {
+                    itemListMap.put(eventID, cloneItemsList);
+                }
+
+                serviceHandler.getAssignmentHandler().updateAssignment(new BaseFaroRequestCallback<Map<String, List<Item>>>() {
                     @Override
                     public void onFailure(Request request, IOException ex) {
                         Log.e(TAG, "failed to send new item list");
                     }
 
                     @Override
-                    public void onResponse(String s, HttpError error) {
+                    public void onResponse(final Map<String, List<Item>> stringListMap, HttpError error) {
                         if (error == null ) {
                             Runnable myRunnable = new Runnable() {
                                 @Override
                                 public void run() {
                                     Log.i(TAG, "Successfully updated items list to server");
                                     final Assignment originalAssignment = assignmentListHandler.getOriginalAssignmentFromMap(assignmentID);
-                                    originalAssignment.setItems(cloneItemsList);
+
+                                    List<Item> receivedItemList;
+                                    if (activityID != null) {
+                                        receivedItemList = stringListMap.get(activityID);
+                                    }else {
+                                        receivedItemList = stringListMap.get(eventID);
+                                    }
+
+                                    originalAssignment.setItems(receivedItemList);
 
                                     //Reload AssignmentLandingFragment
                                     AssignmentLandingPageReloadIntent.putExtra("eventID", eventID);
@@ -134,7 +151,7 @@ public class AssignmentLandingFragment extends Fragment{
                         }
 
                     }
-                }, eventID, cloneAssignment.getId(), activityID, cloneItemsList);
+                }, eventID, itemListMap);
             }
         });
 

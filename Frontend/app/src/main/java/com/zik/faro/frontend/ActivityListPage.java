@@ -36,8 +36,6 @@ public class ActivityListPage extends android.app.Activity {
 
     static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
 
-    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
-
     private String eventID;
     Intent eventLandingPage = null;
     private static String TAG = "ActivityListPage";

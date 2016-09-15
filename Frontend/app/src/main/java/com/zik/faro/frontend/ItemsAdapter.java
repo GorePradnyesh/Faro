@@ -11,7 +11,6 @@ import android.widget.TextView;
 
 import com.zik.faro.data.ActionStatus;
 import com.zik.faro.data.Item;
-import com.zik.faro.frontend.data.ItemParentInfo;
 import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 
 import java.util.LinkedList;
@@ -20,7 +19,7 @@ import java.util.List;
 
 public class ItemsAdapter extends ArrayAdapter {
     //TODO (Code Review) Implement sorted list instead of Linkedlist
-    public List<ItemParentInfo> list = new LinkedList<>();
+    public List<Item> list = new LinkedList<>();
 
     private Context context;
 
@@ -38,20 +37,20 @@ public class ItemsAdapter extends ArrayAdapter {
     }
 
 
-    public void insertAtBeginning(ItemParentInfo itemParentInfo){
-        list.add(0, itemParentInfo);
+    public void insertAtBeginning(Item item){
+        list.add(0, item);
     }
 
-    public void insertAtEnd(ItemParentInfo itemParentInfo){
-        list.add(itemParentInfo);
+    public void insertAtEnd(Item item){
+        list.add(item);
     }
 
     public void removeFromPosition(int position){
         list.remove(position);
     }
 
-    public void insertAtPosition(ItemParentInfo itemParentInfo, int position){
-        list.add(position, itemParentInfo);
+    public void insertAtPosition(Item item, int position){
+        list.add(position, item);
     }
 
     @Override
@@ -78,7 +77,7 @@ public class ItemsAdapter extends ArrayAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         View row = convertView;
 
-        ItemParentInfo itemParentInfo = (ItemParentInfo) getItem(position);
+        Item item = (Item) getItem(position);
         LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         ImgHolder holder = new ImgHolder();
@@ -99,8 +98,8 @@ public class ItemsAdapter extends ArrayAdapter {
                         public void onClick(View v) {
                             ImageButton imageButton = (ImageButton) v;
                             int viewPosition = imageButton.getId();
-                            ItemParentInfo removeItemParentInfo = (ItemParentInfo) getItem(viewPosition);
-                            list.remove(removeItemParentInfo);
+                            Item removeItem = (Item) getItem(viewPosition);
+                            list.remove(removeItem);
                             notifyDataSetChanged();
                         }
                     });
@@ -111,7 +110,7 @@ public class ItemsAdapter extends ArrayAdapter {
                 holder.ASSIGNEE_NAME = (TextView) row.findViewById(R.id.asigneeName);
                 row.setTag(holder);
 
-                holder.ITEM_NAME.setText(itemParentInfo.getItem().getName());
+                holder.ITEM_NAME.setText(item.getName());
                 break;
             case "AssignmentLandingPageFragment":
             case "MyAssignmentsFragment":
@@ -123,10 +122,10 @@ public class ItemsAdapter extends ArrayAdapter {
                 row.setTag(holder);
 
                 String myUserId = faroUserContext.getEmail();
-                if(myUserId.equals(itemParentInfo.getItem().getAssigneeId())){
-                    holder.ITEM_CHECKBOX.setText(itemParentInfo.getItem().getName());
+                if(myUserId.equals(item.getAssigneeId())){
+                    holder.ITEM_CHECKBOX.setText(item.getName());
                     holder.ITEM_CHECKBOX.setId(position);
-                    if (itemParentInfo.getItem().getStatus() == ActionStatus.COMPLETE) {
+                    if (item.getStatus() == ActionStatus.COMPLETE) {
                         holder.ITEM_CHECKBOX.setChecked(true);
                     }else{
                         holder.ITEM_CHECKBOX.setChecked(false);
@@ -137,25 +136,25 @@ public class ItemsAdapter extends ArrayAdapter {
                             CheckBox clickedCheckBox = (CheckBox)v;
                             int viewPosition = clickedCheckBox.getId();
                             if (clickedCheckBox.isChecked()){
-                                ItemParentInfo clickedItemParentInfo = (ItemParentInfo) getItem(viewPosition);
-                                clickedItemParentInfo.getItem().setStatus(ActionStatus.COMPLETE);
-                                list.remove(clickedItemParentInfo);
-                                insertAtEnd(clickedItemParentInfo);
+                                Item clickedItem = (Item) getItem(viewPosition);
+                                clickedItem.setStatus(ActionStatus.COMPLETE);
+                                list.remove(clickedItem);
+                                insertAtEnd(clickedItem);
                                 notifyDataSetChanged();
                             }else{
-                                ItemParentInfo clickedItemParentInfo = (ItemParentInfo) getItem(viewPosition);
-                                clickedItemParentInfo.getItem().setStatus(ActionStatus.INCOMPLETE);
-                                list.remove(clickedItemParentInfo);
-                                insertAtBeginning(clickedItemParentInfo);
+                                Item clickedItem = (Item) getItem(viewPosition);
+                                clickedItem.setStatus(ActionStatus.INCOMPLETE);
+                                list.remove(clickedItem);
+                                insertAtBeginning(clickedItem);
                                 notifyDataSetChanged();
                             }
                         }
                     });
                 }else{
-                    holder.ITEM_CHECKBOX.setText(itemParentInfo.getItem().getName());
+                    holder.ITEM_CHECKBOX.setText(item.getName());
                     holder.ITEM_CHECKBOX.setId(position);
                     holder.ITEM_CHECKBOX.setClickable(false);
-                    if (itemParentInfo.getItem().getStatus() == ActionStatus.COMPLETE) {
+                    if (item.getStatus() == ActionStatus.COMPLETE) {
                         holder.ITEM_CHECKBOX.setChecked(true);
                     }else{
                         holder.ITEM_CHECKBOX.setChecked(false);
@@ -164,9 +163,9 @@ public class ItemsAdapter extends ArrayAdapter {
                 break;
         }
 
-        holder.ITEM_COUNT.setText(String.valueOf(itemParentInfo.getItem().getCount()));
-        holder.ITEM_UNIT.setText(itemParentInfo.getItem().getUnit().toString());
-        String fullName = eventFriendListHandler.getFriendFullNameFromID(itemParentInfo.getItem().getAssigneeId());
+        holder.ITEM_COUNT.setText(String.valueOf(item.getCount()));
+        holder.ITEM_UNIT.setText(item.getUnit().toString());
+        String fullName = eventFriendListHandler.getFriendFullNameFromID(item.getAssigneeId());
         holder.ASSIGNEE_NAME.setText(fullName);
 
         return row;

@@ -27,18 +27,17 @@ import com.zik.faro.data.IllegalDataOperation;
 import com.zik.faro.data.InviteeList;
 import com.zik.faro.data.Item;
 import com.zik.faro.data.Unit;
-import com.zik.faro.frontend.data.ItemParentInfo;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static android.widget.Toast.LENGTH_LONG;
 
@@ -55,7 +54,7 @@ public class EditAssignment extends android.app.Activity {
     private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
     private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
     private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+    private static FaroServiceHandler serviceHandler;
 
     private String eventID = null;
     private String activityID = null;
@@ -79,6 +78,8 @@ public class EditAssignment extends android.app.Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_assignment);
+
+        serviceHandler = eventListHandler.serviceHandler;
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
@@ -133,8 +134,7 @@ public class EditAssignment extends android.app.Activity {
             itemList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    ItemParentInfo itemParentInfo = (ItemParentInfo) parent.getItemAtPosition(position);
-                    Item item = itemParentInfo.getItem();
+                    Item item = (Item) parent.getItemAtPosition(position);
                     if (item.getStatus().equals(ActionStatus.INCOMPLETE)){
                         itemNameEditText.setText(item.getName());
                         itemCountEditText.setText(Integer.toString(item.getCount()));
@@ -149,11 +149,10 @@ public class EditAssignment extends android.app.Activity {
 
             for (Integer i = cloneAssignment.getItems().size() - 1; i >= 0; i--) {
                 Item item = cloneAssignment.getItems().get(i);
-                ItemParentInfo itemParentInfo = new ItemParentInfo(item, eventID, activityID, assignmentID);
                 if (item.getStatus() == ActionStatus.COMPLETE) {
-                    itemsAdapter.insertAtEnd(itemParentInfo);
+                    itemsAdapter.insertAtEnd(item);
                 } else {
-                    itemsAdapter.insertAtBeginning(itemParentInfo);
+                    itemsAdapter.insertAtBeginning(item);
                 }
                 originalItemSet.add(item);
             }
@@ -221,13 +220,12 @@ public class EditAssignment extends android.app.Activity {
                         illegalDataOperation.printStackTrace();
                     }
 
-                    ItemParentInfo itemParentInfo = new ItemParentInfo(item, eventID, activityID, assignmentID);
                     if (addEditedItem){
                         addEditedItem = false;
-                        itemsAdapter.insertAtPosition(itemParentInfo, editItemPosition);
+                        itemsAdapter.insertAtPosition(item, editItemPosition);
                         editItemPosition = -1;
                     }else {
-                        itemsAdapter.insertAtBeginning(itemParentInfo);
+                        itemsAdapter.insertAtBeginning(item);
                     }
                     itemsAdapter.notifyDataSetChanged();
                     itemNameEditText.setText("");
@@ -254,8 +252,8 @@ public class EditAssignment extends android.app.Activity {
                         Toast.makeText(EditAssignment.this, "Deleting all the previous assignments", LENGTH_LONG).show();
                     }else {
                         for (int i = 0; i < itemsAdapter.list.size(); i++) {
-                            updatedItemList.add(itemsAdapter.list.get(i).getItem());
-                            newItemSet.add(itemsAdapter.list.get(i).getItem());
+                            updatedItemList.add(itemsAdapter.list.get(i));
+                            newItemSet.add(itemsAdapter.list.get(i));
                         }
 
                         if (originalItemSet.equals(newItemSet)){
@@ -265,42 +263,55 @@ public class EditAssignment extends android.app.Activity {
                         }
                     }
 
-                    serviceHandler.getAssignmentHandler().updateAssignment(new BaseFaroRequestCallback<String>() {
-                        @Override
-                        public void onFailure(Request request, IOException ex) {
-                            Log.e(TAG, "failed to send new item list");
-                        }
+                    Map<String, List<Item>> itemListMap = new HashMap<String, List<Item>>();
+                    if (activityID != null) {
+                        itemListMap.put(activityID, updatedItemList);
+                    }else {
+                        itemListMap.put(eventID, updatedItemList);
+                    }
 
-                        @Override
-                        public void onResponse(String s, HttpError error) {
-                            if (error == null ) {
-                                Runnable myRunnable = new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Log.i(TAG, "Successfully updated items list to server");
-                                        cloneAssignment.setItems(updatedItemList);
-                                        assignmentListHandler.removeAssignmentFromListAndMap(cloneAssignment.getId());
-                                        if (activityID != null){
-                                            originalActivity.setAssignment(cloneAssignment);
-                                        }else{
-                                            originalEvent.setAssignment(cloneAssignment);
-                                        }
-                                        assignmentListHandler.addAssignmentToListAndMap(cloneAssignment, activityID);
-                                        AssignmentLandingPageTabsIntent.putExtra("eventID", eventID);
-                                        AssignmentLandingPageTabsIntent.putExtra("activityID", activityID);
-                                        AssignmentLandingPageTabsIntent.putExtra("assignmentID", assignmentID);
-                                        startActivity(AssignmentLandingPageTabsIntent);
-                                        finish();
-                                    }
-                                };
-                                Handler mainHandler = new Handler(mContext.getMainLooper());
-                                mainHandler.post(myRunnable);
-                            }else {
-                                Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                    serviceHandler.getAssignmentHandler().updateAssignment(new BaseFaroRequestCallback<Map<String, List<Item>>>() {
+                            @Override
+                            public void onFailure(Request request, IOException ex) {
+                                Log.e(TAG, "failed to send new item list");
                             }
 
-                        }
-                    }, eventID, cloneAssignment.getId(), activityID, updatedItemList);
+                            @Override
+                            public void onResponse(final Map<String, List<Item>> stringListMap, HttpError error) {
+                                if (error == null ) {
+                                    Runnable myRunnable = new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Log.i(TAG, "Successfully updated items list to server");
+                                            List<Item> receivedItemList;
+                                            if (activityID != null) {
+                                                receivedItemList = stringListMap.get(activityID);
+                                            }else {
+                                                receivedItemList = stringListMap.get(eventID);
+                                            }
+                                            cloneAssignment.setItems(receivedItemList);
+                                            assignmentListHandler.removeAssignmentFromListAndMap(cloneAssignment.getId());
+                                            if (activityID != null){
+                                                originalActivity.setAssignment(cloneAssignment);
+                                            }else{
+                                                originalEvent.setAssignment(cloneAssignment);
+                                            }
+                                            assignmentListHandler.addAssignmentToListAndMap(cloneAssignment, activityID);
+                                            AssignmentLandingPageTabsIntent.putExtra("eventID", eventID);
+                                            AssignmentLandingPageTabsIntent.putExtra("activityID", activityID);
+                                            AssignmentLandingPageTabsIntent.putExtra("assignmentID", assignmentID);
+                                            startActivity(AssignmentLandingPageTabsIntent);
+                                            finish();
+                                        }
+                                    };
+                                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                                    mainHandler.post(myRunnable);
+                                }else {
+                                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                                }
+
+                            }
+                        }, eventID, itemListMap);
                 }
             });
 

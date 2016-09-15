@@ -99,21 +99,16 @@ public class OkHttpWrapperAssignment extends BaseFaroOKHttpWrapper implements As
     }
 
     @Override
-    public void updateAssignment(BaseFaroRequestCallback<String> callback, String eventId, String assignmentId, String activityId, List<Item> items) {
+    public void updateAssignment(BaseFaroRequestCallback<Map<String, List<Item>>> callback, String eventId, Map<String, List<Item>> items) {
         String token = TokenCache.getTokenCache().getToken();
-        String queryString = "";
         String itemList = mapper.toJson(items);
         if(token != null) {
-            if(activityId != null)
-            {
-                queryString = "?activityId=" + activityId;
-            }
             Request request = new Request.Builder()
-                    .url(this.getEventsUrl + eventId + "/assignment/" + assignmentId + "/updateItems" + queryString) // getting events has a different base url
+                    .url(this.getEventsUrl + eventId + "/assignment" + "/updateItems")
                     .post(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), itemList))
                     .addHeader(authHeaderName, token)
                     .build();
-            this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<>(callback, String.class));
+            this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<Map<String, List<Item>>>(callback, Map.class));
         }
         else{
             callback.onFailure(null, new IOException("Could not fetch auth token"));

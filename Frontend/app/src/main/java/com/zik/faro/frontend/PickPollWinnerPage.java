@@ -48,7 +48,7 @@ public class PickPollWinnerPage extends Activity {
 
     private static PollListHandler pollListHandler = PollListHandler.getInstance();
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+    private static FaroServiceHandler serviceHandler;
 
     private List<PollOption> pollOptionsList;
 
@@ -70,6 +70,8 @@ public class PickPollWinnerPage extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pick_poll_winner);
+
+        serviceHandler = eventListHandler.serviceHandler;
 
         final TextView pollDesc = (TextView)findViewById(R.id.pollDescription);
         final Button selectWinner = (Button) findViewById(R.id.selectWinner);

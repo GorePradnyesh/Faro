@@ -36,7 +36,7 @@ public class PollListPage extends Activity {
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static Event E;
     private static String eventID = null;
-    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+    private static FaroServiceHandler serviceHandler;
 
     private static String TAG = "PollListPage";
 
@@ -44,6 +44,8 @@ public class PollListPage extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_poll_list_page);
+
+        serviceHandler = eventListHandler.serviceHandler;
 
         EventLandingPage = new Intent(PollListPage.this, EventLandingPage.class);
         OpenPollLandingPage = new Intent(PollListPage.this, OpenPollLandingPage.class);

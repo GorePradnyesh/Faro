@@ -13,6 +13,6 @@ public interface AssignmentHandler {
     void getAssignment(final BaseFaroRequestCallback<Assignment> callback, final String eventId, final String assignmentId, final String activityId);
     void getPendingAssignmentCount(BaseFaroRequestCallback<AssignmentCount> callback, String eventId);
     void deleteAssignment(BaseFaroRequestCallback<String> callback, String eventId, String assignmentId, String activityId);
-    void updateAssignment(final BaseFaroRequestCallback<String> callback, final String eventId, final String assignmentId, final String activityId, List<Item> items);
+    void updateAssignment(final BaseFaroRequestCallback<Map<String, List<Item>>> callback, final String eventId, Map<String, List<Item>> items);
     void addAssignment(final BaseFaroRequestCallback<String> callback, final String eventId, final Assignment assignment, final String activityId);
 }

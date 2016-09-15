@@ -49,13 +49,15 @@ public class CreateNewActivity extends android.app.Activity{
 
     Intent activityListPage = null;
 
-    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+    private static FaroServiceHandler serviceHandler;
     private static String TAG = "CreateNewActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_new_activity);
+
+        serviceHandler = eventListHandler.serviceHandler;
 
         final EditText activityName = (EditText) findViewById(R.id.activityName);
         final EditText activityDescription = (EditText) findViewById(R.id.activityDescription);

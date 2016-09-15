@@ -60,7 +60,7 @@ public class OpenPollLandingPage extends Activity {
 
     static FaroUserContext faroUserContext = FaroUserContext.getInstance();
     String myUserId = faroUserContext.getEmail();
-    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+    private static FaroServiceHandler serviceHandler;
     private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
 
     //Maps to manage Multichoice polls
@@ -91,6 +91,8 @@ public class OpenPollLandingPage extends Activity {
         protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_open_poll_landing_page);
+
+        serviceHandler = eventListHandler.serviceHandler;
 
         final TextView pollDesc = (TextView)findViewById(R.id.pollDescription);
 
