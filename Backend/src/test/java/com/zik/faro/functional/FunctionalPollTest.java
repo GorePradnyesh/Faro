@@ -37,8 +37,8 @@ public class FunctionalPollTest {
     
     // Create an event for all activity tests
     private static void createEvent() throws IOException{
-    	Event eventCreateData = new Event("Dinner", Calendar.getInstance(),
-                Calendar.getInstance(), "Description", false, null, new Location("SFO"),null, null, "Mafia god");
+    	Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(),
+                Calendar.getInstance(), false,"Description",  null, new Location("SFO"), "Mafia god");
     	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);
         Event event = response.getEntity(Event.class);
         FunctionalEventTest.assertEntity(eventCreateData, event);

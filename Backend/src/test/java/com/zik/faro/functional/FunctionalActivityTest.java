@@ -21,6 +21,7 @@ import com.zik.faro.data.Event;
 import com.zik.faro.data.Item;
 import com.zik.faro.data.Location;
 import com.zik.faro.data.Unit;
+import com.zik.faro.data.expense.ExpenseGroup;
 
 public class FunctionalActivityTest {
     private static URL endpoint;
@@ -37,7 +38,8 @@ public class FunctionalActivityTest {
     // Create an event for all activity tests
     private static void createEvent() throws IOException{
     	Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(),
-                Calendar.getInstance(), "Description", false, null, new Location("Random Location"),null, null, "Mafia god");
+                Calendar.getInstance(), false, "Description", null, new Location("Random Location"), "Mafia god");
+    	
         ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);
         Event event = response.getEntity(Event.class);
         FunctionalEventTest.assertEntity(eventCreateData, event);

@@ -58,7 +58,7 @@ public class FunctionalAssignmentTest {
     	List<Item> items = new ArrayList<Item>();
     	items.add(new Item("food", "Gaurav", 2, Unit.COUNT) );
     	map.put(eventId, items);
-    	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/assignment/"+eventDetails.getAssignment().getId()+"/updateItems", token, map);
+    	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/assignment/updateItems", token, map);
     	Map<String,List<Item>> updatedItems = response.getEntity(new GenericType<Map<String,List<Item>>>(){});
     	Assert.assertEquals(map.size(), updatedItems.size());
     	map = updatedItems;
@@ -70,7 +70,7 @@ public class FunctionalAssignmentTest {
     	
         // update above added item-todo for event level
         items.get(0).setCount(5);
-        response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/assignment/"+eventDetails.getAssignment().getId()+"/updateItems", token, map);
+        response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/assignment/updateItems", token, map);
         updatedItems = response.getEntity(new GenericType<Map<String,List<Item>>>(){});
     	assertTodo(map.get(eventId), updatedItems.get(eventId));
     	map = updatedItems;
@@ -92,7 +92,7 @@ public class FunctionalAssignmentTest {
     	
     	activityItems.add(new Item("food", "Gaurav", 2, Unit.COUNT));
     	map.put(activityResponse.getId(), activityItems);
-    	response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/assignment/"+eventDetails.getAssignment().getId()+"/updateItems", token, map);
+    	response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/assignment/updateItems", token, map);
     	updatedItems = response.getEntity(new GenericType<Map<String,List<Item>>>(){});
     	Assert.assertEquals(map.size(), updatedItems.size());
     	map = updatedItems;
@@ -111,7 +111,7 @@ public class FunctionalAssignmentTest {
     	items.get(0).setCount(10);
 
     	activityItems.add(new Item("drinks", "Kunal", 3, Unit.COUNT));
-    	response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/assignment/"+eventDetails.getAssignment().getId()+"/updateItems", token, map);
+    	response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/assignment/updateItems", token, map);
         updatedItems = response.getEntity(new GenericType<Map<String,List<Item>>>(){});
         assertTodo(map.get(eventId), updatedItems.get(eventId));
     	assertTodo(map.get(activityResponse.getId()), updatedItems.get(activityResponse.getId()));
