@@ -1,12 +1,15 @@
 package com.zik.faro.frontend;
 
 import android.app.Activity;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.content.CursorLoader;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.os.Handler;
@@ -26,8 +29,10 @@ import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 
+import com.google.common.collect.Lists;
 import com.squareup.okhttp.Request;
 import java.util.Date;
+import java.util.List;
 
 import com.zik.faro.data.Event;
 import com.zik.faro.data.InviteeList;
@@ -63,6 +68,7 @@ public class EventLandingPage extends Activity {
     private ImageButton addFriendsButton = null;
     private Button photosButton = null;
     private Button cameraButton = null;
+    private Button uploadPhotosButton = null;
     private TextView event_status = null;
 
     private String eventID;
@@ -70,6 +76,7 @@ public class EventLandingPage extends Activity {
     private Intent EventLandingPageReload;
 
     private static final int REQUEST_TAKE_PHOTO = 1;
+    private static final int REQUEST_PICK_PHOTOS = 2;
     private static final String TAG = "EventLandingPage";
 
     private static final String CAPTURED_PHOTO_PATH_KEY = "capturedPhotoPath";
@@ -99,6 +106,7 @@ public class EventLandingPage extends Activity {
         editButton.setImageResource(R.drawable.edit);
         photosButton = (Button)findViewById(R.id.photosButton);
         cameraButton = (Button)findViewById(R.id.cameraButton);
+        uploadPhotosButton = (Button)findViewById(R.id.uploadPhotosButton);
 
 
         statusYes = (Button) findViewById(R.id.statusYes);
@@ -220,10 +228,18 @@ public class EventLandingPage extends Activity {
         });
 
         cameraButton.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
                 dispatchTakePictureIntent();
+            }
+        });
+
+        uploadPhotosButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent chooseIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                chooseIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                startActivityForResult(chooseIntent, REQUEST_PICK_PHOTOS);
             }
         });
 
@@ -307,6 +323,7 @@ public class EventLandingPage extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
             Log.i(TAG, "Photo captured successfully. uri : Add photo to gallery");
             if (mCurrentPhotoPath != null) {
@@ -316,12 +333,42 @@ public class EventLandingPage extends Activity {
             } else {
                 Log.e(TAG, "mCurrentPhotoPath = " + mCurrentPhotoPath);
             }
+        } else if (requestCode == REQUEST_PICK_PHOTOS && resultCode == RESULT_OK) {
+            if (data.getClipData() != null) {
+                ClipData mClipData = data.getClipData();
+                List<String> filePaths = Lists.newArrayList();
+                for (int i = 0; i < mClipData.getItemCount(); i++) {
+                    ClipData.Item item = mClipData.getItemAt(i);
+                    String filePath = getRealPathFromURI(item.getUri());
+                    filePaths.add(filePath);
+                    Log.i(TAG, "filePath = " + filePath);
+                }
+                Log.i(TAG, "Selected Images size : " + filePaths.size());
+                Log.i(TAG, "Selected Images : " + filePaths);
+
+                Log.d(TAG, MessageFormat.format("Uploading images to album {0} ", cloneEvent.getEventName()));
+                for (String filePath : filePaths) {
+                    Log.i(TAG, MessageFormat.format("uploading image .. {0}", filePath));
+                    uploadPhoto(filePath, cloneEvent.getEventName());
+                }
+            }
         }
     }
 
-    public void uploadPhoto(String photoPath, String eventName) {
-        String accessTokenString = "EAACEdEose0cBAARRS6q7Qs5GLEtHyzffEoqw1RKGkTo7kqAwdaXxtbkdDbCDOKY3Vz1OHv1JRruZCg1dAK" +
-                "e3cvLuJCgpPXAhxgvsLh1OCZCH5dq6iubbf9ccKKhXpS11ZCWLXuDzT7undtsLYgTj4lfdHYMS5pAk9nPcDagJgZDZD";
+    private String getRealPathFromURI(Uri contentUri) {
+        String[] proj = { MediaStore.Images.Media.DATA };
+        CursorLoader loader = new CursorLoader(mContext, contentUri, proj, null, null, null);
+        Cursor cursor = loader.loadInBackground();
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        String result = cursor.getString(column_index);
+        cursor.close();
+        return result;
+    }
+
+    private void uploadPhoto(String photoPath, String eventName) {
+        String accessTokenString = "EAACEdEose0cBADakuvqmAlQlGnbBgLDwX29rCKcEtyufZCq1eZAZA1RdO3M1otZARANsZBXVR8MuVDPyVxNdO2s5VwnS9RSBBkBZC81v" +
+                "2NCM77RSzNxr4O8pk3a9XQiOmyFbONzqLuya7nX4NBp4FliH9KATbm9SeNVWLD8ZCTyJQZDZD";
         String userId = "10155071787680006";
         FbGraphApiService fbGraphApiService = new FbGraphApiService(accessTokenString, userId);
         fbGraphApiService.uploadPhoto(photoPath, eventName);

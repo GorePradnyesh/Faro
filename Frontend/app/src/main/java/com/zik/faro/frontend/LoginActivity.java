@@ -30,8 +30,8 @@ import java.text.MessageFormat;
 public class LoginActivity extends Activity {
     private String TAG = "LoginActivity";
 
-    protected static final String baseUrl = "http://10.0.2.2:8080/v1/";
-    private String baseUrl2 = "http://10.0.2.2:8080/v1/";
+    protected static final String baseUrl = "http://192.168.1.2:8080/v1/";
+    private String baseUrl2 = "http://192.168.1.2:8080/v1/";
     private static FaroServiceHandler serviceHandler;
 
     private EditText emailTextBox;
@@ -80,7 +80,7 @@ public class LoginActivity extends Activity {
             @Override
             public void afterTextChanged(Editable s) {
                 if (serverIPAddressEditText.getText().toString().trim().isEmpty()) {
-                    baseUrl2 = "http://10.0.2.2:8080/v1/";
+                    baseUrl2 = "http://192.168.1.7:8080/v1/";
                 } else {
                     baseUrl2 = "http://" + serverIPAddressEditText.getText().toString().trim()
                             + ":8080/v1/";

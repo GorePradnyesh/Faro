@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.GridView;
@@ -24,6 +25,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileDescriptor;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -102,9 +104,19 @@ public class FbGraphApiService {
     private String createAlbum(final String albumName) {
         String albumId = findAlbum(albumName);
         if (albumId == null) {
+            Log.i(TAG, "Album does not exist.Creating one");
             // Create new album
             Bundle parameters = new Bundle();
             parameters.putString("name", albumName);
+
+            // Set privacy of the album to SELF i.e. only the user can view the album and its photos
+            JSONObject privacyObject = new JSONObject();
+            try {
+                privacyObject.put("value", "SELF");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            parameters.putString("privacy", privacyObject.toString());
             GraphRequest createRequest = new GraphRequest(
                     accessToken,
                     "/me/albums",
@@ -120,6 +132,8 @@ public class FbGraphApiService {
                         e.printStackTrace();
                     }
                 }
+            } else {
+                Log.i(TAG, "could not create album. error  = " + response.getError());
             }
         }
 
@@ -184,8 +198,7 @@ public class FbGraphApiService {
     }
 
     public void uploadPhoto(final String imageFilePath, final String albumName) {
-
-        new Runnable() {
+        new Thread(new Runnable() {
             @Override
             public void run() {
                 // Check if album exists
@@ -197,7 +210,7 @@ public class FbGraphApiService {
                 }
 
                 // Upload photo
-                Log.i(TAG, "Converting image " + imageFilePath + "to byte array before uploading ...");
+                Log.i(TAG, "Converting image " + imageFilePath + " to byte array before uploading ...");
 
                 if (imageFilePath != null) {
                     byte[] data = null;
@@ -232,7 +245,7 @@ public class FbGraphApiService {
                     Log.e(TAG, "Could not find file");
                 }
             }
-        }.run();
+        }).start();
     }
 
     private void getImages() {

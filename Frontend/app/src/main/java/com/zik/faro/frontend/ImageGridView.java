@@ -16,8 +16,8 @@ public class ImageGridView extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_grid_view);
 
-        String accessTokenString = "EAACEdEose0cBAARRS6q7Qs5GLEtHyzffEoqw1RKGkTo7kqAwdaXxtbkdDbCDOKY3Vz1OHv1JRr" +
-                "uZCg1dAKe3cvLuJCgpPXAhxgvsLh1OCZCH5dq6iubbf9ccKKhXpS11ZCWLXuDzT7undtsLYgTj4lfdHYMS5pAk9nPcDagJgZDZD";
+        String accessTokenString = "EAACEdEose0cBADakuvqmAlQlGnbBgLDwX29rCKcEtyufZCq1eZAZA1RdO3M1otZARANsZBXVR8MuVDPyVxNdO2s5VwnS9RSBBkBZC81v2NCM77R" +
+                "SzNxr4O8pk3a9XQiOmyFbONzqLuya7nX4NBp4FliH9KATbm9SeNVWLD8ZCTyJQZDZD";
         String userId = "10155071787680006";
 
         GridView gridView = (GridView) findViewById(R.id.gridview);
