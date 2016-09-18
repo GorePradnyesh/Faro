@@ -10,6 +10,8 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.zik.faro.frontend.R;
 
+import java.util.List;
+
 /**
  * Created by granganathan on 7/13/16.
  */
@@ -17,9 +19,10 @@ public class ImageAdapter extends ArrayAdapter {
     private Context context;
     private LayoutInflater inflater;
 
-    private String[] imageUrls;
+    //private String[] imageUrls;
+    private List<String> imageUrls;
 
-    public ImageAdapter(Context context, String[] imageUrls) {
+    public ImageAdapter(Context context, List<String> imageUrls) {
         super(context, R.layout.gridview_item_image, imageUrls);
 
         this.context = context;
@@ -36,7 +39,7 @@ public class ImageAdapter extends ArrayAdapter {
 
         Glide
                 .with(context)
-                .load(imageUrls[position])
+                .load(imageUrls.get(position))
                 .into((ImageView) convertView);
 
         return convertView;

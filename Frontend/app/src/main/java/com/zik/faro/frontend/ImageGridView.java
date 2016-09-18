@@ -2,28 +2,34 @@ package com.zik.faro.frontend;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.GridView;
+
+import java.util.List;
 
 /**
  * Created by granganathan on 7/9/16.
  */
 public class ImageGridView extends AppCompatActivity {
+    private static final String TAG = "ImageGridView";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_grid_view);
 
-        String accessTokenString = "EAACEdEose0cBADakuvqmAlQlGnbBgLDwX29rCKcEtyufZCq1eZAZA1RdO3M1otZARANsZBXVR8MuVDPyVxNdO2s5VwnS9RSBBkBZC81v2NCM77R" +
-                "SzNxr4O8pk3a9XQiOmyFbONzqLuya7nX4NBp4FliH9KATbm9SeNVWLD8ZCTyJQZDZD";
+        String accessTokenString = "EAACEdEose0cBAI1NuZCFd5lG4Ms33y8fShyUv8js8m4Xz4GkgMOxTXS4Nk4Gyj1WIzpynVIkYZC5bDIlhT" +
+                "7H7BZBBBOx5lece36yZAJ7g4nsMWEuW5n7KIF87IhgF13vB8CizDZAITERTz0TtcdGlRbRwAPoThNmtAnzqp9DlSAZDZD";
         String userId = "10155071787680006";
+
+        String eventName = getIntent().getStringExtra("eventName");
+        Log.i(TAG, "eventName = " + eventName);
 
         GridView gridView = (GridView) findViewById(R.id.gridview);
         FbGraphApiService fbGraphApiService = new FbGraphApiService(accessTokenString, userId);
-        fbGraphApiService.obtainUserData();
-        fbGraphApiService.downloadImagesIntoGridView("test album001", gridView, this);
+        gridView.setAdapter(new ImageAdapter(this, fbGraphApiService.obtainImageDownloadLinks(eventName)));
     }
 
     @Override

@@ -10,20 +10,16 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.content.CursorLoader;
-import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.os.Handler;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.MessageFormat;
@@ -329,7 +325,7 @@ public class EventLandingPage extends Activity {
             if (mCurrentPhotoPath != null) {
                 Log.i(TAG, "mCurrentPhotoPath = " + mCurrentPhotoPath);
                 galleryAddPic();
-                uploadPhoto(mCurrentPhotoPath, cloneEvent.getEventName());
+                uploadPhoto(Lists.newArrayList(mCurrentPhotoPath), cloneEvent.getEventName());
             } else {
                 Log.e(TAG, "mCurrentPhotoPath = " + mCurrentPhotoPath);
             }
@@ -347,10 +343,7 @@ public class EventLandingPage extends Activity {
                 Log.i(TAG, "Selected Images : " + filePaths);
 
                 Log.d(TAG, MessageFormat.format("Uploading images to album {0} ", cloneEvent.getEventName()));
-                for (String filePath : filePaths) {
-                    Log.i(TAG, MessageFormat.format("uploading image .. {0}", filePath));
-                    uploadPhoto(filePath, cloneEvent.getEventName());
-                }
+                uploadPhoto(filePaths, cloneEvent.getEventName());
             }
         }
     }
@@ -366,12 +359,12 @@ public class EventLandingPage extends Activity {
         return result;
     }
 
-    private void uploadPhoto(String photoPath, String eventName) {
-        String accessTokenString = "EAACEdEose0cBADakuvqmAlQlGnbBgLDwX29rCKcEtyufZCq1eZAZA1RdO3M1otZARANsZBXVR8MuVDPyVxNdO2s5VwnS9RSBBkBZC81v" +
-                "2NCM77RSzNxr4O8pk3a9XQiOmyFbONzqLuya7nX4NBp4FliH9KATbm9SeNVWLD8ZCTyJQZDZD";
+    private void uploadPhoto(List<String> photoPaths, String eventName) {
+        String accessTokenString = "EAACEdEose0cBAI1NuZCFd5lG4Ms33y8fShyUv8js8m4Xz4GkgMOxTXS4Nk4Gyj1WIzpynVIkYZC5bD" +
+                "IlhT7H7BZBBBOx5lece36yZAJ7g4nsMWEuW5n7KIF87IhgF13vB8CizDZAITERTz0TtcdGlRbRwAPoThNmtAnzqp9DlSAZDZD";
         String userId = "10155071787680006";
         FbGraphApiService fbGraphApiService = new FbGraphApiService(accessTokenString, userId);
-        fbGraphApiService.uploadPhoto(photoPath, eventName);
+        fbGraphApiService.uploadPhotos(photoPaths, eventName);
     }
 
     @Override

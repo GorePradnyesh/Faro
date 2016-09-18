@@ -72,7 +72,7 @@ public class FaroApplication extends Application {
         //createAlbum(albumName);
 
         // Upload photos to Album from camera roll
-        //uploadPhoto();
+        //uploadPhotos();
 
         // Download photos from Album using public link to each photo
         // and save to camera roll
