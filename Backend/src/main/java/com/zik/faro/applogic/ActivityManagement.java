@@ -6,6 +6,8 @@ import java.util.List;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Assignment;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
+import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.persistence.datastore.data.ActivityDo;
 import com.zik.faro.persistence.datastore.ActivityDatastoreImpl;
 
@@ -37,7 +39,7 @@ public class ActivityManagement {
 		ActivityDatastoreImpl.delelteActivityById(activityId, eventId);
 	}
 	
-	public static Activity updateActivity(Activity updateActivity, String eventId) throws DataNotFoundException{
+	public static Activity updateActivity(Activity updateActivity, String eventId) throws DataNotFoundException, DatastoreException, UpdateVersionException{
 		ActivityDo updateActivityDo = ConversionUtils.toDo(updateActivity);
 		return ConversionUtils.fromDo(ActivityDatastoreImpl.updateActivity(updateActivityDo, eventId));
 	}

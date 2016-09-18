@@ -106,8 +106,16 @@ public class EventDatastoreImplTest {
         Assert.assertEquals(updateObj.getStatus(), returnedEventDo.getStatus());
         Assert.assertEquals(updateObj.getLocation().locationName, returnedEventDo.getLocation().locationName);
         Long newVersion = updateObj.getVersion();
-        newVersion = ++newVersion;
-        Assert.assertEquals(newVersion, returnedEventDo.getVersion());
+        Assert.assertEquals(++newVersion, returnedEventDo.getVersion());
+        
+        // Update with older version and verify failure
+        try{
+        	EventDatastoreImpl.updateEvent(updateObj.getId(), updateObj);
+    	} catch(UpdateVersionException e){
+    		Assert.assertNotNull(e);
+    		Assert.assertEquals(e.getMessage(), "Incorrect entity version. Current version:2");
+    		return;
+    	}
         
     }
 }

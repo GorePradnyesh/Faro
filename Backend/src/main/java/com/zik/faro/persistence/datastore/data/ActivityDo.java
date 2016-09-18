@@ -18,11 +18,9 @@ import com.zik.faro.data.Location;
 
 @XmlRootElement
 @Entity
-public class ActivityDo {
+public class ActivityDo extends BaseEntityDo{
 
-	@Id
-    private String id;
-    @Parent
+	@Parent
     private Ref<EventDo> eventId;
     private Assignment assignment;
     private String name;
@@ -45,7 +43,7 @@ public class ActivityDo {
     
     public ActivityDo(String id, String eventId, String name, String description, Location location, 
     		Calendar startDate, Calendar endDate, Assignment assignment){
-    	this.id = id;
+    	super(id,1L);
         this.eventId = Ref.create(Key.create(EventDo.class, eventId));
         this.name = name;
         this.description = description;
@@ -56,11 +54,6 @@ public class ActivityDo {
     }
 
     // Getters and setters
-
-    public String getId() {
-    	return id;
-    }
-
     public String getEventId() {
         return eventId.getKey().getName();
     }
@@ -93,10 +86,6 @@ public class ActivityDo {
         return this.assignment;
     }
     
-    public void setId(String id) {
-		this.id = id;
-	}
-
 	public void setEventId(String eventId) {
 		this.eventId = Ref.create(Key.create(EventDo.class, eventId));;
 	}
@@ -104,7 +93,6 @@ public class ActivityDo {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
 
 	public Calendar getStartDate() {
 		return startDate;

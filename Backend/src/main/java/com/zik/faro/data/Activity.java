@@ -2,8 +2,7 @@ package com.zik.faro.data;
 
 import java.util.Calendar;
 
-public class Activity {
-    private String id;
+public class Activity extends BaseEntity{
     private String eventId;
     private Assignment assignment;
     private String name;
@@ -21,17 +20,17 @@ public class Activity {
     public Activity() {    
     }
     
-    // Mainly to be used by client who has all info other than id
+    // Mainly to be used by client who has all info other than id and version
     public Activity(String eventId, String name, String description,
     		Location location, Calendar startDate, Calendar endDate, Assignment assignment) {
-        this(null, eventId, name, description, location, startDate, endDate, assignment);
+        this(null, 1L, eventId, name, description, location, startDate, endDate, assignment);
     }
     
     // Mostly used on server side for to and for communication
     // Also useful during updates when id is known to client
-    public Activity(String id, String eventId, String name, String description,
+    public Activity(String id, Long version, String eventId, String name, String description,
     		Location location, Calendar startDate, Calendar endDate, Assignment assignment) {
-        this.id = id;
+        super(id,version);
         this.eventId = eventId;
         this.name = name;
         this.description = description;
@@ -42,10 +41,6 @@ public class Activity {
     }
 
     // Getters and setters
-
-    public String getId() {
-    	return id;
-    }
 
     public String getEventId() {
         return eventId;
@@ -79,10 +74,6 @@ public class Activity {
     public Assignment getAssignment(){
         return this.assignment;
     }
-    
-    public void setId(String id) {
-		this.id = id;
-	}
 
 	public void setEventId(String eventId) {
 		this.eventId = eventId;

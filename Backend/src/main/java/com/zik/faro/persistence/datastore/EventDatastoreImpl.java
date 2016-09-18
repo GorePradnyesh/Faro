@@ -36,10 +36,13 @@ public class EventDatastoreImpl {
 				} catch (DataNotFoundException e) {
 					return new TransactionResult<EventDo>(null, TransactionStatus.DATANOTFOUND);
 				}
-				if(updateObj.getVersion()!= null 
-						&& !updateObj.getVersion().equals(event.getVersion()))
-					return new TransactionResult<EventDo>(null, TransactionStatus.VERSIONMISSMATCH, "Incorrect entity version. Current version:"+event.getVersion().toString());
+//				if(updateObj.getVersion()!= null 
+//						&& !updateObj.getVersion().equals(event.getVersion()))
+//					return new TransactionResult<EventDo>(null, TransactionStatus.VERSIONMISSMATCH, "Incorrect entity version. Current version:"+event.getVersion().toString());
 				
+				if(!BaseDatastoreImpl.isVersionOk(updateObj, event)){
+					return new TransactionResult<EventDo>(null, TransactionStatus.VERSIONMISSMATCH, "Incorrect entity version. Current version:"+event.getVersion().toString());
+				}
 				if(updateObj.getEndDate() != null){
 					event.setEndDate(updateObj.getEndDate());
 				}
@@ -64,8 +67,7 @@ public class EventDatastoreImpl {
 				if(updateObj.isControlFlag()){
 					event.setControlFlag(true);
 				}
-				Long updatedVersion = updateObj.getVersion();
-				event.setVersion(++updatedVersion);
+				BaseDatastoreImpl.versionIncrement(updateObj, event);
                 DatastoreObjectifyDAL.storeObject(event);
                 return new TransactionResult<EventDo>(event, TransactionStatus.SUCCESS);
 			}

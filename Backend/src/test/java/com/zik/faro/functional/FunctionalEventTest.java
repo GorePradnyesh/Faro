@@ -162,27 +162,6 @@ public class FunctionalEventTest {
         
     }
     
-    // 4. disableEventControl
-    public void disableEventControl() throws IOException{
-    	Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(),
-                Calendar.getInstance(), false,"Description",  null, new Location("NYC"), "Mafia god");
-    	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);
-        Event ev = response.getEntity(Event.class);
-        ClientResponse response1 = TestHelper.doGET(endpoint.toString(), "v1/event/"+ ev.getId()+"/details", new MultivaluedMapImpl(), token);
-        Event eventDetails = response1.getEntity(Event.class);
-        assertEntity(eventCreateData, eventDetails);
-        
-        // Disable event control. Returns "OK"
-        ClientResponse response2 = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventDetails.getId()+"/disableControl", token, eventCreateData);
-        String str = response2.getEntity(String.class);
-        Assert.assertEquals("OK", str);
-        
-        // Verify indeed disabled
-        ClientResponse verifyControlFlag = TestHelper.doGET(endpoint.toString(), "v1/event/"+ ev.getId()+"/details", new MultivaluedMapImpl(), token);
-        eventDetails = verifyControlFlag.getEntity(Event.class);
-        Assert.assertTrue(eventDetails.getControlFlag());
-    }
-    
     // 5. removeAttendee
     // *** Covered with getEventInvitees ***
         
@@ -206,7 +185,7 @@ public class FunctionalEventTest {
     	eventsResponse = TestHelper.doGET(endpoint.toString(), "v1/events", new MultivaluedMapImpl(), token);
     	eventsResponse = TestHelper.doGET(endpoint.toString(), "v1/events", new MultivaluedMapImpl(), token);
     	List<EventInviteStatusWrapper> events = eventsResponse.getEntity(new GenericType<List<EventInviteStatusWrapper>>(){});
-    	Assert.assertEquals(15, events.size());
+    	Assert.assertEquals(14, events.size());
     }
     
     public void updateEvent() throws Exception{
@@ -240,8 +219,7 @@ public class FunctionalEventTest {
         Assert.assertEquals(updateObj.getEventName(), ev.getEventName());
         Assert.assertEquals(updateObj.getStatus(), ev.getStatus());
         Assert.assertEquals(updateObj.getLocation().locationName, ev.getLocation().locationName);
-        Long updatedVersion = updateObj.getVersion()+1;
-        Assert.assertEquals(updatedVersion, ev.getVersion());
+        assertVersion(updateObj, ev);
         
         // Update 2
         Event updateObj2 = new Event();
@@ -258,8 +236,7 @@ public class FunctionalEventTest {
         Assert.assertEquals(updateObj.getEventName(), ev.getEventName());
         Assert.assertEquals(updateObj.getStatus(), ev.getStatus());
         Assert.assertEquals(updateObj.getLocation().locationName, ev.getLocation().locationName);
-        updatedVersion = updateObj.getVersion()+2;
-        Assert.assertEquals(updatedVersion, ev.getVersion());
+        assertVersion(updateObj2, ev);
         Assert.assertTrue(ev.getControlFlag());
     }
     
@@ -268,7 +245,6 @@ public class FunctionalEventTest {
     	System.out.println(token);
     	createEventTest();
     	getEventDetails();
-    	disableEventControl();
     	getEvents();
     	getEventInvitees();
     	updateEvent();
@@ -287,6 +263,10 @@ public class FunctionalEventTest {
         Assert.assertEquals(expected.getEventDescription(), actual.getEventDescription());
         Assert.assertNotNull(actual.getEventCreatorId());
         Assert.assertEquals(ObjectStatus.OPEN, actual.getStatus());
+    }
+    public static void assertVersion(Event expected, Event actual){
+    	Long version = expected.getVersion();
+        Assert.assertEquals(++version, actual.getVersion());
     }
     
 }

@@ -1,5 +1,6 @@
 package com.zik.faro.persistence.datastore;
 
+import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 
@@ -13,6 +14,8 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
+import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.IllegalDataOperation;
 import com.zik.faro.data.ActionStatus;
 import com.zik.faro.persistence.datastore.data.ActivityDo;
@@ -125,7 +128,7 @@ public class ActivityDatastoreImplTest {
     }
     
     @Test
-    public void testUpdateActivity() throws IllegalDataOperation, DataNotFoundException{
+    public void testUpdateActivity() throws IllegalDataOperation, DataNotFoundException, DatastoreException, UpdateVersionException{
     	// Create activity
     	EventDo event = new EventDo("TestEvent");
     	String eventId = event.getId();
@@ -153,6 +156,25 @@ public class ActivityDatastoreImplTest {
     	Assert.assertEquals(retrievedActivity.getLocation().locationName, "Fremont");
     	Assert.assertEquals(retrievedActivity.getDescription(), "Description changed");
     	
+    	// Test update with correct version
+    	a.setStartDate(Calendar.getInstance());
+    	a.setVersion(retrievedActivity.getVersion());
+    	ActivityDatastoreImpl.updateActivity(a, eventId);
+    	retrievedActivity = ActivityDatastoreImpl.loadActivityById(a.getId(), eventId);
+    	Assert.assertNotNull(retrievedActivity);
+    	Assert.assertEquals(a.getStartDate(), retrievedActivity.getStartDate());
+    	
+    	// Test update failure without correct version
+    	a.setStartDate(Calendar.getInstance());
+    	try{
+    		ActivityDatastoreImpl.updateActivity(a, eventId);
+    	} catch(UpdateVersionException e){
+    		Assert.assertNotNull(e);
+    		Assert.assertEquals(e.getMessage(), "Incorrect entity version. Current version:3");
+    		return;
+    	}
+    	// Execution should never reach here
+    	Assert.assertNull("Activity update failure");
     }
   
 }

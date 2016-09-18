@@ -56,15 +56,6 @@ public class FunctionalActivityTest {
         Assert.assertEquals(activityRequest.getEndDate(), activityResponse.getEndDate());
         Assert.assertEquals(activityRequest.getLocation().locationName, activityResponse.getLocation().locationName);
         Assert.assertEquals(activityRequest.getEventId(), activityResponse.getEventId());
-//        for(int i = 0 ; i < activityRequest.getAssignment().getItems().size() ; i++){
-//            Assert.assertEquals(activityRequest.getAssignment().getItems().get(i).getName(), activityResponse.getAssignment().getItems().get(i).getName());
-//            Assert.assertEquals(activityRequest.getAssignment().getItems().get(i).getCount(), activityResponse.getAssignment().getItems().get(i).getCount());
-//            Assert.assertEquals(activityRequest.getAssignment().getItems().get(i).getAssigneeId(), activityResponse.getAssignment().getItems().get(i).getAssigneeId());
-//            Assert.assertEquals(activityRequest.getAssignment().getItems().get(i).getId(), activityResponse.getAssignment().getItems().get(i).getId());
-//            Assert.assertEquals(activityRequest.getAssignment().getItems().get(i).getStatus(), activityResponse.getAssignment().getItems().get(i).getStatus());
-//        }
-//        Assert.assertEquals(activityRequest.getAssignment().getId(), activityResponse.getAssignment().getId());
-//        Assert.assertEquals(activityRequest.getAssignment().getStatus(), activityResponse.getAssignment().getStatus());
     }
     
     @SuppressWarnings("deprecation")
@@ -77,6 +68,11 @@ public class FunctionalActivityTest {
         Assert.assertEquals(activityRequest.getLocation().locationName, activityResponse.getLocation().locationName);
         Assert.assertNotNull(activityResponse.getAssignment());
         Assert.assertNotNull(activityResponse.getAssignment().getId());
+    }
+    
+    public static void assertVersion(Activity activityRequest, Activity activityResponse){
+        Long version = activityRequest.getVersion();
+    	Assert.assertEquals(++version, activityResponse.getVersion());
     }
 
     public static void createAndReadActivityTest() throws Exception{
@@ -118,7 +114,41 @@ public class FunctionalActivityTest {
         ClientResponse updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/"+ activityResponse.getId()+"/update", token, activity);
         activityResponse = updateResponse.getEntity(Activity.class);
         assertCreatedEntity(activity, activityResponse);
+        assertVersion(activity, activityResponse);
     }
+    
+    public static void updateActivityVersionCheckTest()throws Exception{
+      // Create sample activity without id
+      Activity activity = new Activity(eventId, "Hiking",
+              "Test activity description", new Location("NYC"),
+              Calendar.getInstance(), Calendar.getInstance(), null);
+      ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/create", token, activity);
+      Activity activityResponse = response.getEntity(Activity.class);
+      assertCreatedEntity(activity, activityResponse);
+      // Update activity. Activity id and event id should be passed in URI. Values in activity object will not be honored
+      activity.setDescription("Update with version 1");
+      activity.setVersion(activityResponse.getVersion());
+      
+      response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/"+ activityResponse.getId()+"/update", token, activity);
+      activityResponse = response.getEntity(Activity.class);
+      assertCreatedEntity(activity, activityResponse);
+      assertVersion(activity, activityResponse);
+      
+      activity.setDescription("Update with version 2");
+      activity.setVersion(activityResponse.getVersion());
+      
+      response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/"+ activityResponse.getId()+"/update", token, activity);
+      activityResponse = response.getEntity(Activity.class);
+      assertCreatedEntity(activity, activityResponse);
+      assertVersion(activity, activityResponse);
+      
+      activity.setDescription("Update with old version 2");
+      
+      response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/"+ activityResponse.getId()+"/update", token, activity);
+      Assert.assertEquals(400,response.getStatus());
+      Assert.assertEquals("Incorrect entity version. Current version:3", response.getEntity(String.class));
+      
+  }
 
     public static void deleteActivityTest() throws Exception{
 //        Assignment assignment = new Assignment("HikingToDo", ActionStatus.INCOMPLETE);
@@ -183,6 +213,7 @@ public class FunctionalActivityTest {
         createAndReadActivityTest();
         updateActivityTest();
         deleteActivityTest();
+        updateActivityVersionCheckTest();
 
     }
 

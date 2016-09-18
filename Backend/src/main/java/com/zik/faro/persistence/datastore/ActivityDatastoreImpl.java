@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.googlecode.objectify.Work;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
+import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.persistence.datastore.data.ActivityDo;
 import com.zik.faro.persistence.datastore.data.EventDo;
 
@@ -33,7 +35,7 @@ public class ActivityDatastoreImpl {
     	DatastoreObjectifyDAL.deleteObjectByIdWithParentId(activityId, ActivityDo.class, eventId, EventDo.class);
     }
     
-	public static ActivityDo updateActivity(final ActivityDo updateActivity, final String eventId) throws DataNotFoundException{
+	public static ActivityDo updateActivity(final ActivityDo updateActivity, final String eventId) throws DataNotFoundException, DatastoreException, UpdateVersionException{
     	Work w = new Work<TransactionResult<ActivityDo>>() {
 	        public TransactionResult<ActivityDo> run() {
 	        	// Read from datastore
@@ -43,7 +45,11 @@ public class ActivityDatastoreImpl {
 				} catch (DataNotFoundException e) {
 					return new TransactionResult<ActivityDo>(null, TransactionStatus.DATANOTFOUND);
 				}
-	        	
+				
+				if(!BaseDatastoreImpl.isVersionOk(updateActivity, activity)){
+					return new TransactionResult<ActivityDo>(null, TransactionStatus.VERSIONMISSMATCH, "Incorrect entity version. Current version:"+activity.getVersion().toString());
+				}
+				
 	            // Modify.
 				if(updateActivity.getStartDate() != null){
 					activity.setStartDate(updateActivity.getStartDate());
@@ -61,7 +67,8 @@ public class ActivityDatastoreImpl {
 				if(updateActivity.getName() != null){
 					activity.setName(updateActivity.getName());
 				}
-				
+				BaseDatastoreImpl.versionIncrement(updateActivity, activity);
+
 	            // Store
 	            storeActivity(activity);
 	            return new TransactionResult<ActivityDo>(activity, TransactionStatus.SUCCESS);
@@ -69,9 +76,7 @@ public class ActivityDatastoreImpl {
 	    };
 	    
     	TransactionResult<ActivityDo> result = DatastoreObjectifyDAL.update(w);
-    	if(result.getStatus().equals(TransactionStatus.DATANOTFOUND)){
-    		throw new DataNotFoundException("Activity not found");
-    	}
+    	DatastoreUtil.processResult(result);
     	return result.getEntity();
     }
 	

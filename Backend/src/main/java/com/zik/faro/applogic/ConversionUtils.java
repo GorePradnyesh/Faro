@@ -54,6 +54,7 @@ public class ConversionUtils {
 		activityDo.setId(activity.getId());
 		activityDo.setEventId(activity.getEventId());
 		activityDo.setName(activity.getName());
+		activityDo.setVersion(activity.getVersion());
 		return activityDo;
 	}
 	
@@ -67,6 +68,7 @@ public class ConversionUtils {
 		activity.setId(activityDo.getId());
 		activity.setEventId(activityDo.getEventId());
 		activity.setName(activityDo.getName());
+		activity.setVersion(activityDo.getVersion());
 		return activity;
 	}
 	

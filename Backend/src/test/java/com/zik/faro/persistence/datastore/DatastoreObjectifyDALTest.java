@@ -389,38 +389,38 @@ public class DatastoreObjectifyDALTest {
         // Cannot verify since deletion is async.
     }
     
-    // Activity id is a UUID. Client must know this id when he sends an update
-    // otherwise there is no way to find that activity
-    @Test
-    public void testUpdateActivity() throws IllegalDataOperation, DataNotFoundException{
-    	// Create activity
-    	EventDo event = new EventDo("TestEvent");
-    	String eventId = event.getId();
-    	EventDatastoreImpl.storeEventOnly(event);
-    	ActivityDo a = new ActivityDo(event.getId(), "TestEvent", "Testing update",
-    			new Location("San Jose"), new GregorianCalendar(), new GregorianCalendar(),new Assignment());
-    	DatastoreObjectifyDAL.storeObject(a);
-    	
-    	// Verify indeed created
-    	ActivityDo retrievedActivity = DatastoreObjectifyDAL.loadObjectWithParentId(EventDo.class,
-    			event.getId(), ActivityDo.class, a.getId());
-    	Assert.assertNotNull(retrievedActivity);
-    	// Modify
-    	a.setStartDate(new GregorianCalendar());
-    	a.setEndDate(new GregorianCalendar());
-    	a.setDescription("Description changed");
-    	a.setLocation(new Location("Fremont"));
-    	
-    	// Update
-    	ActivityDatastoreImpl.updateActivity(a, event.getId());
-    	retrievedActivity = DatastoreObjectifyDAL.loadObjectWithParentId(EventDo.class,
-    			event.getId(), ActivityDo.class, a.getId());
-    	Assert.assertNotNull(retrievedActivity);
-    	
-    	// Verify
-    	Assert.assertEquals(retrievedActivity.getLocation().locationName, "Fremont");
-    	Assert.assertEquals(retrievedActivity.getDescription(), "Description changed");
-    	
-    }
+//    // Activity id is a UUID. Client must know this id when he sends an update
+//    // otherwise there is no way to find that activity
+//    @Test
+//    public void testUpdateActivity() throws IllegalDataOperation, DataNotFoundException{
+//    	// Create activity
+//    	EventDo event = new EventDo("TestEvent");
+//    	String eventId = event.getId();
+//    	EventDatastoreImpl.storeEventOnly(event);
+//    	ActivityDo a = new ActivityDo(event.getId(), "TestEvent", "Testing update",
+//    			new Location("San Jose"), new GregorianCalendar(), new GregorianCalendar(),new Assignment());
+//    	DatastoreObjectifyDAL.storeObject(a);
+//    	
+//    	// Verify indeed created
+//    	ActivityDo retrievedActivity = DatastoreObjectifyDAL.loadObjectWithParentId(EventDo.class,
+//    			event.getId(), ActivityDo.class, a.getId());
+//    	Assert.assertNotNull(retrievedActivity);
+//    	// Modify
+//    	a.setStartDate(new GregorianCalendar());
+//    	a.setEndDate(new GregorianCalendar());
+//    	a.setDescription("Description changed");
+//    	a.setLocation(new Location("Fremont"));
+//    	
+//    	// Update
+//    	ActivityDatastoreImpl.updateActivity(a, event.getId());
+//    	retrievedActivity = DatastoreObjectifyDAL.loadObjectWithParentId(EventDo.class,
+//    			event.getId(), ActivityDo.class, a.getId());
+//    	Assert.assertNotNull(retrievedActivity);
+//    	
+//    	// Verify
+//    	Assert.assertEquals(retrievedActivity.getLocation().locationName, "Fremont");
+//    	Assert.assertEquals(retrievedActivity.getDescription(), "Description changed");
+//    	
+//    }
 
 }
