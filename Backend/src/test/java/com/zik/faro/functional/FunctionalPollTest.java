@@ -42,7 +42,7 @@ public class FunctionalPollTest {
     	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);
         Event event = response.getEntity(Event.class);
         FunctionalEventTest.assertEntity(eventCreateData, event);
-    	eventId = event.getEventId();
+    	eventId = event.getId();
     }
     
     @SuppressWarnings("deprecation")
@@ -51,6 +51,7 @@ public class FunctionalPollTest {
     	Assert.assertEquals(pollRequest.getOwner(), pollResponse.getOwner());
     	Assert.assertEquals(pollRequest.getDescription(), pollResponse.getDescription());
     	Assert.assertEquals(pollRequest.getEventId(), pollResponse.getEventId());
+//    	Assert.assertEquals(pollRequest.getId(), pollResponse.getId());
     	Assert.assertNotNull(pollResponse.getId());
     	Assert.assertEquals(pollRequest.getWinnerId(), pollResponse.getWinnerId());
     	Assert.assertEquals(pollRequest.getDeadline(), pollResponse.getDeadline());

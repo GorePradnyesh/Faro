@@ -395,15 +395,15 @@ public class DatastoreObjectifyDALTest {
     public void testUpdateActivity() throws IllegalDataOperation, DataNotFoundException{
     	// Create activity
     	EventDo event = new EventDo("TestEvent");
-    	String eventId = event.getEventId();
+    	String eventId = event.getId();
     	EventDatastoreImpl.storeEventOnly(event);
-    	ActivityDo a = new ActivityDo(event.getEventId(), "TestEvent", "Testing update",
+    	ActivityDo a = new ActivityDo(event.getId(), "TestEvent", "Testing update",
     			new Location("San Jose"), new GregorianCalendar(), new GregorianCalendar(),new Assignment());
     	DatastoreObjectifyDAL.storeObject(a);
     	
     	// Verify indeed created
     	ActivityDo retrievedActivity = DatastoreObjectifyDAL.loadObjectWithParentId(EventDo.class,
-    			event.getEventId(), ActivityDo.class, a.getId());
+    			event.getId(), ActivityDo.class, a.getId());
     	Assert.assertNotNull(retrievedActivity);
     	// Modify
     	a.setStartDate(new GregorianCalendar());
@@ -412,9 +412,9 @@ public class DatastoreObjectifyDALTest {
     	a.setLocation(new Location("Fremont"));
     	
     	// Update
-    	ActivityDatastoreImpl.updateActivity(a, event.getEventId());
+    	ActivityDatastoreImpl.updateActivity(a, event.getId());
     	retrievedActivity = DatastoreObjectifyDAL.loadObjectWithParentId(EventDo.class,
-    			event.getEventId(), ActivityDo.class, a.getId());
+    			event.getId(), ActivityDo.class, a.getId());
     	Assert.assertNotNull(retrievedActivity);
     	
     	// Verify

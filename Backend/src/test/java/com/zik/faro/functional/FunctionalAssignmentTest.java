@@ -46,7 +46,7 @@ public class FunctionalAssignmentTest {
         ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);
         Event event = response.getEntity(Event.class);
         FunctionalEventTest.assertEntity(eventCreateData, event);
-        eventId = event.getEventId();
+        eventId = event.getId();
     }
     
     public void updateEventAndActivityAssignmentTodo() throws IllegalDataOperation, IOException{

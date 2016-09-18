@@ -45,7 +45,7 @@ public class SampleRestUnitTest extends JerseyTest {
 
         ObjectMapper mapper = new ObjectMapper();
         EventDo testEvent = mapper.readValue(responseMessage, EventDo.class);
-        Assert.assertNotNull(testEvent.getEventId());
+        Assert.assertNotNull(testEvent.getId());
         Assert.assertNotNull(testEvent.getEventName());
     }
 

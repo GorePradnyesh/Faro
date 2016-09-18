@@ -32,6 +32,7 @@ import com.zik.faro.applogic.AssignmentManagement;
 import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Assignment;
 import com.zik.faro.data.Event;
@@ -124,6 +125,11 @@ public class AssignmentHandler {
             throw new WebApplicationException(response);
 		} catch (DatastoreException e) {
 			Response response = Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(e.getMessage())
+                    .build();
+            throw new WebApplicationException(response);
+		} catch (UpdateVersionException e) {
+			Response response = Response.status(Response.Status.BAD_REQUEST)
                     .entity(e.getMessage())
                     .build();
             throw new WebApplicationException(response);

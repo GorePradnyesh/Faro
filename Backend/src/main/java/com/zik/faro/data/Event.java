@@ -5,8 +5,7 @@ import com.zik.faro.data.expense.ExpenseGroup;
 import java.util.Calendar;
 import java.util.UUID;
 
-public class Event {
-    private String eventId;           
+public class Event extends BaseEntity{
     private String eventName;
     private Calendar startDate;     
     private Calendar endDate;
@@ -17,13 +16,14 @@ public class Event {
     private ObjectStatus status;
     private Assignment assignment;
     private String eventCreatorId;
+    
 
     // *** Server side constructors ***
     public Event(final String eventName, final Calendar startDate, final Calendar endDate,
                  final String eventDescription, final boolean controlFlag, final ExpenseGroup expenseGroup, 
                  final Location location, final ObjectStatus objectStatus, final Assignment assignment,
                  final String eventCreatorId) {
-        this.eventId = UUID.randomUUID().toString();
+        super(UUID.randomUUID().toString(), 1L);
         this.eventName = eventName;
         this.startDate = startDate;
         this.endDate = endDate;
@@ -125,14 +125,6 @@ public class Event {
 
     public void markEventClosed(){
         this.status = ObjectStatus.CLOSED;
-    }
-
-    public String getEventId() {
-        return eventId;
-    }
-    
-    public void setEventId(String eventId){
-    	this.eventId = eventId;
     }
 
     public ObjectStatus getStatus() {

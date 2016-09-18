@@ -24,6 +24,7 @@ import com.zik.faro.applogic.PollManagement;
 import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateVersionException;
 
 @Path(EVENT_PATH_CONST + EVENT_ID_PATH_PARAM_STRING + POLL_PATH_CONST)
 public class PollHandler {
@@ -100,6 +101,11 @@ public class PollHandler {
 					.entity(e.getMessage())
 					.build();
             throw new WebApplicationException(response);
+		} catch (UpdateVersionException e) {
+			Response response = Response.status(Response.Status.BAD_REQUEST)
+                    .entity(e.getMessage())
+                    .build();
+           throw new WebApplicationException(response);
 		}
         return JResponse.ok(HTTP_OK).build();
     }
@@ -125,6 +131,11 @@ public class PollHandler {
 					.entity(e.getMessage())
 					.build();
             throw new WebApplicationException(response);
+		} catch (UpdateVersionException e) {
+			Response response = Response.status(Response.Status.BAD_REQUEST)
+                    .entity(e.getMessage())
+                    .build();
+           throw new WebApplicationException(response);
 		}
         return JResponse.ok(updatedPoll).build();
     }

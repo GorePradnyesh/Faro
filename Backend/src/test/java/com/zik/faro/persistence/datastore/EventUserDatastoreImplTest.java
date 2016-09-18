@@ -56,8 +56,8 @@ public class EventUserDatastoreImplTest {
                 "2323", new Address(123, "Palm Avenue", "Stanford", "CA", 94332));
         DatastoreObjectifyDAL.storeObject(faroUser);
 
-        EventUserDatastoreImpl.storeEventUser(testEvent.getEventId(), faroUser.getEmail());
-        EventUserDo eventUser = EventUserDatastoreImpl.loadEventUser(testEvent.getEventId(), faroUser.getEmail());
+        EventUserDatastoreImpl.storeEventUser(testEvent.getId(), faroUser.getEmail());
+        EventUserDo eventUser = EventUserDatastoreImpl.loadEventUser(testEvent.getId(), faroUser.getEmail());
         Assert.assertNotNull(eventUser);
 
         EventDo retEvent = eventUser.getEvent();
@@ -101,16 +101,16 @@ public class EventUserDatastoreImplTest {
                 "0000002", new Address(2, "Palm Avenue2", "Stanford2", "CA", 94332));
         DatastoreObjectifyDAL.storeObject(faroUser2);
 
-        EventUserDatastoreImpl.storeEventUser(event1.getEventId(), faroUser1.getEmail());
-        EventUserDatastoreImpl.storeEventUser(event1.getEventId(), faroUser2.getEmail());
-        EventUserDatastoreImpl.storeEventUser(event2.getEventId(), faroUser1.getEmail());
-        EventUserDatastoreImpl.storeEventUser(event3.getEventId(), faroUser1.getEmail());
+        EventUserDatastoreImpl.storeEventUser(event1.getId(), faroUser1.getEmail());
+        EventUserDatastoreImpl.storeEventUser(event1.getId(), faroUser2.getEmail());
+        EventUserDatastoreImpl.storeEventUser(event2.getId(), faroUser1.getEmail());
+        EventUserDatastoreImpl.storeEventUser(event3.getId(), faroUser1.getEmail());
 
 
         // load test
-        List<EventUserDo> userList1 = EventUserDatastoreImpl.loadEventUserByEvent(event1.getEventId());
+        List<EventUserDo> userList1 = EventUserDatastoreImpl.loadEventUserByEvent(event1.getId());
         Assert.assertEquals(2, userList1.size());
-        List<EventUserDo> userList2 = EventUserDatastoreImpl.loadEventUserByEvent(event2.getEventId());
+        List<EventUserDo> userList2 = EventUserDatastoreImpl.loadEventUserByEvent(event2.getId());
         Assert.assertEquals(1, userList2.size());
         List<EventUserDo> eventList = EventUserDatastoreImpl.loadEventUserByFaroUser(faroUser1.getEmail());
         Assert.assertEquals(3, eventList.size());
@@ -118,11 +118,11 @@ public class EventUserDatastoreImplTest {
         Assert.assertEquals(1, eventList2.size());
 
         // delete test
-        EventUserDatastoreImpl.deleteEventUserByEvent(event1.getEventId());
-        userList1 = EventUserDatastoreImpl.loadEventUserByEvent(event1.getEventId());
+        EventUserDatastoreImpl.deleteEventUserByEvent(event1.getId());
+        userList1 = EventUserDatastoreImpl.loadEventUserByEvent(event1.getId());
         Assert.assertEquals(0, userList1.size());
-        EventUserDatastoreImpl.deleteEventUserByEvent(event2.getEventId());
-        userList2 = EventUserDatastoreImpl.loadEventUserByEvent(event2.getEventId());
+        EventUserDatastoreImpl.deleteEventUserByEvent(event2.getId());
+        userList2 = EventUserDatastoreImpl.loadEventUserByEvent(event2.getId());
         Assert.assertEquals(0, userList2.size());
     }
 
@@ -141,11 +141,11 @@ public class EventUserDatastoreImplTest {
         DatastoreObjectifyDAL.storeObject(faroUser1);
 
         /*Repeat 'n' times */
-        EventUserDatastoreImpl.storeEventUser(event1.getEventId(), faroUser1.getEmail());
-        EventUserDatastoreImpl.storeEventUser(event1.getEventId(), faroUser1.getEmail());
-        EventUserDatastoreImpl.storeEventUser(event1.getEventId(), faroUser1.getEmail());
+        EventUserDatastoreImpl.storeEventUser(event1.getId(), faroUser1.getEmail());
+        EventUserDatastoreImpl.storeEventUser(event1.getId(), faroUser1.getEmail());
+        EventUserDatastoreImpl.storeEventUser(event1.getId(), faroUser1.getEmail());
 
-        List<EventUserDo> userList1 = EventUserDatastoreImpl.loadEventUserByEvent(event1.getEventId());
+        List<EventUserDo> userList1 = EventUserDatastoreImpl.loadEventUserByEvent(event1.getId());
         Assert.assertEquals(1, userList1.size());
     }
     
@@ -165,20 +165,20 @@ public class EventUserDatastoreImplTest {
         DatastoreObjectifyDAL.storeObject(faroUser1);
         
         // Establish user-event connectivity. User invited to event
-        EventUserDatastoreImpl.storeEventUser(event1.getEventId(), faroUser1.getEmail());
+        EventUserDatastoreImpl.storeEventUser(event1.getId(), faroUser1.getEmail());
         
         // Verify user-event relation
-        EventUserDo eventUser = EventUserDatastoreImpl.loadEventUser(event1.getEventId(),
+        EventUserDo eventUser = EventUserDatastoreImpl.loadEventUser(event1.getId(),
         		faroUser1.getEmail());
         Assert.assertNotNull(eventUser);
         Assert.assertEquals(event1,eventUser.getEvent());
         Assert.assertEquals(faroUser1, eventUser.getFaroUser());
         
         // Delete user from event
-        EventUserDatastoreImpl.deleteEventUser(event1.getEventId(), faroUser1.getEmail());
+        EventUserDatastoreImpl.deleteEventUser(event1.getId(), faroUser1.getEmail());
         
         // Verify deletion
-        eventUser = EventUserDatastoreImpl.loadEventUser(event1.getEventId(),
+        eventUser = EventUserDatastoreImpl.loadEventUser(event1.getId(),
         		faroUser1.getEmail());
         Assert.assertNull(eventUser);
     }

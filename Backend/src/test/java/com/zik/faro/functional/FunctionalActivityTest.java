@@ -43,18 +43,19 @@ public class FunctionalActivityTest {
         ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);
         Event event = response.getEntity(Event.class);
         FunctionalEventTest.assertEntity(eventCreateData, event);
-        eventId = event.getEventId();
+        eventId = event.getId();
     }
 
     @SuppressWarnings("deprecation")
     private static void assertEntity(Activity activityRequest, Activity activityResponse){
         Assert.assertNotNull(activityResponse.getId());
-        Assert.assertEquals(activityRequest.getEventId(), activityResponse.getEventId());
+        Assert.assertEquals(activityRequest.getId(), activityResponse.getId());
         Assert.assertEquals(activityRequest.getDescription(), activityResponse.getDescription());
         Assert.assertEquals(activityRequest.getName(), activityResponse.getName());
         Assert.assertEquals(activityRequest.getStartDate(), activityResponse.getStartDate());
         Assert.assertEquals(activityRequest.getEndDate(), activityResponse.getEndDate());
         Assert.assertEquals(activityRequest.getLocation().locationName, activityResponse.getLocation().locationName);
+        Assert.assertEquals(activityRequest.getEventId(), activityResponse.getEventId());
 //        for(int i = 0 ; i < activityRequest.getAssignment().getItems().size() ; i++){
 //            Assert.assertEquals(activityRequest.getAssignment().getItems().get(i).getName(), activityResponse.getAssignment().getItems().get(i).getName());
 //            Assert.assertEquals(activityRequest.getAssignment().getItems().get(i).getCount(), activityResponse.getAssignment().getItems().get(i).getCount());
@@ -69,7 +70,6 @@ public class FunctionalActivityTest {
     @SuppressWarnings("deprecation")
     public static void assertCreatedEntity(Activity activityRequest, Activity activityResponse){
         Assert.assertNotNull(activityResponse.getId());
-        Assert.assertEquals(activityRequest.getEventId(), activityResponse.getEventId());
         Assert.assertEquals(activityRequest.getDescription(), activityResponse.getDescription());
         Assert.assertEquals(activityRequest.getName(), activityResponse.getName());
         Assert.assertEquals(activityRequest.getStartDate(), activityResponse.getStartDate());

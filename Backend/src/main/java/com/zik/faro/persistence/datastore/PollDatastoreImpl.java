@@ -6,6 +6,7 @@ import java.util.Set;
 import com.googlecode.objectify.Work;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.PollOption;
 import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.persistence.datastore.data.PollDo;
@@ -52,7 +53,7 @@ public class PollDatastoreImpl {
     }
     
     public static PollDo castVote(final String eventId, final String pollId,
-    		final Set<String> options, final String userId) throws DatastoreException, DataNotFoundException{
+    		final Set<String> options, final String userId) throws DatastoreException, DataNotFoundException, UpdateVersionException{
     	Work w = new Work<TransactionResult<PollDo>>() {
     		
 			@Override
@@ -84,7 +85,7 @@ public class PollDatastoreImpl {
     }
     
     public static PollDo updatePoll(final String eventId, final String pollId,
-    		final PollDo updatePoll, final String userId) throws DatastoreException, DataNotFoundException{
+    		final PollDo updatePoll, final String userId) throws DatastoreException, DataNotFoundException, UpdateVersionException{
     	Work w = new Work<TransactionResult<PollDo>>() {
     		
 			@Override

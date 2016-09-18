@@ -128,7 +128,7 @@ public class ActivityDatastoreImplTest {
     public void testUpdateActivity() throws IllegalDataOperation, DataNotFoundException{
     	// Create activity
     	EventDo event = new EventDo("TestEvent");
-    	String eventId = event.getEventId();
+    	String eventId = event.getId();
     	EventDatastoreImpl.storeEventOnly(event);
     	
     	ActivityDo a = new ActivityDo(eventId, "TestEvent", "Testing update",

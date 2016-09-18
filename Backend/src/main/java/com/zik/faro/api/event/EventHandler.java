@@ -21,6 +21,7 @@ import com.zik.faro.applogic.EventUserManagement;
 import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.AddFriendRequest;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.IllegalDataOperation;
@@ -85,6 +86,11 @@ public class EventHandler {
                      .entity(e.getMessage())
                      .build();
             throw new WebApplicationException(response);
+		} catch (UpdateVersionException e) {
+			Response response = Response.status(Response.Status.BAD_REQUEST)
+                    .entity(e.getMessage())
+                    .build();
+           throw new WebApplicationException(response);
 		}
     	return JResponse.ok(Constants.HTTP_OK).build();
     }
@@ -107,29 +113,14 @@ public class EventHandler {
                      .entity(e.getMessage())
                      .build();
             throw new WebApplicationException(response);
+		} catch (UpdateVersionException e) {
+			Response response = Response.status(Response.Status.BAD_REQUEST)
+                    .entity(e.getMessage())
+                    .build();
+           throw new WebApplicationException(response);
 		}
     }
     
-    @Path(EVENT_DISABLE_CONTROL_PATH_CONST)
-    @POST
-    public JResponse<String> disableEventControl(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
-        String userId = context.getUserPrincipal().getName();
-        try {
-            EventManagement.disableEventControls(userId, eventId);
-        } catch (DataNotFoundException e) {
-            Response response = Response.status(Response.Status.NOT_FOUND)
-                    .entity(e.getMessage())
-                    .build();
-            throw new WebApplicationException(response);
-        } catch (DatastoreException e) {
-        	Response response = Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                     .entity(e.getMessage())
-                     .build();
-            throw new WebApplicationException(response);
-		}
-        return JResponse.ok(Constants.HTTP_OK).build();
-    }
-
     @Path(EVENT_REMOVE_ATTENDEE_PATH_CONST)
     @POST
     public JResponse<String> removeAttendee(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,

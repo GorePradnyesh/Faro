@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Assignment;
 import com.zik.faro.data.Event;
@@ -32,13 +33,13 @@ public class AssignmentManagement {
 		return AssignmentDatastoreImpl.getAllAssignments(eventId);
 	}
 	
-	public static Activity updateActivityItems(final String eventId, final String activityId, final List<Item> items) throws DataNotFoundException, DatastoreException{
+	public static Activity updateActivityItems(final String eventId, final String activityId, final List<Item> items) throws DataNotFoundException, DatastoreException, UpdateVersionException{
 		createItemIds(items);
 		ActivityDo activityDo = AssignmentDatastoreImpl.updateItemsForActivityAssignment(eventId, activityId, items);
 		return ConversionUtils.fromDo(activityDo);
 	}
 	
-	public static Event updateEventItems(final String eventId, final List<Item> items) throws DataNotFoundException, DatastoreException{
+	public static Event updateEventItems(final String eventId, final List<Item> items) throws DataNotFoundException, DatastoreException, UpdateVersionException{
 		createItemIds(items);
 		EventDo eventDo = AssignmentDatastoreImpl.updateItemsForEventAssignment(eventId, items);
 		return ConversionUtils.fromDo(eventDo);

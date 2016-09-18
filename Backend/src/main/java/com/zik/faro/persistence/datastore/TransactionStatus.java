@@ -4,5 +4,6 @@ package com.zik.faro.persistence.datastore;
 // while within a transaction. Require something to identify failures
 public enum TransactionStatus {
 	SUCCESS,
+	VERSIONMISSMATCH,
 	DATANOTFOUND;
 }

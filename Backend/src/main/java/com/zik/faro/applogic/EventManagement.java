@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.AddFriendRequest;
 import com.zik.faro.data.Assignment;
 import com.zik.faro.data.Event;
@@ -39,15 +40,8 @@ public class EventManagement {
         EventDo event = EventDatastoreImpl.loadEventByID(eventId);
         return ConversionUtils.fromDo(event);
     }
-
-    public static Event disableEventControls(final String userId, final String eventId) throws DataNotFoundException, DatastoreException {
-        //TODO: Validate that the user has permissions to modify event, from the EventUser table
-    	//TODO: Validate if the user is the owner of the event
-        EventDo eventDo = EventDatastoreImpl.disableEventControlFlag(eventId);
-        return ConversionUtils.fromDo(eventDo);
-    }
     
-    public static Event updateEvent(final Event updateObj, final String eventId) throws DataNotFoundException, DatastoreException {
+    public static Event updateEvent(final Event updateObj, final String eventId) throws DataNotFoundException, DatastoreException, UpdateVersionException {
         //TODO: Validate that the user has permissions to modify event, from the EventUser table
     	//TODO: Validate if the user is the owner of the event
     	EventDo eventDo = ConversionUtils.toDo(updateObj);

@@ -8,6 +8,7 @@ import java.util.Map;
 import com.googlecode.objectify.Work;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.ActionStatus;
 import com.zik.faro.persistence.datastore.data.ActivityDo;
 import com.zik.faro.data.Assignment;
@@ -71,7 +72,7 @@ public class AssignmentDatastoreImpl {
 	}
 	
 	public static ActivityDo updateItemsForActivityAssignment(final String eventId, final String activityId,
-			final List<Item> items) throws DataNotFoundException, DatastoreException{
+			final List<Item> items) throws DataNotFoundException, DatastoreException, UpdateVersionException{
 		Work w = new Work<TransactionResult<ActivityDo>>() {			
 			@Override
 			public TransactionResult<ActivityDo> run() {
@@ -96,7 +97,7 @@ public class AssignmentDatastoreImpl {
 		return result.getEntity();
 	}
 	
-	public static EventDo updateItemsForEventAssignment(final String eventId, final List<Item> items) throws DataNotFoundException, DatastoreException{
+	public static EventDo updateItemsForEventAssignment(final String eventId, final List<Item> items) throws DataNotFoundException, DatastoreException, UpdateVersionException{
 		Work w = new Work<TransactionResult<EventDo>>() {
 			
 			@Override

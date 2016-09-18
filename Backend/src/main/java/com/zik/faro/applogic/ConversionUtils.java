@@ -18,11 +18,12 @@ public class ConversionUtils {
 		event.setStartDate(eventDo.getStartDate());
 		event.setExpenseGroup(eventDo.getExpenseGroup());
 		event.setLocation(eventDo.getLocation());
-		event.setEventId(eventDo.getEventId());
+		event.setId(eventDo.getId());
 		event.setEventName(eventDo.getEventName());
 		event.setEventCreatorId(eventDo.getEventCreatorId());
 		event.setEventDescription(eventDo.getEventDescription());
 		event.setStatus(eventDo.getStatus());
+		event.setVersion(eventDo.getVersion());
 		return event;
 	}
 	
@@ -34,7 +35,8 @@ public class ConversionUtils {
 		eventDo.setStartDate(event.getStartDate());
 		eventDo.setExpenseGroup(event.getExpenseGroup());
 		eventDo.setLocation(event.getLocation());
-		eventDo.setEventId(event.getEventId());
+		eventDo.setId(event.getId());
+		eventDo.setVersion(event.getVersion());
 		eventDo.setEventName(event.getEventName());
 		eventDo.setEventCreatorId(event.getEventCreatorId());
 		eventDo.setEventDescription(event.getEventDescription());

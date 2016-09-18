@@ -9,6 +9,7 @@ import com.zik.faro.data.Poll;
 import com.zik.faro.data.PollOption;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.persistence.datastore.data.PollDo;
 import com.zik.faro.persistence.datastore.PollDatastoreImpl;
 
@@ -40,12 +41,12 @@ public class PollManagement {
 	}
 	
 	public static void castVote(final String eventId, final String pollId,
-    		final Set<String> options, final String userId ) throws DatastoreException, DataNotFoundException{
+    		final Set<String> options, final String userId ) throws DatastoreException, DataNotFoundException, UpdateVersionException{
 		PollDatastoreImpl.castVote(eventId, pollId, options, userId);
 	}
 	
 	public static Poll update(final String eventId, final String pollId,
-    		final Poll poll, final String userId ) throws DatastoreException, DataNotFoundException{
+    		final Poll poll, final String userId ) throws DatastoreException, DataNotFoundException, UpdateVersionException{
 		generatePollIds(poll.getPollOptions());
 		PollDo pollDo = ConversionUtils.toDo(poll);
 		return ConversionUtils.fromDo(PollDatastoreImpl.updatePoll(eventId, pollId, pollDo, userId));
