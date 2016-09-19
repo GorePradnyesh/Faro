@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import junit.framework.Assert;
@@ -157,8 +159,71 @@ public class FunctionalPollTest {
         update.setPollOptions(newOptions);
         update.setEventId(eventId);
         update.setId(pollResponse.getId());
+        update.setVersion(pollResponse.getVersion());
+        Map<String, Object> map = new HashMap<String,Object>();
+        map.put("poll", update);
         ClientResponse updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/"
-        		+pollResponse.getId()+"/updatePoll", token, update);
+        		+pollResponse.getId()+"/updatePoll", token, map);
+        Poll updatedPollResponse = updateResponse.getEntity(Poll.class);
+        Assert.assertEquals(200, updateResponse.getStatus());
+        Assert.assertEquals(4,updatedPollResponse.getPollOptions().size());
+    	for(int i = 0; i < updatedPollResponse.getPollOptions().size(); i++){
+    		Assert.assertNotNull(updatedPollResponse.getPollOptions().get(i).getId());
+    	}
+    	
+    	// Update Poll properties
+    	update = new Poll(); update.setEventId(eventId); update.setId(pollResponse.getId());
+    	update.setDescription("Poll Description updated");
+    	update.setVersion(updatedPollResponse.getVersion());
+    	map.put("poll", update);
+    	updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/"
+        		+pollResponse.getId()+"/updatePoll", token, map);
+        updatedPollResponse = updateResponse.getEntity(Poll.class);
+        Assert.assertEquals(update.getDescription(), updatedPollResponse.getDescription());
+        Long version = update.getVersion();
+        Assert.assertEquals(++version, updatedPollResponse.getVersion());
+        
+        // Update Poll properties and cast vote
+        
+        update = new Poll(); update.setEventId(eventId); update.setId(pollResponse.getId());
+    	update.setDescription("Poll Description updated again");
+    	update.setVersion(updatedPollResponse.getVersion());
+    	map.put("poll", update);
+    	Set<String> voteOption = new HashSet<String>();
+        voteOption.add(pollResponse.getPollOptions().get(1).getId());
+        map.put("voteOption", voteOption);
+    	updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/"
+        		+pollResponse.getId()+"/updatePoll", token, map);
+        updatedPollResponse = updateResponse.getEntity(Poll.class);
+        Assert.assertEquals(update.getDescription(), updatedPollResponse.getDescription());
+        version = update.getVersion();
+        Assert.assertEquals(++version, updatedPollResponse.getVersion());
+        Assert.assertEquals(1,updatedPollResponse.getPollOptions().get(1).getVoters().size());
+    }
+    
+    public static void testTest() throws Exception{
+    	List<PollOption> pollOptions = new ArrayList<PollOption>();
+    	pollOptions.add(new PollOption("Italian"));
+    	pollOptions.add(new PollOption("Indian"));
+    	pollOptions.add(new PollOption("Burmese"));
+    	Poll p = new Poll(eventId, "Kaivan", true, pollOptions, "Kaivan", "Dinner cuisine", ObjectStatus.OPEN);
+    	//new Poll(eventId, creator, multiChoice, pollOptions, owner, description, status)
+    	
+    	// Create sample poll
+    	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/create", token, p);
+        Poll pollResponse = response.getEntity(Poll.class);
+        assertEntity(p, pollResponse);
+        // Add poll options
+        // Cast vote
+        Set<String> voteOption = new HashSet<String>();
+        voteOption.add(pollResponse.getPollOptions().get(1).getId());
+        voteOption.add(pollResponse.getPollOptions().get(2).getId());
+        Map<String,Object> map = new HashMap<String,Object>();
+        map.put("version", pollResponse.getVersion());
+        map.put("voteOption", voteOption);
+        map.put("poll", p);
+        ClientResponse updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/"
+        		+pollResponse.getId()+"/test", token, map);
         Poll updatedPollResponse = updateResponse.getEntity(Poll.class);
         Assert.assertEquals(200, updateResponse.getStatus());
         Assert.assertEquals(4,updatedPollResponse.getPollOptions().size());

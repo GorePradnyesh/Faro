@@ -36,10 +36,6 @@ public class EventDatastoreImpl {
 				} catch (DataNotFoundException e) {
 					return new TransactionResult<EventDo>(null, TransactionStatus.DATANOTFOUND);
 				}
-//				if(updateObj.getVersion()!= null 
-//						&& !updateObj.getVersion().equals(event.getVersion()))
-//					return new TransactionResult<EventDo>(null, TransactionStatus.VERSIONMISSMATCH, "Incorrect entity version. Current version:"+event.getVersion().toString());
-				
 				if(!BaseDatastoreImpl.isVersionOk(updateObj, event)){
 					return new TransactionResult<EventDo>(null, TransactionStatus.VERSIONMISSMATCH, "Incorrect entity version. Current version:"+event.getVersion().toString());
 				}

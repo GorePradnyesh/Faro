@@ -84,6 +84,7 @@ public class ConversionUtils {
 		poll.setWinnerId(pollDo.getWinnerId());
 		poll.setPollOptions(pollDo.getPollOptions());
 		poll.setMultiChoice(pollDo.getMultiChoice());
+		poll.setVersion(pollDo.getVersion());
 		return poll;
 	}
 	
@@ -99,6 +100,7 @@ public class ConversionUtils {
 		pollDo.setWinnerId(poll.getWinnerId());
 		pollDo.setPollOptions(poll.getPollOptions());
 		pollDo.setMultiChoice(poll.getMultiChoice());
+		pollDo.setVersion(poll.getVersion());
 		return pollDo;
 	}
 

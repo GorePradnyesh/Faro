@@ -1,19 +1,34 @@
 package com.zik.faro.applogic;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import com.zik.faro.data.Poll;
-import com.zik.faro.data.PollOption;
+import javax.ws.rs.WebApplicationException;
+
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+
+import com.zik.faro.commons.FaroResponseStatus;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.FaroWebAppException;
 import com.zik.faro.commons.exceptions.UpdateVersionException;
-import com.zik.faro.persistence.datastore.data.PollDo;
+import com.zik.faro.data.Poll;
+import com.zik.faro.data.PollOption;
 import com.zik.faro.persistence.datastore.PollDatastoreImpl;
+import com.zik.faro.persistence.datastore.data.PollDo;
 
 public class PollManagement {
+	private static ObjectMapper mapper = new ObjectMapper();
+	
 	public static Poll createPoll(final Poll poll) throws DataNotFoundException{
 		// Create option ids during poll creation
 		generatePollIds(poll.getPollOptions());
@@ -40,16 +55,33 @@ public class PollManagement {
 		return PollDatastoreImpl.getCountofUnvotedPolls(eventId, userId);
 	}
 	
-	public static void castVote(final String eventId, final String pollId,
-    		final Set<String> options, final String userId ) throws DatastoreException, DataNotFoundException, UpdateVersionException{
-		PollDatastoreImpl.castVote(eventId, pollId, options, userId);
-	}
-	
 	public static Poll update(final String eventId, final String pollId,
-    		final Poll poll, final String userId ) throws DatastoreException, DataNotFoundException, UpdateVersionException{
+    		final Map<String, Object> updateObj, final String userId ) throws DatastoreException, DataNotFoundException, UpdateVersionException{
+		Poll poll = extractPollUpdateObject(updateObj);
+		Set<String> voteOptions = extractVoteOptionsUpdateObject(updateObj);
 		generatePollIds(poll.getPollOptions());
 		PollDo pollDo = ConversionUtils.toDo(poll);
-		return ConversionUtils.fromDo(PollDatastoreImpl.updatePoll(eventId, pollId, pollDo, userId));
+		return ConversionUtils.fromDo(PollDatastoreImpl.updatePoll(eventId, pollId, pollDo, userId, voteOptions));
+	}
+	
+	public static Poll extractPollUpdateObject(Map<String, Object> updateObj){
+		if(updateObj != null && updateObj.containsKey("poll")){
+			
+	        try {
+	        	JSONObject jObj = new JSONObject(updateObj.get("poll").toString());
+				return mapper.readValue(jObj.toString(), Poll.class);
+			} catch (Exception e) {
+				throw new FaroWebAppException(FaroResponseStatus.BAD_REQUEST, "Incorrect update object for Poll");
+			}
+		}
+		throw new FaroWebAppException(FaroResponseStatus.BAD_REQUEST, "Update object missing for Poll");
+	}
+	
+	public static Set<String> extractVoteOptionsUpdateObject(Map<String, Object> updateObj){
+		if(updateObj != null && updateObj.get("voteOption") != null){
+			return new HashSet<String>((List<String>) updateObj.get("voteOption"));
+		}
+		return null;
 	}
 	
 	public static void deletePoll(final String eventId, final String pollId){

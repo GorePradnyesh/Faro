@@ -52,8 +52,8 @@ public class PollDatastoreImpl {
     	return count;
     }
     
-    public static PollDo castVote(final String eventId, final String pollId,
-    		final Set<String> options, final String userId) throws DatastoreException, DataNotFoundException, UpdateVersionException{
+    public static PollDo updatePoll(final String eventId, final String pollId,
+    		final PollDo updatePoll, final String userId, final Set<String> options) throws DatastoreException, DataNotFoundException, UpdateVersionException{
     	Work w = new Work<TransactionResult<PollDo>>() {
     		
 			@Override
@@ -61,38 +61,21 @@ public class PollDatastoreImpl {
 				PollDo poll;
 				try {
 					poll = loadPollById(pollId, eventId);
+					if(!BaseDatastoreImpl.isVersionOk(updatePoll, poll)){
+						return new TransactionResult<PollDo>(null, TransactionStatus.VERSIONMISSMATCH, "Incorrect entity version. Current version:"+poll.getVersion().toString());
+					}
 					
 					// Iterate over all poll options. 
 					// Since it is a list I cannot get O(1) operation either ways.
-					for(PollOption pollOption : poll.getPollOptions()){
-						if(options.contains(pollOption.getId())){
-							pollOption.getVoters().add(userId);
-						}else{
-							pollOption.getVoters().remove(userId);
+					if(options != null && !options.isEmpty()){
+						for(PollOption pollOption : poll.getPollOptions()){
+							if(options.contains(pollOption.getId())){
+								pollOption.getVoters().add(userId);
+							}else{
+								pollOption.getVoters().remove(userId);
+							}
 						}
 					}
-	                
-	                storePoll(poll);
-				} catch (DataNotFoundException e) {
-					return new TransactionResult<PollDo>(null, TransactionStatus.DATANOTFOUND);
-				}
-				return new TransactionResult<PollDo>(poll, TransactionStatus.SUCCESS);
-			}
-		};
-        TransactionResult<PollDo> result = DatastoreObjectifyDAL.update(w);
-        DatastoreUtil.processResult(result);
-        return result.getEntity();
-    }
-    
-    public static PollDo updatePoll(final String eventId, final String pollId,
-    		final PollDo updatePoll, final String userId) throws DatastoreException, DataNotFoundException, UpdateVersionException{
-    	Work w = new Work<TransactionResult<PollDo>>() {
-    		
-			@Override
-			public TransactionResult<PollDo> run(){
-				PollDo poll;
-				try {
-					poll = loadPollById(pollId, eventId);
 					
 					if(updatePoll.getCreatorId() != null){
 						poll.setCreatorId(updatePoll.getCreatorId());
@@ -123,7 +106,7 @@ public class PollDatastoreImpl {
 					if(updatePoll.getWinnerId() != null){
 						poll.setWinnerId(updatePoll.getWinnerId());
 					}
-	                
+	                BaseDatastoreImpl.versionIncrement(updatePoll, poll);
 	                storePoll(poll);
 				} catch (DataNotFoundException e) {
 					return new TransactionResult<PollDo>(null, TransactionStatus.DATANOTFOUND);

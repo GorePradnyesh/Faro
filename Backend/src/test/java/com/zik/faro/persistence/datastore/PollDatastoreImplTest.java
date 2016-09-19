@@ -143,8 +143,11 @@ public class PollDatastoreImplTest {
         optionIds.add(poll1.getPollOptions().get(0).getId());
         optionIds.add(poll1.getPollOptions().get(1).getId());
         System.out.println(poll1.getPollOptions());
+        PollDo updateObj = new PollDo();
+        updateObj.setId(poll1.getId());updateObj.setEventId(poll1.getEventId());updateObj.setVersion(poll1.getVersion());
+        
         // Cast user3's vote to both options of the poll(Shasta and vegas)
-        PollDatastoreImpl.castVote(event.getId(), poll1.getId(), optionIds, "user3");
+        PollDatastoreImpl.updatePoll(event.getId(), poll1.getId(), updateObj, "user3", optionIds);
         
         // Verify. If vote went through. User3 should be present in both shasta and vegas
         PollDo returnedPollDo = PollDatastoreImpl.loadPollById(poll1.getId(), eventId);
@@ -155,11 +158,18 @@ public class PollDatastoreImplTest {
         // CHange user3s vote and verify
         optionIds = new HashSet<String>();
         optionIds.add(poll1.getPollOptions().get(2).getId());
-        PollDatastoreImpl.castVote(event.getId(), poll1.getId(), optionIds, "user3");
+        updateObj.setVersion(returnedPollDo.getVersion());
+        PollDatastoreImpl.updatePoll(event.getId(), poll1.getId(), updateObj, "user3", optionIds);
         returnedPollDo = PollDatastoreImpl.loadPollById(poll1.getId(), eventId);
         Assert.assertFalse(returnedPollDo.getPollOptions().get(0).getVoters().contains("user3"));
         Assert.assertFalse(returnedPollDo.getPollOptions().get(1).getVoters().contains("user3"));
         Assert.assertTrue(returnedPollDo.getPollOptions().get(2).getVoters().contains("user3"));
+        try{
+        	PollDatastoreImpl.updatePoll(event.getId(), poll1.getId(), updateObj, "user3", optionIds);
+        }catch(UpdateVersionException e){
+        	Assert.assertNotNull(e);
+        	Assert.assertEquals("Incorrect entity version. Current version:3", e.getMessage());
+        }
     }
     
     @Test
@@ -179,9 +189,10 @@ public class PollDatastoreImplTest {
         updateObj.setWinnerId("Updated poll winner");
         //updateObj.setMultiChoice(true);
         updateObj.addPollOptions(new PollOption(UUID.randomUUID().toString(), "Bombay"));
+        updateObj.setVersion(1L);
         
         // Call update API
-        PollDatastoreImpl.updatePoll(updateObj.getEventId(), updateObj.getId(), updateObj, null);
+        PollDatastoreImpl.updatePoll(updateObj.getEventId(), updateObj.getId(), updateObj, null, null);
         
         // Verify. 
         PollDo returnedPollDo = PollDatastoreImpl.loadPollById(poll1.getId(), eventId);
@@ -192,7 +203,30 @@ public class PollDatastoreImplTest {
         Assert.assertEquals(returnedPollDo.getWinnerId(), updateObj.getWinnerId());
         //Assert.assertTrue(returnedPollDo.getMultiChoice());
         Assert.assertEquals(4, returnedPollDo.getPollOptions().size());
+        Long newVersion = updateObj.getVersion();
+        Assert.assertEquals(++newVersion, returnedPollDo.getVersion());
         
+        // Another update with correct version
+        updateObj = new PollDo();
+        updateObj.setId(poll1.getId()); updateObj.setEventId(poll1.getEventId());
+        updateObj.setCreatorId("Updated creator2");
+        updateObj.setVersion(returnedPollDo.getVersion());
+        
+        returnedPollDo = PollDatastoreImpl.updatePoll(updateObj.getEventId(), updateObj.getId(), updateObj, null, null);
+        Assert.assertEquals(returnedPollDo.getCreatorId(), updateObj.getCreatorId());
+        newVersion = updateObj.getVersion();
+        Assert.assertEquals(++newVersion, returnedPollDo.getVersion());
+        
+        //Another update with wrong version
+        updateObj.setCreatorId("Updated creator3");
+        try{
+        	returnedPollDo = PollDatastoreImpl.updatePoll(updateObj.getEventId(), updateObj.getId(), updateObj, null, null);
+        }catch(UpdateVersionException e){
+        	Assert.assertNotNull(e);
+        	Assert.assertEquals("Incorrect entity version. Current version:3", e.getMessage());
+        	return;
+        }
+        Assert.assertNull("Problem with Poll updates");
     }
     
     @Test

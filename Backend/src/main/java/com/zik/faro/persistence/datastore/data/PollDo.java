@@ -15,9 +15,8 @@ import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.PollOption;
 
 @Entity
-public class PollDo {
-    @Id
-    private String id;
+public class PollDo extends BaseEntityDo{
+    
     @Parent
     private Ref<EventDo> eventId;
     private String creatorId;
@@ -33,7 +32,7 @@ public class PollDo {
     public PollDo(){ //to satisfy jaxb;
     }
 
-    public PollDo(String eventId, String creator, List<PollOption> pollOptions, String winnerId, String owner, 
+	public PollDo(String eventId, String creator, List<PollOption> pollOptions, String winnerId, String owner, 
     		String description, ObjectStatus status, Calendar deadline, boolean multiChoice) {
     	this(UUID.randomUUID().toString(),eventId, creator, pollOptions, winnerId,
     			owner, description, status, deadline, multiChoice);
@@ -41,7 +40,7 @@ public class PollDo {
     
     public PollDo(String id, String eventId, String creator, List<PollOption> pollOptions, String winnerId, 
     		String owner, String description, ObjectStatus status, Calendar deadline, boolean multiChoice){
-    	this.id = id;
+    	super(id,1L);
     	this.eventId = Ref.create(Key.create(EventDo.class, eventId));
         this.creatorId = creator;
         this.pollOptions = pollOptions;
@@ -51,10 +50,6 @@ public class PollDo {
         this.status = ObjectStatus.OPEN;
         this.deadline = deadline;
         this.multiChoice = multiChoice;
-    }
-
-    public String getId() {
-        return id;
     }
     
     public String getEventId() {
@@ -111,10 +106,6 @@ public class PollDo {
     
     public void setCreatorId(String creatorId){
     	this.creatorId = creatorId;
-    }
-    
-    public void setId(String id){
-    	this.id = id;
     }
     
     public void setEventId(String eventId){
