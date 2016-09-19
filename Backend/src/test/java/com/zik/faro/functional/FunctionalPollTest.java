@@ -111,34 +111,7 @@ public class FunctionalPollTest {
         Integer count = readResponse.getEntity(Integer.class);
         Assert.assertEquals(1, count.intValue());
     }
-    
-    public static void castVoteTest() throws Exception{
-    	List<PollOption> pollOptions = new ArrayList<PollOption>();
-    	pollOptions.add(new PollOption("Italian"));
-    	pollOptions.add(new PollOption("Indian"));
-    	pollOptions.add(new PollOption("Burmese"));
-    	Poll p = new Poll(eventId, "Kaivan", true, pollOptions, "Kaivan", "Dinner cuisine", ObjectStatus.OPEN);
-    	//new Poll(eventId, creator, multiChoice, pollOptions, owner, description, status)
-    	
-    	// Create sample poll
-    	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/create", token, p);
-        Poll pollResponse = response.getEntity(Poll.class);
-        assertEntity(p, pollResponse);
-        // Cast vote
-        Set<String> voteOption = new HashSet<String>();
-        voteOption.add(pollResponse.getPollOptions().get(1).getId());
-        ClientResponse castVoteResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/"
-        		+pollResponse.getId()+"/vote", token, voteOption);
-        String http_ok = castVoteResponse.getEntity(String.class);
-        Assert.assertEquals(200,castVoteResponse.getStatus());
-        Assert.assertEquals("OK", http_ok);
-        
-        // Verify vote casted
-        ClientResponse readResponse = TestHelper.doGET(endpoint.toString(), "v1/event/"+eventId+"/poll/"+pollResponse.getId(), new MultivaluedMapImpl(), token);
-        pollResponse = readResponse.getEntity(Poll.class);
-        Assert.assertEquals(1,pollResponse.getPollOptions().get(1).getVoters().size());
-    	
-    }
+   
     
     public static void updatePollTest() throws Exception{
     	List<PollOption> pollOptions = new ArrayList<PollOption>();
@@ -235,14 +208,13 @@ public class FunctionalPollTest {
     public static void getPolls() throws Exception{
     	ClientResponse readResponse = TestHelper.doGET(endpoint.toString(), "v1/event/"+eventId+"/polls", new MultivaluedMapImpl(), token);
         List<Poll> polls = readResponse.getEntity(new GenericType<List<Poll>>(){});
-        Assert.assertEquals(2, polls.size());
+        Assert.assertEquals(1, polls.size());
     }
     
     @Test
     public void allTest() throws Exception{
     	createAndReadAndDeletePollTest();
     	getUnvotedCountTest();
-    	castVoteTest();
     	getPolls();
     	updatePollTest();
     }
