@@ -30,8 +30,8 @@ import java.text.MessageFormat;
 public class LoginActivity extends Activity {
     private String TAG = "LoginActivity";
 
-    protected static final String baseUrl = "http://192.168.1.2:8080/v1/";
-    private String baseUrl2 = "http://192.168.1.2:8080/v1/";
+    protected static final String baseUrl = "http://192.168.1.10:8080/v1/";
+    private String baseUrl2 = "http://192.168.1.10:8080/v1/";
     private static FaroServiceHandler serviceHandler;
 
     private EditText emailTextBox;

@@ -35,7 +35,7 @@ public class ApiBaseTest extends ApplicationTestCase<Application> {
         FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
 
         Utils.TestSignupCallback callback = new Utils.TestSignupCallback(waitSem, 200);
-        serviceHandler.getSignupHandler().signup(callback, new FaroUser(username), password);
+        serviceHandler.getSignupHandler().signup(callback, new FaroUser(username, null, null, null, null, null, null), password);
         boolean timeout;
         timeout = !waitSem.tryAcquire(30000, TimeUnit.MILLISECONDS);
         Assert.assertFalse(timeout);
@@ -46,7 +46,7 @@ public class ApiBaseTest extends ApplicationTestCase<Application> {
         final Semaphore waitSem = new Semaphore(0);
         FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
         Utils.TestSignupCallback callback = new Utils.TestSignupCallback(waitSem, 200);
-        serviceHandler.getSignupHandler().signup(callback, new FaroUser(username), password, false);
+        serviceHandler.getSignupHandler().signup(callback, new FaroUser(username, null, null, null, null, null, null), password, false);
         boolean timeout;
         timeout = !waitSem.tryAcquire(30000, TimeUnit.MILLISECONDS);
         Assert.assertFalse(timeout);

@@ -30,8 +30,8 @@ import java.net.URL;
 public class SignupActivity extends Activity {
     private String TAG = "SignupActivity";
     private static FaroServiceHandler serviceHandler = null;
-    protected static final String baseUrl = "http://192.168.1.2:8080/v1/";
-    private String baseUrl2 = "http://192.168.1.2:8080/v1/";
+    protected static final String baseUrl = "http://192.168.1.10:8080/v1/";
+    private String baseUrl2 = "http://192.168.1.10:8080/v1/";
 
     private EditText nameTextBox;
     private EditText emailTextBox;

@@ -60,7 +60,7 @@ public class EventListHandler {
 
     public static FaroServiceHandler serviceHandler;
 
-    protected static final String baseUrl = "http://192.168.1.2:8080/v1/";
+    protected static final String baseUrl = "http://192.168.1.10:8080/v1/";
     private static String TAG = "EventListHandler";
 
     private static final FaroServiceHandler CreateFaroServiceHandler()

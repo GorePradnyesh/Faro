@@ -109,6 +109,13 @@
         <activity
             android:name=".ImageGridView"
             android:label="@string/title_activity_grid_view" />
+        <activity android:name="com.facebook.FacebookActivity"
+            android:configChanges=
+                "keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:label="FacebookActivity" />
+        <activity android:name=".FbLoginPage"
+            android:label="FbLoginPage" />
     </application>
 
 </manifest>

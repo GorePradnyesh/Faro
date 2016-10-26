@@ -3,7 +3,7 @@ package com.zik.faro.frontend;
 import android.app.Application;
 import android.test.suitebuilder.annotation.LargeTest;
 
-import com.zik.faro.data.EventCreateData;
+import com.zik.faro.data.Event;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 
 import junit.framework.Assert;
@@ -55,7 +55,7 @@ public class EventApiTest extends ApiBaseTest {
         
         // Create Event
         TestEventCreateCallback createCallback = new TestEventCreateCallback(waitSem, 200, null);
-        EventCreateData eventCreateData= new EventCreateData("MySampleEvent", Calendar.getInstance(), Calendar.getInstance(), null, null);
+        Event eventCreateData= new Event("MySampleEvent", Calendar.getInstance(), Calendar.getInstance(), null, null);
         serviceHandler.getEventHandler().createEvent(createCallback, eventCreateData);
         timeout = false;
         timeout = !waitSem.tryAcquire(3000, TimeUnit.SECONDS);
@@ -88,7 +88,7 @@ public class EventApiTest extends ApiBaseTest {
         getTokenForNewUser(uuidEmail, password);
         
         TestEventCreateCallback callback = new TestEventCreateCallback(waitSem, 200, null);
-        EventCreateData eventCreateData= new EventCreateData("MySampleEvent", Calendar.getInstance(), null, null, null);
+        Event eventCreateData= new Event("MySampleEvent", Calendar.getInstance(), null, null, null);
         
         // Create Event
         serviceHandler.getEventHandler().createEvent(callback, eventCreateData);
@@ -112,8 +112,7 @@ public class EventApiTest extends ApiBaseTest {
         timeout = false;
         
         // Get event list
-        TestGetEventsCallback getEventsCallback 
-                = new TestGetEventsCallback(waitSem);
+        TestGetEventsCallback getEventsCallback = new TestGetEventsCallback(waitSem);
         serviceHandler.getEventHandler().getEvents(getEventsCallback);
         timeout = !waitSem.tryAcquire(testTimeout, TimeUnit.MILLISECONDS);
         

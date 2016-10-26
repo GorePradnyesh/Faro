@@ -1,5 +1,6 @@
 package com.zik.faro.frontend;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphRequestBatch;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -37,18 +39,14 @@ import java.util.concurrent.TimeoutException;
 public class FbGraphApiService {
     private String TAG = "FbGraphApiService";
     private AccessToken accessToken;
-    private String userId;
-    private static final String FB_APPLICATION_ID = "145634995501895";
     private static final long FB_IMAGES_REQUEST_TIMEOUT_SECS = 60;
     private static final int NUM_THREADS = 10;
 
     // TODO : need an optimal configuration of the threadpool
-    private ExecutorService threadPool = Executors.newFixedThreadPool(NUM_THREADS);
+    private static ExecutorService threadPool = Executors.newFixedThreadPool(NUM_THREADS);
 
-    public FbGraphApiService(String accessTokenStr, String userId) {
-        this.userId = userId;
-        accessToken = new AccessToken(accessTokenStr, FB_APPLICATION_ID, userId, null,
-                null, AccessTokenSource.FACEBOOK_APPLICATION_WEB, new Date(1467673200), null);
+    public FbGraphApiService() {
+        this.accessToken = AccessToken.getCurrentAccessToken();
     }
 
     // TODO : Change return type
@@ -82,10 +80,7 @@ public class FbGraphApiService {
      * @return  id of the album on FB
      */
     private String findAlbum(final String albumName) {
-        GraphRequest request = new GraphRequest(
-                accessToken,
-                "/me/albums");
-
+        GraphRequest request = new GraphRequest(accessToken, "/me/albums");
         GraphResponse response = request.executeAndWait();
 
         if (response.getError() == null) {
@@ -120,7 +115,11 @@ public class FbGraphApiService {
     private String createAlbum(final String albumName) {
         String albumId = findAlbum(albumName);
         if (albumId == null) {
-            Log.i(TAG, "Album does not exist.Creating one");
+            Log.i(TAG, "Album does not exist. Must create one. First check permissions to create");
+            if (!accessToken.getPermissions().contains("user_photos")) {
+
+            }
+
             // Create new album
             Bundle parameters = new Bundle();
             parameters.putString("name", albumName);
@@ -134,10 +133,10 @@ public class FbGraphApiService {
             }
             parameters.putString("privacy", privacyObject.toString());
             GraphRequest createRequest = new GraphRequest(
-                    accessToken,
-                    "/me/albums",
-                    parameters,
-                    HttpMethod.POST);
+                accessToken,
+                "/me/albums",
+                parameters,
+                HttpMethod.POST);
             GraphResponse response = createRequest.executeAndWait();
             if (response.getError() == null) {
                 JSONObject createAlbumResponsObject = response.getJSONObject();
@@ -176,10 +175,10 @@ public class FbGraphApiService {
                     params.putString("fields", "images");
 
                     GraphResponse response = new GraphRequest(
-                            accessToken,
-                            photosPath,
-                            params,
-                            HttpMethod.GET
+                        accessToken,
+                        photosPath,
+                        params,
+                        HttpMethod.GET
                     ).executeAndWait();
 
                     if (response.getError() == null) {
@@ -251,6 +250,11 @@ public class FbGraphApiService {
                     for (String photoPath : photoPaths) {
                         byte[] data = null;
                         Bitmap bi = BitmapFactory.decodeFile(photoPath);
+
+                        if (bi == null) {
+                            Log.e(TAG, "could not decode file " + photoPath);
+                            return;
+                        }
                         ByteArrayOutputStream baos = new ByteArrayOutputStream();
                         bi.compress(Bitmap.CompressFormat.JPEG, 100, baos);
                         data = baos.toByteArray();

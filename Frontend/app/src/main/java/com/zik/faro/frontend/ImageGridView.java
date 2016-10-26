@@ -28,7 +28,7 @@ public class ImageGridView extends AppCompatActivity {
         Log.i(TAG, "eventName = " + eventName);
 
         GridView gridView = (GridView) findViewById(R.id.gridview);
-        FbGraphApiService fbGraphApiService = new FbGraphApiService(accessTokenString, userId);
+        FbGraphApiService fbGraphApiService = new FbGraphApiService();
         gridView.setAdapter(new ImageAdapter(this, fbGraphApiService.obtainImageDownloadLinks(eventName)));
     }
 

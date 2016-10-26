@@ -9,6 +9,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.CursorLoader;
 import android.util.Log;
 import android.os.Handler;
@@ -25,6 +27,8 @@ import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 
+import com.facebook.AccessToken;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.squareup.okhttp.Request;
 import java.util.Date;
@@ -233,9 +237,24 @@ public class EventLandingPage extends Activity {
         uploadPhotosButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent chooseIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                chooseIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                startActivityForResult(chooseIntent, REQUEST_PICK_PHOTOS);
+
+
+                /*AccessToken accessToken = AccessToken.getCurrentAccessToken();
+
+                if (accessToken == null || accessToken.isExpired()) {
+                    FaroCache faroCache = FaroCache.getFaroUserContextCache();
+                    String fbAccessToken = faroCache.loadFaroCacheFromDisk("FB_ACCESS_TOKEN");
+                    if (Strings.isNullOrEmpty(fbAccessToken)) {
+                        // Initiate FB login
+                        Intent fbLoginIntent = new Intent(EventLandingPage.this, FbLoginPage.class);
+                        fbLoginIntent.putExtra("fbPermission", "user_photos");
+                        startActivity(fbLoginIntent);
+                    }
+                } else {
+                    Intent chooseIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    chooseIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                    startActivityForResult(chooseIntent, REQUEST_PICK_PHOTOS);
+                }*/
             }
         });
 
@@ -320,12 +339,19 @@ public class EventLandingPage extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
             Log.i(TAG, "Photo captured successfully. uri : Add photo to gallery");
             if (mCurrentPhotoPath != null) {
                 Log.i(TAG, "mCurrentPhotoPath = " + mCurrentPhotoPath);
                 galleryAddPic();
-                uploadPhoto(Lists.newArrayList(mCurrentPhotoPath), cloneEvent.getEventName());
+                AccessToken accessToken = AccessToken.getCurrentAccessToken();
+                if (accessToken != null &&
+                        !accessToken.getPermissions().contains("publish_actions")) {
+                    requestAdditionalPrivileges();
+                } else {
+                    uploadPhoto(Lists.newArrayList(mCurrentPhotoPath), cloneEvent.getEventName());
+                }
             } else {
                 Log.e(TAG, "mCurrentPhotoPath = " + mCurrentPhotoPath);
             }
@@ -342,8 +368,14 @@ public class EventLandingPage extends Activity {
                 Log.i(TAG, "Selected Images size : " + filePaths.size());
                 Log.i(TAG, "Selected Images : " + filePaths);
 
-                Log.d(TAG, MessageFormat.format("Uploading images to album {0} ", cloneEvent.getEventName()));
-                uploadPhoto(filePaths, cloneEvent.getEventName());
+                AccessToken accessToken = AccessToken.getCurrentAccessToken();
+                if (accessToken != null &&
+                        !accessToken.getPermissions().contains("publish_actions")) {
+                    requestAdditionalPrivileges();
+                } else {
+                    Log.d(TAG, MessageFormat.format("Uploading images to album {0} ", cloneEvent.getEventName()));
+                    uploadPhoto(filePaths, cloneEvent.getEventName());
+                }
             }
         }
     }
@@ -359,11 +391,15 @@ public class EventLandingPage extends Activity {
         return result;
     }
 
+    private void requestAdditionalPrivileges() {
+        // Initiate FB login
+        Intent fbLoginIntent = new Intent(EventLandingPage.this, FbLoginPage.class);
+        fbLoginIntent.putExtra("fbPermission", "publish_actions");
+        startActivity(fbLoginIntent);
+    }
+
     private void uploadPhoto(List<String> photoPaths, String eventName) {
-        String accessTokenString = "EAACEdEose0cBAI1NuZCFd5lG4Ms33y8fShyUv8js8m4Xz4GkgMOxTXS4Nk4Gyj1WIzpynVIkYZC5bD" +
-                "IlhT7H7BZBBBOx5lece36yZAJ7g4nsMWEuW5n7KIF87IhgF13vB8CizDZAITERTz0TtcdGlRbRwAPoThNmtAnzqp9DlSAZDZD";
-        String userId = "10155071787680006";
-        FbGraphApiService fbGraphApiService = new FbGraphApiService(accessTokenString, userId);
+        FbGraphApiService fbGraphApiService = new FbGraphApiService();
         fbGraphApiService.uploadPhotos(photoPaths, eventName);
     }
 
