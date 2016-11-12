@@ -77,23 +77,6 @@ Backend Dev Environment Setup Instructions :
   
     export M2_HOME=/Users/granganathan/Development/apache-maven-3.3.9
 
-    if [[ "$PATH" != *"${M2_HOME}/bin"* ]]; then
-       export PATH=${M2_HOME}/bin:${PATH}
-    fi
-
-6. Build the project
-
-   mvn compile
-
-7. Run
-
-   mvn appengine:devserver
-
-   To skip tests - 
-
-   mvn appengine:devserver -DskipTests
-
-
 You may build/run completely from IntelliJ as well, but make sure to specify the Maven home in intellij
 Open IntelliJ Preferences, under Build Tools->Maven, set the Maven home directory
 
