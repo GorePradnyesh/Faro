@@ -41,7 +41,7 @@ public class EventListFragment extends Fragment{
 
     private void eventSelectedFromList(AdapterView<?> parent, int position, Intent eventLanding) {
         Event event = (Event) parent.getItemAtPosition(position);
-        eventLanding.putExtra("eventID", event.getEventId());
+        eventLanding.putExtra("eventID", event.getId());
         //TODO: check if startActivityForResult is a better way
         startActivity(eventLanding);
     }

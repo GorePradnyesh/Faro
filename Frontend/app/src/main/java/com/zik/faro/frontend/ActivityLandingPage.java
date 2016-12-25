@@ -64,7 +64,7 @@ public class ActivityLandingPage extends android.app.Activity {
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EditActivityPage.putExtra("eventID", cloneEvent.getEventId());
+                EditActivityPage.putExtra("eventID", cloneEvent.getId());
                 EditActivityPage.putExtra("activityID", cloneActivity.getId());
                 startActivity(EditActivityPage);
                 finish();
@@ -74,7 +74,7 @@ public class ActivityLandingPage extends android.app.Activity {
         activityAssignmentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AssignmentLandingPageIntent.putExtra("eventID", cloneEvent.getEventId());
+                AssignmentLandingPageIntent.putExtra("eventID", cloneEvent.getId());
                 AssignmentLandingPageIntent.putExtra("activityID", cloneActivity.getId());
                 AssignmentLandingPageIntent.putExtra("assignmentID", cloneActivity.getAssignment().getId());
                 startActivity(AssignmentLandingPageIntent);

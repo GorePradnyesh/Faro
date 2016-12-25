@@ -13,7 +13,7 @@ public class SetDisplayProperties {
     static EventListHandler eventListHandler = EventListHandler.getInstance();
 
     static public int getEventStatusImage(Event event){
-        EventInviteStatus eventInviteStatus = eventListHandler.getUserEventStatus(event.getEventId());
+        EventInviteStatus eventInviteStatus = eventListHandler.getUserEventStatus(event.getId());
         switch (eventInviteStatus){
             case ACCEPTED:
                 return R.drawable.green;

@@ -133,7 +133,7 @@ public class CreateNewPoll extends Activity {
                                 public void run() {
                                     Log.i(TAG, "Poll Create Response received Successfully");
                                     pollListHandler.addPollToListAndMap(receivedPoll);
-                                    OpenPollLandingPage.putExtra("eventID", event.getEventId());
+                                    OpenPollLandingPage.putExtra("eventID", event.getId());
                                     OpenPollLandingPage.putExtra("pollID", receivedPoll.getId());
                                     startActivity(OpenPollLandingPage);
                                     finish();

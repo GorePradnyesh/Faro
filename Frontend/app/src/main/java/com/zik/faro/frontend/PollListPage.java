@@ -55,7 +55,7 @@ public class PollListPage extends Activity {
         Bundle extras = getIntent().getExtras();
         if(extras == null) {
             //TODO: Error condition. Handle it. Below code is incorrect
-            EventLandingPage.putExtra("eventID", E.getEventId());
+            EventLandingPage.putExtra("eventID", E.getId());
             startActivity(EventLandingPage);
             finish();
             return;
@@ -116,7 +116,7 @@ public class PollListPage extends Activity {
                 if(pollListHandler.getCombinedListSize() == PollListHandler.MAX_TOTAL_POLLS_PER_EVENT) {
                     //DO NOT ALLOW NEW POLL CREATION
                 }else {
-                    CreateNewPoll.putExtra("eventID", E.getEventId());
+                    CreateNewPoll.putExtra("eventID", E.getId());
                     startActivity(CreateNewPoll);
                 }
             }
@@ -152,7 +152,7 @@ public class PollListPage extends Activity {
 
     private void pollSelectedFromList(AdapterView<?> parent, int position, Intent intent) {
         Poll poll = (Poll) parent.getItemAtPosition(position);
-        intent.putExtra("eventID", E.getEventId());
+        intent.putExtra("eventID", E.getId());
         intent.putExtra("pollID", poll.getId());
         startActivity(intent);
     }
