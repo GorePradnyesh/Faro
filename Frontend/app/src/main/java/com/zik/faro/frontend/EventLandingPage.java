@@ -9,8 +9,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.CursorLoader;
 import android.util.Log;
 import android.os.Handler;
@@ -28,7 +26,6 @@ import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 
 import com.facebook.AccessToken;
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.squareup.okhttp.Request;
 import java.util.Date;
@@ -44,8 +41,6 @@ import com.zik.faro.frontend.faroservice.HttpError;
 import static android.os.Environment.getExternalStoragePublicDirectory;
 
 public class EventLandingPage extends Activity {
-
-    public static final int NO_CHANGES = 0;
     private DateFormat sdf = new SimpleDateFormat(" EEE, MMM d, yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
@@ -69,17 +64,16 @@ public class EventLandingPage extends Activity {
     private Button photosButton = null;
     private Button cameraButton = null;
     private Button uploadPhotosButton = null;
-    private TextView event_status = null;
 
     private String eventID;
     final Context mContext = this;
-    private Intent EventLandingPageReload;
+    private Intent eventLandingPageReload;
 
     private static final int REQUEST_TAKE_PHOTO = 1;
     private static final int REQUEST_PICK_PHOTOS = 2;
     private static final String TAG = "EventLandingPage";
-
     private static final String CAPTURED_PHOTO_PATH_KEY = "capturedPhotoPath";
+
     private String mCurrentPhotoPath = null;
 
     @Override
@@ -87,7 +81,7 @@ public class EventLandingPage extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_landing_page);
 
-        final TextView event_name = (TextView) findViewById(R.id.eventNameText);
+        final TextView eventDisplayName = (TextView) findViewById(R.id.eventNameText);
         TextView eventDescription = (TextView) findViewById(R.id.eventDescriptionTextView);
 
         TextView startDateAndTime = (TextView) findViewById(R.id.startDateAndTimeDisplay);
@@ -113,13 +107,12 @@ public class EventLandingPage extends Activity {
         statusNo = (Button) findViewById(R.id.statusNo);
         statusMaybe = (Button) findViewById(R.id.statusMaybe);
 
-        final Intent PollListPage = new Intent(EventLandingPage.this, PollListPage.class);
-        final Intent EditEvent = new Intent(EventLandingPage.this, EditEvent.class);
-        final Intent ActivityListPage = new Intent(EventLandingPage.this, ActivityListPage.class);
-        final Intent InviteFriendToEventPage = new Intent(EventLandingPage.this, InviteFriendToEventPage.class);
-        final Intent CreateEventAssignment = new Intent(EventLandingPage.this, CreateNewAssignment.class);
-        final Intent AssignmentLandingPage = new Intent(EventLandingPage.this, AssignmentLandingPage.class);
-        EventLandingPageReload = new Intent(EventLandingPage.this, EventLandingPage.class);
+        final Intent pollListPage = new Intent(EventLandingPage.this, PollListPage.class);
+        final Intent editEvent = new Intent(EventLandingPage.this, EditEvent.class);
+        final Intent activityListPage = new Intent(EventLandingPage.this, ActivityListPage.class);
+        final Intent inviteFriendToEventPage = new Intent(EventLandingPage.this, InviteFriendToEventPage.class);
+        final Intent assignmentLandingPage = new Intent(EventLandingPage.this, AssignmentLandingPage.class);
+        eventLandingPageReload = new Intent(EventLandingPage.this, EventLandingPage.class);
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
@@ -129,23 +122,19 @@ public class EventLandingPage extends Activity {
             cloneEvent = eventListHandler.getEventCloneFromMap(eventID);
             if (cloneEvent != null) {
 
-                //Display elements based on Event Status
-                eventStateBasedView(cloneEvent);
+                // Display elements based on Event Status
+                eventStateBasedView();
 
                 controlFlagBasedView();
 
-                String ev_name = cloneEvent.getEventName();
-                event_name.setText(ev_name);
-
-                String eventDescr = cloneEvent.getEventDescription();
-                eventDescription.setText(eventDescr);
+                eventDisplayName.setText(cloneEvent.getEventName());
+                eventDescription.setText(cloneEvent.getEventDescription());
 
                 startDateAndTime.setText(sdf.format(cloneEvent.getStartDate().getTime()) + " at " +
                         stf.format(cloneEvent.getStartDate().getTime()));
 
                 endDateAndTime.setText(sdf.format(cloneEvent.getEndDate().getTime()) + " at " +
                         stf.format(cloneEvent.getEndDate().getTime()));
-
 
                 statusYes.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -169,40 +158,39 @@ public class EventLandingPage extends Activity {
                 });
 
                 assignmentListHandler.addAssignmentToListAndMap(cloneEvent.getAssignment());
-
             }
         }
 
         pollButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PollListPage.putExtra("eventID", eventID);
-                startActivity(PollListPage);
+                pollListPage.putExtra("eventID", eventID);
+                startActivity(pollListPage);
             }
         });
 
         eventAssignmentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AssignmentLandingPage.putExtra("eventID", eventID);
-                AssignmentLandingPage.putExtra("assignmentID", cloneEvent.getAssignment().getId());
-                startActivity(AssignmentLandingPage);
+                assignmentLandingPage.putExtra("eventID", eventID);
+                assignmentLandingPage.putExtra("assignmentID", cloneEvent.getAssignment().getId());
+                startActivity(assignmentLandingPage);
             }
         });
 
         activityButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ActivityListPage.putExtra("eventID", eventID);
-                startActivity(ActivityListPage);
+                activityListPage.putExtra("eventID", eventID);
+                startActivity(activityListPage);
             }
         });
 
         addFriendsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                InviteFriendToEventPage.putExtra("eventID", eventID);
-                startActivity(InviteFriendToEventPage);
+                inviteFriendToEventPage.putExtra("eventID", eventID);
+                startActivity(inviteFriendToEventPage);
                 finish();
             }
         });
@@ -210,8 +198,8 @@ public class EventLandingPage extends Activity {
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EditEvent.putExtra("eventID", eventID);
-                startActivity(EditEvent);
+                editEvent.putExtra("eventID", eventID);
+                startActivity(editEvent);
                 finish();
             }
         });
@@ -384,9 +372,9 @@ public class EventLandingPage extends Activity {
         String[] proj = { MediaStore.Images.Media.DATA };
         CursorLoader loader = new CursorLoader(mContext, contentUri, proj, null, null, null);
         Cursor cursor = loader.loadInBackground();
-        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
         cursor.moveToFirst();
-        String result = cursor.getString(column_index);
+        String result = cursor.getString(columnIndex);
         cursor.close();
         return result;
     }
@@ -433,26 +421,26 @@ public class EventLandingPage extends Activity {
                     Runnable myRunnable = new Runnable() {
                         @Override
                         public void run() {
-                            switch (eventInviteStatus){
-                                case ACCEPTED:
-                                    eventListHandler.addEventToListAndMap(cloneEvent, EventInviteStatus.ACCEPTED);
-                                    //Reload EventLandingPage
-                                    EventLandingPageReload.putExtra("eventID", eventID);
-                                    finish();
-                                    startActivity(EventLandingPageReload);
-                                    break;
-                                case MAYBE:
-                                    eventListHandler.addEventToListAndMap(cloneEvent, EventInviteStatus.MAYBE);
-                                    //Reload EventLandingPage
-                                    EventLandingPageReload.putExtra("eventID", eventID);
-                                    finish();
-                                    startActivity(EventLandingPageReload);
-                                    break;
-                                case DECLINED:
-                                    eventListHandler.removeEventFromListAndMap(eventID);
-                                    finish();
-                                    break;
-                            }
+                       switch (eventInviteStatus){
+                           case ACCEPTED:
+                               eventListHandler.addEventToListAndMap(cloneEvent, EventInviteStatus.ACCEPTED);
+                               //Reload EventLandingPage
+                               eventLandingPageReload.putExtra("eventID", eventID);
+                               finish();
+                               startActivity(eventLandingPageReload);
+                               break;
+                           case MAYBE:
+                               eventListHandler.addEventToListAndMap(cloneEvent, EventInviteStatus.MAYBE);
+                               //Reload EventLandingPage
+                               eventLandingPageReload.putExtra("eventID", eventID);
+                               finish();
+                               startActivity(eventLandingPageReload);
+                               break;
+                           case DECLINED:
+                               eventListHandler.removeEventFromListAndMap(eventID);
+                               finish();
+                               break;
+                       }
                         }
                     };
                     Handler mainHandler = new Handler(mContext.getMainLooper());
@@ -464,8 +452,7 @@ public class EventLandingPage extends Activity {
         }, eventID, eventInviteStatus);
     }
 
-    private void eventStateBasedView(Event event){
-
+    private void eventStateBasedView(){
         EventInviteStatus inviteStatus = eventListHandler.getUserEventStatus(eventID);
         
         if (inviteStatus == EventInviteStatus.ACCEPTED){
