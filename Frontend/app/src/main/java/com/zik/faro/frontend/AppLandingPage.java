@@ -31,13 +31,7 @@ public class AppLandingPage extends FragmentActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_landing_page);
 
-        final Intent CreateNewEventIntent = new Intent(this, CreateNewEvent.class);
-
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            String baseUrl = extras.getString("baseUrl");
-            eventListHandler.CreateFaroServiceHandler(baseUrl);
-        }
+        final Intent createNewEventIntent = new Intent(this, CreateNewEvent.class);
 
         //Creating the Adapters for all
         if (eventListHandler.acceptedEventAdapter == null) {
@@ -96,7 +90,7 @@ public class AppLandingPage extends FragmentActivity{
         mTabHost.getTabWidget().getChildAt(2).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(CreateNewEventIntent);
+                startActivity(createNewEventIntent);
             }
         });
 

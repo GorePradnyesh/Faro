@@ -5,6 +5,8 @@ import android.test.ApplicationTestCase;
 import android.util.Log;
 
 import com.squareup.okhttp.Request;
+import com.zik.faro.data.Event;
+import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
@@ -14,16 +16,12 @@ import junit.framework.Assert;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import com.zik.faro.data.Event;
-
 
 public class ApiBaseTest extends ApplicationTestCase<Application> {
-    protected static final String baseUrl = "http://10.0.2.2:8080/v1/";
     protected static final int testTimeout = 30000;
     
     public ApiBaseTest(Class<Application> applicationClass) {
@@ -32,7 +30,7 @@ public class ApiBaseTest extends ApplicationTestCase<Application> {
 
     protected String getTokenForNewUser(final String username, final String password) throws InterruptedException, MalformedURLException {
         final Semaphore waitSem = new Semaphore(0);
-        FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
+        FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
         Utils.TestSignupCallback callback = new Utils.TestSignupCallback(waitSem, 200);
         serviceHandler.getSignupHandler().signup(callback, new FaroUser(username, null, null, null, null, null, null), password);
@@ -44,7 +42,7 @@ public class ApiBaseTest extends ApplicationTestCase<Application> {
 
     protected void signUpUser(final String username, final String password) throws InterruptedException, MalformedURLException {
         final Semaphore waitSem = new Semaphore(0);
-        FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
+        FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
         Utils.TestSignupCallback callback = new Utils.TestSignupCallback(waitSem, 200);
         serviceHandler.getSignupHandler().signup(callback, new FaroUser(username, null, null, null, null, null, null), password, false);
         boolean timeout;
@@ -57,7 +55,7 @@ public class ApiBaseTest extends ApplicationTestCase<Application> {
 
     final static class TestGetEventsCallback
             extends Utils.BaseTestCallbackHandler
-            implements BaseFaroRequestCallback<List<Event>> {
+            implements BaseFaroRequestCallback<List<EventInviteStatusWrapper>> {
         List<Event> eventList;
         TestGetEventsCallback(Semaphore semaphore){
             super(semaphore, 0);
@@ -69,7 +67,7 @@ public class ApiBaseTest extends ApplicationTestCase<Application> {
         }
 
         @Override
-        public void onResponse(List<Event> eventList, HttpError error) {
+        public void onResponse(List<EventInviteStatusWrapper> eventInviteStatusWrappers, HttpError error) {
             if(error != null){
                 this.failed = true;
             }

@@ -4,24 +4,20 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.squareup.okhttp.Request;
-//import com.zik.faro.frontend.data.EventCreateData;
-import com.zik.faro.data.Activity;
+import com.zik.faro.data.Event;
 import com.zik.faro.data.EventInviteStatusWrapper;
-import com.zik.faro.data.EventUser;
-import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import com.zik.faro.data.Event;
+
+//import com.zik.faro.frontend.data.EventCreateData;
 
 public class EventListHandler {
 
@@ -60,30 +56,8 @@ public class EventListHandler {
 
     public static FaroServiceHandler serviceHandler;
 
-    protected static final String baseUrl = "http://10.0.2.2:8080/v1/";
     private static String TAG = "EventListHandler";
 
-    private static final FaroServiceHandler CreateFaroServiceHandler()
-    {
-        FaroServiceHandler innerServiceHandler = null;
-        try {
-            innerServiceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
-        } catch (MalformedURLException e) {
-            Log.e(TAG, "failed to obtain servicehandler", e);
-        }
-        return innerServiceHandler;
-    }
-    
-    public static final void CreateFaroServiceHandler(String baseUrl1)
-    {
-        FaroServiceHandler innerServiceHandler = null;
-        try {
-            innerServiceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl1));
-        } catch (MalformedURLException e) {
-            Log.e(TAG, "failed to obtain servicehandler", e);
-        }
-        serviceHandler =  innerServiceHandler;
-    }
 
     //TODO Function call to remove items from the List and Map when user keeps scrolling and caches
     // lot of events. Have a Max limit on number of events we will cache else will use up a lot of

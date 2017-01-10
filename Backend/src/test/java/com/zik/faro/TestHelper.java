@@ -19,7 +19,10 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
+import com.zik.faro.data.Event;
+import com.zik.faro.data.Location;
 import com.zik.faro.data.user.FaroUser;
+import com.zik.faro.functional.FunctionalEventTest;
 import org.codehaus.jackson.Version;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.module.SimpleModule;
@@ -169,15 +172,17 @@ public class TestHelper {
         return response;
     	
     }
-    
-    public static ClientResponse doDELETE(String uri, String path, String authToken){
-    	Client client = RestClient.getInstance().getClient();
+
+    public static ClientResponse doDELETE(String uri, String path, String authToken) {
+        Client client = RestClient.getInstance().getClient();
         WebResource webResource = client.resource(uri);
+
         ClientResponse response = webResource
                 .path(path)
                 .header("authentication", authToken)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .delete(ClientResponse.class);
+
         Assert.assertNotNull(response);
         return response;
     }
@@ -224,8 +229,24 @@ public class TestHelper {
         Assert.assertEquals(200, clientResponse.getStatus());
         return email;
     }
+
+    // Create an event for all activity tests
+    public static String createEventForTest(String token, URL endpoint) throws IOException{
+        Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(),
+                Calendar.getInstance(), "Description", false, null, new Location("Random Location"),null, null, "Mafia god");
+        ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);
+        Event event = response.getEntity(Event.class);
+        FunctionalEventTest.assertEntity(eventCreateData, event);
+        return event.getEventId();
+    }
+
+    public static void deleteEvent(String token, URL endpoint, String eventId) {
+        ClientResponse response = doDELETE(endpoint.toString(), "v1/event/{" + eventId + "}", token);
+    }
    
     public static void main(String[] args) throws Exception {
 		doPOST("", "", "", 123);
 	}
+
+
 }

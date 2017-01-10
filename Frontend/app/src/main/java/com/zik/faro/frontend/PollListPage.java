@@ -22,13 +22,11 @@ import com.zik.faro.data.Poll;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
-import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 
 import java.io.IOException;
 import java.util.List;
 
 public class PollListPage extends Activity {
-
     Intent EventLandingPage = null;
     Intent OpenPollLandingPage = null;
     Intent ClosedPollLandingPage = null;
@@ -36,7 +34,7 @@ public class PollListPage extends Activity {
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static Event E;
     private static String eventID = null;
-    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
     private static String TAG = "PollListPage";
 

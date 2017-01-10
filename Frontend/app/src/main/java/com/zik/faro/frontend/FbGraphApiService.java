@@ -1,20 +1,18 @@
 package com.zik.faro.frontend;
 
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 
 import com.facebook.AccessToken;
-import com.facebook.AccessTokenSource;
 import com.facebook.GraphRequest;
 import com.facebook.GraphRequestBatch;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,7 +20,6 @@ import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.text.MessageFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -51,27 +48,6 @@ public class FbGraphApiService {
         if (this.accessToken == null) {
             throw new IllegalStateException("Access token is null. Not logged into FB account");
         }
-    }
-
-    // TODO : Change return type
-    public void obtainUserData() {
-        threadPool.submit(new Runnable() {
-            @Override
-            public void run() {
-                Bundle parameters = new Bundle();
-                parameters.putString("fields", "id,name,link");
-                GraphRequest request = new GraphRequest(
-                        accessToken,
-                        "/me",
-                        parameters,
-                        HttpMethod.GET);
-
-                GraphResponse response = request.executeAndWait();
-                Log.d(TAG, "response = " + response);
-                Log.d(TAG, "object = " + response.getJSONObject());
-
-            }
-        });
     }
 
     /**
@@ -116,7 +92,7 @@ public class FbGraphApiService {
      * Must be executed by background thread
      * @param albumName
      */
-    private String createAlbum(final String albumName) {
+    private String getOrCreateAlbum(final String albumName) {
         String albumId = findAlbum(albumName);
         if (albumId == null) {
             Log.i(TAG, "Album does not exist. Must create one. First check permissions to create");
@@ -162,83 +138,58 @@ public class FbGraphApiService {
     /**
      * Obtain the public URL of all the images in the album specified
      *
-     * @param albumName
+     * @param fbPhotoIds
      * @return list of image urls
      */
-    public List<String> obtainImageDownloadLinks(final String albumName) {
-        Future<List<String>> future = threadPool.submit(new Callable<List<String>>() {
-            @Override
-            public List<String> call() {
-                List<String> imageUrls = Lists.newArrayList();
-                String albumId = findAlbum(albumName);
-
-                if (albumId != null) {
-                    // Get all images from the album
-                    String photosPath = MessageFormat.format("/{0}/photos", albumId);
-                    Bundle params = new Bundle();
-                    params.putString("fields", "images");
-
-                    GraphResponse response = new GraphRequest(
-                        accessToken,
-                        photosPath,
-                        params,
-                        HttpMethod.GET
-                    ).executeAndWait();
-
-                    if (response.getError() == null) {
-                        JSONObject responseObject = response.getJSONObject();
-
-                        try {
-                            JSONArray photos = responseObject.getJSONArray("data");
-
-                            for (int i = 0; i < photos.length(); i++) {
-                                JSONArray imagesArray = photos.getJSONObject(i).getJSONArray("images");
-                                if (imagesArray != null) {
-                                    JSONObject imageObject = imagesArray.getJSONObject(0);
-
-                                    String url = imageObject.getString("source");
-                                    Log.d(TAG, MessageFormat.format("Found image {0} URL : {1}", i, url));
-                                    imageUrls.add(url);
-                                } else {
-                                    Log.e(TAG, "images not present for the photo");
-                                }
-                            }
-
-                            Log.d(TAG, "imageUrls : " + imageUrls);
-                        } catch (JSONException e) {
-                            Log.e(TAG, "incorrect JSON processing or invalid response");
-                        }
-                    } else {
-                        Log.e(TAG, "error " + response.getError());
-                    }
-                } else {
-                    Log.i(TAG, MessageFormat.format("Album for event {0} not found", albumName));
-                }
-
-                return imageUrls;
-            }
-        });
-
+    public List<String> obtainImageDownloadLinks(final List<String> fbPhotoIds) {
         List<String> imageUrls = Lists.newArrayList();
-        try {
-            imageUrls = future.get(FB_IMAGES_REQUEST_TIMEOUT_SECS, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            Log.e(TAG, MessageFormat.format("Failed to download images from album {0}", albumName));
+
+        Bundle params = new Bundle();
+        params.putString("fields", "images");
+
+        for (String fbPhotoId : fbPhotoIds) {
+            GraphResponse response = new GraphRequest(
+                    accessToken,
+                    MessageFormat.format("/{0}",fbPhotoId),
+                    params,
+                    HttpMethod.GET
+            ).executeAndWait();
+
+            if (response.getError() == null) {
+                try {
+                    JSONArray imagesArray = response.getJSONObject().getJSONArray("images");
+                    if (imagesArray != null) {
+                        JSONObject imageObject = imagesArray.getJSONObject(0);
+
+                        String url = imageObject.getString("source");
+                        Log.d(TAG, MessageFormat.format("Found image URL : {0}", url));
+                        imageUrls.add(url);
+                    } else {
+                        Log.e(TAG, "images not present for the photo");
+                    }
+                } catch (JSONException e) {
+                    Log.e(TAG, "incorrect JSON processing or invalid response");
+                }
+            } else {
+                Log.e(TAG, "error " + response.getError());
+            }
         }
 
+        Log.d(TAG, "imageUrls : " + imageUrls);
         return imageUrls;
     }
 
-    public void uploadPhotos(final List<String> photoPaths, final String albumName) {
-        threadPool.execute(new Runnable() {
+    public List<String> uploadPhotos(final List<String> photoPaths, final String albumName) {
+        Future<List<String>> future = threadPool.submit(new Callable<List<String>>() {
             @Override
-            public void run() {
-                // Check if album exists
-                String albumId = createAlbum(albumName);
+            public List<String> call() throws JSONException {
+                // Check if album exists or create it
+                String albumId = getOrCreateAlbum(albumName);
 
                 if (albumId == null) {
                     Log.e(TAG, "Album does not exist and could not be created");
-                    return;
+                    // TODO : throw exception
+                    return Lists.newArrayList();
                 }
 
                 String uploadPhotoGraphPath = MessageFormat.format("{0}/photos", albumId);
@@ -246,7 +197,7 @@ public class FbGraphApiService {
                 if (photoPaths != null) {
                     GraphRequestBatch batchRequest = new GraphRequestBatch();
 
-                    // Map of request to file path in order to associate the response of a a request to the file path
+                    // Map of request to file path in order to associate the response of a request to the file path
                     Map<GraphRequest, String> requestMap = Maps.newHashMap();
 
                     // Convert the photos to byte arrays and then upload them all using a single batch request
@@ -257,7 +208,8 @@ public class FbGraphApiService {
 
                         if (bi == null) {
                             Log.e(TAG, "could not decode file " + photoPath);
-                            return;
+                            // TODO : throw exception
+                            return Lists.newArrayList();
                         }
                         ByteArrayOutputStream baos = new ByteArrayOutputStream();
                         bi.compress(Bitmap.CompressFormat.JPEG, 100, baos);
@@ -282,18 +234,38 @@ public class FbGraphApiService {
 
                     // Execute the batch request and handle the result
                     List<GraphResponse> responseList = batchRequest.executeAndWait();
+                    List<String> photoIds = Lists.newArrayList();
 
                     for (GraphResponse response : responseList) {
                         String filePath = requestMap.get(response.getRequest());
                         if (response.getError() == null) {
                             Log.d(TAG, MessageFormat.format("Uploaded the photo {0} successfully", filePath));
+                            photoIds.add(response.getJSONObject().getString("id"));
                         } else {
                             Log.e(TAG, MessageFormat.format("Failed to upload the photo {0}. error {1}",
                                     filePath, response.getError()));
                         }
                     }
+
+                    Log.i(TAG, MessageFormat.format("Get image URLs of the uploaded photos {0}", photoIds));
+                    List<String> imageUrls = obtainImageDownloadLinks(photoIds);
+
+                    // Store the image urls and image metadata on app server
+                    FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
                 }
+
+                return Lists.newArrayList();
             }
         });
+
+        List<String> photos = Lists.newArrayList();
+        try {
+            photos = future.get(FB_IMAGES_REQUEST_TIMEOUT_SECS, TimeUnit.SECONDS);
+
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            Log.e(TAG, MessageFormat.format("Failed to download images from album {0}", albumName));
+        }
+
+        return photos;
     }
 }

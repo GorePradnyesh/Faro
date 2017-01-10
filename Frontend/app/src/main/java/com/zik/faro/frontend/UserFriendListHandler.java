@@ -14,8 +14,8 @@ public class UserFriendListHandler {
         if (userFriendListHandler != null){
             return userFriendListHandler;
         }
-        synchronized (UserFriendListHandler.class)
-        {
+
+        synchronized (UserFriendListHandler.class) {
             if (userFriendListHandler == null){
                 userFriendListHandler = new UserFriendListHandler();
             }

@@ -20,6 +20,7 @@ import com.zik.faro.frontend.faroservice.spec.SignupHandler;
 import java.net.URL;
 
 public class FaroServiceHandler {
+    private static  FaroServiceHandler serviceHandler;
     private EventHandler        eventHandler;
     private ProfileHandler      profileHandler;
     private SignupHandler       signupHandler;
@@ -29,18 +30,23 @@ public class FaroServiceHandler {
     private FriendsHandler      friendsHandler;
     private AssignmentHandler   assignmentHandler;
 
-    private FaroServiceHandler(){}
+    private FaroServiceHandler(URL baseUrl) {
+        eventHandler = new OKHttpWrapperEvent(baseUrl);
+        profileHandler = new OkHttpWrapperProfile(baseUrl);
+        signupHandler = new OKHttpWrapperSignup(baseUrl);
+        loginHandler = new OKHttpWrapperLogin(baseUrl);
+        pollHandler = new OKHttpWrapperPoll(baseUrl);
+        activityHandler = new OKHttpWrapperActivity(baseUrl);
+        friendsHandler = new OKHttpWrapperFriends(baseUrl);
+        assignmentHandler = new OkHttpWrapperAssignment(baseUrl);
+    }
 
-    public static FaroServiceHandler getFaroServiceHandler(final URL baseUrl){
-        FaroServiceHandler serviceHandler = new FaroServiceHandler();
-        serviceHandler.eventHandler = new OKHttpWrapperEvent(baseUrl);
-        serviceHandler.profileHandler = new OkHttpWrapperProfile(baseUrl);
-        serviceHandler.signupHandler = new OKHttpWrapperSignup(baseUrl);
-        serviceHandler.loginHandler = new OKHttpWrapperLogin(baseUrl);
-        serviceHandler.pollHandler = new OKHttpWrapperPoll(baseUrl);
-        serviceHandler.activityHandler = new OKHttpWrapperActivity(baseUrl);
-        serviceHandler.friendsHandler = new OKHttpWrapperFriends(baseUrl);
-        serviceHandler.assignmentHandler = new OkHttpWrapperAssignment(baseUrl);
+    public static FaroServiceHandler initializeInstance(URL baseUrl) {
+        serviceHandler = new FaroServiceHandler(baseUrl);
+        return serviceHandler;
+    }
+
+    public static FaroServiceHandler getFaroServiceHandler() {
         return serviceHandler;
     }
 

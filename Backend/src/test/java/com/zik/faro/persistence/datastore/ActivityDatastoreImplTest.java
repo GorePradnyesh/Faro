@@ -14,7 +14,6 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.data.IllegalDataOperation;
-import com.zik.faro.data.ActionStatus;
 import com.zik.faro.persistence.datastore.data.ActivityDo;
 import com.zik.faro.data.Assignment;
 import com.zik.faro.persistence.datastore.data.EventDo;
@@ -113,7 +112,7 @@ public class ActivityDatastoreImplTest {
     	Assert.assertNotNull(retrievedActivity);
     	
     	//ActivityDatastoreImpl
-    	ActivityDatastoreImpl.delelteActivityById(a.getId(), a.getEventId());
+    	ActivityDatastoreImpl.deleteActivityById(a.getId(), a.getEventId());
     	
     	// Verify deleted
     	try{

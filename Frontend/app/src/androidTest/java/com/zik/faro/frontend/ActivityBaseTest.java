@@ -1,7 +1,6 @@
 package com.zik.faro.frontend;
 
 import android.app.Application;
-import android.test.ActivityTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 
 import com.squareup.okhttp.Request;
@@ -16,9 +15,7 @@ import junit.framework.Assert;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
@@ -34,7 +31,7 @@ public class ActivityBaseTest extends ApiBaseTest {
     public void testCreateGetActivity() throws InterruptedException, MalformedURLException {
         // Sign up user, so that the token cache is populated
         final Semaphore waitSem = new Semaphore(0);
-        FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
+        FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
         String uuidEmail = UUID.randomUUID().toString() + "@gmail.com";
         String password = UUID.randomUUID().toString();
 
@@ -43,7 +40,7 @@ public class ActivityBaseTest extends ApiBaseTest {
 
         // Create Event
         TestEventCreateCallback createCallback = new TestEventCreateCallback(waitSem, 200, null);
-        Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(), null, null, null);
+        Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(), null, false, null, null, null, null);
         serviceHandler.getEventHandler().createEvent(createCallback, eventCreateData);
         timeout = false;
         timeout = !waitSem.tryAcquire(testTimeout, TimeUnit.MILLISECONDS);

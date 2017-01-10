@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
-
 public class FaroCache {
     private String TAG = "FaroCache";
     private static FaroCache instance = null;

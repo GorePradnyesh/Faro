@@ -7,7 +7,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.GridView;
 
-import java.util.List;
+import com.google.common.collect.Lists;
 
 /**
  * Created by granganathan on 7/9/16.
@@ -25,7 +25,7 @@ public class ImageGridView extends AppCompatActivity {
 
         GridView gridView = (GridView) findViewById(R.id.gridview);
         FbGraphApiService fbGraphApiService = new FbGraphApiService();
-        gridView.setAdapter(new ImageAdapter(this, fbGraphApiService.obtainImageDownloadLinks(eventName)));
+        gridView.setAdapter(new ImageAdapter(this, fbGraphApiService.obtainImageDownloadLinks(Lists.<String>newArrayList())));
     }
 
     @Override

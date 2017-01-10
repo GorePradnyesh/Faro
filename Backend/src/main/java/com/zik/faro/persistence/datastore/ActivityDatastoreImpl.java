@@ -29,7 +29,7 @@ public class ActivityDatastoreImpl {
         return activityList;
     }
     
-    public static void delelteActivityById(final String activityId, final String eventId){
+    public static void deleteActivityById(final String activityId, final String eventId){
     	DatastoreObjectifyDAL.deleteObjectByIdWithParentId(activityId, ActivityDo.class, eventId, EventDo.class);
     }
     

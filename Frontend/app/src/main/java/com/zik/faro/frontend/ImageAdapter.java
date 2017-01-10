@@ -8,7 +8,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
-import com.zik.faro.frontend.R;
 
 import java.util.List;
 

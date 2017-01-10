@@ -1,10 +1,7 @@
 package com.zik.faro.frontend;
 
 import com.google.gson.Gson;
-import com.zik.faro.data.Activity;
 import com.zik.faro.data.Assignment;
-import com.zik.faro.data.Event;
-import com.zik.faro.data.Poll;
 
 import java.util.List;
 import java.util.Map;

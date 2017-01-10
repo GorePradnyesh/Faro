@@ -5,8 +5,7 @@ import android.app.Application;
 import android.test.suitebuilder.annotation.LargeTest;
 
 import com.squareup.okhttp.Request;
-
-import com.zik.faro.data.EventCreateData;
+import com.zik.faro.data.Event;
 import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.PollOption;
@@ -18,10 +17,8 @@ import junit.framework.Assert;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -38,7 +35,7 @@ public class PollApiTest extends ApiBaseTest{
     public void testCreateGetPoll() throws InterruptedException, MalformedURLException {
         // Sign up user, so that the token cache is populated
         final Semaphore waitSem = new Semaphore(0);
-        FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
+        FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
         String uuidEmail = UUID.randomUUID().toString() + "@gmail.com";
         String password = UUID.randomUUID().toString();
 
@@ -47,7 +44,8 @@ public class PollApiTest extends ApiBaseTest{
 
         // Create Event
         TestEventCreateCallback createCallback = new TestEventCreateCallback(waitSem, 200, null);
-        EventCreateData eventCreateData= new EventCreateData("MySampleEvent", Calendar.getInstance(), null, null, null);
+        Event eventCreateData= new Event("MySampleEvent", Calendar.getInstance(), null, null, false,
+                null, null, null, null, null);
         serviceHandler.getEventHandler().createEvent(createCallback, eventCreateData);
         timeout = false;
         timeout = !waitSem.tryAcquire(testTimeout, TimeUnit.MILLISECONDS);

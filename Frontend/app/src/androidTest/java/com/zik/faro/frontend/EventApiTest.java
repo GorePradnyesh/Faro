@@ -9,7 +9,6 @@ import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import junit.framework.Assert;
 
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Calendar;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
@@ -27,7 +26,7 @@ public class EventApiTest extends ApiBaseTest {
     public void testGetEvent() throws InterruptedException, MalformedURLException {
         // Sign up user, so that the token cache is populated
         final Semaphore waitSem = new Semaphore(0);
-        FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
+        FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
         String uuidEmail = UUID.randomUUID().toString()+ "@gmail.com";
         String password = UUID.randomUUID().toString();
 
@@ -46,7 +45,7 @@ public class EventApiTest extends ApiBaseTest {
     public void testCreateGetEvent() throws InterruptedException, MalformedURLException {
         // Sign up user, so that the token cache is populated
         final Semaphore waitSem = new Semaphore(0);
-        FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
+        FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
         String uuidEmail = UUID.randomUUID().toString()+ "@gmail.com";
         String password = UUID.randomUUID().toString();
         
@@ -55,7 +54,8 @@ public class EventApiTest extends ApiBaseTest {
         
         // Create Event
         TestEventCreateCallback createCallback = new TestEventCreateCallback(waitSem, 200, null);
-        Event eventCreateData= new Event("MySampleEvent", Calendar.getInstance(), Calendar.getInstance(), null, null);
+        Event eventCreateData= new Event("MySampleEvent", Calendar.getInstance(), Calendar.getInstance(), null, false,
+                null, null, null, null, null);
         serviceHandler.getEventHandler().createEvent(createCallback, eventCreateData);
         timeout = false;
         timeout = !waitSem.tryAcquire(3000, TimeUnit.SECONDS);
@@ -81,14 +81,15 @@ public class EventApiTest extends ApiBaseTest {
     public void testCreateGetEvents() throws InterruptedException, MalformedURLException {
         // Sign up user, so that the token cache is populated
         final Semaphore waitSem = new Semaphore(0);
-        FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
+        FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
         String uuidEmail = UUID.randomUUID().toString()+ "@gmail.com";
         String password = UUID.randomUUID().toString();
         
         getTokenForNewUser(uuidEmail, password);
         
         TestEventCreateCallback callback = new TestEventCreateCallback(waitSem, 200, null);
-        Event eventCreateData= new Event("MySampleEvent", Calendar.getInstance(), null, null, null);
+        Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(), null, null, false,
+                null, null, null, null, null);
         
         // Create Event
         serviceHandler.getEventHandler().createEvent(callback, eventCreateData);

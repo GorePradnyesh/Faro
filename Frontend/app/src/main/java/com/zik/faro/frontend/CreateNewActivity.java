@@ -16,21 +16,21 @@ import android.widget.EditText;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.squareup.okhttp.Request;
+import com.zik.faro.data.Activity;
+import com.zik.faro.data.Event;
+import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
+import com.zik.faro.frontend.faroservice.FaroServiceHandler;
+import com.zik.faro.frontend.faroservice.HttpError;
+
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-import com.squareup.okhttp.Request;
-import com.zik.faro.data.Event;
-import com.zik.faro.data.Activity;
-import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
-import com.zik.faro.frontend.faroservice.FaroServiceHandler;
-import com.zik.faro.frontend.faroservice.HttpError;
-
 import static android.widget.Toast.LENGTH_LONG;
 
-public class CreateNewActivity extends android.app.Activity{
+public class CreateNewActivity extends android.app.Activity {
 
     private static String eventID = null;
     static EventListHandler eventListHandler = EventListHandler.getInstance();

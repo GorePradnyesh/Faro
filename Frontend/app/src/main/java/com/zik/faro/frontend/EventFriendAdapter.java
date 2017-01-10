@@ -9,7 +9,6 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.zik.faro.data.InviteeList;
-import com.zik.faro.data.MinUser;
 
 import java.util.LinkedList;
 import java.util.List;

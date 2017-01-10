@@ -5,9 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -24,24 +22,16 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.squareup.okhttp.Request;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.PollOption;
-import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
-import com.zik.faro.frontend.faroservice.FaroServiceHandler;
-import com.zik.faro.frontend.faroservice.HttpError;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static android.widget.Toast.LENGTH_LONG;
 
 public class PickPollWinner extends Activity {
-
     private static String eventID = null;
     private static String pollID = null;
     private static String calledFrom = null;
@@ -49,7 +39,6 @@ public class PickPollWinner extends Activity {
     private static Event cloneEvent;
     private static PollListHandler pollListHandler = PollListHandler.getInstance();
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
 
     List<PollOption> pollOptionsList;
 
