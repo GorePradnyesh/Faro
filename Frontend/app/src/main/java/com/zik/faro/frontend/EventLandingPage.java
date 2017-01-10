@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.CursorLoader;
 import android.util.Log;
 import android.os.Handler;
@@ -26,6 +27,10 @@ import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 
 import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookSdk;
+import com.facebook.login.LoginManager;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.squareup.okhttp.Request;
 import java.util.Date;
@@ -40,7 +45,7 @@ import com.zik.faro.frontend.faroservice.HttpError;
 
 import static android.os.Environment.getExternalStoragePublicDirectory;
 
-public class EventLandingPage extends Activity {
+public class EventLandingPage extends FragmentActivity {
     private DateFormat sdf = new SimpleDateFormat(" EEE, MMM d, yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
@@ -75,6 +80,8 @@ public class EventLandingPage extends Activity {
     private static final String CAPTURED_PHOTO_PATH_KEY = "capturedPhotoPath";
 
     private String mCurrentPhotoPath = null;
+
+    private FbLoginPage fbLoginPage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -225,24 +232,20 @@ public class EventLandingPage extends Activity {
         uploadPhotosButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-
-                /*AccessToken accessToken = AccessToken.getCurrentAccessToken();
+                AccessToken accessToken = AccessToken.getCurrentAccessToken();
 
                 if (accessToken == null || accessToken.isExpired()) {
                     FaroCache faroCache = FaroCache.getFaroUserContextCache();
                     String fbAccessToken = faroCache.loadFaroCacheFromDisk("FB_ACCESS_TOKEN");
                     if (Strings.isNullOrEmpty(fbAccessToken)) {
                         // Initiate FB login
-                        Intent fbLoginIntent = new Intent(EventLandingPage.this, FbLoginPage.class);
-                        fbLoginIntent.putExtra("fbPermission", "user_photos");
-                        startActivity(fbLoginIntent);
+                        requestAdditionalPrivileges();
                     }
                 } else {
                     Intent chooseIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                     chooseIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
                     startActivityForResult(chooseIntent, REQUEST_PICK_PHOTOS);
-                }*/
+                }
             }
         });
 
@@ -269,6 +272,10 @@ public class EventLandingPage extends Activity {
                 }
             }
         }, eventID);
+
+        FacebookSdk.sdkInitialize(getApplicationContext());
+        CallbackManager.Factory.create();
+        fbLoginPage = (FbLoginPage) getFragmentManager().findFragmentById(R.id.fb_login_page);
     }
 
 
@@ -334,7 +341,7 @@ public class EventLandingPage extends Activity {
                 Log.i(TAG, "mCurrentPhotoPath = " + mCurrentPhotoPath);
                 galleryAddPic();
                 AccessToken accessToken = AccessToken.getCurrentAccessToken();
-                if (accessToken != null &&
+                if (accessToken == null ||
                         !accessToken.getPermissions().contains("publish_actions")) {
                     requestAdditionalPrivileges();
                 } else {
@@ -344,9 +351,11 @@ public class EventLandingPage extends Activity {
                 Log.e(TAG, "mCurrentPhotoPath = " + mCurrentPhotoPath);
             }
         } else if (requestCode == REQUEST_PICK_PHOTOS && resultCode == RESULT_OK) {
+            List<String> filePaths = Lists.newArrayList();
+
             if (data.getClipData() != null) {
                 ClipData mClipData = data.getClipData();
-                List<String> filePaths = Lists.newArrayList();
+
                 for (int i = 0; i < mClipData.getItemCount(); i++) {
                     ClipData.Item item = mClipData.getItemAt(i);
                     String filePath = getRealPathFromURI(item.getUri());
@@ -355,9 +364,14 @@ public class EventLandingPage extends Activity {
                 }
                 Log.i(TAG, "Selected Images size : " + filePaths.size());
                 Log.i(TAG, "Selected Images : " + filePaths);
+            } else if (data.getData() != null) {
+                String filePath = getRealPathFromURI(data.getData());
+                filePaths.add(filePath);
+            }
 
+            if (!filePaths.isEmpty()) {
                 AccessToken accessToken = AccessToken.getCurrentAccessToken();
-                if (accessToken != null &&
+                if (accessToken == null ||
                         !accessToken.getPermissions().contains("publish_actions")) {
                     requestAdditionalPrivileges();
                 } else {
@@ -381,14 +395,25 @@ public class EventLandingPage extends Activity {
 
     private void requestAdditionalPrivileges() {
         // Initiate FB login
-        Intent fbLoginIntent = new Intent(EventLandingPage.this, FbLoginPage.class);
-        fbLoginIntent.putExtra("fbPermission", "publish_actions");
-        startActivity(fbLoginIntent);
+        Log.i(TAG, "initiate login again to get additional permissions");
+        initiateFbLogin(Lists.newArrayList("publish_actions"));
+    }
+
+    private void initiateFbLogin(List<String> permissions) {
+        LoginManager.getInstance().logInWithPublishPermissions(fbLoginPage, permissions);
+    }
+
+    private void initiateFbLogin() {
+        LoginManager.getInstance().logInWithPublishPermissions(fbLoginPage, Lists.newArrayList("user_photos", "public_profile"));
     }
 
     private void uploadPhoto(List<String> photoPaths, String eventName) {
-        FbGraphApiService fbGraphApiService = new FbGraphApiService();
-        fbGraphApiService.uploadPhotos(photoPaths, eventName);
+        try {
+            FbGraphApiService fbGraphApiService = new FbGraphApiService();
+            fbGraphApiService.uploadPhotos(photoPaths, eventName);
+        } catch (Exception e) {
+            Log.e(TAG, MessageFormat.format("could not upload photos : {0}", photoPaths), e);
+        }
     }
 
     @Override
@@ -464,7 +489,7 @@ public class EventLandingPage extends Activity {
             addFriendsButton.setVisibility(View.VISIBLE);
             activityButton.setVisibility(View.VISIBLE);
             editButton.setVisibility(View.VISIBLE);
-        }else{
+        } else {
             statusYes.setVisibility(View.VISIBLE);
             statusNo.setVisibility(View.VISIBLE);
             pollButton.setVisibility(View.GONE);

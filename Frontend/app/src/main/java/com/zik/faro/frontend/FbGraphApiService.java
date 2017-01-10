@@ -47,6 +47,10 @@ public class FbGraphApiService {
 
     public FbGraphApiService() {
         this.accessToken = AccessToken.getCurrentAccessToken();
+
+        if (this.accessToken == null) {
+            throw new IllegalStateException("Access token is null. Not logged into FB account");
+        }
     }
 
     // TODO : Change return type

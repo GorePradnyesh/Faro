@@ -20,10 +20,6 @@ public class ImageGridView extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_grid_view);
 
-        String accessTokenString = "EAACEdEose0cBAI1NuZCFd5lG4Ms33y8fShyUv8js8m4Xz4GkgMOxTXS4Nk4Gyj1WIzpynVIkYZC5bDIlhT" +
-                "7H7BZBBBOx5lece36yZAJ7g4nsMWEuW5n7KIF87IhgF13vB8CizDZAITERTz0TtcdGlRbRwAPoThNmtAnzqp9DlSAZDZD";
-        String userId = "10155071787680006";
-
         String eventName = getIntent().getStringExtra("eventName");
         Log.i(TAG, "eventName = " + eventName);
 
