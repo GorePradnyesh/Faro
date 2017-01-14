@@ -58,6 +58,7 @@ public class TokenCache {
      * @return
      */
     public synchronized String getToken() {
+
         if (jwtToken == null) {
             String tokenStringFromDisk = loadTokenStringFromDisk();
             if (!Strings.isNullOrEmpty(tokenStringFromDisk)) {
@@ -65,7 +66,10 @@ public class TokenCache {
             } else {
                 throw new RuntimeException("No token present");
             }
-        } else if(jwtToken.hasExpired()){
+        }
+
+        if(jwtToken.hasExpired()){
+            deleteToken();
             throw new RuntimeException("Token expired or getToken invoked before signing-in");
             //TODO: Add sync and async methods   - ???
         }

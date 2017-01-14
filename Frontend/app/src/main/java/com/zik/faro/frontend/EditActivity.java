@@ -154,7 +154,7 @@ public class EditActivity extends ActionBarActivity {
                                 @Override
                                 public void run() {
                                     activityListHandler.addActivityToListAndMap(cloneActivity);
-                                    ActivityLandingPage.putExtra("eventID", event.getEventId());
+                                    ActivityLandingPage.putExtra("eventID", eventID);
                                     ActivityLandingPage.putExtra("activityID", cloneActivity.getId());
                                     startActivity(ActivityLandingPage);
                                     finish();

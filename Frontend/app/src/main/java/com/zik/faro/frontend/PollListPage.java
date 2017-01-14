@@ -22,7 +22,6 @@ import com.zik.faro.data.Poll;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
-import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 
 import java.io.IOException;
 import java.util.List;
@@ -34,7 +33,7 @@ public class PollListPage extends Activity {
     Intent ClosedPollLandingPage = null;
     static PollListHandler pollListHandler = PollListHandler.getInstance();
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static Event E;
+    private static Event event;
     private static String eventID = null;
     private static FaroServiceHandler serviceHandler;
 
@@ -55,14 +54,14 @@ public class PollListPage extends Activity {
         Bundle extras = getIntent().getExtras();
         if(extras == null) {
             //TODO: Error condition. Handle it. Below code is incorrect
-            EventLandingPage.putExtra("eventID", E.getEventId());
+            EventLandingPage.putExtra("eventID", event.getId());
             startActivity(EventLandingPage);
             finish();
             return;
         }
 
         eventID = extras.getString("eventID");
-        E = eventListHandler.getEventCloneFromMap(eventID);
+        event = eventListHandler.getEventCloneFromMap(eventID);
 
         TextView Poll = (TextView)findViewById(R.id.polls);
         //Poll.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
@@ -116,7 +115,7 @@ public class PollListPage extends Activity {
                 if(pollListHandler.getCombinedListSize() == PollListHandler.MAX_TOTAL_POLLS_PER_EVENT) {
                     //DO NOT ALLOW NEW POLL CREATION
                 }else {
-                    CreateNewPoll.putExtra("eventID", E.getEventId());
+                    CreateNewPoll.putExtra("eventID", eventID);
                     startActivity(CreateNewPoll);
                 }
             }
@@ -152,7 +151,7 @@ public class PollListPage extends Activity {
 
     private void pollSelectedFromList(AdapterView<?> parent, int position, Intent intent) {
         Poll poll = (Poll) parent.getItemAtPosition(position);
-        intent.putExtra("eventID", E.getEventId());
+        intent.putExtra("eventID", eventID);
         intent.putExtra("pollID", poll.getId());
         startActivity(intent);
     }

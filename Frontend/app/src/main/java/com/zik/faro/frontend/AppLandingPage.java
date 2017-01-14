@@ -9,6 +9,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+
+import java.sql.Driver;
+
 public class AppLandingPage extends FragmentActivity{
     private FragmentTabHost mTabHost;
 
@@ -37,6 +41,13 @@ public class AppLandingPage extends FragmentActivity{
             String baseUrl = extras.getString("baseUrl");
             eventListHandler.CreateFaroServiceHandler(baseUrl);
         }
+
+        /*GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this *//* FragmentActivity *//*,
+                        this *//* OnConnectionFailedListener *//*)
+                .addApi()
+                .addScope(Drive.SCOPE_FILE)
+                .build();*/
 
         //Creating the Adapters for all
         if (eventListHandler.acceptedEventAdapter == null) {

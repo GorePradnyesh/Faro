@@ -5,15 +5,12 @@ import com.zik.faro.data.EventUser;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.user.EventInviteStatus;
 
-/**
- * Created by nakulshah on 4/26/15.
- */
 public class SetDisplayProperties {
 
     static EventListHandler eventListHandler = EventListHandler.getInstance();
 
     static public int getEventStatusImage(Event event){
-        EventInviteStatus eventInviteStatus = eventListHandler.getUserEventStatus(event.getEventId());
+        EventInviteStatus eventInviteStatus = eventListHandler.getUserEventStatus(event.getId());
         switch (eventInviteStatus){
             case ACCEPTED:
                 return R.drawable.green;

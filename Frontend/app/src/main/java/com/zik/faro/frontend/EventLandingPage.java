@@ -13,11 +13,6 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.List;
-
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.InviteeList;
@@ -25,6 +20,11 @@ import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
+
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.List;
 
 public class EventLandingPage extends Activity {
 
@@ -233,13 +233,11 @@ public class EventLandingPage extends Activity {
                         } else {
                             Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                         }
-
                     }
                 }, eventID);
             }
         }
     }
-
 
     private void updateUserEventInviteStatus(final EventInviteStatus eventInviteStatus) {
         serviceHandler.getEventHandler().updateEventUserInviteStatus(new BaseFaroRequestCallback<String>() {

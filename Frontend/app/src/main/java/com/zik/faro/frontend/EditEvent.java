@@ -172,7 +172,7 @@ public class EditEvent extends Activity {
                                     //Since update to server successful, adding event to List and Map below
                                     Log.i(TAG, "Event Create Response received Successfully");
                                     eventListHandler.addEventToListAndMap(receivedEvent, EventInviteStatus.ACCEPTED);
-                                    EventLanding.putExtra("eventID", receivedEvent.getEventId());
+                                    EventLanding.putExtra("eventID", eventID);
                                     startActivity(EventLanding);
                                     finish();
                                 }
@@ -183,7 +183,7 @@ public class EditEvent extends Activity {
                             Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                         }
                     }
-                }, cloneEvent.getEventId(), cloneEvent);
+                }, eventID, cloneEvent);
             }
         });
 
@@ -456,7 +456,7 @@ public class EditEvent extends Activity {
 
     @Override
     public void onBackPressed() {
-        EventLanding.putExtra("eventID", cloneEvent.getEventId());
+        EventLanding.putExtra("eventID", eventID);
         startActivity(EventLanding);
         finish();
         super.onBackPressed();

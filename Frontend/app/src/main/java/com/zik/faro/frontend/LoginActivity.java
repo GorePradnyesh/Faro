@@ -49,6 +49,8 @@ public class LoginActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        final Intent LoginActivityReloadIntent = new Intent(this, com.zik.faro.frontend.LoginActivity.class);
+
         // Bind the data fields with the corresponding View components
         emailTextBox = (EditText)findViewById(R.id.TFEmail);
         passwordTextBox = (EditText)findViewById(R.id.TFPassword);
