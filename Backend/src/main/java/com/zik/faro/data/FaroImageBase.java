@@ -22,46 +22,6 @@ public class FaroImageBase implements FaroImage {
     public FaroImageBase () {
     }
 
-    public FaroImageBase withImageName(String imageName) {
-        setImageName(imageName);
-        return this;
-    }
-
-    public FaroImageBase withAlbumName(String albumName) {
-        setAlbumName(albumName);
-        return this;
-    }
-
-    public FaroImageBase withCreatedTime(Date createdTime) {
-        setCreatedTime(createdTime);
-        return this;
-    }
-
-    public FaroImageBase withFaroUserId(String faroUserId) {
-        setFaroUserId(faroUserId);
-        return this;
-    }
-
-    public FaroImageBase withEventId(String eventId) {
-        setEventId(eventId);
-        return this;
-    }
-
-    public FaroImageBase withHeight(Integer height) {
-        setHeight(height);
-        return this;
-    }
-
-    public FaroImageBase withWidth(Integer width) {
-        setWidth(width);
-        return this;
-    }
-
-    public FaroImageBase withPublicUrl(URL url) {
-        setPublicUrl(url);
-        return this;
-    }
-
     public void setImageName(String imageName) {
         this.imageName = imageName;
     }

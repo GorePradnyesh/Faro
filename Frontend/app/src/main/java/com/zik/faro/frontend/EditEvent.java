@@ -26,17 +26,17 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
+
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 import static android.widget.Toast.LENGTH_LONG;
 
@@ -48,7 +48,6 @@ import static android.widget.Toast.LENGTH_LONG;
 * user presses the OK button. Until then simply collect all the updated information in local
 * variables.*/
 public class EditEvent extends Activity {
-
     Button startDateButton = null;
     Button startTimeButton = null;
     Button endTimeButton = null;
@@ -59,7 +58,7 @@ public class EditEvent extends Activity {
 
 
     private  static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private static Event cloneEvent;
 
     private RelativeLayout popUpRelativeLayout;

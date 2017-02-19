@@ -29,11 +29,10 @@ import com.zik.faro.frontend.faroservice.HttpError;
 import java.io.IOException;
 
 public class FriendListFragment extends Fragment {
-
     private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
 
     static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private static String TAG = "FriendListFragment";
 
     private RelativeLayout popUpRelativeLayout;

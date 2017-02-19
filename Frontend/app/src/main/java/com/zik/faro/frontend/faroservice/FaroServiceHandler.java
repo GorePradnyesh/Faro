@@ -7,11 +7,13 @@ import com.zik.faro.frontend.faroservice.okHttp.OKHttpWrapperLogin;
 import com.zik.faro.frontend.faroservice.okHttp.OKHttpWrapperPoll;
 import com.zik.faro.frontend.faroservice.okHttp.OKHttpWrapperSignup;
 import com.zik.faro.frontend.faroservice.okHttp.OkHttpWrapperAssignment;
+import com.zik.faro.frontend.faroservice.okHttp.OkHttpWrapperImage;
 import com.zik.faro.frontend.faroservice.okHttp.OkHttpWrapperProfile;
 import com.zik.faro.frontend.faroservice.spec.ActivityHandler;
 import com.zik.faro.frontend.faroservice.spec.AssignmentHandler;
 import com.zik.faro.frontend.faroservice.spec.EventHandler;
 import com.zik.faro.frontend.faroservice.spec.FriendsHandler;
+import com.zik.faro.frontend.faroservice.spec.ImagesHandler;
 import com.zik.faro.frontend.faroservice.spec.LoginHandler;
 import com.zik.faro.frontend.faroservice.spec.PollHandler;
 import com.zik.faro.frontend.faroservice.spec.ProfileHandler;
@@ -29,6 +31,7 @@ public class FaroServiceHandler {
     private PollHandler         pollHandler;
     private FriendsHandler      friendsHandler;
     private AssignmentHandler   assignmentHandler;
+    private ImagesHandler       imagesHandler;
 
     private FaroServiceHandler(URL baseUrl) {
         eventHandler = new OKHttpWrapperEvent(baseUrl);
@@ -39,6 +42,7 @@ public class FaroServiceHandler {
         activityHandler = new OKHttpWrapperActivity(baseUrl);
         friendsHandler = new OKHttpWrapperFriends(baseUrl);
         assignmentHandler = new OkHttpWrapperAssignment(baseUrl);
+        imagesHandler = new OkHttpWrapperImage(baseUrl);
     }
 
     public static FaroServiceHandler initializeInstance(URL baseUrl) {
@@ -80,5 +84,9 @@ public class FaroServiceHandler {
 
     public AssignmentHandler getAssignmentHandler() {
         return assignmentHandler;
+    }
+
+    public ImagesHandler getImagesHandler() {
+        return imagesHandler;
     }
 }

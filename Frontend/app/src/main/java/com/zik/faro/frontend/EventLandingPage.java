@@ -213,7 +213,7 @@ public class EventLandingPage extends FragmentActivity {
             @Override
             public void onClick(View v) {
                 Intent imagesViewIntent = new Intent(EventLandingPage.this, ImageGridView.class);
-                imagesViewIntent.putExtra("eventID", cloneEvent.getEventId());
+                imagesViewIntent.putExtra("eventId", cloneEvent.getEventId());
                 imagesViewIntent.putExtra("eventName", cloneEvent.getEventName());
                 startActivity(imagesViewIntent);
                 finish();
@@ -266,7 +266,7 @@ public class EventLandingPage extends FragmentActivity {
                     Handler mainHandler = new Handler(mContext.getMainLooper());
                     mainHandler.post(myRunnable);
                 } else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                    Log.e(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                 }
             }
         }, eventID);
@@ -343,7 +343,7 @@ public class EventLandingPage extends FragmentActivity {
                         !accessToken.getPermissions().contains("publish_actions")) {
                     requestAdditionalPrivileges();
                 } else {
-                    uploadPhoto(Lists.newArrayList(mCurrentPhotoPath), cloneEvent.getEventName());
+                    uploadPhoto(Lists.newArrayList(mCurrentPhotoPath), cloneEvent);
                 }
             } else {
                 Log.e(TAG, "mCurrentPhotoPath = " + mCurrentPhotoPath);
@@ -374,7 +374,7 @@ public class EventLandingPage extends FragmentActivity {
                     requestAdditionalPrivileges();
                 } else {
                     Log.d(TAG, MessageFormat.format("Uploading images to album {0} ", cloneEvent.getEventName()));
-                    uploadPhoto(filePaths, cloneEvent.getEventName());
+                    uploadPhoto(filePaths, cloneEvent);
                 }
             }
         }
@@ -405,10 +405,10 @@ public class EventLandingPage extends FragmentActivity {
         LoginManager.getInstance().logInWithPublishPermissions(fbLoginPage, Lists.newArrayList("user_photos", "public_profile"));
     }
 
-    private void uploadPhoto(List<String> photoPaths, String eventName) {
+    private void uploadPhoto(List<String> photoPaths, Event event) {
         try {
             FbGraphApiService fbGraphApiService = new FbGraphApiService();
-            fbGraphApiService.uploadPhotos(photoPaths, eventName);
+            fbGraphApiService.uploadPhotos(photoPaths, event);
         } catch (Exception e) {
             Log.e(TAG, MessageFormat.format("could not upload photos : {0}", photoPaths), e);
         }

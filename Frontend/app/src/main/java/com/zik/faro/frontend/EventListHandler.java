@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-//import com.zik.faro.frontend.data.EventCreateData;
 
 public class EventListHandler {
 
@@ -54,7 +53,7 @@ public class EventListHandler {
     */
     private Map<String, EventInviteStatusWrapper> eventMap = new ConcurrentHashMap<>();
 
-    public static FaroServiceHandler serviceHandler;
+    public static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
     private static String TAG = "EventListHandler";
 

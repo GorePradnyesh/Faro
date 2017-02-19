@@ -48,7 +48,7 @@ public class FunctionalImageTest {
         assertThat(imageList).isEmpty();
 
         // Create images
-        FbImage fbImage1 = (FbImage) new FbImage()
+        FbImage fbImage1 = new FbImage()
                 .withEventId(eventId)
                 .withImageName("randomPic001.jpg")
                 .withFaroUserId(FaroJwtTokenManager.obtainClaimsWithNoChecks(token).getEmail())

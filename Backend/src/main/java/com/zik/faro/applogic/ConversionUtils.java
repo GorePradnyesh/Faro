@@ -3,6 +3,7 @@ package com.zik.faro.applogic;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.FaroImageBase;
+import com.zik.faro.data.FbImage;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.persistence.datastore.data.ActivityDo;
@@ -132,7 +133,7 @@ public class ConversionUtils {
         FaroImageBase faroImage;
 
 		if (ImageProvider.FACEBOOK.equals(imageDo.getImageProvider())) {
-			faroImage = new FaroImageBase()
+			faroImage = new FbImage()
 					.withFaroUserId(imageDo.getFaroUserId())
 					.withImageName(imageDo.getImageName())
 					.withAlbumName(imageDo.getAlbumName())

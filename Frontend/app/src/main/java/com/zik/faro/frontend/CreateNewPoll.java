@@ -37,7 +37,7 @@ public class CreateNewPoll extends Activity {
     private static Event event;
     Intent PollListPage = null;
 
-    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private static String TAG = "CreateNewPoll";
 
     @Override

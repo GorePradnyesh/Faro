@@ -49,7 +49,7 @@ public class CreateNewActivity extends android.app.Activity {
 
     Intent activityListPage = null;
 
-    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private static String TAG = "CreateNewActivity";
 
     @Override

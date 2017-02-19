@@ -17,8 +17,6 @@ import java.util.List;
 public class ImageAdapter extends ArrayAdapter {
     private Context context;
     private LayoutInflater inflater;
-
-    //private String[] imageUrls;
     private List<String> imageUrls;
 
     public ImageAdapter(Context context, List<String> imageUrls) {
@@ -34,12 +32,11 @@ public class ImageAdapter extends ArrayAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.gridview_item_image, parent, false);
-        }
 
-        Glide
-                .with(context)
-                .load(imageUrls.get(position))
-                .into((ImageView) convertView);
+            Glide.with(context)
+                    .load(imageUrls.get(position))
+                    .into((ImageView) convertView);
+        }
 
         return convertView;
     }

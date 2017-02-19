@@ -30,13 +30,12 @@ import java.util.List;
 */
 
 public class ActivityListPage extends android.app.Activity {
-
     private static Event event;
     private  static EventListHandler eventListHandler = EventListHandler.getInstance();
 
     static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
 
-    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
     private String eventID;
     Intent eventLandingPage = null;
