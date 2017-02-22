@@ -103,7 +103,7 @@ public class PollDatastoreImpl {
 						poll.setStatus(updatePoll.getStatus());
 					}
 					
-					if(updatePoll.getWinnerId() != null){
+					if(updatePoll.getWinnerId() != null && userId.equals(poll.getCreatorId())){
 						poll.setWinnerId(updatePoll.getWinnerId());
 					}
 	                BaseDatastoreImpl.versionIncrement(updatePoll, poll);
