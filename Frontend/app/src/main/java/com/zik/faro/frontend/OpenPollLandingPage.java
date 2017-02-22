@@ -31,7 +31,9 @@ import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -100,7 +102,7 @@ public class OpenPollLandingPage extends Activity {
         editButton.setImageResource(R.drawable.edit);
 
         Button votePoll = (Button)findViewById(R.id.votePoll);
-        Button closePoll = (Button)findViewById(R.id.closePoll);
+        final Button closePoll = (Button)findViewById(R.id.closePoll);
 
         popUpRelativeLayout = (RelativeLayout) findViewById(R.id.pollLandingPage);
 
@@ -134,6 +136,10 @@ public class OpenPollLandingPage extends Activity {
 
             ScrollView radioScrollView = (ScrollView) findViewById(R.id.radioScrollView);
             ScrollView checkboxScrollView = (ScrollView) findViewById(R.id.checkboxScrollView);
+
+            if (!(clonePoll.getCreatorId().equals(myUserId))) {
+                closePoll.setVisibility(View.GONE);
+            }
 
             //Depending on the type of clonePoll it will be displayed differently
             if(clonePoll.getMultiChoice()) {
@@ -265,126 +271,82 @@ public class OpenPollLandingPage extends Activity {
         votePoll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Map<String, Object> map = new HashMap<String, Object>();
+                Set<String> voteOption = new HashSet<String>();
+
+                Poll pollVersionObj = new Poll();
+                pollVersionObj.setEventId(clonePoll.getEventId());
+                pollVersionObj.setId(clonePoll.getId());
+                pollVersionObj.setVersion
+
+                        (clonePoll.getVersion());
+
                 if(clonePoll.getMultiChoice()) {
                     if (originalSelectedPollMap.isEmpty() && selectedPollMap.isEmpty()){
                         Toast.makeText(OpenPollLandingPage.this, "Select atleast one option to Vote", LENGTH_LONG).show();
+                        return;
                     }else if(originalSelectedPollMap.equals(selectedPollMap)){
                         Toast.makeText(OpenPollLandingPage.this, "No change to selected options", LENGTH_LONG).show();
+                        return;
                     }else{
                         if (BuildConfig.DEBUG && (selectedPollMap.size() + notSelectedPollMap.size() != pollOptionsList.size())) {
                             throw new AssertionError();
                         }
-                        String ids = "Selected options are ";
-
-                        //TODO Remove the userID from the previously selected option update is not done on server end.
-
-                        Set<String> options = new HashSet<String>();
 
 
                         for(Map.Entry<Integer, PollOption> entry : selectedPollMap.entrySet()){
                             PollOption mapPollOption = entry.getValue();
-                            options.add(mapPollOption.getId());
+                            voteOption.add(mapPollOption.getId());
                         }
 
-                        //TODO *************Below code not required if we get back the updated Poll object from server. We can simply reload the page after that
-                        Integer i;
-                        for (i = 0; i < pollOptionsList.size(); i++) {
-                            PollOption pollOption;
-                            if (selectedPollMap.containsKey(i)) {
-                                pollOption = selectedPollMap.get(i);
-                                pollOption.addVoters(myUserId);
-                                ids = ids.concat(pollOption.getOption());
-                                ids = ids.concat(", ");
-                            } else if (notSelectedPollMap.containsKey(i)) {
-                                pollOption = notSelectedPollMap.get(i);
-                                pollOption.removeVoter(myUserId);
-                            }
-                        }
-                        Toast.makeText(OpenPollLandingPage.this, ids, LENGTH_LONG).show();
-                        //TODO *************Above code not required if we get back the updated Poll object from server. We can simply reload the page after that
-
-                        serviceHandler.getPollHandler().castVote(new BaseFaroRequestCallback<String>() {
-                            @Override
-                            public void onFailure(Request request, IOException ex) {
-                                Log.e(TAG, "failed to send cast vote request");
-                            }
-
-                            @Override
-                            public void onResponse(String s, HttpError error) {
-                                if (error == null ) {
-                                    Runnable myRunnable = new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            pollListHandler.addPollToListAndMap(clonePoll);
-                                            //Reload current activity
-                                            OpenPollLandingPageReload.putExtra("eventID", eventID);
-                                            OpenPollLandingPageReload.putExtra("pollID", pollID);
-                                            finish();
-                                            startActivity(OpenPollLandingPageReload);
-                                        }
-                                    };
-                                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                                    mainHandler.post(myRunnable);
-                                }else {
-                                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
-                                }
-                            }
-                        }, eventID, pollID, options);
+                        map.put("poll", pollVersionObj);
+                        map.put("voteOption", voteOption);
                     }
                 }else {
                     if (originalSelectedRadioOption.equals(INVALID_SELECTED_INDEX)
-                            && selectedRadioOption.equals(INVALID_SELECTED_INDEX)){
+                            && selectedRadioOption.equals(INVALID_SELECTED_INDEX)) {
                         Toast.makeText(OpenPollLandingPage.this, "Select an option to Vote", LENGTH_LONG).show();
-                    }else if (originalSelectedRadioOption.equals(selectedRadioOption)) {
+                        return;
+                    } else if (originalSelectedRadioOption.equals(selectedRadioOption)) {
                         Toast.makeText(OpenPollLandingPage.this, "No change to selected options", LENGTH_LONG).show();
+                        return;
                     } else {
-
-                        //TODO *************Below code not required if we get back the updated Poll object from server. We can simply reload the page after that
-                        //Add the userID to the selected option
-                        pollOptionsList.get(selectedRadioOption).addVoters(myUserId);
-
-                        //Remove the userID from the previously selected option.
-                        //TODO This update is not done on server end.
-                        if(!originalSelectedRadioOption.equals(INVALID_SELECTED_INDEX)){
-                            pollOptionsList.get(originalSelectedRadioOption).removeVoter(myUserId);
-                        }
-                        //TODO *************Above code not required if we get back the updated Poll object from server. We can simply reload the page after that
-
-
                         Toast.makeText(OpenPollLandingPage.this, "Selected option is " + pollOptionsList.get(selectedRadioOption).getOption(), LENGTH_LONG).show();
 
-                        Set<String> options = new HashSet<String>();
-                        options.add((pollOptionsList.get(selectedRadioOption)).getId());
+                        voteOption.add((pollOptionsList.get(selectedRadioOption)).getId());
 
-                        serviceHandler.getPollHandler().castVote(new BaseFaroRequestCallback<String>() {
-                            @Override
-                            public void onFailure(Request request, IOException ex) {
-                                Log.e(TAG, "failed to send cast vote request");
-                            }
-
-                            @Override
-                            public void onResponse(String s, HttpError error) {
-                                if (error == null ) {
-                                    Runnable myRunnable = new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            pollListHandler.addPollToListAndMap(clonePoll);
-                                            //Reload current activity
-                                            OpenPollLandingPageReload.putExtra("eventID", eventID);
-                                            OpenPollLandingPageReload.putExtra("pollID", pollID);
-                                            finish();
-                                            startActivity(OpenPollLandingPageReload);
-                                        }
-                                    };
-                                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                                    mainHandler.post(myRunnable);
-                                }else {
-                                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
-                                }
-                            }
-                        }, eventID, pollID, options);
+                        map.put("poll", pollVersionObj);
+                        map.put("voteOption", voteOption);
                     }
                 }
+
+                serviceHandler.getPollHandler().updatePoll(new BaseFaroRequestCallback<Poll>() {
+                    @Override
+                    public void onFailure(Request request, IOException ex) {
+                        Log.e(TAG, "failed to send cast vote request");
+                    }
+
+                    @Override
+                    public void onResponse(final Poll poll, HttpError error) {
+                        if (error == null ) {
+                            Runnable myRunnable = new Runnable() {
+                                @Override
+                                public void run() {
+                                    pollListHandler.addPollToListAndMap(poll);
+                                    //Reload current activity
+                                    OpenPollLandingPageReload.putExtra("eventID", eventID);
+                                    OpenPollLandingPageReload.putExtra("pollID", pollID);
+                                    finish();
+                                    startActivity(OpenPollLandingPageReload);
+                                }
+                            };
+                            Handler mainHandler = new Handler(mContext.getMainLooper());
+                            mainHandler.post(myRunnable);
+                        }else {
+                            Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                        }
+                    }
+                }, eventID, pollID, map);
             }
         });
 

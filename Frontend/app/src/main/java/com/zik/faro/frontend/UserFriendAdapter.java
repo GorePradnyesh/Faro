@@ -36,7 +36,19 @@ public class UserFriendAdapter extends ArrayAdapter {
         Collections.sort(list, new Comparator<MinUser>() {
             @Override
             public int compare(MinUser lhs, MinUser rhs) {
-                return lhs.getFirstName().compareTo(rhs.getFirstName());
+                String name1 = null;
+                String name2 = null;
+                if (lhs.getFirstName() != null) {
+                    name1 = lhs.getFirstName();
+                }else {
+                    name1 = lhs.getEmail();
+                }
+                if (rhs.getFirstName() != null){
+                    name2 = rhs.getFirstName();
+                }else{
+                    name2 = rhs.getEmail();
+                }
+                return name1.compareTo(name2);
             }
         });
     }

@@ -14,6 +14,7 @@ import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class OKHttpWrapperPoll extends BaseFaroOKHttpWrapper implements PollHandler {
@@ -138,10 +139,10 @@ public class OKHttpWrapperPoll extends BaseFaroOKHttpWrapper implements PollHand
     }
 
     @Override
-    public void updatePoll(final BaseFaroRequestCallback<Poll> callback, final String eventId, final String pollId, Poll poll){
+    public void updatePoll(final BaseFaroRequestCallback<Poll> callback, final String eventId, final String pollId, Map<String,Object> updateObj){
         String token = TokenCache.getTokenCache().getToken();
         if(token != null) {
-            String pollPostBody = mapper.toJson(poll);
+            String pollPostBody = mapper.toJson(updateObj);
             Request request = new Request.Builder()
                     .url(baseHandlerURL.toString() + eventId + "/poll/" + pollId + "/updatePoll")
                     .post(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), pollPostBody))

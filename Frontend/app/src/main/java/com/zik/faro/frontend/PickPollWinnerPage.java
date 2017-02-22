@@ -35,7 +35,9 @@ import com.zik.faro.frontend.faroservice.HttpError;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static android.widget.Toast.LENGTH_LONG;
 
@@ -160,9 +162,16 @@ public class PickPollWinnerPage extends Activity {
                         Toast.makeText(PickPollWinnerPage.this, "Winner not changed", LENGTH_LONG).show();
                     }else{
                         PollOption winnerPollOption = pollOptionsList.get(pollOptionWinnerPosition);
-                        Poll updatePoll = new Poll(eventID, clonePoll.getCreatorId(), clonePoll.getMultiChoice(), null,
-                                clonePoll.getOwner(), clonePoll.getDescription(), ObjectStatus.CLOSED);
-                        updatePoll.setWinnerId(winnerPollOption.getId());
+
+                        Poll pollVersionObj = new Poll();
+                        pollVersionObj.setEventId(clonePoll.getEventId());
+                        pollVersionObj.setId(clonePoll.getId());
+                        pollVersionObj.setVersion(clonePoll.getVersion());
+                        pollVersionObj.setWinnerId(winnerPollOption.getId());
+                        pollVersionObj.setStatus(ObjectStatus.CLOSED);
+
+                        Map<String, Object> map = new HashMap<String, Object>();
+                        map.put("poll", pollVersionObj);
 
                         serviceHandler.getPollHandler().updatePoll(new BaseFaroRequestCallback<Poll>() {
                             @Override
@@ -191,7 +200,7 @@ public class PickPollWinnerPage extends Activity {
                                     Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                                 }
                             }
-                        }, eventID, pollID, updatePoll);
+                        }, eventID, pollID, map);
                     }
                 }
             });

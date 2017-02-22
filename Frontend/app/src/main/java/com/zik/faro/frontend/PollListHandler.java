@@ -122,9 +122,6 @@ public class PollListHandler {
     public void changePollStatusToOpen(Poll poll){
         removePollFromListAndMap(poll);
         poll.setStatus(ObjectStatus.OPEN);
-
-        //TODO: send update to server and if successful then delete poll from List and Map below
-
         addPollToListAndMap(poll);
     }
 
