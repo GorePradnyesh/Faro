@@ -115,28 +115,30 @@ public class FbGraphApiService {
             JSONObject privacyObject = new JSONObject();
             try {
                 privacyObject.put("value", "SELF");
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            parameters.putString("privacy", privacyObject.toString());
-            GraphRequest createRequest = new GraphRequest(
-                accessToken,
-                "/me/albums",
-                parameters,
-                HttpMethod.POST);
-            GraphResponse response = createRequest.executeAndWait();
-            if (response.getError() == null) {
-                JSONObject createAlbumResponsObject = response.getJSONObject();
-                if (createAlbumResponsObject != null) {
-                    try {
-                        albumId = createAlbumResponsObject.getString("id");
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+
+                parameters.putString("privacy", privacyObject.toString());
+                GraphRequest createRequest = new GraphRequest(
+                        accessToken,
+                        "/me/albums",
+                        parameters,
+                        HttpMethod.POST);
+                GraphResponse response = createRequest.executeAndWait();
+                if (response.getError() == null) {
+                    JSONObject createAlbumResponsObject = response.getJSONObject();
+                    if (createAlbumResponsObject != null) {
+                        try {
+                            albumId = createAlbumResponsObject.getString("id");
+                        } catch (JSONException e) {
+                            Log.e(TAG, "Error processing response from album creation response");
+                        }
                     }
+                } else {
+                    Log.e(TAG, MessageFormat.format("could not create album. error  = {0}", response.getError()));
                 }
-            } else {
-                Log.e(TAG, MessageFormat.format("could not create album. error  = {0}", response.getError()));
+            } catch (JSONException e) {
+                Log.e(TAG, "Error creating request to create album", e);
             }
+
         }
 
         return albumId;
@@ -148,11 +150,11 @@ public class FbGraphApiService {
      * @param fbPhotos
      * @return list of image urls
      */
-    private Map<String, String> obtainImageDownloadLinks(final Map<String, String> fbPhotos) {
-        Map<String, String> imageUrlsMap = Maps.newHashMap();
+    private List<FaroImageBase> obtainImageDownloadLinks(final Map<String, String> fbPhotos, Event event) {
+        List<FaroImageBase> faroImages = Lists.newArrayList();
 
         Bundle params = new Bundle();
-        params.putString("fields", "images");
+        params.putString("fields", "images, created_time, height, width, album");
 
         for (String fbPhoto : fbPhotos.keySet()) {
             GraphResponse response = new GraphRequest(
@@ -164,26 +166,48 @@ public class FbGraphApiService {
 
             if (response.getError() == null) {
                 try {
-                    JSONArray imagesArray = response.getJSONObject().getJSONArray("images");
+                    JSONObject jsonResponse = response.getJSONObject();
+                    String createdTime = jsonResponse.getString("created_time");
+                    Integer height = jsonResponse.getInt("height");
+                    Integer width = jsonResponse.getInt("width");
+                    String albumName = jsonResponse.getJSONObject("album").getString("name");
+
+                    String url = null;
+
+                    Log.i(TAG, MessageFormat.format("createdTime: {0} height: {1} width: {2}", createdTime, height, width));
+                    JSONArray imagesArray = jsonResponse.getJSONArray("images");
                     if (imagesArray != null) {
                         JSONObject imageObject = imagesArray.getJSONObject(0);
 
-                        String url = imageObject.getString("source");
+                        url = imageObject.getString("source");
                         Log.d(TAG, MessageFormat.format("Found image URL : {0}", url));
-                        imageUrlsMap.put(fbPhoto, url);
                     } else {
                         Log.e(TAG, "images not present for the photo");
                     }
+
+                    if (url != null && createdTime != null && height != null && width != null && albumName != null) {
+                        faroImages.add(new FbImage()
+                                .withImageName(fbPhoto)
+                                .withPublicUrl(new URL(url))
+                                .withHeight(height)
+                                .withWidth(width)
+                                .withAlbumName(albumName)
+                                .withFaroUserId(FaroUserContext.getInstance().getEmail())
+                                .withCreatedTime(createdTime)
+                                .withEventId(event.getEventId()));
+                    }
                 } catch (JSONException e) {
                     Log.e(TAG, "incorrect JSON processing or invalid response");
+                } catch (MalformedURLException e) {
+                    Log.e(TAG, "incorrect URL processing or invalid response");
                 }
             } else {
                 Log.e(TAG, "error " + response.getError());
             }
         }
 
-        Log.d(TAG, "imageUrlsMap : " + imageUrlsMap);
-        return imageUrlsMap;
+        Log.d(TAG, "imageUrlsMap : " + faroImages);
+        return faroImages;
     }
 
     public void uploadPhotos(final List<String> photoPaths, final Event event) {
@@ -256,21 +280,9 @@ public class FbGraphApiService {
                     }
 
                     Log.i(TAG, "Get image URLs of the uploaded photos ");
-                    Map<String, String> imageUrlsMap = obtainImageDownloadLinks(photoIdsMap);
+                    List<FaroImageBase> fbImages = obtainImageDownloadLinks(photoIdsMap, event);
 
-                    List<FaroImageBase> fbImages = Lists.newArrayList();
-                    for (String img : imageUrlsMap.keySet()) {
-                        try {
-                            fbImages.add(new FbImage()
-                                    .withImageName(img)
-                                    .withAlbumName(event.getEventName())
-                                    .withEventId(event.getEventId())
-                                    .withFaroUserId(FaroUserContext.getInstance().getEmail())
-                                    .withPublicUrl(new URL(imageUrlsMap.get(img))));
-                        } catch (MalformedURLException e) {
-                            Log.e(TAG, MessageFormat.format("imageUrl {0} is malformed", imageUrlsMap.get(img)));
-                        }
-                    }
+
                     // Store the image urls and image metadata on app server
                     FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 

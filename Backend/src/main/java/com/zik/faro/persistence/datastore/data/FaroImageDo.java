@@ -25,7 +25,7 @@ public class FaroImageDo {
     @Id @Index
     private String imageName;
     private String albumName;
-    private Date createdTime;
+    private String createdTime;
     private String faroUserId;
     @Parent
     private Ref<EventDo> eventId;
@@ -48,7 +48,7 @@ public class FaroImageDo {
         return this;
     }
 
-    public FaroImageDo withCreatedTime(Date createdTime) {
+    public FaroImageDo withCreatedTime(String createdTime) {
         setCreatedTime(createdTime);
         return this;
     }
@@ -99,11 +99,11 @@ public class FaroImageDo {
         this.albumName = albumName;
     }
 
-    public Date getCreatedTime() {
+    public String getCreatedTime() {
         return createdTime;
     }
 
-    public void setCreatedTime(Date createdTime) {
+    public void setCreatedTime(String createdTime) {
         this.createdTime = createdTime;
     }
 

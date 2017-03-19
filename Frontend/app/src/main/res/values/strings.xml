@@ -111,5 +111,6 @@
     <string name="title_activity_invite_friend_page">InviteFriendPage</string>
     <string name="friends">Friends</string>
     <string name="add">Add</string>
-    <string name="title_activity_grid_view">GridView</string>
+
+    <string name="screen_slide_text">Image</string>
 </resources>

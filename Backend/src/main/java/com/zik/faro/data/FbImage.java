@@ -22,7 +22,7 @@ public class FbImage extends FaroImageBase {
         return this;
     }
 
-    public FbImage withCreatedTime(Date createdTime) {
+    public FbImage withCreatedTime(String createdTime) {
         setCreatedTime(createdTime);
         return this;
     }

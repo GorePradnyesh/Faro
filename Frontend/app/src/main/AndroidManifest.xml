@@ -107,13 +107,16 @@
             android:name=".InviteFriendToEventPage"
             android:label="InviteFriendToEventPage"/>
         <activity
-            android:name=".ImageGridView"
-            android:label="@string/title_activity_grid_view" />
+            android:name=".ImageGridViewActivity"
+            android:label="ImageGridView" />
         <activity android:name="com.facebook.FacebookActivity"
             android:configChanges=
                 "keyboard|keyboardHidden|screenLayout|screenSize|orientation"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:label="@string/app_name" />
+        <activity android:name=".ScreenSlidePagerActivity"
+            android:label=".ScreenSlidePagerActivity" />
+
     </application>
 
 </manifest>

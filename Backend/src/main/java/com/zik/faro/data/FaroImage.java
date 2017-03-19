@@ -1,7 +1,6 @@
 package com.zik.faro.data;
 
 import java.net.URL;
-import java.util.Date;
 
 /**
  * Created by granganathan on 12/24/16.
@@ -9,7 +8,7 @@ import java.util.Date;
 public interface FaroImage {
     String getImageName();
     String getAlbumName();
-    Date getCreatedTime();
+    String getCreatedTime();
     String getFaroUserId();
     String getEventId();
     Integer getHeight();

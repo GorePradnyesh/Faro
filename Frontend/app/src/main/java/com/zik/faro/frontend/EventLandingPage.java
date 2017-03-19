@@ -212,7 +212,7 @@ public class EventLandingPage extends FragmentActivity {
         photosButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent imagesViewIntent = new Intent(EventLandingPage.this, ImageGridView.class);
+                Intent imagesViewIntent = new Intent(EventLandingPage.this, ImageGridViewActivity.class);
                 imagesViewIntent.putExtra("eventId", cloneEvent.getEventId());
                 imagesViewIntent.putExtra("eventName", cloneEvent.getEventName());
                 startActivity(imagesViewIntent);

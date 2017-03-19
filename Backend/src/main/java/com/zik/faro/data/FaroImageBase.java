@@ -11,7 +11,7 @@ import java.util.Date;
 public class FaroImageBase implements FaroImage {
     private String imageName;
     private String albumName;
-    private Date createdTime;
+    private String createdTime;
     private String faroUserId;
     private String eventId;
     private Integer height;
@@ -30,7 +30,7 @@ public class FaroImageBase implements FaroImage {
         this.albumName = albumName;
     }
 
-    public void setCreatedTime(Date createdTime) {
+    public void setCreatedTime(String createdTime) {
         this.createdTime = createdTime;
     }
 
@@ -67,7 +67,7 @@ public class FaroImageBase implements FaroImage {
     }
 
     @Override
-    public Date getCreatedTime() {
+    public String getCreatedTime() {
         return createdTime;
     }
 

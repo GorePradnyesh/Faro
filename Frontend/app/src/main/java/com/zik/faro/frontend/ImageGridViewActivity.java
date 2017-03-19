@@ -1,5 +1,6 @@
 package com.zik.faro.frontend;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -25,19 +26,24 @@ import java.util.List;
 /**
  * Created by granganathan on 7/9/16.
  */
-public class ImageGridView extends AppCompatActivity {
-    private static final String TAG = "ImageGridView";
+public class ImageGridViewActivity extends AppCompatActivity {
+    private static final String TAG = "ImageGridViewActivity";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_grid_view);
 
-        String eventName = getIntent().getStringExtra("eventName");
+        final String eventName = getIntent().getStringExtra("eventName");
         String eventId = getIntent().getStringExtra("eventId");
         Log.i(TAG, "eventName = " + eventName);
 
+        // Set the title to the event name
+        setTitle(eventName);
+
         final GridView gridView = (GridView) findViewById(R.id.gridview);
+
         final List<String> imageUrls = Lists.newArrayList();
 
         FaroServiceHandler.getFaroServiceHandler().getImagesHandler().getImages(new BaseFaroRequestCallback<List<FaroImageBase>>() {
@@ -50,6 +56,8 @@ public class ImageGridView extends AppCompatActivity {
             public void onResponse(List<FaroImageBase> faroImages, HttpError error) {
                 if (error == null) {
                     if (!faroImages.isEmpty()) {
+                        ImagesListHandler.getInstance().setFaroImages(faroImages);
+
                         imageUrls.addAll(Lists.transform(faroImages, new Function<FaroImageBase, String>() {
                             @Override
                             public String apply(FaroImageBase faroImageBase) {
@@ -70,7 +78,10 @@ public class ImageGridView extends AppCompatActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Log.i(TAG, MessageFormat.format("Item view position = {0}, item row id = {1}", i, l));
 
-                
+                Intent screenSlideIntent = new Intent(ImageGridViewActivity.this, ScreenSlidePagerActivity.class);
+                screenSlideIntent.putExtra("imageIndex", i);
+                screenSlideIntent.putExtra("eventName", eventName);
+                startActivity(screenSlideIntent);
             }
         });
     }
@@ -96,5 +107,6 @@ public class ImageGridView extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
 
 }
