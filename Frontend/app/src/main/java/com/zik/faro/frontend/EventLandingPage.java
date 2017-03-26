@@ -1,14 +1,18 @@
 package com.zik.faro.frontend;
 
+import android.Manifest;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.CursorLoader;
 import android.util.Log;
@@ -73,6 +77,8 @@ public class EventLandingPage extends FragmentActivity {
 
     private static final int REQUEST_TAKE_PHOTO = 1;
     private static final int REQUEST_PICK_PHOTOS = 2;
+    private final int PERMISSIONS_REQ_EXTERNAL_STORAGE = 1;
+
     private static final String TAG = "EventLandingPage";
     private static final String CAPTURED_PHOTO_PATH_KEY = "capturedPhotoPath";
 
@@ -215,33 +221,25 @@ public class EventLandingPage extends FragmentActivity {
                 imagesViewIntent.putExtra("eventId", cloneEvent.getEventId());
                 imagesViewIntent.putExtra("eventName", cloneEvent.getEventName());
                 startActivity(imagesViewIntent);
-                finish();
             }
         });
 
         cameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dispatchTakePictureIntent();
+                if (checkPermissionsForUploadingPhotos()) {
+                    // Proceed with the workflow to capture a photo and upload
+                    dispatchTakePictureIntent();
+                }
             }
         });
 
         uploadPhotosButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AccessToken accessToken = AccessToken.getCurrentAccessToken();
-
-                if (accessToken == null || accessToken.isExpired()) {
-                    FaroCache faroCache = FaroCache.getFaroUserContextCache();
-                    String fbAccessToken = faroCache.loadFaroCacheFromDisk("FB_ACCESS_TOKEN");
-                    if (Strings.isNullOrEmpty(fbAccessToken)) {
-                        // Initiate FB login
-                        requestAdditionalPrivileges();
-                    }
-                } else {
-                    Intent chooseIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                    chooseIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                    startActivityForResult(chooseIntent, REQUEST_PICK_PHOTOS);
+                if (checkPermissionsForUploadingPhotos()) {
+                    // Proceed with upload photos workflow
+                    startPhotosUploadWorkflow();
                 }
             }
         });
@@ -274,6 +272,44 @@ public class EventLandingPage extends FragmentActivity {
         fbLoginPage = (FbLoginPage) getFragmentManager().findFragmentById(R.id.fb_login_page);
     }
 
+    private boolean checkPermissionsForUploadingPhotos() {
+        // Beginning in Android 6.0 (API level 23), users grant permissions to
+        // apps while the app is running, not when they install the app.
+
+        // Check Permission to access READ and WRITE to the External Storage and request for access if not already granted
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Show asynchronously, an explanation of why the permission is required
+                        /*if (ActivityCompat.shouldShowRequestPermissionRationale((android.app.Activity) mContext,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                        }*/
+
+                Log.i(TAG, "Requesting permission to access external write storage for uploading photos");
+                ActivityCompat.requestPermissions((android.app.Activity) mContext,
+                        new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSIONS_REQ_EXTERNAL_STORAGE);
+                return false;
+            }
+        }
+
+        return true;
+    }
+    private void startPhotosUploadWorkflow() {
+        // Get FB access token
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+
+        if (accessToken == null || accessToken.isExpired()) {
+            FaroCache faroCache = FaroCache.getFaroUserContextCache();
+            String fbAccessToken = faroCache.loadFaroCacheFromDisk("FB_ACCESS_TOKEN");
+            if (Strings.isNullOrEmpty(fbAccessToken)) {
+                // Initiate FB login
+                requestAdditionalPrivileges();
+            }
+        } else {
+            Intent chooseIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            chooseIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+            startActivityForResult(chooseIntent, REQUEST_PICK_PHOTOS);
+        }
+    }
 
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -328,13 +364,24 @@ public class EventLandingPage extends FragmentActivity {
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        if (requestCode == PERMISSIONS_REQ_EXTERNAL_STORAGE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Woohoo ! permission was granted
+                startPhotosUploadWorkflow();
+            } else {
+                Log.i(TAG, "Permission to access EXTERNAL STORAGE to upload photos denied");
+            }
+        }
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
-            Log.i(TAG, "Photo captured successfully. uri : Add photo to gallery");
             if (cameraTakenPhotoPath != null) {
-                Log.i(TAG, "cameraTakenPhotoPath = " + cameraTakenPhotoPath);
+                Log.i(TAG, "Photo captured successfully. Add photo to gallery. cameraTakenPhotoPath = " + cameraTakenPhotoPath);
                 galleryAddPic();
                 AccessToken accessToken = AccessToken.getCurrentAccessToken();
                 if (accessToken == null ||
