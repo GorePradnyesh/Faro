@@ -1,7 +1,9 @@
 package com.zik.faro.frontend;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -28,6 +30,7 @@ import java.util.List;
  */
 public class ImageGridViewActivity extends AppCompatActivity {
     private static final String TAG = "ImageGridViewActivity";
+    private final Context mContext = this;
 
 
     @Override
@@ -46,32 +49,8 @@ public class ImageGridViewActivity extends AppCompatActivity {
 
         final List<String> imageUrls = Lists.newArrayList();
 
-        FaroServiceHandler.getFaroServiceHandler().getImagesHandler().getImages(new BaseFaroRequestCallback<List<FaroImageBase>>() {
-            @Override
-            public void onFailure(Request request, IOException ex) {
-                Log.e(TAG, "failed to get images");
-            }
-
-            @Override
-            public void onResponse(List<FaroImageBase> faroImages, HttpError error) {
-                if (error == null) {
-                    if (!faroImages.isEmpty()) {
-                        ImagesListHandler.getInstance().setFaroImages(faroImages);
-
-                        imageUrls.addAll(Lists.transform(faroImages, new Function<FaroImageBase, String>() {
-                            @Override
-                            public String apply(FaroImageBase faroImageBase) {
-                                return faroImageBase.getPublicUrl().toString();
-                            }
-                        }));
-                    }
-                } else {
-                    Log.e(TAG, MessageFormat.format("error = {0}", error.getCode()));
-                }
-            }
-        }, eventId);
-
-        gridView.setAdapter(new ImageAdapter(this, imageUrls));
+        ImagesListHandler imagesListHandler = ImagesListHandler.initializeInstance(mContext);
+        gridView.setAdapter(imagesListHandler.getImageAdapter());
 
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -84,6 +63,43 @@ public class ImageGridViewActivity extends AppCompatActivity {
                 startActivity(screenSlideIntent);
             }
         });
+
+
+        FaroServiceHandler.getFaroServiceHandler().getImagesHandler().getImages(new BaseFaroRequestCallback<List<FaroImageBase>>() {
+            @Override
+            public void onFailure(Request request, IOException ex) {
+                Log.e(TAG, "failed to get images");
+            }
+
+            @Override
+            public void onResponse(final List<FaroImageBase> faroImages, HttpError error) {
+                if (error == null) {
+                    if (!faroImages.isEmpty()) {
+                        ImagesListHandler.getInstance().setFaroImages(faroImages);
+
+                        imageUrls.addAll(Lists.transform(faroImages, new Function<FaroImageBase, String>() {
+                            @Override
+                            public String apply(FaroImageBase faroImageBase) {
+                                return faroImageBase.getPublicUrl().toString();
+                            }
+                        }));
+
+                        Runnable myRunnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                Log.i(TAG, "Successfully obtained images for the event");
+                                ImagesListHandler.getInstance().addImages(imageUrls);
+                            }
+                        };
+                        Handler mainHandler = new Handler(mContext.getMainLooper());
+                        mainHandler.post(myRunnable);
+                    }
+                } else {
+                    Log.e(TAG, MessageFormat.format("error = {0}", error.getCode()));
+                }
+            }
+        }, eventId);
+
     }
 
     @Override
@@ -108,5 +124,9 @@ public class ImageGridViewActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
 
 }

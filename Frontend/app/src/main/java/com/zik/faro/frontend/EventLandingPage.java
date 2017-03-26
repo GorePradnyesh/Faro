@@ -21,7 +21,6 @@ import android.widget.TextView;
 
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
-import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -77,7 +76,7 @@ public class EventLandingPage extends FragmentActivity {
     private static final String TAG = "EventLandingPage";
     private static final String CAPTURED_PHOTO_PATH_KEY = "capturedPhotoPath";
 
-    private String mCurrentPhotoPath = null;
+    private String cameraTakenPhotoPath = null;
 
     private FbLoginPage fbLoginPage;
 
@@ -271,7 +270,6 @@ public class EventLandingPage extends FragmentActivity {
             }
         }, eventID);
 
-        FacebookSdk.sdkInitialize(getApplicationContext());
         CallbackManager.Factory.create();
         fbLoginPage = (FbLoginPage) getFragmentManager().findFragmentById(R.id.fb_login_page);
     }
@@ -317,13 +315,13 @@ public class EventLandingPage extends FragmentActivity {
         );
 
         // Save a file: path for use with ACTION_VIEW intents
-        mCurrentPhotoPath = image.getAbsolutePath();
+        cameraTakenPhotoPath = image.getAbsolutePath();
         return image;
     }
 
     private void galleryAddPic() {
         Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        File imageFile = new File(mCurrentPhotoPath);
+        File imageFile = new File(cameraTakenPhotoPath);
         Uri photoURI = Uri.fromFile(imageFile);
         mediaScanIntent.setData(photoURI);
         this.sendBroadcast(mediaScanIntent);
@@ -335,18 +333,18 @@ public class EventLandingPage extends FragmentActivity {
 
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
             Log.i(TAG, "Photo captured successfully. uri : Add photo to gallery");
-            if (mCurrentPhotoPath != null) {
-                Log.i(TAG, "mCurrentPhotoPath = " + mCurrentPhotoPath);
+            if (cameraTakenPhotoPath != null) {
+                Log.i(TAG, "cameraTakenPhotoPath = " + cameraTakenPhotoPath);
                 galleryAddPic();
                 AccessToken accessToken = AccessToken.getCurrentAccessToken();
                 if (accessToken == null ||
                         !accessToken.getPermissions().contains("publish_actions")) {
                     requestAdditionalPrivileges();
                 } else {
-                    uploadPhoto(Lists.newArrayList(mCurrentPhotoPath), cloneEvent);
+                    uploadPhoto(Lists.newArrayList(cameraTakenPhotoPath), cloneEvent);
                 }
             } else {
-                Log.e(TAG, "mCurrentPhotoPath = " + mCurrentPhotoPath);
+                Log.e(TAG, "cameraTakenPhotoPath = " + cameraTakenPhotoPath);
             }
         } else if (requestCode == REQUEST_PICK_PHOTOS && resultCode == RESULT_OK) {
             List<String> filePaths = Lists.newArrayList();
@@ -357,14 +355,19 @@ public class EventLandingPage extends FragmentActivity {
                 for (int i = 0; i < mClipData.getItemCount(); i++) {
                     ClipData.Item item = mClipData.getItemAt(i);
                     String filePath = getRealPathFromURI(item.getUri());
-                    filePaths.add(filePath);
                     Log.i(TAG, "filePath = " + filePath);
+                    if (!Strings.isNullOrEmpty(filePath)) {
+                        filePaths.add(filePath);
+                    }
+
                 }
                 Log.i(TAG, "Selected Images size : " + filePaths.size());
                 Log.i(TAG, "Selected Images : " + filePaths);
             } else if (data.getData() != null) {
                 String filePath = getRealPathFromURI(data.getData());
-                filePaths.add(filePath);
+                if (!Strings.isNullOrEmpty(filePath)) {
+                    filePaths.add(filePath);
+                }
             }
 
             if (!filePaths.isEmpty()) {
@@ -417,7 +420,7 @@ public class EventLandingPage extends FragmentActivity {
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         // Save the user's current state
-        savedInstanceState.putString(CAPTURED_PHOTO_PATH_KEY, mCurrentPhotoPath);
+        savedInstanceState.putString(CAPTURED_PHOTO_PATH_KEY, cameraTakenPhotoPath);
 
         // Always call the superclass so it can save the view hierarchy state
         super.onSaveInstanceState(savedInstanceState);
@@ -427,7 +430,7 @@ public class EventLandingPage extends FragmentActivity {
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         // Always call the superclass so it can restore the view hierarchy
         super.onRestoreInstanceState(savedInstanceState);
-        mCurrentPhotoPath = savedInstanceState.getString(CAPTURED_PHOTO_PATH_KEY);
+        cameraTakenPhotoPath = savedInstanceState.getString(CAPTURED_PHOTO_PATH_KEY);
     }
 
     private void updateUserEventInviteStatus(final EventInviteStatus eventInviteStatus) {

@@ -1,5 +1,7 @@
 package com.zik.faro.frontend;
 
+import android.content.Context;
+
 import com.google.common.collect.Lists;
 import com.zik.faro.data.FaroImageBase;
 
@@ -13,15 +15,21 @@ public class ImagesListHandler {
     private List<FaroImageBase> faroImages = Lists.newArrayList();
 
     private static ImagesListHandler imagesListHandler = null;
+    private static ImageAdapter imageAdapter;
 
-    public static ImagesListHandler getInstance() {
-
+    public static ImagesListHandler initializeInstance(Context context) {
         synchronized (ImagesListHandler.class) {
             if (imagesListHandler == null) {
                 imagesListHandler = new ImagesListHandler();
             }
         }
 
+        imageAdapter = new ImageAdapter(context);
+
+        return imagesListHandler;
+    }
+
+    public static ImagesListHandler getInstance() {
         return imagesListHandler;
     }
 
@@ -34,4 +42,15 @@ public class ImagesListHandler {
     public void setFaroImages(List<FaroImageBase> faroImages) {
         this.faroImages = faroImages;
     }
+
+    public void addImages(List<String> imageUrls) {
+        imageAdapter.addAll(imageUrls);
+        imageAdapter.notifyDataSetChanged();
+    }
+
+    public ImageAdapter getImageAdapter() {
+        return imageAdapter;
+    }
+
+
 }

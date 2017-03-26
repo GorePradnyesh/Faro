@@ -12,14 +12,11 @@ import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
-import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.google.common.collect.Lists;
 
 import java.text.MessageFormat;
-
-import static com.facebook.FacebookSdk.getApplicationContext;
 
 /**
  * Created by granganathan on 9/18/16.
@@ -38,7 +35,6 @@ public class FbLoginPage extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        FacebookSdk.sdkInitialize(getApplicationContext());
         callbackManager = CallbackManager.Factory.create();
 
         LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
