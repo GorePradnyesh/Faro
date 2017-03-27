@@ -63,10 +63,10 @@ public class PickPollWinnerPage extends Activity {
     private static int popupWidth;
     private static int popupHeight;
     private RelativeLayout popUpRelativeLayout;
-    private static final Integer POLL_OPTION_ROW_HEIGHT = 100;
+    private static final Integer POLL_OPTION_ROW_HEIGHT = 150;
 
-    Intent OpenPollLandingPage = null;
-    Intent ClosedPollLandingPage = null;
+    private Intent OpenPollLandingPage = null;
+    private Intent ClosedPollLandingPage = null;
 
     private static String TAG = "OpenPollLandingPage";
 
@@ -102,31 +102,32 @@ public class PickPollWinnerPage extends Activity {
             pollOptionsList = clonePoll.getPollOptions();
             pollDesc.setText(clonePoll.getDescription());
 
-            LinearLayout voterButtonLinearLayout = (LinearLayout) findViewById(R.id.voterButtonLinearLayout);
-            RadioGroup pollOptionsRadioGroup = (RadioGroup) findViewById(R.id.pollOptionsRadioGroup);
+            final LinearLayout pollOptionsListLinearLayout  = (LinearLayout) findViewById(R.id.pollOptionsListLinearLayout);
+            final LinearLayout voterButtonLinearLayout = (LinearLayout) findViewById(R.id.votersListLinearLayout);
 
             popUpRelativeLayout = (RelativeLayout) findViewById(R.id.pickPollWinner);
 
 
             for (Integer i = 0; i < pollOptionsList.size(); i++) {
-                //Create RadioButton
-                final RadioButton button = new RadioButton(this);
                 PollOption pollOption = pollOptionsList.get(i);
-                button.setText(pollOption.getOption());
-                button.setId(i);
-                if((pollOption.getId().equals(clonePoll.getWinnerId()))){
-                    button.setChecked(true);
-                    pollOptionWinnerPosition = i;
-                    previousPollOptionWinnerPosition = i;
-                }
-                button.setOnClickListener(new View.OnClickListener() {
+
+                //Create textview for the poll Option
+                TextView pollOptionDescription = new TextView(this);
+                pollOptionDescription.setText(pollOption.getOption());
+                pollOptionDescription.setId(i);
+                pollOptionDescription.setGravity(Gravity.CENTER_VERTICAL);
+                pollOptionDescription.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        RadioButton clickedRadioButton = (RadioButton)v;
-                        Integer id = clickedRadioButton.getId();
-                        if(clickedRadioButton.isChecked()){
-                            pollOptionWinnerPosition = id;
+                        TextView selectedButton = (TextView) v;
+                        Integer id = selectedButton.getId();
+                        pollOptionsListLinearLayout.getChildAt(id).setBackgroundColor(Color.RED);
+                        voterButtonLinearLayout.getChildAt(id).setBackgroundColor(Color.RED);
+                        if (!pollOptionWinnerPosition.equals(INVALID_SELECTED_INDEX) && !pollOptionWinnerPosition.equals(id)) {
+                            pollOptionsListLinearLayout.getChildAt(pollOptionWinnerPosition).setBackgroundColor(Color.TRANSPARENT);
+                            voterButtonLinearLayout.getChildAt(pollOptionWinnerPosition).setBackgroundColor(Color.TRANSPARENT);
                         }
+                        pollOptionWinnerPosition = id;
                     }
                 });
 
@@ -143,15 +144,18 @@ public class PickPollWinnerPage extends Activity {
                     }
                 });
 
-                //Insert RadioButton into Radio Group
-                RelativeLayout.LayoutParams radioButtonParams = new RelativeLayout.LayoutParams(
-                        RelativeLayout.LayoutParams.MATCH_PARENT, POLL_OPTION_ROW_HEIGHT);
-                pollOptionsRadioGroup.addView(button, radioButtonParams);
+                if((pollOption.getId().equals(clonePoll.getWinnerId()))) {
+                    pollOptionDescription.setBackgroundColor(Color.RED);
+                    voterCountButton.setBackgroundColor(Color.RED);
+                    pollOptionWinnerPosition = i;
+                    previousPollOptionWinnerPosition = i;
+                }
 
-                //Insert voter count button into voterButtonLinearLayout
-                RelativeLayout.LayoutParams voterCountButtonParams = new RelativeLayout.LayoutParams(
-                        RelativeLayout.LayoutParams.WRAP_CONTENT, POLL_OPTION_ROW_HEIGHT);
-                voterButtonLinearLayout.addView(voterCountButton, voterCountButtonParams);
+                //Insert poll Option and the voter count button into the LinearLayouts
+                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                        RelativeLayout.LayoutParams.MATCH_PARENT, POLL_OPTION_ROW_HEIGHT);
+                pollOptionsListLinearLayout.addView(pollOptionDescription, layoutParams);
+                voterButtonLinearLayout.addView(voterCountButton, layoutParams);
             }
 
             selectWinner.setOnClickListener(new View.OnClickListener() {
@@ -209,7 +213,7 @@ public class PickPollWinnerPage extends Activity {
         }
     }
 
-    public void voterListPopUP(View v) {
+    private void voterListPopUP(View v) {
         LayoutInflater layoutInflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         ViewGroup container = (ViewGroup) layoutInflater.inflate(R.layout.poll_voters_list_popup, null);
         final PopupWindow popupWindow = new PopupWindow(container, popupWidth, popupHeight, true);

@@ -12,6 +12,7 @@
         android:id="@+id/pollDescription"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
+
     <ScrollView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -20,24 +21,25 @@
         android:layout_below="@+id/pollDescription"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
-        android:id="@+id/radioScrollView">
+        android:id="@+id/pollOptionsScrollView">
         <RelativeLayout
-            android:id="@+id/pollOptionsList1"
+            android:id="@+id/pollOptionsRelativeView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/voterButtonLinearLayout"
+                android:id="@+id/votersListLinearLayout"
                 android:orientation="vertical"
                 android:layout_alignParentEnd="true" />
-            <RadioGroup
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/pollOptionsRadioGroup"
                 android:layout_alignParentStart="true"
-                android:layout_toStartOf="@id/voterButtonLinearLayout" />
+                android:id="@+id/pollOptionsListLinearLayout"
+                android:orientation="vertical"
+                android:layout_toStartOf="@id/votersListLinearLayout"/>
         </RelativeLayout>
     </ScrollView>
 

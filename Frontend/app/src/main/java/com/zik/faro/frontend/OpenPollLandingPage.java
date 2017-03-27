@@ -17,13 +17,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -33,7 +30,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,7 +38,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import static android.widget.Toast.LENGTH_LONG;
 
 import com.squareup.okhttp.Request;
-import com.zik.faro.data.Event;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.PollOption;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
@@ -55,13 +50,12 @@ public class OpenPollLandingPage extends Activity {
     private static PollListHandler pollListHandler = PollListHandler.getInstance();
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static Poll clonePoll;
-    private static Event event;
     private static String eventID = null;
     private static String pollID = null;
 
 
     static FaroUserContext faroUserContext = FaroUserContext.getInstance();
-    String myUserId = faroUserContext.getEmail();
+    private String myUserId = faroUserContext.getEmail();
     private static FaroServiceHandler serviceHandler;
     private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
 
@@ -72,15 +66,17 @@ public class OpenPollLandingPage extends Activity {
 
     //Below Integers to manage Single choice polls
     private static final Integer INVALID_SELECTED_INDEX = -1;
-    private Integer originalSelectedRadioOption = INVALID_SELECTED_INDEX;
-    private Integer selectedRadioOption = INVALID_SELECTED_INDEX;
+    private Integer originalSelectedSingleChoiceOption = INVALID_SELECTED_INDEX;
+    private Integer selectedSingleChoiceOption = INVALID_SELECTED_INDEX;
+
+    private boolean isMultiChoice = false;
 
     private static int popupWidth;
     private static int popupHeight;
     private RelativeLayout popUpRelativeLayout;
     private static final Integer POLL_OPTION_ROW_HEIGHT = 150;
 
-    List<PollOption> pollOptionsList;
+    private List<PollOption> pollOptionsList;
 
     Intent PollListPage = null;
     Intent PickPollWinner = null;
@@ -125,7 +121,6 @@ public class OpenPollLandingPage extends Activity {
             eventID = extras.getString("eventID");
             pollID = extras.getString("pollID");
             clonePoll = pollListHandler.getPollCloneFromMap(pollID);
-            event = eventListHandler.getEventCloneFromMap(eventID);
             if (clonePoll == null){
                 Toast.makeText(OpenPollLandingPage.this, "No Poll found", LENGTH_LONG).show();
                 finish();
@@ -134,7 +129,6 @@ public class OpenPollLandingPage extends Activity {
             pollOptionsList = clonePoll.getPollOptions();
             pollDesc.setText(clonePoll.getDescription());
 
-            ScrollView radioScrollView = (ScrollView) findViewById(R.id.radioScrollView);
             ScrollView checkboxScrollView = (ScrollView) findViewById(R.id.checkboxScrollView);
 
             if (!(clonePoll.getCreatorId().equals(myUserId))) {
@@ -142,130 +136,93 @@ public class OpenPollLandingPage extends Activity {
             }
 
             //Depending on the type of clonePoll it will be displayed differently
-            if(clonePoll.getMultiChoice()) {
-                //Disable visibility for radio ScrollView
-                radioScrollView.setVisibility(View.GONE);
-                /*
-                 * Relative Layout(pollOptionLayout) is composed of 2 Linear Layouts, as mentioned below, besides each other
-                 * 1. Linear Layout for list of clonePoll options with checkbox (pollOptionsCheckboxList)
-                 * 2. Linear Layout for list of buttons for voter count (voterButtonLinearLayout)
-                 */
 
-                LinearLayout pollOptionsCheckboxList = (LinearLayout) findViewById(R.id.pollOptionsCheckboxList);
-                LinearLayout voterButtonLinearLayout = (LinearLayout) findViewById(R.id.voterButtonLinearLayout);
-                for (Integer i = 0; i < pollOptionsList.size(); i++) {
+            isMultiChoice = clonePoll.getMultiChoice();
 
-                    //Create checkbox
-                    final CheckBox checkBox = new CheckBox(this);
-                    PollOption pollOption = pollOptionsList.get(i);
-                    checkBox.setText(pollOption.getOption());
-                    if(pollOption.getVoters().contains(myUserId)) {
-                        checkBox.setChecked(true);
-                        selectedPollMap.put(i, pollOption);
-                        originalSelectedPollMap.put(i, pollOption);
-                    }else{
-                        notSelectedPollMap.put(i, pollOption);
-                    }
-                    checkBox.setId(i);
-                    checkBox.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            CheckBox clickedCheckBox = (CheckBox)v;
-                            Integer id = clickedCheckBox.getId();
-                            PollOption pollOption = pollOptionsList.get(id);
-                            if(clickedCheckBox.isChecked()){
-                                selectedPollMap.put(id, pollOption);
-                                notSelectedPollMap.remove(id);
-                            }else{
+            /*
+             * Relative Layout(newPollOptionsRelativeView) is composed of 2 Linear Layouts, as mentioned below, besides each other
+             * 1. Linear Layout for list of clonePoll options
+             * 2. Linear Layout for list of buttons for voter count (voterButtonLinearLayout)
+             */
+            final LinearLayout pollOptionsListLinearLayout  = (LinearLayout) findViewById(R.id.pollOptionsListLinearLayout);
+            final LinearLayout voterButtonLinearLayout = (LinearLayout) findViewById(R.id.votersListLinearLayout);
+
+
+            for (Integer i = 0; i < pollOptionsList.size(); i++){
+                PollOption pollOption = clonePoll.getPollOptions().get(i);
+
+                //Create textview for the poll Option
+                TextView pollOptionDescription = new TextView(this);
+                pollOptionDescription.setText(pollOption.getOption());
+                pollOptionDescription.setId(i);
+                pollOptionDescription.setGravity(Gravity.CENTER_VERTICAL);
+                pollOptionDescription.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        TextView selectedButton = (TextView) v;
+                        Integer id = selectedButton.getId();
+                        PollOption pollOption = pollOptionsList.get(id);
+                        if (!isMultiChoice) {
+                            pollOptionsListLinearLayout.getChildAt(id).setBackgroundColor(Color.RED);
+                            voterButtonLinearLayout.getChildAt(id).setBackgroundColor(Color.RED);
+                            if (!selectedSingleChoiceOption.equals(INVALID_SELECTED_INDEX) && !selectedSingleChoiceOption.equals(id)) {
+                                pollOptionsListLinearLayout.getChildAt(selectedSingleChoiceOption).setBackgroundColor(Color.TRANSPARENT);
+                                voterButtonLinearLayout.getChildAt(selectedSingleChoiceOption).setBackgroundColor(Color.TRANSPARENT);
+                            }
+                            selectedSingleChoiceOption = id;
+                        }else{
+                            if (selectedPollMap.containsKey(id)){
                                 selectedPollMap.remove(id);
                                 notSelectedPollMap.put(id, pollOption);
+                                pollOptionsListLinearLayout.getChildAt(id).setBackgroundColor(Color.TRANSPARENT);
+                                voterButtonLinearLayout.getChildAt(id).setBackgroundColor(Color.TRANSPARENT);
+                            }else{
+                                selectedPollMap.put(id, pollOption);
+                                notSelectedPollMap.remove(id);
+                                pollOptionsListLinearLayout.getChildAt(id).setBackgroundColor(Color.RED);
+                                voterButtonLinearLayout.getChildAt(id).setBackgroundColor(Color.RED);
                             }
                         }
-                    });
-
-                    //Create voter count button
-                    Button voterCountButton = new Button(this);
-                    int votersCount = pollOption.getVoters().size();
-                    voterCountButton.setText("(" + Integer.toString(votersCount) + ")");
-                    voterCountButton.setBackgroundColor(Color.TRANSPARENT);
-                    voterCountButton.setId(i);
-                    voterCountButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            voterListPopUP(v);
-                        }
-                    });
-
-                    //Insert checkBox into pollOptionsCheckboxList
-                    RelativeLayout.LayoutParams checkBoxparams = new RelativeLayout.LayoutParams(
-                            RelativeLayout.LayoutParams.MATCH_PARENT, POLL_OPTION_ROW_HEIGHT);
-                    pollOptionsCheckboxList.addView(checkBox, checkBoxparams);
-
-                    //Insert voter count button into voterButtonLinearLayout
-                    RelativeLayout.LayoutParams voterCountButtonParams = new RelativeLayout.LayoutParams(
-                            RelativeLayout.LayoutParams.WRAP_CONTENT, POLL_OPTION_ROW_HEIGHT);
-                    voterButtonLinearLayout.addView(voterCountButton, voterCountButtonParams);
-                }
-            }else{
-                //Disable visibility for checkbox ScrollView
-                checkboxScrollView.setVisibility(View.GONE);
-                /*
-                 * Relative Layout(pollOptionLayout) is composed of 2 Linear Layouts, as mentioned below, besides each other
-                 * 1. RadioGroup for list of clonePoll options with radio buttons (pollOptionsRadioGroup)
-                 * 2. Linear Layout for list of buttons for voter count (voterButtonLinearLayout)
-                 */
-                LinearLayout voterButtonLinearLayout = (LinearLayout) findViewById(R.id.voterButtonLinearLayout1);
-                RadioGroup pollOptionsRadioGroup = (RadioGroup) findViewById(R.id.pollOptionsRadioGroup);
-
-
-                for (Integer i = 0; i < pollOptionsList.size(); i++) {
-
-                    //Create RadioButton
-                    final RadioButton button = new RadioButton(this);
-                    PollOption pollOption = pollOptionsList.get(i);
-                    button.setText(pollOption.getOption());
-                    button.setId(i);
-                    if(pollOption.getVoters().contains(myUserId)) {
-                        button.setChecked(true);
-                        originalSelectedRadioOption = i;
-                        selectedRadioOption = i;
                     }
-                    button.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            RadioButton clickedRadioButton = (RadioButton)v;
-                            Integer id = clickedRadioButton.getId();
-                            if(clickedRadioButton.isChecked()){
-                                selectedRadioOption = id;
-                            }
-                        }
-                    });
+                });
 
-                    //Create voter count button
-                    Button voterCountButton = new Button(this);
-                    int votersCount = pollOption.getVoters().size();
-                    voterCountButton.setText("(" + Integer.toString(votersCount) + ")");
-                    voterCountButton.setBackgroundColor(Color.TRANSPARENT);
-                    voterCountButton.setId(i);
-                    voterCountButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            voterListPopUP(v);
-                        }
-                    });
+                //Create voter count button
+                Button voterCountButton = new Button(this);
+                int votersCount = pollOption.getVoters().size();
+                voterCountButton.setText("(" + Integer.toString(votersCount) + ")");
+                voterCountButton.setBackgroundColor(Color.TRANSPARENT);
+                voterCountButton.setId(i);
+                voterCountButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        voterListPopUP(v);
+                    }
+                });
 
-                    //Insert RadioButton into Radio Group
-                    RelativeLayout.LayoutParams radioButtonParams = new RelativeLayout.LayoutParams(
-                            RelativeLayout.LayoutParams.MATCH_PARENT, POLL_OPTION_ROW_HEIGHT);
-                    pollOptionsRadioGroup.addView(button, radioButtonParams);
 
-                    //Insert voter count button into voterButtonLinearLayout
-                    RelativeLayout.LayoutParams voterCountButtonParams = new RelativeLayout.LayoutParams(
-                            RelativeLayout.LayoutParams.WRAP_CONTENT, POLL_OPTION_ROW_HEIGHT);
-                    voterButtonLinearLayout.addView(voterCountButton, voterCountButtonParams);
+                //Insert poll Option and the voter count button into the LinearLayouts
+                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                        RelativeLayout.LayoutParams.MATCH_PARENT, POLL_OPTION_ROW_HEIGHT);
+
+                pollOptionsListLinearLayout.addView(pollOptionDescription, layoutParams);
+                voterButtonLinearLayout.addView(voterCountButton, layoutParams);
+
+                if(pollOption.getVoters().contains(myUserId)) {
+                    pollOptionsListLinearLayout.getChildAt(i).setBackgroundColor(Color.RED);
+                    voterButtonLinearLayout.getChildAt(i).setBackgroundColor(Color.RED);
+                    if (!isMultiChoice) {
+                        originalSelectedSingleChoiceOption = i;
+                        selectedSingleChoiceOption = i;
+                    }else{
+                        selectedPollMap.put(i, pollOption);
+                        originalSelectedPollMap.put(i, pollOption);
+                    }
+                }else{
+                    if (isMultiChoice) {
+                        notSelectedPollMap.put(i, pollOption);
+                    }
                 }
             }
-
         }
 
         votePoll.setOnClickListener(new View.OnClickListener() {
@@ -281,13 +238,20 @@ public class OpenPollLandingPage extends Activity {
 
                         (clonePoll.getVersion());
 
-                if(clonePoll.getMultiChoice()) {
+                if(isMultiChoice) {
                     if (originalSelectedPollMap.isEmpty() && selectedPollMap.isEmpty()){
                         Toast.makeText(OpenPollLandingPage.this, "Select atleast one option to Vote", LENGTH_LONG).show();
                         return;
                     }else if(originalSelectedPollMap.equals(selectedPollMap)){
                         Toast.makeText(OpenPollLandingPage.this, "No change to selected options", LENGTH_LONG).show();
                         return;
+                    }else if(!originalSelectedPollMap.isEmpty() && selectedPollMap.isEmpty()){ //Can happen when user wants to unvote from all options
+                        if (BuildConfig.DEBUG && (selectedPollMap.size() + notSelectedPollMap.size() != pollOptionsList.size())) {
+                            throw new AssertionError();
+                        }
+                        //TODO: Handle this case on backend. Not implemented on backend
+                        map.put("poll", pollVersionObj);
+                        map.put("voteOption", voteOption);
                     }else{
                         if (BuildConfig.DEBUG && (selectedPollMap.size() + notSelectedPollMap.size() != pollOptionsList.size())) {
                             throw new AssertionError();
@@ -303,17 +267,17 @@ public class OpenPollLandingPage extends Activity {
                         map.put("voteOption", voteOption);
                     }
                 }else {
-                    if (originalSelectedRadioOption.equals(INVALID_SELECTED_INDEX)
-                            && selectedRadioOption.equals(INVALID_SELECTED_INDEX)) {
+                    if (originalSelectedSingleChoiceOption.equals(INVALID_SELECTED_INDEX)
+                            && selectedSingleChoiceOption.equals(INVALID_SELECTED_INDEX)) {
                         Toast.makeText(OpenPollLandingPage.this, "Select an option to Vote", LENGTH_LONG).show();
                         return;
-                    } else if (originalSelectedRadioOption.equals(selectedRadioOption)) {
+                    } else if (originalSelectedSingleChoiceOption.equals(selectedSingleChoiceOption)) {
                         Toast.makeText(OpenPollLandingPage.this, "No change to selected options", LENGTH_LONG).show();
                         return;
                     } else {
-                        Toast.makeText(OpenPollLandingPage.this, "Selected option is " + pollOptionsList.get(selectedRadioOption).getOption(), LENGTH_LONG).show();
+                        Toast.makeText(OpenPollLandingPage.this, "Selected option is " + pollOptionsList.get(selectedSingleChoiceOption).getOption(), LENGTH_LONG).show();
 
-                        voteOption.add((pollOptionsList.get(selectedRadioOption)).getId());
+                        voteOption.add((pollOptionsList.get(selectedSingleChoiceOption)).getId());
 
                         map.put("poll", pollVersionObj);
                         map.put("voteOption", voteOption);
