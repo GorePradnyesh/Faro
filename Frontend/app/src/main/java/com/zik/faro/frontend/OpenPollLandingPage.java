@@ -78,7 +78,7 @@ public class OpenPollLandingPage extends Activity {
     private static int popupWidth;
     private static int popupHeight;
     private RelativeLayout popUpRelativeLayout;
-    private static final Integer POLL_OPTION_ROW_HEIGHT = 100;
+    private static final Integer POLL_OPTION_ROW_HEIGHT = 150;
 
     List<PollOption> pollOptionsList;
 
@@ -388,7 +388,11 @@ public class OpenPollLandingPage extends Activity {
         for (String temp : pollOption.getVoters()) {
             String friendName = userFriendListHandler.getFriendFullNameFromID(temp);
 
-            voters.add(friendName);
+            if (friendName != null) {
+                voters.add(friendName);
+            }else{
+                voters.add(temp);
+            }
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<>(OpenPollLandingPage.this, android.R.layout.simple_spinner_item, voters);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

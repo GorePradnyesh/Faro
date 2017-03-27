@@ -43,7 +43,8 @@ public class ClosedPollLandingPage extends ActionBarActivity {
     private static Poll clonePoll;
     private static PollListHandler pollListHandler = PollListHandler.getInstance();
     private  static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;;
+    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+    private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
 
     List<PollOption> pollOptionsList;
 
@@ -207,7 +208,13 @@ public class ClosedPollLandingPage extends ActionBarActivity {
         voters.add("Voters are:");
         ListView voterList = (ListView) container.findViewById(R.id.votersList);
         for (String temp : pollOption.getVoters()) {
-            voters.add(temp);
+            String friendName = userFriendListHandler.getFriendFullNameFromID(temp);
+
+            if (friendName != null) {
+                voters.add(friendName);
+            }else{
+                voters.add(temp);
+            }
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<>(ClosedPollLandingPage.this, android.R.layout.simple_spinner_item, voters);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

@@ -51,6 +51,8 @@ public class PickPollWinnerPage extends Activity {
     private static PollListHandler pollListHandler = PollListHandler.getInstance();
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static FaroServiceHandler serviceHandler;
+    private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
+
 
     private List<PollOption> pollOptionsList;
 
@@ -220,8 +222,15 @@ public class PickPollWinnerPage extends Activity {
         voters.add("Voters are:");
         ListView voterList = (ListView) container.findViewById(R.id.votersList);
         for (String temp : pollOption.getVoters()) {
-            voters.add(temp);
+            String friendName = userFriendListHandler.getFriendFullNameFromID(temp);
+
+            if (friendName != null) {
+                voters.add(friendName);
+            }else{
+                voters.add(temp);
+            }
         }
+
         ArrayAdapter<String> adapter = new ArrayAdapter<>(PickPollWinnerPage.this, android.R.layout.simple_spinner_item, voters);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         voterList.setAdapter(adapter);
