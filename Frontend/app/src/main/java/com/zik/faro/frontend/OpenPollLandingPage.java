@@ -163,8 +163,8 @@ public class OpenPollLandingPage extends Activity {
                         Integer id = selectedButton.getId();
                         PollOption pollOption = pollOptionsList.get(id);
                         if (!isMultiChoice) {
-                            pollOptionsListLinearLayout.getChildAt(id).setBackgroundColor(Color.RED);
-                            voterButtonLinearLayout.getChildAt(id).setBackgroundColor(Color.RED);
+                            pollOptionsListLinearLayout.getChildAt(id).setBackgroundColor(Color.BLUE);
+                            voterButtonLinearLayout.getChildAt(id).setBackgroundColor(Color.BLUE);
                             if (!selectedSingleChoiceOption.equals(INVALID_SELECTED_INDEX) && !selectedSingleChoiceOption.equals(id)) {
                                 pollOptionsListLinearLayout.getChildAt(selectedSingleChoiceOption).setBackgroundColor(Color.TRANSPARENT);
                                 voterButtonLinearLayout.getChildAt(selectedSingleChoiceOption).setBackgroundColor(Color.TRANSPARENT);
@@ -179,8 +179,8 @@ public class OpenPollLandingPage extends Activity {
                             }else{
                                 selectedPollMap.put(id, pollOption);
                                 notSelectedPollMap.remove(id);
-                                pollOptionsListLinearLayout.getChildAt(id).setBackgroundColor(Color.RED);
-                                voterButtonLinearLayout.getChildAt(id).setBackgroundColor(Color.RED);
+                                pollOptionsListLinearLayout.getChildAt(id).setBackgroundColor(Color.BLUE);
+                                voterButtonLinearLayout.getChildAt(id).setBackgroundColor(Color.BLUE);
                             }
                         }
                     }
@@ -208,8 +208,8 @@ public class OpenPollLandingPage extends Activity {
                 voterButtonLinearLayout.addView(voterCountButton, layoutParams);
 
                 if(pollOption.getVoters().contains(myUserId)) {
-                    pollOptionsListLinearLayout.getChildAt(i).setBackgroundColor(Color.RED);
-                    voterButtonLinearLayout.getChildAt(i).setBackgroundColor(Color.RED);
+                    pollOptionsListLinearLayout.getChildAt(i).setBackgroundColor(Color.BLUE);
+                    voterButtonLinearLayout.getChildAt(i).setBackgroundColor(Color.BLUE);
                     if (!isMultiChoice) {
                         originalSelectedSingleChoiceOption = i;
                         selectedSingleChoiceOption = i;

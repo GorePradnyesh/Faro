@@ -5,6 +5,8 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -31,8 +33,14 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlacePicker;
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.Event;
+import com.zik.faro.data.GeoPosition;
+import com.zik.faro.data.Location;
 import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
@@ -54,6 +62,8 @@ public class EditEvent extends Activity {
     private Button endTimeButton = null;
     private Button endDateButton = null;
 
+    private TextView eventAddress = null;
+
     private DateFormat sdf = new SimpleDateFormat("MMM dd yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
 
@@ -73,7 +83,12 @@ public class EditEvent extends Activity {
 
     Intent EventLanding = null;
 
+    private int PLACE_PICKER_REQUEST = 1;
+
     final Context mContext = this;
+    private Activity mActivity = this;
+
+    private Location location = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +104,7 @@ public class EditEvent extends Activity {
 
         TextView eventName = (TextView) findViewById(R.id.eventName);
         final EditText eventDescription = (EditText) findViewById(R.id.eventDescriptionEditText);
+        eventAddress = (TextView) findViewById(R.id.addressTextView);
 
         Button editEventOK = (Button) findViewById(R.id.editEventOK);
         Button deleteEventButton = (Button) findViewById(R.id.deleteEvent);
@@ -147,6 +163,27 @@ public class EditEvent extends Activity {
             }
         });
 
+        if (cloneEvent.getLocation() != null){
+            eventAddress.setText(cloneEvent.getLocation().locationName);
+            eventAddress.setTextColor(Color.BLUE);
+            eventAddress.setPaintFlags(eventAddress.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+        }
+
+        eventAddress.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+                try {
+                    Intent intent = builder.build(mActivity);
+                    startActivityForResult(intent, PLACE_PICKER_REQUEST);
+                } catch (GooglePlayServicesRepairableException e) {
+                    e.printStackTrace();
+                } catch (GooglePlayServicesNotAvailableException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
         /*
         * Since OK button is pressed we will remove the event from the list and insert the clone.
         */
@@ -155,6 +192,7 @@ public class EditEvent extends Activity {
             public void onClick(View v) {
                 cloneEvent.setStartDate(startDateCalendar);
                 cloneEvent.setEndDate(endDateCalendar);
+                cloneEvent.setLocation(location);
 
                 serviceHandler.getEventHandler().updateEvent(new BaseFaroRequestCallback<Event>() {
                     @Override
@@ -209,6 +247,20 @@ public class EditEvent extends Activity {
                 cloneEvent.setEventDescription(eventDescription.getText().toString());
             }
         });
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+
+        if (requestCode == PLACE_PICKER_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                Place place = PlacePicker.getPlace(this, data);
+                String address = String.format("Place: %s", place.getAddress());
+                eventAddress.setText(address);
+
+                GeoPosition geoPosition = new GeoPosition(place.getLatLng().latitude, place.getLatLng().longitude);
+                location = new Location(place.getName().toString(), geoPosition);
+            }
+        }
     }
 
     private void confirmEventDeletePopUP(View v) {

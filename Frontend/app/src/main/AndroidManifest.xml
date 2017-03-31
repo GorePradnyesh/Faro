@@ -4,13 +4,11 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <uses-feature
         android:name="android.hardware.touchscreen"
         android:required="false" />
-    <uses-feature
-        android:name="android.software.leanback"
-        android:required="true" />
 
     <application
         android:allowBackup="true"
@@ -22,6 +20,7 @@
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -83,6 +82,12 @@
         <activity
             android:name=".AssignmentLandingPage"
             android:label="AssignmentLandingPageTabs" />
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_place_api"/>
     </application>
 
 </manifest>

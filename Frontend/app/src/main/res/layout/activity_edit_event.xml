@@ -75,6 +75,15 @@
         android:layout_alignBottom="@+id/endDateButton"
         android:layout_alignParentEnd="true" />
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/addressTextView"
+        android:hint="@string/event_address"
+        android:gravity="center"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_marginTop="15dp"
+        android:layout_below="@+id/endDateButton"/>
 
     <LinearLayout
         android:layout_width="match_parent"

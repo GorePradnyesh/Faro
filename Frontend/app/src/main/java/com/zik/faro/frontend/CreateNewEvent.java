@@ -7,18 +7,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -28,8 +26,14 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlacePicker;
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.Event;
+import com.zik.faro.data.GeoPosition;
+import com.zik.faro.data.Location;
 import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
@@ -62,11 +66,19 @@ public class CreateNewEvent extends Activity {
     private Button endTimeButton = null;
     private Button endDateButton = null;
 
+    private TextView eventAddress = null;
+
     private DateFormat sdf = new SimpleDateFormat("MMM dd yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
 
     private static FaroServiceHandler serviceHandler;
     private static String TAG = "CreateNewEvent";
+
+    private int PLACE_PICKER_REQUEST = 1;
+
+    private Activity mActivity = this;
+
+    private Location location = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -77,6 +89,7 @@ public class CreateNewEvent extends Activity {
 
         final EditText eventName = (EditText) findViewById(R.id.eventNameTextEdit);
         final EditText eventDescription = (EditText) findViewById(R.id.eventDescriptionEditText);
+        eventAddress = (TextView) findViewById(R.id.addressTextView);
 
         startDateButton = (Button) findViewById(R.id.startDateButton);
         startTimeButton = (Button) findViewById(R.id.startTimeButton);
@@ -92,11 +105,9 @@ public class CreateNewEvent extends Activity {
 
         final Context mContext = this;
 
+
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
-        /*TODO For location search bar try out the following link
-        * https://developer.android.com/training/location/display-address.html
-        */
         eventName.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -119,6 +130,22 @@ public class CreateNewEvent extends Activity {
             @Override
             public void onClick(View v) {
                 //TODO: Implement popup: This flag once set cannot be changed.
+            }
+        });
+
+
+        eventAddress.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+                try {
+                    Intent intent = builder.build(mActivity);
+                    startActivityForResult(intent, PLACE_PICKER_REQUEST);
+                } catch (GooglePlayServicesRepairableException e) {
+                    e.printStackTrace();
+                } catch (GooglePlayServicesNotAvailableException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -154,7 +181,7 @@ public class CreateNewEvent extends Activity {
                         controlFlagCheckBox.isChecked(),
                         eventDesc,
                         null,
-                        null,
+                        location,
                         eventCreatorId);
 
 
@@ -217,6 +244,20 @@ public class CreateNewEvent extends Activity {
         });
 
         setBothTimeAndDateToDefault();
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+
+        if (requestCode == PLACE_PICKER_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                Place place = PlacePicker.getPlace(this, data);
+                String address = String.format("Place: %s", place.getAddress());
+                eventAddress.setText(address);
+
+                GeoPosition geoPosition = new GeoPosition(place.getLatLng().latitude, place.getLatLng().longitude);
+                location = new Location(place.getName().toString(), geoPosition);
+            }
+        }
     }
 
     private void updateStartDateCalendarDate(Calendar calendar){

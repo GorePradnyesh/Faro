@@ -121,8 +121,8 @@ public class PickPollWinnerPage extends Activity {
                     public void onClick(View v) {
                         TextView selectedButton = (TextView) v;
                         Integer id = selectedButton.getId();
-                        pollOptionsListLinearLayout.getChildAt(id).setBackgroundColor(Color.RED);
-                        voterButtonLinearLayout.getChildAt(id).setBackgroundColor(Color.RED);
+                        pollOptionsListLinearLayout.getChildAt(id).setBackgroundColor(Color.BLUE);
+                        voterButtonLinearLayout.getChildAt(id).setBackgroundColor(Color.BLUE);
                         if (!pollOptionWinnerPosition.equals(INVALID_SELECTED_INDEX) && !pollOptionWinnerPosition.equals(id)) {
                             pollOptionsListLinearLayout.getChildAt(pollOptionWinnerPosition).setBackgroundColor(Color.TRANSPARENT);
                             voterButtonLinearLayout.getChildAt(pollOptionWinnerPosition).setBackgroundColor(Color.TRANSPARENT);
@@ -145,8 +145,8 @@ public class PickPollWinnerPage extends Activity {
                 });
 
                 if((pollOption.getId().equals(clonePoll.getWinnerId()))) {
-                    pollOptionDescription.setBackgroundColor(Color.RED);
-                    voterCountButton.setBackgroundColor(Color.RED);
+                    pollOptionDescription.setBackgroundColor(Color.BLUE);
+                    voterCountButton.setBackgroundColor(Color.BLUE);
                     pollOptionWinnerPosition = i;
                     previousPollOptionWinnerPosition = i;
                 }

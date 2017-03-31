@@ -102,11 +102,6 @@ public class ClosedPollLandingPage extends ActionBarActivity {
 
                 textView.setText(pollOption.getOption());
                 textView.setGravity(Gravity.CENTER_VERTICAL);
-                //Setting the TextView to display the winning Option
-                if ((pollOption.getId().equals(clonePoll.getWinnerId()))){
-                    winnerPollOptionTV.setText("Winner is: " + pollOption.getOption());
-                    textView.setTextColor(Color.RED);
-                }
 
                 //Create voter count button
                 Button voterCountButton = new Button(this);
@@ -120,6 +115,13 @@ public class ClosedPollLandingPage extends ActionBarActivity {
                         voterListPopUP(v);
                     }
                 });
+
+                //Setting the TextView to display the winning Option
+                if ((pollOption.getId().equals(clonePoll.getWinnerId()))){
+                    winnerPollOptionTV.setText("Winner is: " + pollOption.getOption());
+                    textView.setBackgroundColor(Color.BLUE);
+                    voterCountButton.setBackgroundColor(Color.BLUE);
+                }
 
                 //Insert TextView into pollOptionsTextList
                 RelativeLayout.LayoutParams textViewparams = new RelativeLayout.LayoutParams(
