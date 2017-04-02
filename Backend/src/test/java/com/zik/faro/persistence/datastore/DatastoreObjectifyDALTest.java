@@ -34,6 +34,7 @@ import com.zik.faro.data.Assignment;
 import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.data.Item;
 import com.zik.faro.data.Location;
+import com.zik.faro.data.GeoPosition;
 import com.zik.faro.data.Unit;
 
 public class DatastoreObjectifyDALTest {
@@ -397,8 +398,10 @@ public class DatastoreObjectifyDALTest {
 //    	EventDo event = new EventDo("TestEvent");
 //    	String eventId = event.getId();
 //    	EventDatastoreImpl.storeEventOnly(event);
+//		GeoPosition geoPosition1 = new GeoPosition(0,0);
+//		GeoPosition geoPosition2 = new GeoPosition(50,50);
 //    	ActivityDo a = new ActivityDo(event.getId(), "TestEvent", "Testing update",
-//    			new Location("San Jose"), new GregorianCalendar(), new GregorianCalendar(),new Assignment());
+//    			new Location("San Jose", "CA", geoPosition1), new GregorianCalendar(), new GregorianCalendar(),new Assignment());
 //    	DatastoreObjectifyDAL.storeObject(a);
 //    	
 //    	// Verify indeed created
@@ -409,7 +412,7 @@ public class DatastoreObjectifyDALTest {
 //    	a.setStartDate(new GregorianCalendar());
 //    	a.setEndDate(new GregorianCalendar());
 //    	a.setDescription("Description changed");
-//    	a.setLocation(new Location("Fremont"));
+//    	a.setLocation(new Location("Fremont", "CA", geoPosition2));
 //    	
 //    	// Update
 //    	ActivityDatastoreImpl.updateActivity(a, event.getId());
@@ -418,7 +421,9 @@ public class DatastoreObjectifyDALTest {
 //    	Assert.assertNotNull(retrievedActivity);
 //    	
 //    	// Verify
-//    	Assert.assertEquals(retrievedActivity.getLocation().locationName, "Fremont");
+//    	Assert.assertEquals(retrievedActivity.getLocation().getLocationName(), "Fremont");
+//    	Assert.assertEquals(retrievedActivity.getLocation().getAddress(), "CA");
+//    	Assert.assertEquals(retrievedActivity.getLocation().getPosition(), geoPosition2);
 //    	Assert.assertEquals(retrievedActivity.getDescription(), "Description changed");
 //    	
 //    }

@@ -20,6 +20,7 @@ import com.zik.faro.data.Assignment;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.Item;
 import com.zik.faro.data.Location;
+import com.zik.faro.data.GeoPosition;
 import com.zik.faro.data.Unit;
 import com.zik.faro.data.expense.ExpenseGroup;
 
@@ -37,8 +38,10 @@ public class FunctionalActivityTest {
 
     // Create an event for all activity tests
     private static void createEvent() throws IOException{
+		GeoPosition geoPosition = new GeoPosition(0,0);
     	Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(),
-                Calendar.getInstance(), false, "Description", null, new Location("Random Location"), "Mafia god");
+                Calendar.getInstance(), false, "Description", null, new
+				Location("Random Location", "Random Address", geoPosition), "Mafia god");
     	
         ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);
         Event event = response.getEntity(Event.class);
@@ -65,7 +68,9 @@ public class FunctionalActivityTest {
         Assert.assertEquals(activityRequest.getName(), activityResponse.getName());
         Assert.assertEquals(activityRequest.getStartDate(), activityResponse.getStartDate());
         Assert.assertEquals(activityRequest.getEndDate(), activityResponse.getEndDate());
-        Assert.assertEquals(activityRequest.getLocation().locationName, activityResponse.getLocation().locationName);
+        Assert.assertEquals(activityRequest.getLocation().getLocationName(), activityResponse.getLocation().getLocationName());
+        Assert.assertEquals(activityRequest.getLocation().getLocationAddress(), activityResponse.getLocation().getLocationAddress());
+        Assert.assertEquals(activityRequest.getLocation().getPosition(), activityResponse.getLocation().getPosition());
         Assert.assertNotNull(activityResponse.getAssignment());
         Assert.assertNotNull(activityResponse.getAssignment().getId());
     }
@@ -80,8 +85,9 @@ public class FunctionalActivityTest {
 //        assignment.addItem(new Item("food", "Gaurav", 2, Unit.COUNT));
 //        assignment.addItem(new Item("drinks", "Paddy", 5, Unit.COUNT));
         // Create sample activity without id
+		GeoPosition geoPosition = new GeoPosition(0,0);
         Activity activity = new Activity(eventId, "Hiking",
-                "Test activity description", new Location("NYC"),
+                "Test activity description", new Location("NYC", "NYC's Address", geoPosition),
                 Calendar.getInstance(), Calendar.getInstance(),null);
         ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/create", token, activity);
         Activity activityResponse = response.getEntity(Activity.class);
@@ -97,8 +103,10 @@ public class FunctionalActivityTest {
 //        assignment.addItem(new Item("food", "Gaurav", 2, Unit.COUNT));
 //        assignment.addItem(new Item("drinks", "Paddy", 5, Unit.COUNT));
         // Create sample activity without id
+		GeoPosition geoPosition1 = new GeoPosition(0,0);
+		GeoPosition geoPosition2 = new GeoPosition(100,100);
         Activity activity = new Activity(eventId, "Hiking",
-                "Test activity description", new Location("NYC"),
+                "Test activity description", new Location("NYC", "NYC's Address", geoPosition1),
                 Calendar.getInstance(), Calendar.getInstance(), null);
         ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/create", token, activity);
         Activity activityResponse = response.getEntity(Activity.class);
@@ -107,7 +115,7 @@ public class FunctionalActivityTest {
         activity.setDescription("Update activity description");
         activity.setStartDate(Calendar.getInstance());
         activity.setEndDate(Calendar.getInstance());
-        activity.setLocation(new Location("SFO"));
+        activity.setLocation(new Location("SFO", "SFO's Address", geoPosition2));
 //        activity.getAssignment().getItems().remove("food");
 //        activity.getAssignment().addItem(new Item("hookah", "Kunal", 1, Unit.COUNT));
 
@@ -119,34 +127,35 @@ public class FunctionalActivityTest {
     
     public static void updateActivityVersionCheckTest()throws Exception{
       // Create sample activity without id
-      Activity activity = new Activity(eventId, "Hiking",
-              "Test activity description", new Location("NYC"),
-              Calendar.getInstance(), Calendar.getInstance(), null);
-      ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/create", token, activity);
-      Activity activityResponse = response.getEntity(Activity.class);
-      assertCreatedEntity(activity, activityResponse);
-      // Update activity. Activity id and event id should be passed in URI. Values in activity object will not be honored
-      activity.setDescription("Update with version 1");
-      activity.setVersion(activityResponse.getVersion());
+		GeoPosition geoPosition1 = new GeoPosition(0,0);
+		Activity activity = new Activity(eventId, "Hiking",
+                "Test activity description", new Location("NYC", "NYC's Address", geoPosition1),
+				Calendar.getInstance(), Calendar.getInstance(), null);
+		ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/create", token, activity);
+		Activity activityResponse = response.getEntity(Activity.class);
+		assertCreatedEntity(activity, activityResponse);
+		// Update activity. Activity id and event id should be passed in URI. Values in activity object will not be honored
+		activity.setDescription("Update with version 1");
+		activity.setVersion(activityResponse.getVersion());
       
-      response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/"+ activityResponse.getId()+"/update", token, activity);
-      activityResponse = response.getEntity(Activity.class);
-      assertCreatedEntity(activity, activityResponse);
-      assertVersion(activity, activityResponse);
-      
-      activity.setDescription("Update with version 2");
-      activity.setVersion(activityResponse.getVersion());
-      
-      response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/"+ activityResponse.getId()+"/update", token, activity);
-      activityResponse = response.getEntity(Activity.class);
-      assertCreatedEntity(activity, activityResponse);
-      assertVersion(activity, activityResponse);
-      
-      activity.setDescription("Update with old version 2");
-      
-      response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/"+ activityResponse.getId()+"/update", token, activity);
-      Assert.assertEquals(400,response.getStatus());
-      Assert.assertEquals("Incorrect entity version. Current version:3", response.getEntity(String.class));
+		response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/"+ activityResponse.getId()+"/update", token, activity);
+		activityResponse = response.getEntity(Activity.class);
+		assertCreatedEntity(activity, activityResponse);
+		assertVersion(activity, activityResponse);
+
+		activity.setDescription("Update with version 2");
+		activity.setVersion(activityResponse.getVersion());
+
+		response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/"+ activityResponse.getId()+"/update", token, activity);
+		activityResponse = response.getEntity(Activity.class);
+		assertCreatedEntity(activity, activityResponse);
+		assertVersion(activity, activityResponse);
+
+		activity.setDescription("Update with old version 2");
+
+		response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/"+ activityResponse.getId()+"/update", token, activity);
+		Assert.assertEquals(400,response.getStatus());
+		Assert.assertEquals("Incorrect entity version. Current version:3", response.getEntity(String.class));
       
   }
 
@@ -155,8 +164,9 @@ public class FunctionalActivityTest {
 //        assignment.addItem(new Item("food", "Gaurav", 2, Unit.COUNT));
 //        assignment.addItem(new Item("drinks", "Paddy", 5, Unit.COUNT));
         // Create sample activity without id
+		GeoPosition geoPosition1 = new GeoPosition(0,0);
         Activity activity = new Activity(eventId, "Hiking",
-                "Test activity description", new Location("NYC"),
+                "Test activity description", new Location("NYC", "NYC's Address", geoPosition1),
                 Calendar.getInstance(), Calendar.getInstance(), null);
         ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/create", token, activity);
         Activity activityResponse = response.getEntity(Activity.class);
@@ -179,15 +189,17 @@ public class FunctionalActivityTest {
 //        assignment.addItem(new Item("food", "Gaurav", 2, Unit.COUNT));
 //        assignment.addItem(new Item("drinks", "Paddy", 5, Unit.COUNT));
         // Create sample activity without id
+		GeoPosition geoPosition1 = new GeoPosition(0,0);
+		GeoPosition geoPosition2 = new GeoPosition(100,100);
         Activity activity = new Activity(eventId, "Hiking",
-                "Test activity description", new Location("NYC"),
+                "Test activity description", new Location("NYC", "NYC's Address", geoPosition1),
                 Calendar.getInstance(), Calendar.getInstance(), null);
         ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/create", token, activity);
         Activity activityResponse = response.getEntity(Activity.class);
         assertCreatedEntity(activity, activityResponse);
         // Create another activity
         Activity activity1 = new Activity(eventId, "Swimming",
-                "Test activity description for swimming", new Location("Mafatlal bath"),
+                "Test activity description for swimming", new Location("Mafatlal bath", "Chowpatty", geoPosition2),
                 Calendar.getInstance(), Calendar.getInstance(), null);
         response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/create", token, activity1);
         Activity activityResponse1 = response.getEntity(Activity.class);

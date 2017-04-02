@@ -21,6 +21,7 @@ import com.zik.faro.data.Event;
 import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.InviteeList;
 import com.zik.faro.data.Location;
+import com.zik.faro.data.GeoPosition;
 import com.zik.faro.data.InviteeList.Invitees;
 import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.user.EventInviteStatus;
@@ -44,10 +45,13 @@ public class FunctionalEventTest {
     // 1. createEvent
     public void createEventTest() throws Exception {
     	for(int i = 0 ; i < 10; i++){
+			GeoPosition geoPosition = new GeoPosition(0,0);
     		Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(),
-                    Calendar.getInstance(), false,"Description",null, new Location("Random Location"), "Mafia god");
+                    Calendar.getInstance(), false,"Description",null, new
+					Location("Random Location", "Random Address",  geoPosition), "Mafia god");
     		new Event("MySampleEvent", Calendar.getInstance(),
-                    Calendar.getInstance(), false, "Description", null, new Location("Random Location"), null);
+                    Calendar.getInstance(), false, "Description", null, new
+					Location("Random Location", "Random Address", geoPosition), null);
         	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);
             Event event = response.getEntity(Event.class);
             assertEntity(eventCreateData, event);
@@ -56,8 +60,10 @@ public class FunctionalEventTest {
     
     // 2. getEventDetails
     public void getEventDetails() throws Exception{
+		GeoPosition geoPosition = new GeoPosition(0,0);
     	Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(),
-                Calendar.getInstance(), false, "Description", null, new Location("NYC"),"Mafia god");
+                Calendar.getInstance(), false, "Description", null, new
+				Location("NYC", "NYC's Address", geoPosition),"Mafia god");
     	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);
         Event ev = response.getEntity(Event.class);
         ClientResponse response1 = TestHelper.doGET(endpoint.toString(), "v1/event/"+ ev.getId()+"/details", new MultivaluedMapImpl(), token);
@@ -68,8 +74,10 @@ public class FunctionalEventTest {
     // 3. getEventInvitees
     public void getEventInvitees() throws Exception{
     	// Create event
+		GeoPosition geoPosition = new GeoPosition(0,0);
     	Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(),
-                Calendar.getInstance(), false, "Description", null, new Location("NYC"), "Mafia god");
+                Calendar.getInstance(), false, "Description", null, new 
+				Location("NYC", "NYC's Address", geoPosition),"Mafia god");
     	ClientResponse createEventResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);
         Event ev = createEventResponse.getEntity(Event.class);
         // Verify indeed created by doing GET
@@ -171,12 +179,16 @@ public class FunctionalEventTest {
     // 7. getEvents
     public void getEvents() throws Exception{
     	// Create 3 events
+		GeoPosition geoPosition = new GeoPosition(0,0);
     	Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(),
-                Calendar.getInstance(), false,"Description",  null, new Location("NYC"), "Mafia god");
+                Calendar.getInstance(), false,"Description",  null, new 
+				Location("NYC", "NYC's Address", geoPosition),"Mafia god");
     	Event eventCreateData1 = new Event("MySampleEvent", Calendar.getInstance(),
-                Calendar.getInstance(), false,"Description",  null, new Location("NYC"), "Mafia god");
+                Calendar.getInstance(), false,"Description",  null, new 
+				Location("NYC", "NYC's Address", geoPosition),"Mafia god");
     	Event eventCreateData2 = new Event("MySampleEvent", Calendar.getInstance(),
-                Calendar.getInstance(), false,"Description",  null, new Location("NYC"), "Mafia god");
+                Calendar.getInstance(), false,"Description",  null, new 
+				Location("NYC", "NYC's Address", geoPosition),"Mafia god");
     	ClientResponse createEventResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);
     	ClientResponse createEventResponse1 = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData1);
     	ClientResponse createEventResponse2 = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData2);
@@ -190,8 +202,11 @@ public class FunctionalEventTest {
     
     public void updateEvent() throws Exception{
     	// Create
+		GeoPosition geoPosition1 = new GeoPosition(0,0);
+		GeoPosition geoPosition2 = new GeoPosition(100,100);
     	Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(),
-                Calendar.getInstance(), false,"Description",  null, new Location("NYC"), "Mafia god");
+                Calendar.getInstance(), false,"Description",  null, new 
+				Location("NYC", "NYC's Address", geoPosition1),"Mafia god");
     	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);
         Event ev = response.getEntity(Event.class);
     	
@@ -207,7 +222,7 @@ public class FunctionalEventTest {
         updateObj.setEndDate(Calendar.getInstance());
         updateObj.setEventDescription("Updated description");
         updateObj.setEventName("Updated event name");
-        updateObj.setLocation(new Location("Crater Lake"));
+        updateObj.setLocation(new Location("Crater Lake", "Oregon", geoPosition2));
         updateObj.setStartDate(Calendar.getInstance());
         updateObj.setStatus(ObjectStatus.CLOSED);
         
@@ -218,7 +233,9 @@ public class FunctionalEventTest {
         Assert.assertEquals(updateObj.getEventDescription(), ev.getEventDescription());
         Assert.assertEquals(updateObj.getEventName(), ev.getEventName());
         Assert.assertEquals(updateObj.getStatus(), ev.getStatus());
-        Assert.assertEquals(updateObj.getLocation().locationName, ev.getLocation().locationName);
+        Assert.assertEquals(updateObj.getLocation().getLocationName(), ev.getLocation().getLocationName());
+        Assert.assertEquals(updateObj.getLocation().getLocationAddress(), ev.getLocation().getLocationAddress());
+        Assert.assertEquals(updateObj.getLocation().getPosition(), ev.getLocation().getPosition());
         assertVersion(updateObj, ev);
         
         // Update 2
@@ -235,7 +252,9 @@ public class FunctionalEventTest {
         Assert.assertEquals(updateObj.getEventDescription(), ev.getEventDescription());
         Assert.assertEquals(updateObj.getEventName(), ev.getEventName());
         Assert.assertEquals(updateObj.getStatus(), ev.getStatus());
-        Assert.assertEquals(updateObj.getLocation().locationName, ev.getLocation().locationName);
+        Assert.assertEquals(updateObj.getLocation().getLocationName(), ev.getLocation().getLocationName());
+        Assert.assertEquals(updateObj.getLocation().getLocationAddress(), ev.getLocation().getLocationAddress());
+        Assert.assertEquals(updateObj.getLocation().getPosition(), ev.getLocation().getPosition());
         assertVersion(updateObj2, ev);
         Assert.assertTrue(ev.getControlFlag());
     }
@@ -256,6 +275,9 @@ public class FunctionalEventTest {
         Assert.assertEquals(expected.getEndDate(), actual.getEndDate());
         Assert.assertEquals(expected.getStartDate(), actual.getStartDate());
         Assert.assertEquals(expected.getLocation().locationName, actual.getLocation().locationName);
+        Assert.assertEquals(expected.getLocation().getLocationName(), actual.getLocation().getLocationName());
+        Assert.assertEquals(expected.getLocation().getLocationAddress(), actual.getLocation().getLocationAddress());
+        Assert.assertEquals(expected.getLocation().getPosition(), actual.getLocation().getPosition());
         Assert.assertNotNull(actual.getId());
         Assert.assertTrue(!actual.getControlFlag());
         Assert.assertNotNull(actual.getAssignment());

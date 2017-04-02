@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -16,6 +15,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -65,6 +65,7 @@ public class CreateNewEvent extends Activity {
     private Button startTimeButton = null;
     private Button endTimeButton = null;
     private Button endDateButton = null;
+    private ImageButton deleteLocation = null;
 
     private TextView eventAddress = null;
 
@@ -89,7 +90,10 @@ public class CreateNewEvent extends Activity {
 
         final EditText eventName = (EditText) findViewById(R.id.eventNameTextEdit);
         final EditText eventDescription = (EditText) findViewById(R.id.eventDescriptionEditText);
-        eventAddress = (TextView) findViewById(R.id.addressTextView);
+        eventAddress = (TextView) findViewById(R.id.locationAddressTextView);
+        deleteLocation = (ImageButton) findViewById(R.id.deleteLocation);
+        deleteLocation.setImageResource(R.drawable.cancel);
+        deleteLocation.setVisibility(View.GONE);
 
         startDateButton = (Button) findViewById(R.id.startDateButton);
         startTimeButton = (Button) findViewById(R.id.startTimeButton);
@@ -146,6 +150,15 @@ public class CreateNewEvent extends Activity {
                 } catch (GooglePlayServicesNotAvailableException e) {
                     e.printStackTrace();
                 }
+            }
+        });
+
+        deleteLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                location = null;
+                eventAddress.setText("");
+                deleteLocation.setVisibility(View.GONE);
             }
         });
 
@@ -247,15 +260,32 @@ public class CreateNewEvent extends Activity {
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
-
         if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
                 Place place = PlacePicker.getPlace(this, data);
-                String address = String.format("Place: %s", place.getAddress());
-                eventAddress.setText(address);
+
+                String locationNameStr = null;
+                String locationAddressStr = null;
+
+                /*
+                 * TODO: Check if the below condition is OK. Basic testing showed that for places
+                 * which do not have a valid name, getName returns the cordinates and we do not want
+                 * to show that. The placeType for these places was set to TYPE_OTHER.
+                 */
+                if (!place.getPlaceTypes().contains(Place.TYPE_OTHER)){
+                    locationNameStr = place.getName().toString();
+                }
+
+                if (!place.getAddress().equals("")){
+                    locationAddressStr = place.getAddress().toString();
+                }
 
                 GeoPosition geoPosition = new GeoPosition(place.getLatLng().latitude, place.getLatLng().longitude);
-                location = new Location(place.getName().toString(), geoPosition);
+                location = new Location(locationNameStr, locationAddressStr, geoPosition);
+
+                String str = GetLocationAddressString.getLocationAddressString(location);
+                eventAddress.setText(str);
+                deleteLocation.setVisibility(View.VISIBLE);
             }
         }
     }

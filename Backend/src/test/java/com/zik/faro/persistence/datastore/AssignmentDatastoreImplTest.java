@@ -28,6 +28,7 @@ import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.data.Identifier;
 import com.zik.faro.data.Item;
 import com.zik.faro.data.Location;
+import com.zik.faro.data.GeoPosition;
 import com.zik.faro.data.Unit;
 
 public class AssignmentDatastoreImplTest {
@@ -58,8 +59,9 @@ public class AssignmentDatastoreImplTest {
     }
     
 	private ActivityDo createActivity(String eventId, String name) throws IllegalDataOperation{
+		GeoPosition geoPosition = new GeoPosition(0,0);
     	ActivityDo activity1 = new ActivityDo(eventId, name, "dummyDescription",
-                new Location("Lake Shasta"),
+                new Location("Lake Shasta", "Lake Shasta's Address", geoPosition),
                 new GregorianCalendar(),
                 new GregorianCalendar(),
                 new Assignment());
@@ -72,7 +74,9 @@ public class AssignmentDatastoreImplTest {
 	
 	@Test
 	public void getAllAssignmentsTest() throws IllegalDataOperation, DataNotFoundException{
-		EventDo event = new EventDo("TestEvent", Calendar.getInstance(), Calendar.getInstance(), false, null, new Location("San Jose"));
+		GeoPosition geoPosition = new GeoPosition(0,0);
+		EventDo event = new EventDo("TestEvent", Calendar.getInstance(),
+				Calendar.getInstance(), false, null, new Location("San Jose", "CA", geoPosition));
     	EventDatastoreImpl.storeEventOnly(event);
 		ActivityDo activity1 = createActivity(event.getId(), "NewYork");
     	ActivityDo activity2 = createActivity(event.getId(), "SF");
@@ -88,7 +92,9 @@ public class AssignmentDatastoreImplTest {
 	
 	@Test
 	public void getAssignmentUsingEvent_Activity_Assignment_IdTest() throws DataNotFoundException, IllegalDataOperation{
-		EventDo event = new EventDo("TestEvent", Calendar.getInstance(), Calendar.getInstance(), false, null, new Location("San Jose"));
+		GeoPosition geoPosition = new GeoPosition(0,0);
+		EventDo event = new EventDo("TestEvent", Calendar.getInstance(), 
+				Calendar.getInstance(), false, null, new Location("San Jose", "CA", geoPosition));
     	EventDatastoreImpl.storeEventOnly(event);
 		ActivityDo activity1 = createActivity(event.getId(), "NewYork");
 		ActivityDatastoreImpl.storeActivity(activity1);
@@ -100,7 +106,9 @@ public class AssignmentDatastoreImplTest {
 
 /*	@Test
 	public void getAssignmentUsingEvent_Assignment_IdTest() throws DataNotFoundException, IllegalDataOperation{
-		Event event = new Event("TestEvent", new GregorianCalendar(), new GregorianCalendar(), false, null, new Location("San Jose"));
+		GeoPosition geoPosition = new GeoPosition(0,0);
+		Event event = new Event("TestEvent", new GregorianCalendar(), 
+				new GregorianCalendar(), false, null, new Location("San Jose", "CA", geoPosition));
     	EventDatastoreImpl.storeEvent(event);
 		Activity activity1 = createActivity(event.getId(), "NewYork");
     	Activity activity2 = createActivity(event.getId(), "SF");
@@ -117,7 +125,9 @@ public class AssignmentDatastoreImplTest {
 	
 	@Test
 	public void getCountOfPendingAssignmentsTest() throws IllegalDataOperation, DataNotFoundException{
-		EventDo event = new EventDo("TestEvent", Calendar.getInstance(), Calendar.getInstance(), false, null, new Location("San Jose"));
+		GeoPosition geoPosition = new GeoPosition(0,0);
+		EventDo event = new EventDo("TestEvent", Calendar.getInstance(),
+				Calendar.getInstance(), false, null, new Location("San Jose", "CA", geoPosition));
     	EventDatastoreImpl.storeEventOnly(event);
 		ActivityDo activity1 = createActivity(event.getId(), "NewYork");
     	ActivityDo activity2 = createActivity(event.getId(), "SF");
@@ -134,7 +144,9 @@ public class AssignmentDatastoreImplTest {
 	
 	@Test
 	public void updateActivityLevelAssignmentItems() throws IllegalDataOperation, DataNotFoundException, DatastoreException, UpdateVersionException{
-		EventDo event = new EventDo("TestEvent", Calendar.getInstance(), Calendar.getInstance(), false, null, new Location("San Jose"));
+		GeoPosition geoPosition = new GeoPosition(0,0);
+		EventDo event = new EventDo("TestEvent", Calendar.getInstance(), 
+				Calendar.getInstance(), false, null, new Location("San Jose", "CA", geoPosition));
     	EventDatastoreImpl.storeEventOnly(event);
 		ActivityDo activity1 = createActivity(event.getId(), "NewYork");
 		ActivityDatastoreImpl.storeActivity(activity1);
@@ -161,7 +173,9 @@ public class AssignmentDatastoreImplTest {
 	
 	@Test
 	public void updateEventLevelAssignmentItems() throws IllegalDataOperation, DataNotFoundException, DatastoreException, UpdateVersionException{
-		EventDo event = new EventDo("TestEvent", Calendar.getInstance(), Calendar.getInstance(), false, null, new Location("San Jose"));
+		GeoPosition geoPosition = new GeoPosition(0,0);
+		EventDo event = new EventDo("TestEvent", Calendar.getInstance(), 
+				Calendar.getInstance(), false, null, new Location("San Jose", "CA", geoPosition));
 		Assignment eventAssignment = new Assignment();
 		eventAssignment.addItem(new Item("Kaivan", "420", 3, Unit.KG, Identifier.createUniqueIdentifierString()));
 		event.setAssignment(eventAssignment);

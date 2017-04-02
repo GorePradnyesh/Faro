@@ -65,23 +65,36 @@
         android:layout_alignBottom="@+id/endDateButton"
         android:layout_alignParentEnd="true" />
 
-    <TextView
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/addressTextView"
-        android:hint="@string/event_address"
-        android:gravity="center"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:layout_marginTop="15dp"
-        android:layout_below="@+id/endDateButton"/>
+        android:id="@+id/locationLinearLayout"
+        android:layout_below="@+id/endDateButton"
+        android:orientation="horizontal"
+        android:layout_marginTop="15dp">
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/deleteLocation"
+            android:layout_alignParentEnd="true"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/locationAddressTextView"
+            android:hint="@string/location"
+            android:gravity="center"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_toLeftOf="@+id/deleteLocation"/>
+    </RelativeLayout>
 
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/eventDescriptionEditText"
         android:hint="@string/Description"
+        android:gravity="center"
         android:layout_marginTop="15dp"
-        android:layout_below="@id/addressTextView"/>
+        android:layout_below="@id/locationLinearLayout"/>
 
     <CheckBox
         android:layout_width="wrap_content"

@@ -5,9 +5,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.location.Address;
-import android.location.Geocoder;
-import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -47,7 +44,6 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.Locale;
 
 public class EventLandingPage extends FragmentActivity
         implements OnMapReadyCallback,
@@ -112,7 +108,7 @@ public class EventLandingPage extends FragmentActivity
 
         TextView endDateAndTime = (TextView) findViewById(R.id.endDateAndTimeDisplay);
 
-        TextView eventAddress = (TextView) findViewById(R.id.addressTextView);
+        TextView eventAddress = (TextView) findViewById(R.id.locationAddressTextView);
 
         pollButton = (ImageButton) findViewById(R.id.pollImageButton);
         pollButton.setImageResource(R.drawable.poll_icon);
@@ -248,8 +244,9 @@ public class EventLandingPage extends FragmentActivity
                     mapFragment.getView().setVisibility(View.GONE);
                     mapMarker.setVisibility(View.GONE);
                 }else{
-                    mEventLocation = new LatLng(eventLocation.position.getLatitude(), eventLocation.position.getLongitude());
-                    eventAddress.setText(eventLocation.locationName);
+                    mEventLocation = new LatLng(eventLocation.getPosition().getLatitude(), eventLocation.getPosition().getLongitude());
+                    String str = GetLocationAddressString.getLocationAddressString(eventLocation);
+                    eventAddress.setText(str);
                     eventAddress.setTextColor(Color.BLUE);
                     eventAddress.setPaintFlags(eventAddress.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 
@@ -264,19 +261,16 @@ public class EventLandingPage extends FragmentActivity
                     eventAddress.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            double latitude = eventLocation.position.getLatitude();
-                            double longitude = eventLocation.position.getLongitude();
-                            String label = eventLocation.locationName;
+                            // Creating url for Google Maps.
+                            double latitude = eventLocation.getPosition().getLatitude();
+                            double longitude = eventLocation.getPosition().getLongitude();
+                            String label = eventLocation.getLocationName();
                             String uriBegin = "geo:" + latitude + "," + longitude;
                             String query = latitude + "," + longitude + "(" + label + ")";
                             String encodedQuery = Uri.encode(query);
                             String uriString = uriBegin + "?q=" + encodedQuery + "&z=16";
                             Uri uri = Uri.parse(uriString);
 
-
-                            //String uri = String.format(Locale.ENGLISH, "geo:%f,%f",
-                              //      ,
-                                //    eventLocation.position.getLongitude());
                             Intent googleMapsAppIntent = new Intent(Intent.ACTION_VIEW, uri);
                             startActivity(googleMapsAppIntent);
                         }

@@ -14,14 +14,13 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -61,6 +60,7 @@ public class EditEvent extends Activity {
     private Button startTimeButton = null;
     private Button endTimeButton = null;
     private Button endDateButton = null;
+    private ImageButton deleteLocation = null;
 
     private TextView eventAddress = null;
 
@@ -90,6 +90,7 @@ public class EditEvent extends Activity {
 
     private Location location = null;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,10 +102,13 @@ public class EditEvent extends Activity {
         startTimeButton = (Button) findViewById(R.id.startTimeButton);
         endDateButton = (Button) findViewById(R.id.endDateButton);
         endTimeButton = (Button) findViewById(R.id.endTimeButton);
+        deleteLocation = (ImageButton) findViewById(R.id.deleteLocation);
+        deleteLocation.setImageResource(R.drawable.cancel);
+        deleteLocation.setVisibility(View.GONE);
 
         TextView eventName = (TextView) findViewById(R.id.eventName);
         final EditText eventDescription = (EditText) findViewById(R.id.eventDescriptionEditText);
-        eventAddress = (TextView) findViewById(R.id.addressTextView);
+        eventAddress = (TextView) findViewById(R.id.locationAddressTextView);
 
         Button editEventOK = (Button) findViewById(R.id.editEventOK);
         Button deleteEventButton = (Button) findViewById(R.id.deleteEvent);
@@ -164,9 +168,11 @@ public class EditEvent extends Activity {
         });
 
         if (cloneEvent.getLocation() != null){
-            eventAddress.setText(cloneEvent.getLocation().locationName);
+            String str = GetLocationAddressString.getLocationAddressString(cloneEvent.getLocation());
+            eventAddress.setText(str);
             eventAddress.setTextColor(Color.BLUE);
             eventAddress.setPaintFlags(eventAddress.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+            deleteLocation.setVisibility(View.VISIBLE);
         }
 
         eventAddress.setOnClickListener(new View.OnClickListener() {
@@ -181,6 +187,15 @@ public class EditEvent extends Activity {
                 } catch (GooglePlayServicesNotAvailableException e) {
                     e.printStackTrace();
                 }
+            }
+        });
+
+        deleteLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                location = null;
+                eventAddress.setText("");
+                deleteLocation.setVisibility(View.GONE);
             }
         });
 
@@ -254,11 +269,29 @@ public class EditEvent extends Activity {
         if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
                 Place place = PlacePicker.getPlace(this, data);
-                String address = String.format("Place: %s", place.getAddress());
-                eventAddress.setText(address);
+
+                String locationNameStr = null;
+                String locationAddressStr = null;
+
+                /*
+                 * TODO: Check if the below condition is OK. Basic testing showed that for places
+                 * which do not have a valid name, getName returns the cordinates and we do not want
+                 * to show that. The placeType for these places was set to TYPE_OTHER.
+                 */
+                if (!place.getPlaceTypes().contains(Place.TYPE_OTHER)){
+                    locationNameStr = place.getName().toString();
+                }
+
+                if (!place.getAddress().equals("")){
+                    locationAddressStr = place.getAddress().toString();
+                }
 
                 GeoPosition geoPosition = new GeoPosition(place.getLatLng().latitude, place.getLatLng().longitude);
-                location = new Location(place.getName().toString(), geoPosition);
+                location = new Location(locationNameStr, locationAddressStr, geoPosition);
+
+                String str = GetLocationAddressString.getLocationAddressString(location);
+                eventAddress.setText(str);
+                deleteLocation.setVisibility(View.VISIBLE);
             }
         }
     }

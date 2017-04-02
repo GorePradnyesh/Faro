@@ -45,6 +45,11 @@ public class EventManagement {
         //TODO: Validate that the user has permissions to modify event, from the EventUser table
     	//TODO: Validate if the user is the owner of the event
     	EventDo eventDo = ConversionUtils.toDo(updateObj);
+		if (eventDo.getLocation == null){
+			System.out.println("Location is NULL ****************************************");
+		}else{
+			System.out.println("Location is NOT NULL ****************************************");
+		}
     	return ConversionUtils.fromDo(EventDatastoreImpl.updateEvent(eventId, eventDo));
     }
     

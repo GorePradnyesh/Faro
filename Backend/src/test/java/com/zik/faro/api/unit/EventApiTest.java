@@ -62,11 +62,12 @@ public class EventApiTest {
 	@Test
 	public void testEventCreation() {
 		String eventName = UUID.randomUUID().toString();
+		GeoPosition geoPosition = new GeoPosition(0,0);
 
 		Event eventCreateData = new Event(eventName,
 				Calendar.getInstance(), Calendar.getInstance(), "Test event description",
 				false, null, new Location(
-						"Random Location"), null, null,"Mafia god");
+						"Random Location", "Random Address", geoPosition), null, null,"Mafia god");
 
 		EventCreateHandler eventCreateHandler = new EventCreateHandler();
 		Whitebox.setInternalState(eventCreateHandler, securityContextMock);
@@ -87,11 +88,12 @@ public class EventApiTest {
 	@Test
 	public void testEventDeletion() {
 		String eventName = UUID.randomUUID().toString();
+		GeoPosition geoPosition = new GeoPosition(0,0);
 
 		Event eventCreateData = new Event(eventName,
 				Calendar.getInstance(), Calendar.getInstance(), "Test event description",
 				false, null, new Location(
-				"Random Location"), null, null,"Mafia god");
+					"Random Location", "Random Address", geoPosition), null, null,"Mafia god");
 
 		EventCreateHandler eventCreateHandler = new EventCreateHandler();
 		Whitebox.setInternalState(eventCreateHandler, securityContextMock);
@@ -126,11 +128,12 @@ public class EventApiTest {
 //		EventHandler eventHandler = new EventHandler();
 //		Whitebox.setInternalState(eventHandler, securityContextMock);
 //
+//		GeoPosition geoPosition = new GeoPosition(0,0);
 //		// Store event
 //		Event eventCreateData = new Event(eventName,
 //				Calendar.getInstance(), Calendar.getInstance(), "Test event description",
 //				false, null, new Location(
-//						"Random Location"), null, null,"Mafia god");
+//					"Random Location", "Random Address", geoPosition), null, null,"Mafia god");
 //		Event minEvent = eventCreateHandler
 //				.createEvent(eventCreateData).getEntity();
 //
