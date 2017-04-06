@@ -72,7 +72,7 @@ public class EventLandingPage extends FragmentActivity
     private ImageButton eventAssignmentButton = null;
     private ImageButton activityButton = null;
     private ImageButton editButton = null;
-    private ImageButton addFriendsButton = null;
+    private ImageButton guestListImageButton = null;
     private ImageButton mapMarker = null;
 
     private String eventID;
@@ -116,8 +116,8 @@ public class EventLandingPage extends FragmentActivity
         eventAssignmentButton.setImageResource(R.drawable.assignment_icon);
         activityButton = (ImageButton) findViewById(R.id.activityImageButton);
         activityButton.setImageResource(R.drawable.activity);
-        addFriendsButton = (ImageButton) findViewById(R.id.addFriendsImageButton);
-        addFriendsButton.setImageResource(R.drawable.friend_list);
+        guestListImageButton = (ImageButton) findViewById(R.id.guestListImageButton);
+        guestListImageButton.setImageResource(R.drawable.friend_list);
         editButton = (ImageButton) findViewById(R.id.editButton);
         editButton.setImageResource(R.drawable.edit);
         mapMarker = (ImageButton)findViewById(R.id.mapMarker);
@@ -132,7 +132,7 @@ public class EventLandingPage extends FragmentActivity
         final Intent PollListPage = new Intent(EventLandingPage.this, PollListPage.class);
         final Intent EditEvent = new Intent(EventLandingPage.this, EditEvent.class);
         final Intent ActivityListPage = new Intent(EventLandingPage.this, ActivityListPage.class);
-        final Intent InviteFriendToEventPage = new Intent(EventLandingPage.this, InviteFriendToEventPage.class);
+        final Intent EventFriendListLandingPageIntent = new Intent(EventLandingPage.this, EventFriendListLandingPage.class);
         final Intent AssignmentLandingPageTabsIntent = new Intent(EventLandingPage.this, AssignmentLandingPage.class);
         EventLandingPageReload = new Intent(EventLandingPage.this, EventLandingPage.class);
 
@@ -208,11 +208,11 @@ public class EventLandingPage extends FragmentActivity
                     }
                 });
 
-                addFriendsButton.setOnClickListener(new View.OnClickListener() {
+                guestListImageButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        InviteFriendToEventPage.putExtra("eventID", eventID);
-                        startActivity(InviteFriendToEventPage);
+                        EventFriendListLandingPageIntent.putExtra("eventID", eventID);
+                        startActivity(EventFriendListLandingPageIntent);
                         finish();
                     }
                 });
@@ -388,7 +388,7 @@ public class EventLandingPage extends FragmentActivity
             statusMaybe.setVisibility(View.GONE);
             pollButton.setVisibility(View.VISIBLE);
             eventAssignmentButton.setVisibility(View.VISIBLE);
-            addFriendsButton.setVisibility(View.VISIBLE);
+            guestListImageButton.setVisibility(View.VISIBLE);
             activityButton.setVisibility(View.VISIBLE);
             editButton.setVisibility(View.VISIBLE);
         }else{
@@ -396,7 +396,7 @@ public class EventLandingPage extends FragmentActivity
             statusNo.setVisibility(View.VISIBLE);
             pollButton.setVisibility(View.GONE);
             eventAssignmentButton.setVisibility(View.GONE);
-            addFriendsButton.setVisibility(View.GONE);
+            guestListImageButton.setVisibility(View.GONE);
             activityButton.setVisibility(View.GONE);
             editButton.setVisibility(View.GONE);
         }

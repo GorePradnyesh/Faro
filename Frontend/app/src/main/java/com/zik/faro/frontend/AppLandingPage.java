@@ -9,10 +9,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.google.android.gms.common.api.GoogleApiClient;
-
-import java.sql.Driver;
-
 public class AppLandingPage extends FragmentActivity{
     private FragmentTabHost mTabHost;
 
@@ -73,10 +69,15 @@ public class AppLandingPage extends FragmentActivity{
         if (eventFriendListHandler.acceptedFriendAdapter == null){
             eventFriendListHandler.acceptedFriendAdapter = new EventFriendAdapter(this, R.layout.friend_row_style);
         }
-        if (eventFriendListHandler.notAcceptedFriendAdapter == null){
-            eventFriendListHandler.notAcceptedFriendAdapter = new EventFriendAdapter(this, R.layout.friend_row_style);
+        if (eventFriendListHandler.invitedFriendAdapter == null){
+            eventFriendListHandler.invitedFriendAdapter = new EventFriendAdapter(this, R.layout.friend_row_style);
         }
-
+        if (eventFriendListHandler.mayBeFriendAdapter == null){
+            eventFriendListHandler.mayBeFriendAdapter = new EventFriendAdapter(this, R.layout.friend_row_style);
+        }
+        if (eventFriendListHandler.declinedFriendAdapter == null){
+            eventFriendListHandler.declinedFriendAdapter = new EventFriendAdapter(this, R.layout.friend_row_style);
+        }
         if (pollListHandler.openPollsAdapter == null) {
             pollListHandler.openPollsAdapter = new PollAdapter(this, R.layout.poll_list_page_row_style);
         }

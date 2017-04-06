@@ -26,7 +26,9 @@ public class EventFriendListHandler {
     private EventFriendListHandler(){}
 
     public EventFriendAdapter acceptedFriendAdapter;
-    public EventFriendAdapter notAcceptedFriendAdapter;
+    public EventFriendAdapter mayBeFriendAdapter;
+    public EventFriendAdapter invitedFriendAdapter;
+    public EventFriendAdapter declinedFriendAdapter;
 
 
     /*
@@ -41,8 +43,29 @@ public class EventFriendListHandler {
         switch (invitees.getInviteStatus()){
             case ACCEPTED:
                 return acceptedFriendAdapter;
+            case MAYBE:
+                return mayBeFriendAdapter;
+            case INVITED:
+                return invitedFriendAdapter;
+            case DECLINED:
+                return declinedFriendAdapter;
             default:
-                return notAcceptedFriendAdapter;
+                return invitedFriendAdapter;
+        }
+    }
+
+    public EventFriendAdapter getEventFriendAdapter(String status){
+        switch (status){
+            case "Going":
+                return acceptedFriendAdapter;
+            case "Maybe":
+                return mayBeFriendAdapter;
+            case "Invited":
+                return invitedFriendAdapter;
+            case "Not Going":
+                return declinedFriendAdapter;
+            default:
+                return invitedFriendAdapter;
         }
     }
 
@@ -50,6 +73,22 @@ public class EventFriendListHandler {
         EventFriendAdapter eventFriendAdapter = getEventFriendAdapter(invitees);
         eventFriendAdapter.insert(invitees, 0);
         eventFriendAdapter.notifyDataSetChanged();
+    }
+
+    public int getAcceptedFriendCount(){
+        return acceptedFriendAdapter.getCount();
+    }
+
+    public int getInvitedFriendCount(){
+        return invitedFriendAdapter.getCount();
+    }
+
+    public int getMayBeFriendCount(){
+        return mayBeFriendAdapter.getCount();
+    }
+
+    public int getDeclinedFriendCount(){
+        return declinedFriendAdapter.getCount();
     }
 
     public void addFriendToListAndMap(InviteeList.Invitees invitees){
@@ -86,9 +125,17 @@ public class EventFriendListHandler {
             acceptedFriendAdapter.list.clear();
             acceptedFriendAdapter.notifyDataSetChanged();
         }
-        if (notAcceptedFriendAdapter != null){
-            notAcceptedFriendAdapter.list.clear();
-            notAcceptedFriendAdapter.notifyDataSetChanged();
+        if (invitedFriendAdapter != null){
+            invitedFriendAdapter.list.clear();
+            invitedFriendAdapter.notifyDataSetChanged();
+        }
+        if (mayBeFriendAdapter != null){
+            mayBeFriendAdapter.list.clear();
+            mayBeFriendAdapter.notifyDataSetChanged();
+        }
+        if (declinedFriendAdapter != null){
+            declinedFriendAdapter.list.clear();
+            declinedFriendAdapter.notifyDataSetChanged();
         }
         if (friendMap != null){
             friendMap.clear();

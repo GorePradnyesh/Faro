@@ -45,7 +45,7 @@ public class MyAssignmentsFragment extends Fragment{
     String passedAssignmentID = null;
 
     FaroUserContext faroUserContext = FaroUserContext.getInstance();
-    String myUserID = faroUserContext.getEmail();
+    private String myUserID = faroUserContext.getEmail();
 
     private static String TAG = "MyAssignmentsFragment";
 
