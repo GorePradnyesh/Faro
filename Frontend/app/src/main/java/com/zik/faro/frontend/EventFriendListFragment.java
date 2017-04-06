@@ -27,7 +27,7 @@ public class EventFriendListFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            guestListType = getArguments().getString("list_type");
+            guestListType = getArguments().getString("listType");
         }
     }
 

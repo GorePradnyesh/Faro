@@ -60,28 +60,24 @@ public class EventFriendListLandingPage extends FragmentActivity {
         mTabHost = (FragmentTabHost) findViewById(android.R.id.tabhost);
         mTabHost.setup(this, getSupportFragmentManager(), android.R.id.tabcontent);
 
-        Bundle goingBundle = new Bundle();
-        Bundle mayBeBundle = new Bundle();
-        Bundle invitedBundle = new Bundle();
-        Bundle notGoingBundle = new Bundle();
-
-        goingBundle.putString("list_type", "Going");
-        mayBeBundle.putString("list_type", "Maybe");
-        invitedBundle.putString("list_type", "Invited");
-        notGoingBundle.putString("list_type", "Not Going");
-
         mTabHost.addTab(
                 mTabHost.newTabSpec("tab1").setIndicator("Going" + "(" + eventFriendListHandler.getAcceptedFriendCount() + ")"),
-                EventFriendListFragment.class, goingBundle);
+                EventFriendListFragment.class, getBundleForListType("Going"));
         mTabHost.addTab(
                 mTabHost.newTabSpec("tab2").setIndicator("Maybe" + "(" + eventFriendListHandler.getMayBeFriendCount() + ")"),
-                EventFriendListFragment.class, mayBeBundle);
+                EventFriendListFragment.class, getBundleForListType("Maybe"));
         mTabHost.addTab(
                 mTabHost.newTabSpec("tab3").setIndicator("Invited" + "(" + eventFriendListHandler.getInvitedFriendCount() + ")"),
-                EventFriendListFragment.class, invitedBundle);
+                EventFriendListFragment.class, getBundleForListType("Invited"));
         mTabHost.addTab(
                 mTabHost.newTabSpec("tab4").setIndicator("Not Going" + "(" + eventFriendListHandler.getDeclinedFriendCount() + ")"),
-                EventFriendListFragment.class, notGoingBundle);
+                EventFriendListFragment.class, getBundleForListType("Not Going"));
+    }
+
+    private Bundle getBundleForListType(String listType){
+        Bundle bundle = new Bundle();
+        bundle.putString("listType", listType);
+        return bundle;
     }
 
     @Override
