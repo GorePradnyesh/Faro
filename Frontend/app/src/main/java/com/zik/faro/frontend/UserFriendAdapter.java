@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 
@@ -59,6 +60,7 @@ public class UserFriendAdapter extends ArrayAdapter {
     }
 
     static class ImgHolder{
+        ImageView userPicture;
         TextView friendName;
     }
 
@@ -78,6 +80,7 @@ public class UserFriendAdapter extends ArrayAdapter {
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             row = inflater.inflate(R.layout.friend_row_style, parent, false);
+            holder.userPicture = (ImageView)row.findViewById(R.id.userPicture);
             holder.friendName = (TextView)row.findViewById(R.id.friendName);
             row.setTag(holder);
         }else{
@@ -91,6 +94,7 @@ public class UserFriendAdapter extends ArrayAdapter {
                 holder.friendName.setText(minUser.getEmail());
             }
         }
+        holder.userPicture.setImageResource(R.drawable.user_pic);
         return row;
     }
 }

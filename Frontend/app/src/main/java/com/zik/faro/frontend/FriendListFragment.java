@@ -1,6 +1,7 @@
 package com.zik.faro.frontend;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -13,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -58,12 +60,16 @@ public class FriendListFragment extends Fragment {
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(getActivity()));
 
-       /* friendListView.setOnClickListener(new View.OnClickListener() {
+        friendListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onClick(View v) {
-                //TODO: Display Friend's info.
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                final Intent UserProfilePageIntent = new Intent(getActivity(), UserProfilePage.class);
+                MinUser minUser = (MinUser)parent.getItemAtPosition(position);
+                UserProfilePageIntent.putExtra("userEmailID", minUser.getEmail());
+                startActivity(UserProfilePageIntent);
             }
-        });*/
+        });
+
 
         popUpRelativeLayout = (RelativeLayout) view.findViewById(R.id.friendListFragment);
 

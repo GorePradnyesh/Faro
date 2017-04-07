@@ -90,7 +90,8 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_place_api" />
 
-        <activity android:name=".EventFriendListLandingPage"></activity>
+        <activity android:name=".EventFriendListLandingPage" />
+        <activity android:name=".UserProfilePage"></activity>
     </application>
 
 </manifest>
