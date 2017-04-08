@@ -35,7 +35,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * Created by granganathan on 7/23/16.
@@ -211,7 +210,7 @@ public class FbGraphApiService {
     }
 
     public void uploadPhotos(final List<String> photoPaths, final Event event) {
-        Future<List<String>> future = threadPool.submit(new Callable<List<String>>() {
+        threadPool.submit(new Callable<List<String>>() {
             @Override
             public List<String> call() throws JSONException {
                 // Check if album exists or create it

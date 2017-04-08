@@ -6,8 +6,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
@@ -30,7 +28,7 @@ import java.util.List;
  */
 public class ImageGridViewActivity extends AppCompatActivity {
     private static final String TAG = "ImageGridViewActivity";
-    private final Context mContext = this;
+    private final Context context = this;
 
 
     @Override
@@ -47,9 +45,7 @@ public class ImageGridViewActivity extends AppCompatActivity {
 
         final GridView gridView = (GridView) findViewById(R.id.gridview);
 
-        final List<String> imageUrls = Lists.newArrayList();
-
-        ImagesListHandler imagesListHandler = ImagesListHandler.initializeInstance(mContext);
+        ImagesListHandler imagesListHandler = ImagesListHandler.initializeInstance(context);
         gridView.setAdapter(imagesListHandler.getImageAdapter());
 
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -77,6 +73,7 @@ public class ImageGridViewActivity extends AppCompatActivity {
                     if (!faroImages.isEmpty()) {
                         ImagesListHandler.getInstance().setFaroImages(faroImages);
 
+                        final List<String> imageUrls = Lists.newArrayList();
                         imageUrls.addAll(Lists.transform(faroImages, new Function<FaroImageBase, String>() {
                             @Override
                             public String apply(FaroImageBase faroImageBase) {
@@ -91,7 +88,7 @@ public class ImageGridViewActivity extends AppCompatActivity {
                                 ImagesListHandler.getInstance().addImages(imageUrls);
                             }
                         };
-                        Handler mainHandler = new Handler(mContext.getMainLooper());
+                        Handler mainHandler = new Handler(context.getMainLooper());
                         mainHandler.post(myRunnable);
                     }
                 } else {
@@ -100,28 +97,6 @@ public class ImageGridViewActivity extends AppCompatActivity {
             }
         }, eventId);
 
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_grid_view, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override

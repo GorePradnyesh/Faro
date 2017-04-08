@@ -1,11 +1,9 @@
 package com.zik.faro.frontend;
 
 import android.Manifest;
-import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,7 +12,6 @@ import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.content.CursorLoader;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -280,9 +277,9 @@ public class EventLandingPage extends FragmentActivity {
         if (Build.VERSION.SDK_INT >= 23) {
             if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Show asynchronously, an explanation of why the permission is required
-                        /*if (ActivityCompat.shouldShowRequestPermissionRationale((android.app.Activity) mContext,
-                                Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                        }*/
+                /*if (ActivityCompat.shouldShowRequestPermissionRationale((android.app.Activity) mContext,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                }*/
 
                 Log.i(TAG, "Requesting permission to access external write storage for uploading photos");
                 ActivityCompat.requestPermissions((android.app.Activity) mContext,
@@ -305,9 +302,7 @@ public class EventLandingPage extends FragmentActivity {
                 requestAdditionalPrivileges();
             }
         } else {
-            Intent chooseIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            chooseIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-            startActivityForResult(chooseIntent, REQUEST_PICK_PHOTOS);
+            startActivityForResult(new Intent(EventLandingPage.this, ImagePickerActivity.class), REQUEST_PICK_PHOTOS);
         }
     }
 
@@ -394,30 +389,9 @@ public class EventLandingPage extends FragmentActivity {
                 Log.e(TAG, "cameraTakenPhotoPath = " + cameraTakenPhotoPath);
             }
         } else if (requestCode == REQUEST_PICK_PHOTOS && resultCode == RESULT_OK) {
-            List<String> filePaths = Lists.newArrayList();
+            List<String> filePaths = data.getStringArrayListExtra("images");
 
-            if (data.getClipData() != null) {
-                ClipData mClipData = data.getClipData();
-
-                for (int i = 0; i < mClipData.getItemCount(); i++) {
-                    ClipData.Item item = mClipData.getItemAt(i);
-                    String filePath = getRealPathFromURI(item.getUri());
-                    Log.i(TAG, "filePath = " + filePath);
-                    if (!Strings.isNullOrEmpty(filePath)) {
-                        filePaths.add(filePath);
-                    }
-
-                }
-                Log.i(TAG, "Selected Images size : " + filePaths.size());
-                Log.i(TAG, "Selected Images : " + filePaths);
-            } else if (data.getData() != null) {
-                String filePath = getRealPathFromURI(data.getData());
-                if (!Strings.isNullOrEmpty(filePath)) {
-                    filePaths.add(filePath);
-                }
-            }
-
-            if (!filePaths.isEmpty()) {
+            if (filePaths != null && !filePaths.isEmpty()) {
                 AccessToken accessToken = AccessToken.getCurrentAccessToken();
                 if (accessToken == null ||
                         !accessToken.getPermissions().contains("publish_actions")) {
@@ -430,17 +404,6 @@ public class EventLandingPage extends FragmentActivity {
         }
     }
 
-    private String getRealPathFromURI(Uri contentUri) {
-        String[] proj = { MediaStore.Images.Media.DATA };
-        CursorLoader loader = new CursorLoader(mContext, contentUri, proj, null, null, null);
-        Cursor cursor = loader.loadInBackground();
-        int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-        String result = cursor.getString(columnIndex);
-        cursor.close();
-        return result;
-    }
-
     private void requestAdditionalPrivileges() {
         // Initiate FB login
         Log.i(TAG, "initiate login again to get additional permissions");
@@ -449,10 +412,6 @@ public class EventLandingPage extends FragmentActivity {
 
     private void initiateFbLogin(List<String> permissions) {
         LoginManager.getInstance().logInWithPublishPermissions(fbLoginPage, permissions);
-    }
-
-    private void initiateFbLogin() {
-        LoginManager.getInstance().logInWithPublishPermissions(fbLoginPage, Lists.newArrayList("user_photos", "public_profile"));
     }
 
     private void uploadPhoto(List<String> photoPaths, Event event) {

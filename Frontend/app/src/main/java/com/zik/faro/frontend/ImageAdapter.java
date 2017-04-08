@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.GridView;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -26,14 +27,20 @@ public class ImageAdapter extends ArrayAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        ImageView imageView;
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.gridview_item_image, parent, false);
-
-            Glide.with(context)
-                    .load(getItem(position))
-                    .into((ImageView) convertView);
+            imageView = new ImageView(context);
+            imageView.setLayoutParams(new GridView.LayoutParams(350, 350));
+            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            imageView.setPadding(10, 10, 10, 10);
+        } else {
+            imageView = (ImageView) convertView;
         }
 
-        return convertView;
+        Glide.with(context)
+                .load(getItem(position))
+                .into(imageView);
+
+        return imageView;
     }
 }
