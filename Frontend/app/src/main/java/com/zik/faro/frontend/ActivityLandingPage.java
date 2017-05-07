@@ -20,6 +20,9 @@ public class ActivityLandingPage extends android.app.Activity {
     private static Event cloneEvent = null;
     private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
+    String eventID = null;
+    String activityID = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,8 +42,8 @@ public class ActivityLandingPage extends android.app.Activity {
 
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
-            String eventID = extras.getString("eventID");
-            String activityID = extras.getString("activityID");
+            eventID = extras.getString("eventID");
+            activityID = extras.getString("activityID");
             cloneEvent = eventListHandler.getEventCloneFromMap(eventID);
             cloneActivity = activityListHandler.getActivityCloneFromMap(activityID);
 
@@ -64,8 +67,8 @@ public class ActivityLandingPage extends android.app.Activity {
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EditActivityPage.putExtra("eventID", cloneEvent.getId());
-                EditActivityPage.putExtra("activityID", cloneActivity.getId());
+                EditActivityPage.putExtra("eventID", eventID);
+                EditActivityPage.putExtra("activityID", activityID);
                 startActivity(EditActivityPage);
                 finish();
             }
@@ -74,8 +77,8 @@ public class ActivityLandingPage extends android.app.Activity {
         activityAssignmentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AssignmentLandingPageIntent.putExtra("eventID", cloneEvent.getId());
-                AssignmentLandingPageIntent.putExtra("activityID", cloneActivity.getId());
+                AssignmentLandingPageIntent.putExtra("eventID", eventID);
+                AssignmentLandingPageIntent.putExtra("activityID", activityID);
                 AssignmentLandingPageIntent.putExtra("assignmentID", cloneActivity.getAssignment().getId());
                 startActivity(AssignmentLandingPageIntent);
             }
@@ -85,7 +88,6 @@ public class ActivityLandingPage extends android.app.Activity {
     @Override
     public void onBackPressed() {
         activityListHandler.deleteActivityFromMapIfNotInList(cloneActivity);
-        //TODO: Probably will need to clear the AssignmentList and Map here for the cloneActivity's assignments
         finish();
         super.onBackPressed();
     }

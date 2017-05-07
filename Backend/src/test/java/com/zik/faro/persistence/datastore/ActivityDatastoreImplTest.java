@@ -23,6 +23,7 @@ import com.zik.faro.data.Assignment;
 import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.data.Item;
 import com.zik.faro.data.Location;
+import com.zik.faro.data.GeoPosition;
 import com.zik.faro.data.Unit;
 
 
@@ -77,8 +78,9 @@ public class ActivityDatastoreImplTest {
     }
     
     private ActivityDo createActivity(String eventId, String name) throws IllegalDataOperation{
+		GeoPosition geoPosition = new GeoPosition(0,0);
     	ActivityDo activity1 = new ActivityDo(eventId, name, "dummyDescription",
-                new Location("Lake Shasta"),
+                new Location("Lake Shasta", "Lake Shasta's Address", geoPosition),
                 new GregorianCalendar(),
                 new GregorianCalendar(),
                 new Assignment());
@@ -133,9 +135,11 @@ public class ActivityDatastoreImplTest {
     	EventDo event = new EventDo("TestEvent");
     	String eventId = event.getId();
     	EventDatastoreImpl.storeEventOnly(event);
+		GeoPosition geoPosition1 = new GeoPosition(0,0);
+		GeoPosition geoPosition2 = new GeoPosition(100,100);
     	
     	ActivityDo a = new ActivityDo(eventId, "TestEvent", "Testing update",
-    			new Location("San Jose"),new GregorianCalendar(), new GregorianCalendar(), new Assignment());
+    			new Location("San Jose", "CA", geoPosition1),new GregorianCalendar(), new GregorianCalendar(), new Assignment());
     	ActivityDatastoreImpl.storeActivity(a);
     	
     	// Verify indeed created
@@ -145,7 +149,7 @@ public class ActivityDatastoreImplTest {
     	a.setStartDate(new GregorianCalendar());
     	a.setEndDate(new GregorianCalendar());
     	a.setDescription("Description changed");
-    	a.setLocation(new Location("Fremont"));
+    	a.setLocation(new Location("Fremont", "CA", geoPosition2));
     	
     	// Update
     	ActivityDatastoreImpl.updateActivity(a, eventId);
@@ -153,7 +157,9 @@ public class ActivityDatastoreImplTest {
     	Assert.assertNotNull(retrievedActivity);
     	
     	// Verify
-    	Assert.assertEquals(retrievedActivity.getLocation().locationName, "Fremont");
+    	Assert.assertEquals(retrievedActivity.getLocation().getLocationName(), "Fremont");
+    	Assert.assertEquals(retrievedActivity.getLocation().getLocationAddress(), "CA");
+    	Assert.assertEquals(retrievedActivity.getLocation().getPosition(), geoPosition2);
     	Assert.assertEquals(retrievedActivity.getDescription(), "Description changed");
     	
     	// Test update with correct version

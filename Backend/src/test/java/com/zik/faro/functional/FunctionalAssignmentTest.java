@@ -24,6 +24,7 @@ import com.zik.faro.data.Event;
 import com.zik.faro.data.IllegalDataOperation;
 import com.zik.faro.data.Item;
 import com.zik.faro.data.Location;
+import com.zik.faro.data.GeoPosition;
 import com.zik.faro.data.Unit;
 
 public class FunctionalAssignmentTest {
@@ -40,8 +41,10 @@ public class FunctionalAssignmentTest {
 
     // Create an event for all activity tests
     private static void createEvent() throws IOException{
+		GeoPosition geoPosition = new GeoPosition(0,0);
     	Event eventCreateData = new Event("Sample functional assignment test", Calendar.getInstance(), Calendar.getInstance(), 
-    			false, "Testing functional assignment", null, new Location("NY-FunctionalAssignmentTest"), "FunctionalAssignmentUser");
+    			false, "Testing functional assignment", null, new
+				Location("NY-FunctionalAssignmentTest", "NY-Address", geoPosition), "FunctionalAssignmentUser");
     	
         ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);
         Event event = response.getEntity(Event.class);
@@ -76,8 +79,9 @@ public class FunctionalAssignmentTest {
     	map = updatedItems;
     	
     	// Create activity
+		GeoPosition geoPosition = new GeoPosition(0,0);
 		Activity activity = new Activity(eventId, "Hiking",
-				"Test activity description", new Location("NYC"),
+				"Test activity description", new Location("NYC", "NYC Address", geoPosition),
 				Calendar.getInstance(), Calendar.getInstance(), null);
 		response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/create", token, activity);
 		Activity activityResponse = response.getEntity(Activity.class);

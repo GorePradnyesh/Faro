@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "21.1.2"
+    buildToolsVersion '25.0.0'
 
     defaultConfig {
         applicationId "com.zik.faro.frontend"
@@ -10,6 +10,14 @@ android {
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
+
+        // Configure app for multidex - https://developer.android.com/studio/build/multidex.html
+        // to avoid the 64K method references limit
+        multiDexEnabled true
+    }
+
+    dexOptions {
+        javaMaxHeapSize "4g"
     }
 
     buildTypes {
@@ -35,7 +43,10 @@ dependencies {
     compile 'com.squareup.okhttp:okhttp:2.5.0'
     compile 'com.google.code.gson:gson:2.4'
     compile 'com.google.guava:guava:18.0'
-    compile 'com.github.bumptech.glide:glide:3.4.0'
+    compile 'com.github.bumptech.glide:glide:3.7.0'
+    compile 'com.google.android.gms:play-services-gcm:10.2.0'
+    compile 'com.google.android.gms:play-services:10.2.0'
+    compile 'com.android.support.constraint:constraint-layout:1.0.0-beta5'
     compile 'com.android.support:support-v4:23.4.0'
     testCompile 'com.auth0:java-jwt:2.1.0'
 }

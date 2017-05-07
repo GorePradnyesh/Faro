@@ -4,8 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -19,12 +21,20 @@ import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.squareup.okhttp.Request;
 import com.zik.faro.data.Event;
+import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.PollOption;
+import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
+import com.zik.faro.frontend.faroservice.FaroServiceHandler;
+import com.zik.faro.frontend.faroservice.HttpError;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ClosedPollLandingPage extends ActionBarActivity {
 
@@ -33,6 +43,8 @@ public class ClosedPollLandingPage extends ActionBarActivity {
     private static Poll clonePoll;
     private static PollListHandler pollListHandler = PollListHandler.getInstance();
     private  static EventListHandler eventListHandler = EventListHandler.getInstance();
+    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+    private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
 
     List<PollOption> pollOptionsList;
 
@@ -44,6 +56,8 @@ public class ClosedPollLandingPage extends ActionBarActivity {
     Intent PickPollWinner = null;
     Intent OpenPollLandingPage = null;
     Intent PollListPage = null;
+
+    private static String TAG = "ClosedPollLandingPage";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +83,7 @@ public class ClosedPollLandingPage extends ActionBarActivity {
         PickPollWinner = new Intent(ClosedPollLandingPage.this, PickPollWinnerPage.class);
         PollListPage = new Intent(ClosedPollLandingPage.this, PollListPage.class);
 
+        final Context mContext = this;
 
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
@@ -87,11 +102,6 @@ public class ClosedPollLandingPage extends ActionBarActivity {
 
                 textView.setText(pollOption.getOption());
                 textView.setGravity(Gravity.CENTER_VERTICAL);
-                //Setting the TextView to display the winning Option
-                if ((pollOption.getId().equals(clonePoll.getWinnerId()))){
-                    winnerPollOptionTV.setText("Winner is: " + pollOption.getOption());
-                    textView.setTextColor(Color.RED);
-                }
 
                 //Create voter count button
                 Button voterCountButton = new Button(this);
@@ -105,6 +115,13 @@ public class ClosedPollLandingPage extends ActionBarActivity {
                         voterListPopUP(v);
                     }
                 });
+
+                //Setting the TextView to display the winning Option
+                if ((pollOption.getId().equals(clonePoll.getWinnerId()))){
+                    winnerPollOptionTV.setText("Winner is: " + pollOption.getOption());
+                    textView.setBackgroundColor(Color.BLUE);
+                    voterCountButton.setBackgroundColor(Color.BLUE);
+                }
 
                 //Insert TextView into pollOptionsTextList
                 RelativeLayout.LayoutParams textViewparams = new RelativeLayout.LayoutParams(
@@ -135,12 +152,44 @@ public class ClosedPollLandingPage extends ActionBarActivity {
                 public void onClick(View v) {
                     //TODO update server of reopening the Poll
 
-                    clonePoll.setWinnerId(null);
-                    pollListHandler.changePollStatusToOpen(clonePoll);
-                    OpenPollLandingPage.putExtra("eventID", eventID);
-                    OpenPollLandingPage.putExtra("pollID", pollID);
-                    startActivity(OpenPollLandingPage);
-                    finish();
+                    Poll pollVersionObj = new Poll();
+                    pollVersionObj.setEventId(clonePoll.getEventId());
+                    pollVersionObj.setId(clonePoll.getId());
+                    pollVersionObj.setVersion(clonePoll.getVersion());
+                    pollVersionObj.setWinnerId(null);
+                    pollVersionObj.setStatus(ObjectStatus.OPEN);
+
+                    Map<String, Object> map = new HashMap<String, Object>();
+                    map.put("poll", pollVersionObj);
+
+                    serviceHandler.getPollHandler().updatePoll(new BaseFaroRequestCallback<Poll>() {
+                        @Override
+                        public void onFailure(Request request, IOException ex) {
+                            Log.e(TAG, "failed to send Poll update request");
+                        }
+
+                        @Override
+                        public void onResponse(final Poll receivedPoll, HttpError error) {
+                            if (error == null ) {
+                                Runnable myRunnable = new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Log.i(TAG, "Poll Update Response received Successfully");
+                                        pollListHandler.removePollFromListAndMap(clonePoll);
+                                        pollListHandler.addPollToListAndMap(receivedPoll);
+                                        OpenPollLandingPage.putExtra("eventID", eventID);
+                                        OpenPollLandingPage.putExtra("pollID", pollID);
+                                        startActivity(OpenPollLandingPage);
+                                        finish();
+                                    }
+                                };
+                                Handler mainHandler = new Handler(mContext.getMainLooper());
+                                mainHandler.post(myRunnable);
+                            }else {
+                                Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                            }
+                        }
+                    }, eventID, pollID, map);
                 }
             });
 
@@ -161,7 +210,13 @@ public class ClosedPollLandingPage extends ActionBarActivity {
         voters.add("Voters are:");
         ListView voterList = (ListView) container.findViewById(R.id.votersList);
         for (String temp : pollOption.getVoters()) {
-            voters.add(temp);
+            String friendName = userFriendListHandler.getFriendFullNameFromID(temp);
+
+            if (friendName != null) {
+                voters.add(friendName);
+            }else{
+                voters.add(temp);
+            }
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<>(ClosedPollLandingPage.this, android.R.layout.simple_spinner_item, voters);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

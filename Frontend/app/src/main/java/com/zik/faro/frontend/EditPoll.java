@@ -32,8 +32,10 @@ import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static android.widget.Toast.LENGTH_LONG;
@@ -139,6 +141,9 @@ public class EditPoll extends Activity {
                 if(!newPollOptionList.isEmpty()) {
                     clonePoll.setPollOptions(newPollOptionList);
 
+                    Map<String, Object> map = new HashMap<String, Object>();
+                    map.put("poll", clonePoll);
+
                     serviceHandler.getPollHandler().updatePoll(new BaseFaroRequestCallback<Poll>() {
                         @Override
                         public void onFailure(Request request, IOException ex) {
@@ -165,7 +170,7 @@ public class EditPoll extends Activity {
                                 Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                             }
                         }
-                    }, eventID, pollID, clonePoll);
+                    }, eventID, pollID, map);
                 }
             }
         });

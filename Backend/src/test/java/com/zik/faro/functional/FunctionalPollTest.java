@@ -21,6 +21,7 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 import com.zik.faro.TestHelper;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.Location;
+import com.zik.faro.data.GeoPosition;
 import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.PollOption;
@@ -39,8 +40,10 @@ public class FunctionalPollTest {
     
     // Create an event for all activity tests
     private static void createEvent() throws IOException{
+		GeoPosition geoPosition = new GeoPosition(0,0);
     	Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(),
-                Calendar.getInstance(), false,"Description",  null, new Location("SFO"), "Mafia god");
+                Calendar.getInstance(), false,"Description",  null, new
+				Location("SFO", "CA", geoPosition), "Mafia god");
     	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);
         Event event = response.getEntity(Event.class);
         FunctionalEventTest.assertEntity(eventCreateData, event);

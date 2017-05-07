@@ -38,6 +38,13 @@ public class AppLandingPage extends FragmentActivity{
             eventListHandler.CreateFaroServiceHandler(baseUrl);
         }
 
+        /*GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this *//* FragmentActivity *//*,
+                        this *//* OnConnectionFailedListener *//*)
+                .addApi()
+                .addScope(Drive.SCOPE_FILE)
+                .build();*/
+
         //Creating the Adapters for all
         if (eventListHandler.acceptedEventAdapter == null) {
             eventListHandler.acceptedEventAdapter = new EventAdapter(this, R.layout.event_row_style);
@@ -62,10 +69,15 @@ public class AppLandingPage extends FragmentActivity{
         if (eventFriendListHandler.acceptedFriendAdapter == null){
             eventFriendListHandler.acceptedFriendAdapter = new EventFriendAdapter(this, R.layout.friend_row_style);
         }
-        if (eventFriendListHandler.notAcceptedFriendAdapter == null){
-            eventFriendListHandler.notAcceptedFriendAdapter = new EventFriendAdapter(this, R.layout.friend_row_style);
+        if (eventFriendListHandler.invitedFriendAdapter == null){
+            eventFriendListHandler.invitedFriendAdapter = new EventFriendAdapter(this, R.layout.friend_row_style);
         }
-
+        if (eventFriendListHandler.mayBeFriendAdapter == null){
+            eventFriendListHandler.mayBeFriendAdapter = new EventFriendAdapter(this, R.layout.friend_row_style);
+        }
+        if (eventFriendListHandler.declinedFriendAdapter == null){
+            eventFriendListHandler.declinedFriendAdapter = new EventFriendAdapter(this, R.layout.friend_row_style);
+        }
         if (pollListHandler.openPollsAdapter == null) {
             pollListHandler.openPollsAdapter = new PollAdapter(this, R.layout.poll_list_page_row_style);
         }

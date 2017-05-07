@@ -1,5 +1,7 @@
 package com.zik.faro.frontend.faroservice.okHttp;
 
+import android.util.Log;
+
 import com.google.gson.reflect.TypeToken;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.Request;
@@ -18,7 +20,9 @@ import java.util.List;
 import java.util.Map;
 
 public class OkHttpWrapperAssignment extends BaseFaroOKHttpWrapper implements AssignmentHandler {
-    
+
+    private static String TAG = "WrapperAssignment";
+
     final URL getEventsUrl;
     public OkHttpWrapperAssignment (final URL baseUrl){
         super(baseUrl, "event");
@@ -102,6 +106,7 @@ public class OkHttpWrapperAssignment extends BaseFaroOKHttpWrapper implements As
     public void updateAssignment(BaseFaroRequestCallback<Map<String, List<Item>>> callback, String eventId, Map<String, List<Item>> items) {
         String token = TokenCache.getTokenCache().getToken();
         String itemList = mapper.toJson(items);
+        Log.i(TAG, itemList);
         if(token != null) {
             Request request = new Request.Builder()
                     .url(this.getEventsUrl + eventId + "/assignment" + "/updateItems")

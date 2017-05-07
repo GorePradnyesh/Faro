@@ -3,25 +3,44 @@ package com.zik.faro.data;
 
 
 public class Location {
-    public String locationName;
-    public GeoPosition position;
 
-    public Location(String locationName, GeoPosition position) {
+
+    private String locationName;
+    private String locationAddress;
+    private GeoPosition position;
+
+    public Location(String locationName, String locationAddress, GeoPosition position) {
         this.locationName = locationName;
+        this.locationAddress = locationAddress;
         this.position = position;
     }
 
-    public Location(String locationName){
-        this.locationName = locationName;
-        this.position = null;
-    }
 
-    public Location(GeoPosition position){
-        this.position = position;
-        this.locationName = null;
-    }
-
-    private Location() {
+    public Location() {
         //this(null, null); // to satisfy JAXB
+    }
+
+    public String getLocationName() {
+        return locationName;
+    }
+
+    public void setLocationName(String locationName) {
+        this.locationName = locationName;
+    }
+
+    public String getLocationAddress() {
+        return locationAddress;
+    }
+
+    public void setLocationAddress(String locationAddress) {
+        this.locationAddress = locationAddress;
+    }
+
+    public GeoPosition getPosition() {
+        return position;
+    }
+
+    public void setPosition(GeoPosition position) {
+        this.position = position;
     }
 }

@@ -72,7 +72,7 @@ public class ActivityListPage extends android.app.Activity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Activity activity = (Activity) parent.getItemAtPosition(position);
                 activityLandingPage.putExtra("activityID", activity.getId());
-                activityLandingPage.putExtra("eventID", event.getId());
+                activityLandingPage.putExtra("eventID", eventID);
                 //TODO: check if startActivityForResult is a better way
                 startActivity(activityLandingPage);
             }
@@ -104,7 +104,7 @@ public class ActivityListPage extends android.app.Activity {
         addActivity.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                createNewActivityPage.putExtra("eventID", event.getId());
+                createNewActivityPage.putExtra("eventID", eventID);
                 startActivity(createNewActivityPage);
             }
         });

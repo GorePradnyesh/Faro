@@ -19,7 +19,6 @@ import android.widget.Toast;
 
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.AddFriendRequest;
-import com.zik.faro.data.InviteeList;
 import com.zik.faro.data.MinUser;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
@@ -49,7 +48,7 @@ public class InviteFriendToEventPage extends Activity {
     private HashSet<String>invitedSet = new HashSet<>();
     private HashSet<String>unInvitedSet = new HashSet<>();
 
-    private Intent EventLandingPageIntent = null;
+    private Intent EventFriendListLandingPageIntent = null;
 
     private Context mContext;
 
@@ -69,7 +68,7 @@ public class InviteFriendToEventPage extends Activity {
             eventID = extras.getString("eventID");
         }
 
-        EventLandingPageIntent = new Intent(InviteFriendToEventPage.this, EventLandingPage.class);
+        EventFriendListLandingPageIntent = new Intent(InviteFriendToEventPage.this, EventFriendListLandingPage.class);
 
         final EditText searchFriend = (EditText)findViewById(R.id.searchFriend);
         Button updateInviteeList = (Button) findViewById(R.id.addFriends);
@@ -94,6 +93,7 @@ public class InviteFriendToEventPage extends Activity {
                     addFriendRequest.setFriendIds(inviteNewInviteesIDList);
 
                     //API call to addFriends to the event
+                    //Todo: Have the friends added, returned back so that the adapters can be updated.
                     serviceHandler.getEventHandler().addInviteesToEvent(new BaseFaroRequestCallback<String>() {
                         @Override
                         public void onFailure(Request request, IOException ex) {
@@ -108,8 +108,8 @@ public class InviteFriendToEventPage extends Activity {
                                     public void run() {
                                         Log.i(TAG, "Friends successfully invited to the event");
                                         Toast.makeText(InviteFriendToEventPage.this, "Successfully Invited friends", LENGTH_LONG).show();
-                                        EventLandingPageIntent.putExtra("eventID", eventID);
-                                        startActivity(EventLandingPageIntent);
+                                        EventFriendListLandingPageIntent.putExtra("eventID", eventID);
+                                        startActivity(EventFriendListLandingPageIntent);
                                         finish();
                                     }
                                 };
@@ -175,9 +175,6 @@ public class InviteFriendToEventPage extends Activity {
             checkBox.setId(i);
             if (eventFriendListHandler.isFriendInvitedToEvent(minUser.getEmail())) {
                 checkBox.setChecked(true);
-                if (eventFriendListHandler.isFriendComingToEvent(minUser.getEmail())) {
-                    checkBox.setBackgroundColor(Color.GREEN);
-                }
             }
 
             if (invitedSet.contains(minUser.getEmail())){
@@ -220,9 +217,6 @@ public class InviteFriendToEventPage extends Activity {
             checkBox.setId(i);
             if (eventFriendListHandler.isFriendInvitedToEvent(minUser.getEmail())) {
                 checkBox.setChecked(true);
-                if (eventFriendListHandler.isFriendComingToEvent(minUser.getEmail())) {
-                    checkBox.setBackgroundColor(Color.GREEN);
-                }
             }
 
             if (invitedSet.contains(minUser.getEmail())){
@@ -255,8 +249,8 @@ public class InviteFriendToEventPage extends Activity {
 
     @Override
     public void onBackPressed() {
-        EventLandingPageIntent.putExtra("eventID", eventID);
-        startActivity(EventLandingPageIntent);
+        EventFriendListLandingPageIntent.putExtra("eventID", eventID);
+        startActivity(EventFriendListLandingPageIntent);
         finish();
         super.onBackPressed();
     }

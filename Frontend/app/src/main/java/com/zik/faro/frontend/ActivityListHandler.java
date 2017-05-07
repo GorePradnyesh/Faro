@@ -13,7 +13,7 @@ public class ActivityListHandler{
     private static final int MAX_TOTAL_ACTIVITIES_IN_CACHE = 500;
     private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
 
-    public ActivityAdapter activityAdapter;
+    ActivityAdapter activityAdapter;
 
     /*
     * Map of activities needed to access activities downloaded from the server in O(1) time. The Key to the
@@ -45,7 +45,7 @@ public class ActivityListHandler{
     * the above reason then once we return back from the ActivityLanding Page we remove it from the
     * Map.
     */
-    public void addActivityToListAndMap(Activity activity) {
+    void addActivityToListAndMap(Activity activity) {
         removeActivityFromListAndMap(activity.getId());
         addActivityToList(activity);
         activityMap.put(activity.getId(), activity);
@@ -155,8 +155,6 @@ public class ActivityListHandler{
     }
 
     public void removeActivityFromListAndMap(String activityID){
-        //TODO: send update to server and if successful then delete activity from List and Map below
-
         removeActivityFromList(activityID, activityAdapter.list);
         activityAdapter.notifyDataSetChanged();
         activityMap.remove(activityID);

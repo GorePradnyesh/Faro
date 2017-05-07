@@ -5,6 +5,8 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -12,14 +14,13 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -31,8 +32,14 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlacePicker;
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.Event;
+import com.zik.faro.data.GeoPosition;
+import com.zik.faro.data.Location;
 import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
@@ -53,6 +60,9 @@ public class EditEvent extends Activity {
     private Button startTimeButton = null;
     private Button endTimeButton = null;
     private Button endDateButton = null;
+    private ImageButton deleteLocation = null;
+
+    private TextView eventAddress = null;
 
     private DateFormat sdf = new SimpleDateFormat("MMM dd yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
@@ -73,7 +83,13 @@ public class EditEvent extends Activity {
 
     Intent EventLanding = null;
 
+    private int PLACE_PICKER_REQUEST = 1;
+
     final Context mContext = this;
+    private Activity mActivity = this;
+
+    private Location location = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,9 +102,13 @@ public class EditEvent extends Activity {
         startTimeButton = (Button) findViewById(R.id.startTimeButton);
         endDateButton = (Button) findViewById(R.id.endDateButton);
         endTimeButton = (Button) findViewById(R.id.endTimeButton);
+        deleteLocation = (ImageButton) findViewById(R.id.deleteLocation);
+        deleteLocation.setImageResource(R.drawable.cancel);
+        deleteLocation.setVisibility(View.GONE);
 
         TextView eventName = (TextView) findViewById(R.id.eventName);
         final EditText eventDescription = (EditText) findViewById(R.id.eventDescriptionEditText);
+        eventAddress = (TextView) findViewById(R.id.locationAddressTextView);
 
         Button editEventOK = (Button) findViewById(R.id.editEventOK);
         Button deleteEventButton = (Button) findViewById(R.id.deleteEvent);
@@ -147,6 +167,38 @@ public class EditEvent extends Activity {
             }
         });
 
+        if (cloneEvent.getLocation() != null){
+            String str = GetLocationAddressString.getLocationAddressString(cloneEvent.getLocation());
+            eventAddress.setText(str);
+            eventAddress.setTextColor(Color.BLUE);
+            eventAddress.setPaintFlags(eventAddress.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+            deleteLocation.setVisibility(View.VISIBLE);
+        }
+
+        eventAddress.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+                try {
+                    Intent intent = builder.build(mActivity);
+                    startActivityForResult(intent, PLACE_PICKER_REQUEST);
+                } catch (GooglePlayServicesRepairableException e) {
+                    e.printStackTrace();
+                } catch (GooglePlayServicesNotAvailableException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        deleteLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                location = null;
+                eventAddress.setText("");
+                deleteLocation.setVisibility(View.GONE);
+            }
+        });
+
         /*
         * Since OK button is pressed we will remove the event from the list and insert the clone.
         */
@@ -155,6 +207,7 @@ public class EditEvent extends Activity {
             public void onClick(View v) {
                 cloneEvent.setStartDate(startDateCalendar);
                 cloneEvent.setEndDate(endDateCalendar);
+                cloneEvent.setLocation(location);
 
                 serviceHandler.getEventHandler().updateEvent(new BaseFaroRequestCallback<Event>() {
                     @Override
@@ -172,7 +225,7 @@ public class EditEvent extends Activity {
                                     //Since update to server successful, adding event to List and Map below
                                     Log.i(TAG, "Event Create Response received Successfully");
                                     eventListHandler.addEventToListAndMap(receivedEvent, EventInviteStatus.ACCEPTED);
-                                    EventLanding.putExtra("eventID", receivedEvent.getId());
+                                    EventLanding.putExtra("eventID", eventID);
                                     startActivity(EventLanding);
                                     finish();
                                 }
@@ -183,7 +236,7 @@ public class EditEvent extends Activity {
                             Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                         }
                     }
-                }, cloneEvent.getId(), cloneEvent);
+                }, eventID, cloneEvent);
             }
         });
 
@@ -209,6 +262,38 @@ public class EditEvent extends Activity {
                 cloneEvent.setEventDescription(eventDescription.getText().toString());
             }
         });
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+
+        if (requestCode == PLACE_PICKER_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                Place place = PlacePicker.getPlace(this, data);
+
+                String locationNameStr = null;
+                String locationAddressStr = null;
+
+                /*
+                 * TODO: Check if the below condition is OK. Basic testing showed that for places
+                 * which do not have a valid name, getName returns the cordinates and we do not want
+                 * to show that. The placeType for these places was set to TYPE_OTHER.
+                 */
+                if (!place.getPlaceTypes().contains(Place.TYPE_OTHER)){
+                    locationNameStr = place.getName().toString();
+                }
+
+                if (!place.getAddress().equals("")){
+                    locationAddressStr = place.getAddress().toString();
+                }
+
+                GeoPosition geoPosition = new GeoPosition(place.getLatLng().latitude, place.getLatLng().longitude);
+                location = new Location(locationNameStr, locationAddressStr, geoPosition);
+
+                String str = GetLocationAddressString.getLocationAddressString(location);
+                eventAddress.setText(str);
+                deleteLocation.setVisibility(View.VISIBLE);
+            }
+        }
     }
 
     private void confirmEventDeletePopUP(View v) {
@@ -456,7 +541,7 @@ public class EditEvent extends Activity {
 
     @Override
     public void onBackPressed() {
-        EventLanding.putExtra("eventID", cloneEvent.getId());
+        EventLanding.putExtra("eventID", eventID);
         startActivity(EventLanding);
         finish();
         super.onBackPressed();

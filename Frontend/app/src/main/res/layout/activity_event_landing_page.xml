@@ -25,7 +25,7 @@
         android:paddingBottom="0dp"/>
 
     <TextView
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/eventDescriptionTextView"
         android:textAppearance="?android:attr/textAppearanceMedium"
@@ -34,7 +34,7 @@
         android:layout_marginTop="10dp"/>
 
     <RelativeLayout
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/startDateTimeLayout"
         android:layout_below="@+id/eventDescriptionTextView"
@@ -56,7 +56,7 @@
 
 
     <RelativeLayout
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/endDateTimeLayout"
         android:layout_below="@+id/startDateTimeLayout"
@@ -76,10 +76,44 @@
             android:layout_toEndOf="@+id/to" />
     </RelativeLayout>
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/mapStuff"
+        android:layout_below="@+id/endDateTimeLayout">
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/mapMarker"
+            android:clickable="true"
+            android:layout_alignParentRight="true"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/locationAddressTextView"
+            android:gravity="center"
+            android:layout_marginTop="10dp"
+            android:layout_toLeftOf="@id/mapMarker"
+            android:linksClickable="true"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="match_parent"
+            android:layout_height="170dp"
+            android:id="@+id/map"
+            tools:context="com.example.nakulshah.googlemaps.MapsActivity"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_below="@+id/mapMarker"
+            android:layout_marginTop="10dp"/>
+
+    </RelativeLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/endDateTimeLayout">
+        android:layout_below="@+id/mapStuff"
+        android:layout_marginTop="10dp">
         <ImageButton
             android:layout_width="0px"
             android:layout_height="wrap_content"
@@ -104,7 +138,7 @@
             android:layout_width="0px"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:id="@+id/addFriendsImageButton"
+            android:id="@+id/guestListImageButton"
             android:clickable="true"/>
     </LinearLayout>
 

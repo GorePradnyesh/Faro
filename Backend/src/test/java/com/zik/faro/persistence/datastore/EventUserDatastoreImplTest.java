@@ -4,6 +4,7 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
 import com.zik.faro.data.Location;
+import com.zik.faro.data.GeoPosition;
 import com.zik.faro.data.expense.ExpenseGroup;
 import com.zik.faro.data.user.Address;
 import com.zik.faro.persistence.datastore.data.EventDo;
@@ -43,12 +44,13 @@ public class EventUserDatastoreImplTest {
     @Test
     public void testEventUserLoadStore(){
         final String eventName = UUID.randomUUID().toString();
+		GeoPosition geoPosition = new GeoPosition(0,0);
         EventDo testEvent = new EventDo(eventName,
         		Calendar.getInstance(),
         		Calendar.getInstance(),
                 false,
                 new ExpenseGroup("Lake Shasta", "shasta123"),
-                new Location("Lake Shasta"));
+                new Location("Lake Shasta", "Lake Shasta's Address", geoPosition));
         DatastoreObjectifyDAL.storeObject(testEvent);
 
 
@@ -69,28 +71,31 @@ public class EventUserDatastoreImplTest {
 
     @Test
     public void testEventUserLoadDelete(){
+		GeoPosition geoPosition1 = new GeoPosition(0,0);
         EventDo event1 = new EventDo("Event1",
         		Calendar.getInstance(),
         		Calendar.getInstance(),
                 false,
                 new ExpenseGroup("ExpenseGroupName1", "ExpenseGroupId1"),
-                new Location("Location1"));
+                new Location("Location1", "Address1", geoPosition1));
         DatastoreObjectifyDAL.storeObject(event1);
 
+		GeoPosition geoPosition2 = new GeoPosition(100,100);
         EventDo event2 = new EventDo("Event2",
         		Calendar.getInstance(),
         		Calendar.getInstance(),
                 false,
                 new ExpenseGroup("ExpenseGroupName2", "ExpenseGroupId2"),
-                new Location("Location2"));
+                new Location("Location2", "Address2", geoPosition2));
         DatastoreObjectifyDAL.storeObject(event2);
 
+		GeoPosition geoPosition3 = new GeoPosition(50,50);
         EventDo event3 = new EventDo("Event3",
         		Calendar.getInstance(),
         		Calendar.getInstance(),
                 false,
                 new ExpenseGroup("ExpenseGroupName3", "ExpenseGroupId3"),
-                new Location("Location3"));
+                new Location("Location3", "Address3", geoPosition3));
         DatastoreObjectifyDAL.storeObject(event3);
 
         FaroUserDo faroUser1 = new FaroUserDo("user1@gmail.com", "FirstNAme1", null, "LastName1", "expenseid1@splitwise.com",
@@ -128,12 +133,13 @@ public class EventUserDatastoreImplTest {
 
     @Test
     public void testEventUserIdempotency(){
+		GeoPosition geoPosition1 = new GeoPosition(0,0);
         EventDo event1 = new EventDo("Event1",
         		Calendar.getInstance(),
         		Calendar.getInstance(),
                 false,
                 new ExpenseGroup("ExpenseGroupName1", "ExpenseGroupId1"),
-                new Location("Location1"));
+                new Location("Location1", "Address1", geoPosition1));
         DatastoreObjectifyDAL.storeObject(event1);
 
         FaroUserDo faroUser1 = new FaroUserDo("user1@gmail.com", "FirstNAme1", null, "LastName1", "expenseid1@splitwise.com",
@@ -152,12 +158,13 @@ public class EventUserDatastoreImplTest {
     @Test
     public void testEventUserRemoval(){
     	// Create Event
+		GeoPosition geoPosition1 = new GeoPosition(0,0);
     	EventDo event1 = new EventDo("Event1",
     			Calendar.getInstance(),
     			Calendar.getInstance(),
                 false,
                 new ExpenseGroup("ExpenseGroupName1", "ExpenseGroupId1"),
-                new Location("Location1"));
+                new Location("Location1", "Address1", geoPosition1));
         DatastoreObjectifyDAL.storeObject(event1);
         // Create FaroUser
         FaroUserDo faroUser1 = new FaroUserDo("user1@gmail.com", "FirstNAme1", null, "LastName1", "expenseid1@splitwise.com",

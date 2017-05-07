@@ -24,6 +24,7 @@ import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
 import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.Location;
+import com.zik.faro.data.GeoPosition;
 import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.PollOption;
 import com.zik.faro.data.expense.ExpenseGroup;
@@ -58,12 +59,13 @@ public class PollDatastoreImplTest {
     
     private EventDo createEvent(){
     	String eventNameSuffix = UUID.randomUUID().toString();
+		GeoPosition geoPosition = new GeoPosition(0,0);
         EventDo testEvent = new EventDo("Lake Shasta "+ eventNameSuffix,
         		Calendar.getInstance(),
         		Calendar.getInstance(),
                 false,
                 new ExpenseGroup("Lake Shasta", "shasta123"),
-                new Location("Lake Shasta"));
+                new Location("Lake Shasta", "CA", geoPosition));
 
         EventDatastoreImpl.storeEventOnly(testEvent);
         return testEvent;
