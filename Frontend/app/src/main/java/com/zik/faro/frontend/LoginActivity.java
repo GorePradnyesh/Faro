@@ -82,7 +82,6 @@ public class LoginActivity extends Activity {
                 String email = faroCache.loadFaroCacheFromDisk("email");
                 if (email != null){
                     faroUserContext.setEmail(email);
-                    //appLandingPageIntent.putExtra("baseUrl", baseUrl);
                     startActivity(appLandingPageIntent);
                     finish();
                 }else{
@@ -135,6 +134,8 @@ public class LoginActivity extends Activity {
         String password = passwordTextBox.getText().toString();
 
         Log.i(TAG, MessageFormat.format("username :{0} password :{1}", email, password));
+
+        Log.i(TAG, "serverIP = " + ((FaroApplication)getApplication()).getAppServerIp());
 
         // Create Faro service handler
         serviceHandler = FaroServiceHandler.getFaroServiceHandler();

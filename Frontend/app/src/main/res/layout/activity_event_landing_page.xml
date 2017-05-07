@@ -12,7 +12,7 @@
         android:layout_marginTop="30dp"
         android:layout_marginBottom="30dp" />
 
-    <fragment android:name="com.zik.faro.frontend.FbLoginPage"
+    <fragment android:name="com.zik.faro.frontend.FbLoginFragment"
         android:id="@+id/fb_login_page"
         android:layout_weight="1"
         android:layout_width="0dp"

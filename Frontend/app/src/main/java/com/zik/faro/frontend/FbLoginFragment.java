@@ -1,8 +1,8 @@
 package com.zik.faro.frontend;
 
-import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,16 +14,15 @@ import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
-import com.google.common.collect.Lists;
 
 import java.text.MessageFormat;
 
 /**
  * Created by granganathan on 9/18/16.
  */
-public class FbLoginPage extends Fragment {
+public class FbLoginFragment extends Fragment {
     private CallbackManager callbackManager;
-    private static final String TAG = "FbLoginPage";
+    private static final String TAG = "FbLoginFragment";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -45,6 +44,7 @@ public class FbLoginPage extends Fragment {
                 Log.i(TAG, MessageFormat.format("current accesstoken = {0} ", AccessToken.getCurrentAccessToken().getToken()));
                 Log.i(TAG, MessageFormat.format("recently granted permissions = {0}", loginResult.getRecentlyGrantedPermissions()));
                 Log.i(TAG, MessageFormat.format("recently denied  permissions = {0}", loginResult.getRecentlyDeniedPermissions()));
+
             }
 
             @Override
@@ -59,14 +59,6 @@ public class FbLoginPage extends Fragment {
                 Log.e(TAG, "error logging into facebook", exception);
             }
         });
-
-        AccessToken accessToken = AccessToken.getCurrentAccessToken();
-
-        if (accessToken == null || accessToken.isExpired()) {
-            LoginManager.getInstance().logInWithReadPermissions(this, Lists.newArrayList("user_photos"));
-        } else {
-            printAccessToken(accessToken);
-        }
     }
 
     @Override
@@ -75,7 +67,4 @@ public class FbLoginPage extends Fragment {
         callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void printAccessToken(AccessToken accessToken) {
-        Log.i(TAG, MessageFormat.format("accessToken : = {0}  {1}", accessToken.getToken(), accessToken.getPermissions()));
-    }
 }

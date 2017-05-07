@@ -30,7 +30,7 @@ public class ImageAdapter extends ArrayAdapter {
         ImageView imageView;
         if (convertView == null) {
             imageView = new ImageView(context);
-            imageView.setLayoutParams(new GridView.LayoutParams(350, 350));
+            imageView.setLayoutParams(new GridView.LayoutParams(255, 255));
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             imageView.setPadding(10, 10, 10, 10);
         } else {

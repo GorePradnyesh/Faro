@@ -15,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
@@ -132,7 +133,8 @@ public class ImagePickerActivity extends AppCompatActivity {
             ImageView imageView;
             if (convertView == null) {
                 imageView = new ImageView(context);
-                imageView.setLayoutParams(new GridView.LayoutParams(350, 350));
+                imageView.setLayoutParams(gridView.getLayoutParams());
+                imageView.setLayoutParams(new GridView.LayoutParams(255, 255));
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 imageView.setPadding(10, 10, 10, 10);
             } else {
@@ -142,6 +144,7 @@ public class ImagePickerActivity extends AppCompatActivity {
             String pictureName = imageNames.get(position);
 
             if (selectedImages.contains(pictureName)) {
+                ViewParent viewParent = imageView.getParent();
                 imageView.setBackground(getResources().getDrawable(R.drawable.image_view_highlight));
             } else {
                 imageView.setBackground(null);

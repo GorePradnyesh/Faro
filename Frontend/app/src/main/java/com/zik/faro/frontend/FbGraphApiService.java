@@ -1,8 +1,14 @@
 package com.zik.faro.frontend;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
 import com.facebook.AccessToken;
@@ -35,6 +41,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by granganathan on 7/23/16.
@@ -42,8 +49,8 @@ import java.util.concurrent.Executors;
 public class FbGraphApiService {
     private String TAG = "FbGraphApiService";
     private AccessToken accessToken;
-    private static final long FB_IMAGES_REQUEST_TIMEOUT_SECS = 60;
     private static final int NUM_THREADS = 10;
+    private final static AtomicInteger notificationIdGenerator = new AtomicInteger(0);
 
     // TODO : need an optimal configuration of the threadpool
     private static ExecutorService threadPool = Executors.newFixedThreadPool(NUM_THREADS);
@@ -209,7 +216,46 @@ public class FbGraphApiService {
         return faroImages;
     }
 
-    public void uploadPhotos(final List<String> photoPaths, final Event event) {
+    private NotificationCompat.Builder postNotification(Context context, int notificationId, Event event) {
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
+                .setSmallIcon(R.drawable.notification)
+                .setContentTitle("Faro Images Upload")
+                .setContentText("Upload in progress")
+                .setProgress(0, 0, true);
+
+        // Create an explicit intent for the Image GridView Activity in your app
+        Intent imagesViewIntent = new Intent(context, ImageGridViewActivity.class);
+        imagesViewIntent.putExtra("eventId", event.getEventId());
+        imagesViewIntent.putExtra("eventName", event.getEventName());
+
+        // The stack builder object will contain an artificial back stack for the
+        // started Activity.
+        // This ensures that navigating backward from the Activity leads out of
+        // your application to the Home screen.
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+        // Adds the back stack for the Intent (but not the Intent itself)
+        stackBuilder.addParentStack(ImageGridViewActivity.class);
+        // Adds the Intent that starts the Activity to the top of the stack
+        stackBuilder.addNextIntent(imagesViewIntent);
+        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        notificationBuilder.setContentIntent(resultPendingIntent);
+        NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        // mId allows you to update the notification later
+        mNotificationManager.notify(notificationId, notificationBuilder.build());
+
+        return notificationBuilder;
+    }
+
+    private void updateNotification(NotificationCompat.Builder notificationBuilder, Context context, int notificationId) {
+        notificationBuilder.setContentText("Upload Complete")
+                .setProgress(0, 0, false);
+
+        NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        // mId allows you to update the notification later
+        mNotificationManager.notify(notificationId, notificationBuilder.build());
+    }
+
+    public void uploadPhotos(final List<String> photoPaths, final Event event, final Context context) {
         threadPool.submit(new Callable<List<String>>() {
             @Override
             public List<String> call() throws JSONException {
@@ -263,6 +309,9 @@ public class FbGraphApiService {
                         requestMap.put(graphRequest, photoPath);
                     }
 
+                    final int notificationId = notificationIdGenerator.getAndIncrement();
+                    final NotificationCompat.Builder notificationBuilder = postNotification(context, notificationId, event);
+
                     // Execute the batch request and handle the result
                     List<GraphResponse> responseList = batchRequest.executeAndWait();
 
@@ -295,6 +344,7 @@ public class FbGraphApiService {
                         public void onResponse(List<FaroImageBase> faroImageBases, HttpError error) {
                             if (error == null) {
                                 Log.i(TAG, "saved images successfully on app serever");
+                                updateNotification(notificationBuilder, context, notificationId);
                             } else {
                                 Log.e(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                             }

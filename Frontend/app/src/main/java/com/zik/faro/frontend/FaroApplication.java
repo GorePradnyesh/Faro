@@ -38,11 +38,7 @@ public class FaroApplication extends Application {
         // Read app config properties
         appServerIP = ConfigPropertiesUtil.getProperty(APP_SERVER_IP_KEY, this);
         appServerBaseUrl = MessageFormat.format(BASE_URL_TEMPLATE, appServerIP);
-        try {
-            FaroServiceHandler.initializeInstance(new URL(appServerBaseUrl));
-        } catch (MalformedURLException e) {
-            throw new RuntimeException("malformed URL, could not initialize FaroServiceHandler");
-        }
+        setupFaroServiceHandler();
 
         maxImagesUpload = Integer.parseInt(ConfigPropertiesUtil.getProperty(MAX_IMAGES_UPLOAD_KEY, this));
     }
@@ -58,6 +54,15 @@ public class FaroApplication extends Application {
     public void overRideAppServerIp(String appServerIP) {
         this.appServerIP = appServerIP;
         this.appServerBaseUrl = MessageFormat.format(BASE_URL_TEMPLATE, appServerIP);
+        setupFaroServiceHandler();
+    }
+
+    private void setupFaroServiceHandler() {
+        try {
+            FaroServiceHandler.initializeInstance(new URL(appServerBaseUrl));
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("malformed URL, could not initialize FaroServiceHandler");
+        }
     }
 
     public int getMaxImagesUploaded() {
