@@ -8,19 +8,12 @@ import com.zik.faro.data.MinUser;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
-import com.zik.faro.frontend.faroservice.spec.FriendsHandler;
 
 import junit.framework.Assert;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -36,7 +29,7 @@ public class FriendsApiTest extends ApiBaseTest{
     public void testInviteFriends() throws InterruptedException, MalformedURLException {
         // Sign up user, so that the token cache is populated
         final Semaphore waitSem = new Semaphore(0);
-        FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
+        FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
         
         String uuidEmail1 = UUID.randomUUID().toString() + "@gmail.com";
         String password1 = UUID.randomUUID().toString();

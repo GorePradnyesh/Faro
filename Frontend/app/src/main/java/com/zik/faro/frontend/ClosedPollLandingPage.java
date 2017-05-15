@@ -22,7 +22,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.squareup.okhttp.Request;
-import com.zik.faro.data.Event;
 import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.PollOption;
@@ -42,8 +41,7 @@ public class ClosedPollLandingPage extends ActionBarActivity {
     private static String pollID = null;
     private static Poll clonePoll;
     private static PollListHandler pollListHandler = PollListHandler.getInstance();
-    private  static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;
+    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
 
     List<PollOption> pollOptionsList;

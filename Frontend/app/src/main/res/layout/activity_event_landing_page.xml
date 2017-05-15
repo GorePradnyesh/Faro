@@ -4,6 +4,20 @@
     android:layout_height="match_parent"
     tools:context="com.zik.faro.frontend.EventLandingPage">
 
+    <com.facebook.login.widget.LoginButton
+        android:id="@+id/login_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="30dp" />
+
+    <fragment android:name="com.zik.faro.frontend.FbLoginFragment"
+        android:id="@+id/fb_login_page"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:layout_height="match_parent" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -76,6 +90,7 @@
             android:layout_toEndOf="@+id/to" />
     </RelativeLayout>
 
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -113,7 +128,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/mapStuff"
-        android:layout_marginTop="10dp">
+        android:layout_marginTop="10dp"
+        android:id="@+id/linearLayout">
         <ImageButton
             android:layout_width="0px"
             android:layout_height="wrap_content"
@@ -169,6 +185,31 @@
             android:clickable="true"
             android:text="@string/MAYBE"/>
     </LinearLayout>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Photos"
+        android:id="@+id/photosButton"
+        android:layout_below="@+id/linearLayout"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Take Photo"
+        android:id="@+id/cameraButton"
+        android:layout_alignTop="@+id/photosButton"
+        android:layout_toEndOf="@+id/photosButton"
+        android:layout_alignBottom="@+id/photosButton" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Upload Photos"
+        android:id="@+id/uploadPhotosButton"
+        android:layout_alignTop="@+id/cameraButton"
+        android:layout_toEndOf="@+id/eventNameText" />
 
 </RelativeLayout>
 

@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.util.List;
 
 public class PollListPage extends Activity {
-
     Intent EventLandingPage = null;
     Intent OpenPollLandingPage = null;
     Intent ClosedPollLandingPage = null;
@@ -35,7 +34,7 @@ public class PollListPage extends Activity {
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static Event event;
     private static String eventID = null;
-    private static FaroServiceHandler serviceHandler;
+    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
     private static String TAG = "PollListPage";
 
@@ -43,8 +42,6 @@ public class PollListPage extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_poll_list_page);
-
-        serviceHandler = eventListHandler.serviceHandler;
 
         EventLandingPage = new Intent(PollListPage.this, EventLandingPage.class);
         OpenPollLandingPage = new Intent(PollListPage.this, OpenPollLandingPage.class);

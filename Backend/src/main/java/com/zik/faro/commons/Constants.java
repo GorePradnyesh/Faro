@@ -27,6 +27,10 @@ public final class Constants {
     public static final String POLL_ID_PATH_PARAM                               = "pollId";
     public static final String POLL_ID_PATH_PARAM_STRING                        = "/{" + POLL_ID_PATH_PARAM +"}";
 
+    public static final String IMAGE_ID_PATH_PARAM                              = "imageId";
+    public static final String IMAGE_ID_PATH_PARAM_STRING                       = "/{" + IMAGE_ID_PATH_PARAM + "}";
+
+
     //---- Path Constants ---- //
     public static final String EXPENSE_ID_PATH_CONST                            = "/expenseIds";
     public static final String EXPENSE_PATH_CONST                               = "/expense";
@@ -73,7 +77,12 @@ public final class Constants {
     public static final String POLL_UPDATE_PATH_CONST                             = "/updatePoll";
     public static final String POLL_ADD_OPTION_PATH_CONST                       = "/addOption";
     public static final String POLL_CLOSE_PATH_CONST                            = "/close";
-    
+
+    // ---- images path constants ---- //
+    public static final String IMAGE_PATH_CONST                                 = "/image";
+    public static final String IMAGES_PATH_CONST                                = "/images";
+    public static final String IMAGES_CREATE_CONST                              = "/create";
+
     // ---- misc constants ---- //
     public static final String ALL												= "all";
     public static final int MAX_ITEMS_TO_FETCH_FROM_DATASTORE					= 20;

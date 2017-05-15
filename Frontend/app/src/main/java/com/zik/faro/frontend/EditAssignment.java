@@ -54,7 +54,7 @@ public class EditAssignment extends android.app.Activity {
     private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
     private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
     private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler;
+    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
     private String eventID = null;
     private String activityID = null;
@@ -78,8 +78,6 @@ public class EditAssignment extends android.app.Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_assignment);
-
-        serviceHandler = eventListHandler.serviceHandler;
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 

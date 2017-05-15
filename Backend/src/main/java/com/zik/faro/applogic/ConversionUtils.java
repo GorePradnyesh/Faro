@@ -2,10 +2,14 @@ package com.zik.faro.applogic;
 
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Event;
+import com.zik.faro.data.FaroImageBase;
+import com.zik.faro.data.FbImage;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.persistence.datastore.data.ActivityDo;
 import com.zik.faro.persistence.datastore.data.EventDo;
+import com.zik.faro.persistence.datastore.data.FaroImageDo;
+import com.zik.faro.data.ImageProvider;
 import com.zik.faro.persistence.datastore.data.PollDo;
 import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 
@@ -129,5 +133,25 @@ public class ConversionUtils {
 		faroUser.setAddress(faroUserDo.getAddress());
 		faroUser.setInviteStatus(faroUserDo.getInviteStatus());
 		return faroUser;
+	}
+
+	public static FaroImageBase fromDo(FaroImageDo imageDo) {
+        FaroImageBase faroImage;
+
+		if (ImageProvider.FACEBOOK.equals(imageDo.getImageProvider())) {
+			faroImage = new FbImage()
+					.withFaroUserId(imageDo.getFaroUserId())
+					.withImageName(imageDo.getImageName())
+					.withAlbumName(imageDo.getAlbumName())
+					.withCreatedTime(imageDo.getCreatedTime())
+					.withEventId(imageDo.getEventId())
+					.withPublicUrl(imageDo.getPublicUrl())
+					.withHeight(imageDo.getHeight())
+					.withWidth(imageDo.getWidth());
+		} else {
+			throw new IllegalStateException("Invalid image provider");
+		}
+
+		return faroImage;
 	}
 }

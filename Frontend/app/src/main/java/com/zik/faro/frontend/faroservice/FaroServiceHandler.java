@@ -7,11 +7,13 @@ import com.zik.faro.frontend.faroservice.okHttp.OKHttpWrapperLogin;
 import com.zik.faro.frontend.faroservice.okHttp.OKHttpWrapperPoll;
 import com.zik.faro.frontend.faroservice.okHttp.OKHttpWrapperSignup;
 import com.zik.faro.frontend.faroservice.okHttp.OkHttpWrapperAssignment;
+import com.zik.faro.frontend.faroservice.okHttp.OkHttpWrapperImage;
 import com.zik.faro.frontend.faroservice.okHttp.OkHttpWrapperProfile;
 import com.zik.faro.frontend.faroservice.spec.ActivityHandler;
 import com.zik.faro.frontend.faroservice.spec.AssignmentHandler;
 import com.zik.faro.frontend.faroservice.spec.EventHandler;
 import com.zik.faro.frontend.faroservice.spec.FriendsHandler;
+import com.zik.faro.frontend.faroservice.spec.ImagesHandler;
 import com.zik.faro.frontend.faroservice.spec.LoginHandler;
 import com.zik.faro.frontend.faroservice.spec.PollHandler;
 import com.zik.faro.frontend.faroservice.spec.ProfileHandler;
@@ -20,6 +22,7 @@ import com.zik.faro.frontend.faroservice.spec.SignupHandler;
 import java.net.URL;
 
 public class FaroServiceHandler {
+    private static  FaroServiceHandler serviceHandler;
     private EventHandler        eventHandler;
     private ProfileHandler      profileHandler;
     private SignupHandler       signupHandler;
@@ -28,19 +31,26 @@ public class FaroServiceHandler {
     private PollHandler         pollHandler;
     private FriendsHandler      friendsHandler;
     private AssignmentHandler   assignmentHandler;
+    private ImagesHandler       imagesHandler;
 
-    private FaroServiceHandler(){}
+    private FaroServiceHandler(URL baseUrl) {
+        eventHandler = new OKHttpWrapperEvent(baseUrl);
+        profileHandler = new OkHttpWrapperProfile(baseUrl);
+        signupHandler = new OKHttpWrapperSignup(baseUrl);
+        loginHandler = new OKHttpWrapperLogin(baseUrl);
+        pollHandler = new OKHttpWrapperPoll(baseUrl);
+        activityHandler = new OKHttpWrapperActivity(baseUrl);
+        friendsHandler = new OKHttpWrapperFriends(baseUrl);
+        assignmentHandler = new OkHttpWrapperAssignment(baseUrl);
+        imagesHandler = new OkHttpWrapperImage(baseUrl);
+    }
 
-    public static FaroServiceHandler getFaroServiceHandler(final URL baseUrl){
-        FaroServiceHandler serviceHandler = new FaroServiceHandler();
-        serviceHandler.eventHandler = new OKHttpWrapperEvent(baseUrl);
-        serviceHandler.profileHandler = new OkHttpWrapperProfile(baseUrl);
-        serviceHandler.signupHandler = new OKHttpWrapperSignup(baseUrl);
-        serviceHandler.loginHandler = new OKHttpWrapperLogin(baseUrl);
-        serviceHandler.pollHandler = new OKHttpWrapperPoll(baseUrl);
-        serviceHandler.activityHandler = new OKHttpWrapperActivity(baseUrl);
-        serviceHandler.friendsHandler = new OKHttpWrapperFriends(baseUrl);
-        serviceHandler.assignmentHandler = new OkHttpWrapperAssignment(baseUrl);
+    public static FaroServiceHandler initializeInstance(URL baseUrl) {
+        serviceHandler = new FaroServiceHandler(baseUrl);
+        return serviceHandler;
+    }
+
+    public static FaroServiceHandler getFaroServiceHandler() {
         return serviceHandler;
     }
 
@@ -74,5 +84,9 @@ public class FaroServiceHandler {
 
     public AssignmentHandler getAssignmentHandler() {
         return assignmentHandler;
+    }
+
+    public ImagesHandler getImagesHandler() {
+        return imagesHandler;
     }
 }

@@ -115,7 +115,7 @@ public class ActivityHandler {
     @DELETE
     public JResponse<String> deleteActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                  @PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId){
-       ActivityManagement.deteleActivity(eventId, activityId);
+       ActivityManagement.deleteActivity(eventId, activityId);
        return JResponse.ok(Constants.HTTP_OK).build();
     }
     

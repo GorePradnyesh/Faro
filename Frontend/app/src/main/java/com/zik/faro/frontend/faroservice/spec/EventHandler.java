@@ -10,12 +10,12 @@ import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import java.util.List;
 
 public interface EventHandler {
-    public void getEvents(final BaseFaroRequestCallback<List<EventInviteStatusWrapper>> callback);
-    public void getEvent(final BaseFaroRequestCallback<Event> callback, final String eventId);
-    public void createEvent(final BaseFaroRequestCallback<Event> callback, Event event);
-    public void deleteEvent(final BaseFaroRequestCallback<String> callback, final String eventId);
-    public void getEventInvitees(final BaseFaroRequestCallback<InviteeList> callback, final String eventId);
-    public void addInviteesToEvent(final BaseFaroRequestCallback<String> callback, final String eventId, final AddFriendRequest addFriendRequest);
-    public void updateEventUserInviteStatus(final BaseFaroRequestCallback<String> callback, final String eventId, EventInviteStatus inviteStatus);
-    public void updateEvent(final BaseFaroRequestCallback<Event> callback, String eventId, Event event);
+    void getEvents(final BaseFaroRequestCallback<List<EventInviteStatusWrapper>> callback);
+    void getEvent(final BaseFaroRequestCallback<Event> callback, final String eventId);
+    void createEvent(final BaseFaroRequestCallback<Event> callback, Event event);
+    void deleteEvent(final BaseFaroRequestCallback<String> callback, final String eventId);
+    void getEventInvitees(final BaseFaroRequestCallback<InviteeList> callback, final String eventId);
+    void addInviteesToEvent(final BaseFaroRequestCallback<String> callback, final String eventId, final AddFriendRequest addFriendRequest);
+    void updateEventUserInviteStatus(final BaseFaroRequestCallback<String> callback, final String eventId, EventInviteStatus inviteStatus);
+    void updateEvent(final BaseFaroRequestCallback<Event> callback, String eventId, Event event);
 }

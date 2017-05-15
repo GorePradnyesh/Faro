@@ -1,9 +1,7 @@
 package com.zik.faro.frontend;
 
 import android.app.Activity;
-import android.app.Application;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -21,8 +19,6 @@ import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 import com.zik.faro.frontend.faroservice.auth.TokenCache;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 /**
  * Created by granganathan on 1/24/16.
@@ -30,21 +26,22 @@ import java.net.URL;
 public class SignupActivity extends Activity {
     private String TAG = "SignupActivity";
     private static FaroServiceHandler serviceHandler = null;
-    protected static final String baseUrl = "http://10.0.2.2:8080/v1/";
-    private String baseUrl2 = "http://10.0.2.2:8080/v1/";
 
     private EditText nameTextBox;
     private EditText emailTextBox;
     private EditText passwordTextBox;
     private EditText confirmPasswordBox;
 
-    private Intent AppLandingPageIntent;
+    private Intent appLandingPageIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // Init the activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
+
+        // Create Faro service handler
+        serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
         // Bind the data fields with the corresponding View components
         nameTextBox = (EditText)findViewById(R.id.signupName);
@@ -53,7 +50,7 @@ public class SignupActivity extends Activity {
         confirmPasswordBox = (EditText)findViewById(R.id.confirmPassword);
         final EditText serverIPAddressEditText = (EditText)findViewById(R.id.ipAddress);
 
-        AppLandingPageIntent = new Intent(SignupActivity.this, AppLandingPage.class);
+        appLandingPageIntent = new Intent(SignupActivity.this, AppLandingPage.class);
 
         serverIPAddressEditText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -68,10 +65,8 @@ public class SignupActivity extends Activity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (serverIPAddressEditText.getText().toString().trim().isEmpty()){
-                    baseUrl2 = "http://10.0.2.2:8080/v1/";
-                }else{
-                    baseUrl2 = "http://" + serverIPAddressEditText.getText().toString() + ":8080/v1/";
+                if (!serverIPAddressEditText.getText().toString().trim().isEmpty()) {
+                    ((FaroApplication)getApplication()).overRideAppServerIp(serverIPAddressEditText.getText().toString().trim());
                 }
             }
         });
@@ -135,13 +130,6 @@ public class SignupActivity extends Activity {
             null, null, null, null);
             newFaroUser.setFirstName(name);
 
-            // Create Faro service handler
-            try {
-                serviceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl2));
-            } catch (MalformedURLException e) {
-                Log.e(TAG, "failed to obtain servicehandler", e);
-            }
-
             serviceHandler.getSignupHandler().signup(new BaseFaroRequestCallback<String>() {
                 @Override
                 public void onFailure(Request request, IOException ex) {
@@ -158,8 +146,7 @@ public class SignupActivity extends Activity {
                         faroUserContext.setEmail(email);
 
                         // Go to event list page
-                        AppLandingPageIntent.putExtra("baseUrl", baseUrl2);
-                        startActivity(AppLandingPageIntent);
+                        startActivity(appLandingPageIntent);
                         finish();
                     } else {
                         Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());

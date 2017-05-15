@@ -41,15 +41,13 @@ public class CreateNewPoll extends Activity {
     static FaroUserContext faroUserContext = FaroUserContext.getInstance();
     String myUserId = faroUserContext.getEmail();
 
-    private static FaroServiceHandler serviceHandler;
+    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private static String TAG = "CreateNewPoll";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_new_poll);
-
-        serviceHandler = eventListHandler.serviceHandler;
 
         final EditText pollDescription = (EditText)findViewById(R.id.pollDescription);
         final CheckBox isMultiChoice = (CheckBox)findViewById(R.id.multiChoiceFlag);

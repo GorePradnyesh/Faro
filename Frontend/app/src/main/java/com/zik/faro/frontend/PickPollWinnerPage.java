@@ -18,14 +18,11 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.squareup.okhttp.Request;
-import com.zik.faro.data.Event;
 import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.PollOption;
@@ -50,7 +47,7 @@ public class PickPollWinnerPage extends Activity {
 
     private static PollListHandler pollListHandler = PollListHandler.getInstance();
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler;
+    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
 
 
@@ -74,8 +71,6 @@ public class PickPollWinnerPage extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pick_poll_winner);
-
-        serviceHandler = eventListHandler.serviceHandler;
 
         final TextView pollDesc = (TextView)findViewById(R.id.pollDescription);
         final Button selectWinner = (Button) findViewById(R.id.selectWinner);

@@ -26,6 +26,14 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.squareup.okhttp.Request;
+import com.zik.faro.data.Poll;
+import com.zik.faro.data.PollOption;
+import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
+import com.zik.faro.frontend.faroservice.FaroServiceHandler;
+import com.zik.faro.frontend.faroservice.HttpError;
+import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,14 +44,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static android.widget.Toast.LENGTH_LONG;
-
-import com.squareup.okhttp.Request;
-import com.zik.faro.data.Poll;
-import com.zik.faro.data.PollOption;
-import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
-import com.zik.faro.frontend.faroservice.FaroServiceHandler;
-import com.zik.faro.frontend.faroservice.HttpError;
-import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 
 public class OpenPollLandingPage extends Activity {
 
@@ -56,7 +56,7 @@ public class OpenPollLandingPage extends Activity {
 
     static FaroUserContext faroUserContext = FaroUserContext.getInstance();
     private String myUserId = faroUserContext.getEmail();
-    private static FaroServiceHandler serviceHandler;
+    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
 
     //Maps to manage Multichoice polls
@@ -89,8 +89,6 @@ public class OpenPollLandingPage extends Activity {
         protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_open_poll_landing_page);
-
-        serviceHandler = eventListHandler.serviceHandler;
 
         final TextView pollDesc = (TextView)findViewById(R.id.pollDescription);
 

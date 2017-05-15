@@ -7,15 +7,14 @@ import android.util.Log;
 
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.user.FaroUser;
+import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
-import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 
 import junit.framework.Assert;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -28,10 +27,11 @@ public class ProfileApiTest extends ApplicationTestCase<Application> {
 
     private String getTokenForNewUser(final String username, final String password) throws InterruptedException, MalformedURLException {
         final Semaphore waitSem = new Semaphore(0);
-        FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
+        FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
         
         Utils.TestSignupCallback callback = new Utils.TestSignupCallback(waitSem, 200);
-        serviceHandler.getSignupHandler().signup(callback, new FaroUser(username), password);
+        serviceHandler.getSignupHandler().signup(callback, new FaroUser(username,
+                null, null, null, null, null, null), password);
         boolean timeout;
         timeout = !waitSem.tryAcquire(30000, TimeUnit.MILLISECONDS);
         return callback.token;
@@ -41,7 +41,7 @@ public class ProfileApiTest extends ApplicationTestCase<Application> {
     public void testCreateGetProfile() throws InterruptedException, MalformedURLException {
         // Sign up user, so that the token cache is populated
         final Semaphore waitSem = new Semaphore(0);
-        FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
+        FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
         String uuidEmail = UUID.randomUUID().toString()+ "@gmail.com";
         String password = UUID.randomUUID().toString();
 

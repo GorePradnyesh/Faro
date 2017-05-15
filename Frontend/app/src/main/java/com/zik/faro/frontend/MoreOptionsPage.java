@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.facebook.login.LoginManager;
 import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 import com.zik.faro.frontend.faroservice.auth.TokenCache;
 
@@ -39,6 +40,10 @@ public class MoreOptionsPage extends Fragment{
                 eventListHandler.clearListAndMapOnLogout();
                 userFriendListHandler.clearFriendListAndMap();
                 TokenCache.getTokenCache().deleteToken();
+
+                // Log out of facebook
+                LoginManager.getInstance().logOut();
+
                 startActivity(LoginActivity);
                 getActivity().finish();
             }

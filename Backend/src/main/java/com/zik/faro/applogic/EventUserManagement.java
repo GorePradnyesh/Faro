@@ -9,8 +9,10 @@ import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.InviteeList;
 import com.zik.faro.data.MinUser;
 import com.zik.faro.data.user.EventInviteStatus;
+import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.persistence.datastore.EventUserDatastoreImpl;
 import com.zik.faro.persistence.datastore.data.EventUserDo;
+import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 
 public class EventUserManagement {
 	public static InviteeList getEventInvitees(final String eventId){
@@ -18,9 +20,10 @@ public class EventUserManagement {
 		eventUsers = filterDeclinedEvents(eventUsers);
 		InviteeList invitees = new InviteeList();
 		for(EventUserDo user : eventUsers){
-			invitees.addUserStatus(new MinUser(user.getFaroUser().getFirstName(),
-					user.getFaroUser().getLastName(),
-					user.getFaroUser().getEmail()), user.getInviteStatus());
+            FaroUserDo faroUser = user.getFaroUser();
+			invitees.addUserStatus(new MinUser(faroUser.getFirstName(),
+                    faroUser.getLastName(),
+                    faroUser.getEmail()), user.getInviteStatus());
 		}
 		return invitees;
 	}

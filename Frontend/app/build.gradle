@@ -34,6 +34,16 @@ android {
     ext {
         supportLibVersion = '23.2.1'
     }
+
+    buildTypes {
+        debug {
+            buildConfigField "Boolean", "DEBUG_MODE", "true"
+        }
+        release {
+            buildConfigField "Boolean", "DEBUG_MODE", "false"
+        }
+    }
+
 }
 
 dependencies {
@@ -49,4 +59,6 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.0-beta5'
     compile 'com.android.support:support-v4:23.4.0'
     testCompile 'com.auth0:java-jwt:2.1.0'
+    compile 'com.facebook.android:facebook-android-sdk:4.8.+'
+    compile 'com.auth0:java-jwt:2.1.0'
 }

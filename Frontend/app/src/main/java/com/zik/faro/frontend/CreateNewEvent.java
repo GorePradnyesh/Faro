@@ -72,7 +72,7 @@ public class CreateNewEvent extends Activity {
     private DateFormat sdf = new SimpleDateFormat("MMM dd yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
 
-    private static FaroServiceHandler serviceHandler;
+    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private static String TAG = "CreateNewEvent";
 
     private int PLACE_PICKER_REQUEST = 1;
@@ -85,8 +85,6 @@ public class CreateNewEvent extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_new_event);
-
-        serviceHandler = eventListHandler.serviceHandler;
 
         final EditText eventName = (EditText) findViewById(R.id.eventNameTextEdit);
         final EditText eventDescription = (EditText) findViewById(R.id.eventDescriptionEditText);

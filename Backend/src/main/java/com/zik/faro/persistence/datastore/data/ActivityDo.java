@@ -87,7 +87,7 @@ public class ActivityDo extends BaseEntityDo{
     }
     
 	public void setEventId(String eventId) {
-		this.eventId = Ref.create(Key.create(EventDo.class, eventId));;
+		this.eventId = Ref.create(Key.create(EventDo.class, eventId));
 	}
 
 	public void setName(String name) {

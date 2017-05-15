@@ -5,14 +5,13 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.zik.faro.data.Activity;
 import com.zik.faro.data.Assignment;
 import com.zik.faro.frontend.data.AssignmentParentInfo;
 
 import java.util.LinkedList;
 import java.util.List;
 
-public class AssignmentAdapter extends ArrayAdapter{
+public class AssignmentAdapter extends ArrayAdapter {
     //TODO (Code Review) Implement sorted list instead of Linkedlist
     public List<AssignmentParentInfo> list = new LinkedList<>();
 

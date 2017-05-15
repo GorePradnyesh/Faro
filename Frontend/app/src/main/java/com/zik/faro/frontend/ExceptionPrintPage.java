@@ -2,7 +2,6 @@ package com.zik.faro.frontend;
 
 
 import android.app.Activity;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,8 +21,6 @@ public class ExceptionPrintPage extends Activity {
             String error = extras.getString("error");
             errorLogs.setText(error);
         }
-
-
     }
 
 
