@@ -11,9 +11,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ActivityListHandler {
     public static final int MAX_ACTIVITIES_PAGE_SIZE = 100;
     private static final int MAX_TOTAL_ACTIVITIES_IN_CACHE = 500;
+    private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
 
-
-    public ActivityAdapter activityAdapter;
+    ActivityAdapter activityAdapter;
 
     /*
     * Map of activities needed to access activities downloaded from the server in O(1) time. The Key to the
@@ -45,10 +45,11 @@ public class ActivityListHandler {
     * the above reason then once we return back from the ActivityLanding Page we remove it from the
     * Map.
     */
-    public void addActivityToListAndMap(Activity activity) {
+    void addActivityToListAndMap(Activity activity) {
         removeActivityFromListAndMap(activity.getId());
         addActivityToList(activity);
         activityMap.put(activity.getId(), activity);
+        assignmentListHandler.addAssignmentToListAndMap(activity.getAssignment(), activity.getId());
     }
 
     private void addActivityToList(Activity activity) {
@@ -85,9 +86,10 @@ public class ActivityListHandler {
         }
     }
 
-    public void addDownloadedActivitiesToListAndMap(List <Activity> activityList){
+    public void addDownloadedActivitiesToListAndMap(List <Activity> activityList, String eventID){
         for (int i = 0; i < activityList.size(); i++){
-            addActivityToListAndMap(activityList.get(i));
+            Activity activity = activityList.get(i);
+            addActivityToListAndMap(activity);
         }
         activityAdapter.notifyDataSetChanged();
     }
@@ -153,8 +155,6 @@ public class ActivityListHandler {
     }
 
     public void removeActivityFromListAndMap(String activityID){
-        //TODO: send update to server and if successful then delete activity from List and Map below
-
         removeActivityFromList(activityID, activityAdapter.list);
         activityAdapter.notifyDataSetChanged();
         activityMap.remove(activityID);

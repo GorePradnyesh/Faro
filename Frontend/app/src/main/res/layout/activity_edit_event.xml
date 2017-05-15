@@ -75,6 +75,27 @@
         android:layout_alignBottom="@+id/endDateButton"
         android:layout_alignParentEnd="true" />
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/locationLinearLayout"
+        android:layout_below="@+id/endDateButton"
+        android:orientation="horizontal"
+        android:layout_marginTop="15dp">
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/deleteLocation"
+            android:layout_alignParentEnd="true"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/locationAddressTextView"
+            android:hint="@string/location"
+            android:gravity="center"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_toLeftOf="@+id/deleteLocation"/>
+    </RelativeLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -86,18 +107,19 @@
         android:id="@+id/bottomLayout">
 
         <Button
-            style="?android:attr/buttonStyleSmall"
             android:layout_width="0px"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:clickable="true"
             android:text="@string/OK"
-            android:id="@+id/editEventOK" />
+            android:id="@+id/editEventOK"
+            android:enabled="true"/>
 
         <Button
-            style="?android:attr/buttonStyleSmall"
             android:layout_width="0px"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:clickable="true"
             android:text="Delete Event"
             android:id="@+id/deleteEvent"/>
     </LinearLayout>

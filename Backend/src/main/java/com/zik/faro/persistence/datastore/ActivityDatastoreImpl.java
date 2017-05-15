@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.googlecode.objectify.Work;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
+import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.persistence.datastore.data.ActivityDo;
 import com.zik.faro.persistence.datastore.data.EventDo;
 
@@ -33,23 +35,27 @@ public class ActivityDatastoreImpl {
     	DatastoreObjectifyDAL.deleteObjectByIdWithParentId(activityId, ActivityDo.class, eventId, EventDo.class);
     }
     
-	public static ActivityDo updateActivity(final ActivityDo updateActivity, final String eventId) throws DataNotFoundException{
-    	Work w = new Work<TransactionResult>() {
-	        public TransactionResult run() {
+	public static ActivityDo updateActivity(final ActivityDo updateActivity, final String eventId) throws DataNotFoundException, DatastoreException, UpdateVersionException{
+    	Work w = new Work<TransactionResult<ActivityDo>>() {
+	        public TransactionResult<ActivityDo> run() {
 	        	// Read from datastore
 	        	ActivityDo activity = null;
 				try {
 					activity = loadActivityById(updateActivity.getId(), eventId);
 				} catch (DataNotFoundException e) {
-					return TransactionResult.DATANOTFOUND;
+					return new TransactionResult<ActivityDo>(null, TransactionStatus.DATANOTFOUND);
 				}
-	        	
+				
+				if(!BaseDatastoreImpl.isVersionOk(updateActivity, activity)){
+					return new TransactionResult<ActivityDo>(null, TransactionStatus.VERSIONMISSMATCH, "Incorrect entity version. Current version:"+activity.getVersion().toString());
+				}
+				
 	            // Modify.
 				if(updateActivity.getStartDate() != null){
 					activity.setStartDate(updateActivity.getStartDate());
 				}
 				if(updateActivity.getEndDate() != null){
-					activity.setStartDate(updateActivity.getEndDate());
+					activity.setEndDate(updateActivity.getEndDate());
 				}
 				if(updateActivity.getDescription() != null && !updateActivity.getDescription().isEmpty()){
 					activity.setDescription(updateActivity.getDescription());
@@ -57,21 +63,21 @@ public class ActivityDatastoreImpl {
 				if(updateActivity.getLocation() != null){
 					activity.setLocation(updateActivity.getLocation());
 				}
-				if(updateActivity.getAssignment() != null){
-					activity.setAssignment(updateActivity.getAssignment());
-				}
 				
+				if(updateActivity.getName() != null){
+					activity.setName(updateActivity.getName());
+				}
+				BaseDatastoreImpl.versionIncrement(updateActivity, activity);
+
 	            // Store
 	            storeActivity(activity);
-	            return TransactionResult.SUCCESS;
+	            return new TransactionResult<ActivityDo>(activity, TransactionStatus.SUCCESS);
 	        }
 	    };
 	    
-    	TransactionResult result = DatastoreObjectifyDAL.update(w);
-    	if(result.equals(TransactionResult.DATANOTFOUND)){
-    		throw new DataNotFoundException("Activity not found");
-    	}
-    	return updateActivity;
+    	TransactionResult<ActivityDo> result = DatastoreObjectifyDAL.update(w);
+    	DatastoreUtil.processResult(result);
+    	return result.getEntity();
     }
 	
 	

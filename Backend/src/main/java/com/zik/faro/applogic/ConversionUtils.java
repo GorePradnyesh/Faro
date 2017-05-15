@@ -22,11 +22,12 @@ public class ConversionUtils {
 		event.setStartDate(eventDo.getStartDate());
 		event.setExpenseGroup(eventDo.getExpenseGroup());
 		event.setLocation(eventDo.getLocation());
-		event.setEventId(eventDo.getEventId());
+		event.setId(eventDo.getId());
 		event.setEventName(eventDo.getEventName());
 		event.setEventCreatorId(eventDo.getEventCreatorId());
 		event.setEventDescription(eventDo.getEventDescription());
 		event.setStatus(eventDo.getStatus());
+		event.setVersion(eventDo.getVersion());
 		return event;
 	}
 	
@@ -38,7 +39,8 @@ public class ConversionUtils {
 		eventDo.setStartDate(event.getStartDate());
 		eventDo.setExpenseGroup(event.getExpenseGroup());
 		eventDo.setLocation(event.getLocation());
-		eventDo.setEventId(event.getEventId());
+		eventDo.setId(event.getId());
+		eventDo.setVersion(event.getVersion());
 		eventDo.setEventName(event.getEventName());
 		eventDo.setEventCreatorId(event.getEventCreatorId());
 		eventDo.setEventDescription(event.getEventDescription());
@@ -56,19 +58,21 @@ public class ConversionUtils {
 		activityDo.setId(activity.getId());
 		activityDo.setEventId(activity.getEventId());
 		activityDo.setName(activity.getName());
+		activityDo.setVersion(activity.getVersion());
 		return activityDo;
 	}
 	
 	public static Activity fromDo(ActivityDo activityDo){
 		Activity activity = new Activity();
 		activity.setAssignment(activityDo.getAssignment());
-		activity.setStartDate(activityDo.getEndDate());
+		activity.setStartDate(activityDo.getStartDate());
 		activity.setEndDate(activityDo.getEndDate());
 		activity.setDescription(activityDo.getDescription());
 		activity.setLocation(activityDo.getLocation());
 		activity.setId(activityDo.getId());
 		activity.setEventId(activityDo.getEventId());
 		activity.setName(activityDo.getName());
+		activity.setVersion(activityDo.getVersion());
 		return activity;
 	}
 	
@@ -84,6 +88,7 @@ public class ConversionUtils {
 		poll.setWinnerId(pollDo.getWinnerId());
 		poll.setPollOptions(pollDo.getPollOptions());
 		poll.setMultiChoice(pollDo.getMultiChoice());
+		poll.setVersion(pollDo.getVersion());
 		return poll;
 	}
 	
@@ -99,6 +104,7 @@ public class ConversionUtils {
 		pollDo.setWinnerId(poll.getWinnerId());
 		pollDo.setPollOptions(poll.getPollOptions());
 		pollDo.setMultiChoice(poll.getMultiChoice());
+		pollDo.setVersion(poll.getVersion());
 		return pollDo;
 	}
 

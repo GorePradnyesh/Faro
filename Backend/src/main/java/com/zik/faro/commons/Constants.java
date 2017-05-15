@@ -54,6 +54,7 @@ public final class Constants {
     public static final String UPDATE_INVITE_STATUS_PATH_CONST                 = "/updateInviteStatus";
     public static final String EVENT_CREATE_PATH_CONST                          = "/create";
     public static final String EVENT_ADD_FRIENDS_CONST							= "/add";
+    public static final String EVENT_UPDATE_PATH_CONST							= "/updateEvent";
 
     public static final String ACTIVITY_PATH_CONST                              = "/activity";
     public static final String ACTIVITIES_PATH_CONST                            = "/activities";
@@ -73,6 +74,7 @@ public final class Constants {
     public static final String POLL_UNVOTED_COUNT_CONST                         = "/unvoted/count";
     public static final String POLL_CREATE_PATH_CONST                           = "/create";
     public static final String POLL_VOTE_PATH_CONST                             = "/vote";
+    public static final String POLL_UPDATE_PATH_CONST                             = "/updatePoll";
     public static final String POLL_ADD_OPTION_PATH_CONST                       = "/addOption";
     public static final String POLL_CLOSE_PATH_CONST                            = "/close";
 

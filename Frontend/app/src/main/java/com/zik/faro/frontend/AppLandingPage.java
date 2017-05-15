@@ -7,7 +7,6 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTabHost;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 
 public class AppLandingPage extends FragmentActivity{
@@ -23,7 +22,7 @@ public class AppLandingPage extends FragmentActivity{
     private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
     private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
     private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
-    static PollListHandler pollListHandler = PollListHandler.getInstance();
+    private static PollListHandler pollListHandler = PollListHandler.getInstance();
     private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
 
     @Override
@@ -32,6 +31,13 @@ public class AppLandingPage extends FragmentActivity{
         setContentView(R.layout.activity_app_landing_page);
 
         final Intent createNewEventIntent = new Intent(this, CreateNewEvent.class);
+
+        /*GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this *//* FragmentActivity *//*,
+                        this *//* OnConnectionFailedListener *//*)
+                .addApi()
+                .addScope(Drive.SCOPE_FILE)
+                .build();*/
 
         //Creating the Adapters for all
         if (eventListHandler.acceptedEventAdapter == null) {
@@ -57,10 +63,15 @@ public class AppLandingPage extends FragmentActivity{
         if (eventFriendListHandler.acceptedFriendAdapter == null){
             eventFriendListHandler.acceptedFriendAdapter = new EventFriendAdapter(this, R.layout.friend_row_style);
         }
-        if (eventFriendListHandler.notAcceptedFriendAdapter == null){
-            eventFriendListHandler.notAcceptedFriendAdapter = new EventFriendAdapter(this, R.layout.friend_row_style);
+        if (eventFriendListHandler.invitedFriendAdapter == null){
+            eventFriendListHandler.invitedFriendAdapter = new EventFriendAdapter(this, R.layout.friend_row_style);
         }
-
+        if (eventFriendListHandler.mayBeFriendAdapter == null){
+            eventFriendListHandler.mayBeFriendAdapter = new EventFriendAdapter(this, R.layout.friend_row_style);
+        }
+        if (eventFriendListHandler.declinedFriendAdapter == null){
+            eventFriendListHandler.declinedFriendAdapter = new EventFriendAdapter(this, R.layout.friend_row_style);
+        }
         if (pollListHandler.openPollsAdapter == null) {
             pollListHandler.openPollsAdapter = new PollAdapter(this, R.layout.poll_list_page_row_style);
         }
@@ -70,6 +81,10 @@ public class AppLandingPage extends FragmentActivity{
         }
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
+
+        /*TODO For styling the tab layout checkout the following link
+        * https://maxalley.wordpress.com/2014/09/08/android-styling-a-tab-layout-with-fragmenttabhost-and-fragments/
+        */
         mTabHost = (FragmentTabHost) findViewById(android.R.id.tabhost);
         mTabHost.setup(this, getSupportFragmentManager(), android.R.id.tabcontent);
         mTabHost.addTab(
@@ -98,7 +113,7 @@ public class AppLandingPage extends FragmentActivity{
     }
 
     private View getTabIndicator(Context context, int icon) {
-        View view = LayoutInflater.from(context).inflate(R.layout.tab_layout, null);
+        View view = LayoutInflater.from(context).inflate(R.layout.app_landing_tab_layout, null);
         ImageView iv = (ImageView) view.findViewById(R.id.imageView);
         iv.setImageResource(icon);
         return view;

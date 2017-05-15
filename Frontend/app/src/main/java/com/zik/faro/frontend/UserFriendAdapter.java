@@ -6,11 +6,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 
 import com.zik.faro.data.MinUser;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -31,7 +34,24 @@ public class UserFriendAdapter extends ArrayAdapter {
 
     public void insert(MinUser minUser, int index) {
         list.add(index, minUser);
-        super.insert(minUser, index);
+        Collections.sort(list, new Comparator<MinUser>() {
+            @Override
+            public int compare(MinUser lhs, MinUser rhs) {
+                String name1 = null;
+                String name2 = null;
+                if (lhs.getFirstName() != null) {
+                    name1 = lhs.getFirstName();
+                }else {
+                    name1 = lhs.getEmail();
+                }
+                if (rhs.getFirstName() != null){
+                    name2 = rhs.getFirstName();
+                }else{
+                    name2 = rhs.getEmail();
+                }
+                return name1.compareTo(name2);
+            }
+        });
     }
 
     @Override
@@ -40,6 +60,7 @@ public class UserFriendAdapter extends ArrayAdapter {
     }
 
     static class ImgHolder{
+        ImageView userPicture;
         TextView friendName;
     }
 
@@ -59,6 +80,7 @@ public class UserFriendAdapter extends ArrayAdapter {
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             row = inflater.inflate(R.layout.friend_row_style, parent, false);
+            holder.userPicture = (ImageView)row.findViewById(R.id.userPicture);
             holder.friendName = (TextView)row.findViewById(R.id.friendName);
             row.setTag(holder);
         }else{
@@ -72,6 +94,7 @@ public class UserFriendAdapter extends ArrayAdapter {
                 holder.friendName.setText(minUser.getEmail());
             }
         }
+        holder.userPicture.setImageResource(R.drawable.user_pic);
         return row;
     }
 }

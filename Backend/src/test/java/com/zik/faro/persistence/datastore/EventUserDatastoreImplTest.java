@@ -4,6 +4,7 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
 import com.zik.faro.data.Location;
+import com.zik.faro.data.GeoPosition;
 import com.zik.faro.data.expense.ExpenseGroup;
 import com.zik.faro.data.user.Address;
 import com.zik.faro.persistence.datastore.data.EventDo;
@@ -43,12 +44,13 @@ public class EventUserDatastoreImplTest {
     @Test
     public void testEventUserLoadStore(){
         final String eventName = UUID.randomUUID().toString();
+		GeoPosition geoPosition = new GeoPosition(0,0);
         EventDo testEvent = new EventDo(eventName,
         		Calendar.getInstance(),
         		Calendar.getInstance(),
                 false,
                 new ExpenseGroup("Lake Shasta", "shasta123"),
-                new Location("Lake Shasta"));
+                new Location("Lake Shasta", "Lake Shasta's Address", geoPosition));
         DatastoreObjectifyDAL.storeObject(testEvent);
 
 
@@ -56,8 +58,8 @@ public class EventUserDatastoreImplTest {
                 "2323", new Address(123, "Palm Avenue", "Stanford", "CA", 94332));
         DatastoreObjectifyDAL.storeObject(faroUser);
 
-        EventUserDatastoreImpl.storeEventUser(testEvent.getEventId(), faroUser.getEmail());
-        EventUserDo eventUser = EventUserDatastoreImpl.loadEventUser(testEvent.getEventId(), faroUser.getEmail());
+        EventUserDatastoreImpl.storeEventUser(testEvent.getId(), faroUser.getEmail());
+        EventUserDo eventUser = EventUserDatastoreImpl.loadEventUser(testEvent.getId(), faroUser.getEmail());
         Assert.assertNotNull(eventUser);
 
         EventDo retEvent = eventUser.getEvent();
@@ -69,28 +71,31 @@ public class EventUserDatastoreImplTest {
 
     @Test
     public void testEventUserLoadDelete(){
+		GeoPosition geoPosition1 = new GeoPosition(0,0);
         EventDo event1 = new EventDo("Event1",
         		Calendar.getInstance(),
         		Calendar.getInstance(),
                 false,
                 new ExpenseGroup("ExpenseGroupName1", "ExpenseGroupId1"),
-                new Location("Location1"));
+                new Location("Location1", "Address1", geoPosition1));
         DatastoreObjectifyDAL.storeObject(event1);
 
+		GeoPosition geoPosition2 = new GeoPosition(100,100);
         EventDo event2 = new EventDo("Event2",
         		Calendar.getInstance(),
         		Calendar.getInstance(),
                 false,
                 new ExpenseGroup("ExpenseGroupName2", "ExpenseGroupId2"),
-                new Location("Location2"));
+                new Location("Location2", "Address2", geoPosition2));
         DatastoreObjectifyDAL.storeObject(event2);
 
+		GeoPosition geoPosition3 = new GeoPosition(50,50);
         EventDo event3 = new EventDo("Event3",
         		Calendar.getInstance(),
         		Calendar.getInstance(),
                 false,
                 new ExpenseGroup("ExpenseGroupName3", "ExpenseGroupId3"),
-                new Location("Location3"));
+                new Location("Location3", "Address3", geoPosition3));
         DatastoreObjectifyDAL.storeObject(event3);
 
         FaroUserDo faroUser1 = new FaroUserDo("user1@gmail.com", "FirstNAme1", null, "LastName1", "expenseid1@splitwise.com",
@@ -101,16 +106,16 @@ public class EventUserDatastoreImplTest {
                 "0000002", new Address(2, "Palm Avenue2", "Stanford2", "CA", 94332));
         DatastoreObjectifyDAL.storeObject(faroUser2);
 
-        EventUserDatastoreImpl.storeEventUser(event1.getEventId(), faroUser1.getEmail());
-        EventUserDatastoreImpl.storeEventUser(event1.getEventId(), faroUser2.getEmail());
-        EventUserDatastoreImpl.storeEventUser(event2.getEventId(), faroUser1.getEmail());
-        EventUserDatastoreImpl.storeEventUser(event3.getEventId(), faroUser1.getEmail());
+        EventUserDatastoreImpl.storeEventUser(event1.getId(), faroUser1.getEmail());
+        EventUserDatastoreImpl.storeEventUser(event1.getId(), faroUser2.getEmail());
+        EventUserDatastoreImpl.storeEventUser(event2.getId(), faroUser1.getEmail());
+        EventUserDatastoreImpl.storeEventUser(event3.getId(), faroUser1.getEmail());
 
 
         // load test
-        List<EventUserDo> userList1 = EventUserDatastoreImpl.loadEventUserByEvent(event1.getEventId());
+        List<EventUserDo> userList1 = EventUserDatastoreImpl.loadEventUserByEvent(event1.getId());
         Assert.assertEquals(2, userList1.size());
-        List<EventUserDo> userList2 = EventUserDatastoreImpl.loadEventUserByEvent(event2.getEventId());
+        List<EventUserDo> userList2 = EventUserDatastoreImpl.loadEventUserByEvent(event2.getId());
         Assert.assertEquals(1, userList2.size());
         List<EventUserDo> eventList = EventUserDatastoreImpl.loadEventUserByFaroUser(faroUser1.getEmail());
         Assert.assertEquals(3, eventList.size());
@@ -118,22 +123,23 @@ public class EventUserDatastoreImplTest {
         Assert.assertEquals(1, eventList2.size());
 
         // delete test
-        EventUserDatastoreImpl.deleteEventUserByEvent(event1.getEventId());
-        userList1 = EventUserDatastoreImpl.loadEventUserByEvent(event1.getEventId());
+        EventUserDatastoreImpl.deleteEventUserByEvent(event1.getId());
+        userList1 = EventUserDatastoreImpl.loadEventUserByEvent(event1.getId());
         Assert.assertEquals(0, userList1.size());
-        EventUserDatastoreImpl.deleteEventUserByEvent(event2.getEventId());
-        userList2 = EventUserDatastoreImpl.loadEventUserByEvent(event2.getEventId());
+        EventUserDatastoreImpl.deleteEventUserByEvent(event2.getId());
+        userList2 = EventUserDatastoreImpl.loadEventUserByEvent(event2.getId());
         Assert.assertEquals(0, userList2.size());
     }
 
     @Test
     public void testEventUserIdempotency(){
+		GeoPosition geoPosition1 = new GeoPosition(0,0);
         EventDo event1 = new EventDo("Event1",
         		Calendar.getInstance(),
         		Calendar.getInstance(),
                 false,
                 new ExpenseGroup("ExpenseGroupName1", "ExpenseGroupId1"),
-                new Location("Location1"));
+                new Location("Location1", "Address1", geoPosition1));
         DatastoreObjectifyDAL.storeObject(event1);
 
         FaroUserDo faroUser1 = new FaroUserDo("user1@gmail.com", "FirstNAme1", null, "LastName1", "expenseid1@splitwise.com",
@@ -141,23 +147,24 @@ public class EventUserDatastoreImplTest {
         DatastoreObjectifyDAL.storeObject(faroUser1);
 
         /*Repeat 'n' times */
-        EventUserDatastoreImpl.storeEventUser(event1.getEventId(), faroUser1.getEmail());
-        EventUserDatastoreImpl.storeEventUser(event1.getEventId(), faroUser1.getEmail());
-        EventUserDatastoreImpl.storeEventUser(event1.getEventId(), faroUser1.getEmail());
+        EventUserDatastoreImpl.storeEventUser(event1.getId(), faroUser1.getEmail());
+        EventUserDatastoreImpl.storeEventUser(event1.getId(), faroUser1.getEmail());
+        EventUserDatastoreImpl.storeEventUser(event1.getId(), faroUser1.getEmail());
 
-        List<EventUserDo> userList1 = EventUserDatastoreImpl.loadEventUserByEvent(event1.getEventId());
+        List<EventUserDo> userList1 = EventUserDatastoreImpl.loadEventUserByEvent(event1.getId());
         Assert.assertEquals(1, userList1.size());
     }
     
     @Test
     public void testEventUserRemoval(){
     	// Create Event
+		GeoPosition geoPosition1 = new GeoPosition(0,0);
     	EventDo event1 = new EventDo("Event1",
     			Calendar.getInstance(),
     			Calendar.getInstance(),
                 false,
                 new ExpenseGroup("ExpenseGroupName1", "ExpenseGroupId1"),
-                new Location("Location1"));
+                new Location("Location1", "Address1", geoPosition1));
         DatastoreObjectifyDAL.storeObject(event1);
         // Create FaroUser
         FaroUserDo faroUser1 = new FaroUserDo("user1@gmail.com", "FirstNAme1", null, "LastName1", "expenseid1@splitwise.com",
@@ -165,20 +172,20 @@ public class EventUserDatastoreImplTest {
         DatastoreObjectifyDAL.storeObject(faroUser1);
         
         // Establish user-event connectivity. User invited to event
-        EventUserDatastoreImpl.storeEventUser(event1.getEventId(), faroUser1.getEmail());
+        EventUserDatastoreImpl.storeEventUser(event1.getId(), faroUser1.getEmail());
         
         // Verify user-event relation
-        EventUserDo eventUser = EventUserDatastoreImpl.loadEventUser(event1.getEventId(),
+        EventUserDo eventUser = EventUserDatastoreImpl.loadEventUser(event1.getId(),
         		faroUser1.getEmail());
         Assert.assertNotNull(eventUser);
         Assert.assertEquals(event1,eventUser.getEvent());
         Assert.assertEquals(faroUser1, eventUser.getFaroUser());
         
         // Delete user from event
-        EventUserDatastoreImpl.deleteEventUser(event1.getEventId(), faroUser1.getEmail());
+        EventUserDatastoreImpl.deleteEventUser(event1.getId(), faroUser1.getEmail());
         
         // Verify deletion
-        eventUser = EventUserDatastoreImpl.loadEventUser(event1.getEventId(),
+        eventUser = EventUserDatastoreImpl.loadEventUser(event1.getId(),
         		faroUser1.getEmail());
         Assert.assertNull(eventUser);
     }

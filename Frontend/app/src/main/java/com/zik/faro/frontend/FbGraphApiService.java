@@ -200,7 +200,7 @@ public class FbGraphApiService {
                                 .withAlbumName(albumName)
                                 .withFaroUserId(FaroUserContext.getInstance().getEmail())
                                 .withCreatedTime(createdTime)
-                                .withEventId(event.getEventId()));
+                                .withEventId(event.getId()));
                     }
                 } catch (JSONException e) {
                     Log.e(TAG, "incorrect JSON processing or invalid response");
@@ -225,7 +225,7 @@ public class FbGraphApiService {
 
         // Create an explicit intent for the Image GridView Activity in your app
         Intent imagesViewIntent = new Intent(context, ImageGridViewActivity.class);
-        imagesViewIntent.putExtra("eventId", event.getEventId());
+        imagesViewIntent.putExtra("eventId", event.getId());
         imagesViewIntent.putExtra("eventName", event.getEventName());
 
         // The stack builder object will contain an artificial back stack for the
@@ -349,7 +349,7 @@ public class FbGraphApiService {
                                 Log.e(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                             }
                         }
-                    }, event.getEventId(), fbImages);
+                    }, event.getId(), fbImages);
                 }
 
                 return Lists.newArrayList();

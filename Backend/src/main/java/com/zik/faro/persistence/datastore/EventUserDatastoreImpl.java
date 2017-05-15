@@ -10,6 +10,7 @@ import com.googlecode.objectify.Work;
 import com.googlecode.objectify.cmd.Query;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.persistence.datastore.data.ActivityDo;
 import com.zik.faro.persistence.datastore.data.EventDo;
@@ -78,15 +79,15 @@ public class EventUserDatastoreImpl {
     	DatastoreObjectifyDAL.delelteObjectById(user.getId(), EventUserDo.class);
     }
     
-    public static void updateActivity(final EventUserDo eventUserDo) throws DataNotFoundException, DatastoreException{
-    	Work w = new Work<TransactionResult>() {
-	        public TransactionResult run() {
+    public static EventUserDo updateActivity(final EventUserDo eventUserDo) throws DataNotFoundException, DatastoreException, UpdateVersionException{
+    	Work w = new Work<TransactionResult<EventUserDo>>() {
+	        public TransactionResult<EventUserDo> run() {
 	        	// Read from datastore
 	        	EventUserDo eventUserFromDatastore = null;
 				try {
 					eventUserFromDatastore = DatastoreObjectifyDAL.loadObjectById(eventUserDo.getId(), EventUserDo.class);
 				} catch (DataNotFoundException e) {
-					return TransactionResult.DATANOTFOUND;
+					return new TransactionResult<EventUserDo>(null,TransactionStatus.DATANOTFOUND);
 				}
 	        	
 	            // Modify.
@@ -101,11 +102,12 @@ public class EventUserDatastoreImpl {
 	            // Store
 	            DatastoreObjectifyDAL.storeObject(eventUserFromDatastore);
 	            
-	            return TransactionResult.SUCCESS;
+	            return new TransactionResult<EventUserDo>(eventUserFromDatastore,TransactionStatus.SUCCESS);
 	        }
 	    };
 	    
-    	TransactionResult result = DatastoreObjectifyDAL.update(w);
+    	TransactionResult<EventUserDo> result = DatastoreObjectifyDAL.update(w);
     	DatastoreUtil.processResult(result);
+    	return result.getEntity();
     }
 }

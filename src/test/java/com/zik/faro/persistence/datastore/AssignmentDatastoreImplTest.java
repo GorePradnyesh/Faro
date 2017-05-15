@@ -54,8 +54,9 @@ public class AssignmentDatastoreImplTest {
     }
     
 	private Activity createActivity(String eventId, String name) throws IllegalDataOperation{
+		GeoPosition geoPosition = new GeoPosition(0,0);
     	Activity activity1 = new Activity(eventId, name, "dummyDescription",
-                new Location("Lake Shasta"),
+                new Location("Lake Shasta", "Lake Shasta's Address", geoPosition),
                 new GregorianCalendar(),
                 new Assignment());
         Assignment tempAssignment = new Assignment();
@@ -67,7 +68,9 @@ public class AssignmentDatastoreImplTest {
 	
 	@Test
 	public void getAllAssignmentsTest() throws IllegalDataOperation, DataNotFoundException{
-		Event event = new Event("TestEvent", new GregorianCalendar(), new GregorianCalendar(), false, null, new Location("San Jose"));
+		GeoPosition geoPosition = new GeoPosition(0,0);
+		Event event = new Event("TestEvent", new GregorianCalendar(), new
+				GregorianCalendar(), false, null, new Location("San Jose", "CA", geoPosition));
     	EventDatastoreImpl.storeEventOnly(event);
 		Activity activity1 = createActivity(event.getEventId(), "NewYork");
     	Activity activity2 = createActivity(event.getEventId(), "SF");
@@ -83,7 +86,9 @@ public class AssignmentDatastoreImplTest {
 	
 	@Test
 	public void getAssignmentUsingEvent_Activity_Assignment_IdTest() throws DataNotFoundException, IllegalDataOperation{
-		Event event = new Event("TestEvent", new GregorianCalendar(), new GregorianCalendar(), false, null, new Location("San Jose"));
+		GeoPosition geoPosition = new GeoPosition(0,0);
+		Event event = new Event("TestEvent", new GregorianCalendar(), new 
+				GregorianCalendar(), false, null, new Location("San Jose", "CA", geoPosition));
     	EventDatastoreImpl.storeEventOnly(event);
 		Activity activity1 = createActivity(event.getEventId(), "NewYork");
 		ActivityDatastoreImpl.storeActivity(activity1);
@@ -95,7 +100,9 @@ public class AssignmentDatastoreImplTest {
 
 /*	@Test
 	public void getAssignmentUsingEvent_Assignment_IdTest() throws DataNotFoundException, IllegalDataOperation{
-		Event event = new Event("TestEvent", new GregorianCalendar(), new GregorianCalendar(), false, null, new Location("San Jose"));
+		GeoPosition geoPosition = new GeoPosition(0,0);
+		Event event = new Event("TestEvent", new GregorianCalendar(), new 
+				GregorianCalendar(), false, null, new Location("San Jose", "CA", geoPosition));
     	EventDatastoreImpl.storeEvent(event);
 		Activity activity1 = createActivity(event.getEventId(), "NewYork");
     	Activity activity2 = createActivity(event.getEventId(), "SF");
@@ -112,7 +119,9 @@ public class AssignmentDatastoreImplTest {
 	
 	@Test
 	public void getCountOfPendingAssignmentsTest() throws IllegalDataOperation, DataNotFoundException{
-		Event event = new Event("TestEvent", new GregorianCalendar(), new GregorianCalendar(), false, null, new Location("San Jose"));
+		GeoPosition geoPosition = new GeoPosition(0,0);
+		Event event = new Event("TestEvent", new GregorianCalendar(), new 
+				GregorianCalendar(), false, null, new Location("San Jose", "CA", geoPosition));
     	EventDatastoreImpl.storeEventOnly(event);
 		Activity activity1 = createActivity(event.getEventId(), "NewYork");
     	Activity activity2 = createActivity(event.getEventId(), "SF");
@@ -129,7 +138,9 @@ public class AssignmentDatastoreImplTest {
 	
 	@Test
 	public void updateActivityLevelAssignmentItems() throws IllegalDataOperation, DataNotFoundException, DatastoreException{
-		Event event = new Event("TestEvent", new GregorianCalendar(), new GregorianCalendar(), false, null, new Location("San Jose"));
+		GeoPosition geoPosition = new GeoPosition(0,0);
+		Event event = new Event("TestEvent", new GregorianCalendar(), new 
+				GregorianCalendar(), false, null, new Location("San Jose", "CA", geoPosition));
     	EventDatastoreImpl.storeEventOnly(event);
 		Activity activity1 = createActivity(event.getEventId(), "NewYork");
 		ActivityDatastoreImpl.storeActivity(activity1);
@@ -156,7 +167,9 @@ public class AssignmentDatastoreImplTest {
 	
 	@Test
 	public void updateEventLevelAssignmentItems() throws IllegalDataOperation, DataNotFoundException, DatastoreException{
-		Event event = new Event("TestEvent", new GregorianCalendar(), new GregorianCalendar(), false, null, new Location("San Jose"));
+		GeoPosition geoPosition = new GeoPosition(0,0);
+		Event event = new Event("TestEvent", new GregorianCalendar(), new 
+				GregorianCalendar(), false, null, new Location("San Jose", "CA", geoPosition));
 		Assignment eventAssignment = new Assignment();
 		eventAssignment.addItem(new Item("Kaivan", "420", 3, Unit.KG));
 		event.setAssignment(eventAssignment);

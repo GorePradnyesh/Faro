@@ -11,8 +11,13 @@ import static com.zik.faro.commons.Constants.POLL_ID_PATH_PARAM;
 import static com.zik.faro.commons.Constants.POLL_ID_PATH_PARAM_STRING;
 import static com.zik.faro.commons.Constants.POLL_PATH_CONST;
 import static com.zik.faro.commons.Constants.POLL_UNVOTED_COUNT_CONST;
+import static com.zik.faro.commons.Constants.POLL_UPDATE_PATH_CONST;
 import static com.zik.faro.commons.Constants.POLL_VOTE_PATH_CONST;
 
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -28,17 +33,26 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+
 import com.sun.jersey.api.JResponse;
-import com.zik.faro.data.Poll;
 import com.zik.faro.applogic.PollManagement;
 import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateVersionException;
+import com.zik.faro.data.Poll;
 
 @Path(EVENT_PATH_CONST + EVENT_ID_PATH_PARAM_STRING + POLL_PATH_CONST)
 public class PollHandler {
     @Context
     SecurityContext context;
+    
+    private static ObjectMapper mapper = new ObjectMapper();
 	
 	@Path(POLL_ID_PATH_PARAM_STRING)
     @GET
@@ -81,25 +95,18 @@ public class PollHandler {
         		.build();
     }
 
-
-    /*
-    Example payload
-    <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
-    <identifier>
-        <idString>3d824de5-98e7-4a4e-93ae-0dc372b11e11</idString>
-    </identifier>
-     */
-    @Path(POLL_ID_PATH_PARAM_STRING + POLL_VOTE_PATH_CONST)
+    
+    @Path(POLL_ID_PATH_PARAM_STRING + POLL_UPDATE_PATH_CONST)
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public JResponse<String> castVote(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public JResponse<Poll> updatePoll(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                           @PathParam(POLL_ID_PATH_PARAM) final String pollId,
                           // Ids of poll options
-                          Set<String> options){
+                          Map<String,Object> updateObj){
         String userId = context.getUserPrincipal().getName();
-        
+        Poll updatedPoll;
         try {
-			PollManagement.castVote(eventId, pollId, options, userId);
+			updatedPoll = PollManagement.update(eventId, pollId, updateObj, userId);
 		} catch (DatastoreException e) {
 			Response response = Response.status(Response.Status.INTERNAL_SERVER_ERROR)
 					.entity(e.getMessage())
@@ -110,8 +117,13 @@ public class PollHandler {
 					.entity(e.getMessage())
 					.build();
             throw new WebApplicationException(response);
+		} catch (UpdateVersionException e) {
+			Response response = Response.status(Response.Status.BAD_REQUEST)
+                    .entity(e.getMessage())
+                    .build();
+           throw new WebApplicationException(response);
 		}
-        return JResponse.ok(HTTP_OK).build();
+        return JResponse.ok(updatedPoll).build();
     }
 
     @Path(POLL_ID_PATH_PARAM_STRING + POLL_CLOSE_PATH_CONST)
@@ -121,6 +133,25 @@ public class PollHandler {
         // TODO: Still to implement.. Do not have a very clear view of how this 
         // feature works.
         
+        return JResponse.ok(Constants.HTTP_OK).build();
+    }
+    
+    @Path(POLL_ID_PATH_PARAM_STRING + "/test")
+    @POST
+    public JResponse<String> testUpdate(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+                            @PathParam(POLL_ID_PATH_PARAM) final String pollId, Map<String,Object> post) throws JsonParseException, JsonMappingException, IOException, JSONException{
+        
+        System.out.println(post);
+        Long l = Long.valueOf(post.get("version").toString());
+        System.out.println(post.get("voteOption"));
+        String obj = post.get("poll").toString();
+        System.out.println(obj);
+        JSONObject jobj = new JSONObject(obj);
+        
+        System.out.println(jobj.toString());
+        Poll p = mapper.readValue(jobj.toString(), Poll.class);
+        // List<String> s = (List<String>) post.get("voteOption");
+        Set<String> s = new HashSet<String>((List<String>) post.get("voteOption"));
         return JResponse.ok(Constants.HTTP_OK).build();
     }
 

@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class Poll {
-    private String id;
+public class Poll extends BaseEntity{
     private String eventId;
     private String creatorId;
 
@@ -26,7 +25,7 @@ public class Poll {
     }
     
     public Poll(String id, String eventId, String creator, List<PollOption> pollOptions, String owner, String description){
-    	this.id = id;
+    	super(id, 1L);
     	this.eventId = eventId;
         this.creatorId = creator;
         this.pollOptions = pollOptions;
@@ -45,10 +44,6 @@ public class Poll {
         this.owner = owner;
         this.description = description;
         this.status = status;
-    }
-
-    public String getId() {
-        return id;
     }
 
     public String getEventId() {
@@ -105,10 +100,6 @@ public class Poll {
     
     public void setCreatorId(String creatorId){
     	this.creatorId = creatorId;
-    }
-    
-    public void setId(String id){
-    	this.id = id;
     }
     
     public void setEventId(String eventId){

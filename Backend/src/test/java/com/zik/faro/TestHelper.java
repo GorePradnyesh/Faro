@@ -157,6 +157,31 @@ public class TestHelper {
     	
     }
     
+    public static ClientResponse doPOST(String uri, String path, String authToken,
+    		Object postData, MultivaluedMap<String, String> queryParams) throws IOException{
+    	
+    	Client client = RestClient.getInstance().getClient();
+        WebResource webResource = client.resource(uri);
+        String data;
+        if(postData.getClass().equals(String.class)){
+        	data = (String) postData;
+        }else{
+        	data = mapper.writeValueAsString(postData);
+        }
+         
+        System.out.println(data);
+        ClientResponse response = webResource
+                .path(path)
+                .queryParams(queryParams)
+                .header("Content-Type", MediaType.APPLICATION_JSON_TYPE)
+                .header("authentication", authToken)
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .post(ClientResponse.class,data);
+        Assert.assertNotNull(response);
+        return response;
+    	
+    }
+    
     public static ClientResponse doGET(String uri, String path,
     		MultivaluedMap<String, String> queryParams, String authToken) throws IOException{
     	Client client = RestClient.getInstance().getClient();
@@ -233,11 +258,11 @@ public class TestHelper {
     // Create an event for all activity tests
     public static String createEventForTest(String token, URL endpoint) throws IOException{
         Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(),
-                Calendar.getInstance(), "Description", false, null, new Location("Random Location"),null, null, "Mafia god");
+                Calendar.getInstance(), "Description", false, null, new Location("Random Location", null, null), null, null, "Mafia god");
         ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);
         Event event = response.getEntity(Event.class);
         FunctionalEventTest.assertEntity(eventCreateData, event);
-        return event.getEventId();
+        return event.getId();
     }
 
     public static void deleteEvent(String token, URL endpoint, String eventId) {

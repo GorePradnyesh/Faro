@@ -8,6 +8,7 @@ import java.util.Map;
 import com.googlecode.objectify.Work;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.ActionStatus;
 import com.zik.faro.persistence.datastore.data.ActivityDo;
 import com.zik.faro.data.Assignment;
@@ -70,57 +71,77 @@ public class AssignmentDatastoreImpl {
 		return count;
 	}
 	
-	public static void updateItemsForActivityAssignment(final String eventId, final String activityId,
-			final List<Item> items) throws DataNotFoundException, DatastoreException{
-		Work w = new Work<TransactionResult>() {			
+	public static ActivityDo updateItemsForActivityAssignment(final String eventId, final String activityId,
+			final List<Item> items) throws DataNotFoundException, DatastoreException, UpdateVersionException{
+		Work w = new Work<TransactionResult<ActivityDo>>() {			
 			@Override
-			public TransactionResult run() {
+			public TransactionResult<ActivityDo> run() {
 				// Read from datastore
 	        	ActivityDo activity;
 				try {
 					activity = ActivityDatastoreImpl.loadActivityById(activityId, eventId);
 				} catch (DataNotFoundException e) {
-					return TransactionResult.DATANOTFOUND;
+					return new TransactionResult<ActivityDo>(null, TransactionStatus.DATANOTFOUND);
 				}
 	        	
 	            // Modify.
-	            for(Item item: items){
-	            	activity.getAssignment().addItem(item);
-	            }
+				updateItemsInExistingList(items, activity.getAssignment().getItems());
 	            
 	            // Store
 	            ActivityDatastoreImpl.storeActivity(activity);
-	            return TransactionResult.SUCCESS;
+	            return new TransactionResult<ActivityDo>(activity, TransactionStatus.SUCCESS);
 	        }
 		};
-		TransactionResult result = DatastoreObjectifyDAL.update(w);
+		TransactionResult<ActivityDo> result = DatastoreObjectifyDAL.update(w);
 		DatastoreUtil.processResult(result);
+		return result.getEntity();
 	}
 	
-	public static void updateItemsForEventAssignment(final String eventId, final List<Item> items) throws DataNotFoundException, DatastoreException{
-		Work w = new Work<TransactionResult>() {
+	public static EventDo updateItemsForEventAssignment(final String eventId, final List<Item> items) throws DataNotFoundException, DatastoreException, UpdateVersionException{
+		Work w = new Work<TransactionResult<EventDo>>() {
 			
 			@Override
-			public TransactionResult run() {
+			public TransactionResult<EventDo> run() {
 				// Read from datastore
 	        	EventDo event;
 				try {
 					event = EventDatastoreImpl.loadEventByID(eventId);
 				} catch (DataNotFoundException e) {
-					return TransactionResult.DATANOTFOUND;
+					return new TransactionResult<EventDo>(null, TransactionStatus.DATANOTFOUND);
 				}
 	        	
 	            // Modify.
-	            for(Item item: items){
-	            	event.getAssignment().addItem(item);
-	            }
+				updateItemsInExistingList(items, event.getAssignment().getItems());
 	            
 	            // Store
 	            EventDatastoreImpl.storeEventOnly(event);
-	            return TransactionResult.SUCCESS;
+	            return new TransactionResult<EventDo>(event, TransactionStatus.SUCCESS);
 			}
 		};
-		TransactionResult result = DatastoreObjectifyDAL.update(w);
+		TransactionResult<EventDo> result = DatastoreObjectifyDAL.update(w);
 		DatastoreUtil.processResult(result);
+		return result.getEntity();
+	}
+	
+	private static void updateItemsInExistingList(List<Item> newList, List<Item> existingList){
+		if(newList == null || newList.isEmpty()){
+			return;
+		}
+		// O(m*n) complexity, where m is number of new items to be updated and n is existing items in todo list
+		// TODO: Revisit and see if hashmap possible.
+		for(Item item: newList){
+        	int i = 0;
+        	boolean removeItem = false;
+        	for( ;i < existingList.size(); i++){
+        		if(existingList.get(i).getId().equals(item.getId())){
+        			removeItem = true;
+        			break;
+        		}
+        	}
+        	if(removeItem){
+        		existingList.remove(i);
+        	}
+        	existingList.add(item);
+        }
 	}
 }

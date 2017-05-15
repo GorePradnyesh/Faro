@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.InviteeList;
 import com.zik.faro.data.MinUser;
 import com.zik.faro.data.user.EventInviteStatus;
@@ -45,11 +46,11 @@ public class EventUserManagement {
 		EventUserDatastoreImpl.deleteEventUser(eventId, faroUserId);
 	}
 	
-	public static void updateEventUserInviteStatus(final String eventId, final String faroUserId, EventInviteStatus inviteStatus) throws DataNotFoundException, DatastoreException{
+	public static void updateEventUserInviteStatus(final String eventId, final String faroUserId, EventInviteStatus inviteStatus) throws DataNotFoundException, DatastoreException, UpdateVersionException{
 		EventUserDatastoreImpl.updateActivity(new EventUserDo(eventId, faroUserId, null, inviteStatus));
 	}
 	
-	public static void updateEventUserOwnerId(final String eventId, final String faroUserId, String ownerId) throws DataNotFoundException, DatastoreException{
+	public static void updateEventUserOwnerId(final String eventId, final String faroUserId, String ownerId) throws DataNotFoundException, DatastoreException, UpdateVersionException{
 		EventUserDatastoreImpl.updateActivity(new EventUserDo(eventId, faroUserId, ownerId, null));
 	}
 	

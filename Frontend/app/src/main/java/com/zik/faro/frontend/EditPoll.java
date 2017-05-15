@@ -24,7 +24,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.squareup.okhttp.Request;
-import com.zik.faro.data.Event;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.PollOption;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
@@ -32,9 +31,10 @@ import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 
 import static android.widget.Toast.LENGTH_LONG;
 
@@ -45,21 +45,21 @@ public class EditPoll extends Activity {
 
     private static String eventID = null;
     private String pollID;
-    private static Poll poll;
-    private static Event event;
-    Intent PollLandingPage;
+    private static Poll clonePoll;
+    private Intent PollLandingPage;
 
     private static String TAG = "EditPoll";
 
-
     private RelativeLayout popUpRelativeLayout;
-
+    private final List <PollOption> newPollOptionList = new LinkedList<>();
     final Context mContext = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_poll);
+
+        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
         final TextView pollDescription = (TextView) findViewById(R.id.pollDescription);
         final CheckBox isMultiChoice = (CheckBox)findViewById(R.id.multiChoiceFlag);
@@ -70,11 +70,9 @@ public class EditPoll extends Activity {
         addNewOptionButton.setEnabled(false);
 
         ListView editPollOptionsListView = (ListView)findViewById(R.id.editPollOptionsList);
-        final List <PollOption> newPollOptionList = new LinkedList<>();
 
         final Button editPollOK = (Button) findViewById(R.id.editPollOK);
         editPollOK.setEnabled(true);
-        final Button editPollCancel = (Button) findViewById(R.id.editPollCancel);
         final Button deletePoll = (Button)findViewById(R.id.deletePoll);
 
         popUpRelativeLayout = (RelativeLayout) findViewById(R.id.editPollPage);
@@ -85,33 +83,23 @@ public class EditPoll extends Activity {
         if(extras != null) {
             eventID = extras.getString("eventID");
             pollID = extras.getString("pollID");
-            poll = pollListHandler.getPollCloneFromMap(pollID);
-            event = eventListHandler.getEventCloneFromMap(eventID);
+            clonePoll = pollListHandler.getPollCloneFromMap(pollID);
         }
 
 
         final PollOptionsAdapter editPollOptionsAdapter = new PollOptionsAdapter(this, R.layout.poll_option_can_edit_row_style);
         editPollOptionsListView.setAdapter(editPollOptionsAdapter);
-        for (Integer i = 0; i < poll.getPollOptions().size(); i++){
-            PollOption pollOption = poll.getPollOptions().get(i);
+
+        for (Integer i = 0; i < clonePoll.getPollOptions().size(); i++){
+            PollOption pollOption = clonePoll.getPollOptions().get(i);
             editPollOptionsAdapter.insert(pollOption, 0);
         }
+
         editPollOptionsAdapter.notifyDataSetChanged();
         editPollOptionsListView.setAdapter(editPollOptionsAdapter);
-        /*final PollOptionsAdapter newPollOptionsAdapter = new PollOptionsAdapter(this, R.layout.poll_create_new_page_row_style);
-        newPollOptionsList.setAdapter(newPollOptionsAdapter);
 
-        final PollOptionsAdapter oldPollOptionsAdapter = new PollOptionsAdapter(this, R.layout.poll_create_new_page_row_style);
-        for (Integer i = 0; i < poll.getPollOptions().size(); i++){
-            PollOption pollOption = poll.getPollOptions().get(i);
-            oldPollOptionsAdapter.insert(pollOption, 0);
-            oldPollOptionsAdapter.notifyDataSetChanged();
-            finalPollOptionList.add(pollOption);
-        }
-        oldPollOptionsList.setAdapter(oldPollOptionsAdapter);*/
-
-        pollDescription.setText(poll.getDescription());
-        isMultiChoice.setChecked(poll.getMultiChoice());
+        pollDescription.setText(clonePoll.getDescription());
+        isMultiChoice.setChecked(clonePoll.getMultiChoice());
 
         //Enable the addNewOptionButton only after Users enters an Option
         optionText.addTextChangedListener(new TextWatcher() {
@@ -134,10 +122,9 @@ public class EditPoll extends Activity {
             public void onClick(View v) {
                 String optionDescription = optionText.getText().toString();
                 PollOption pollOption = new PollOption(optionDescription);
-
                 editPollOptionsAdapter.insert(pollOption, 0);
-                editPollOptionsAdapter.notifyDataSetChanged();
                 newPollOptionList.add(pollOption);
+                editPollOptionsAdapter.notifyDataSetChanged();
                 optionText.setText("");
             }
         });
@@ -147,29 +134,39 @@ public class EditPoll extends Activity {
             public void onClick(View v) {
 
                 if(!newPollOptionList.isEmpty()) {
-                    //TODO Make API call to update the pollOptions
-                    List <PollOption> tempList = editPollOptionsAdapter.getList();
-                    for (Integer i = 0; i < tempList.size(); i++){
-                        PollOption pollOption = tempList.get(i);
-                        pollOption.setId(UUID.randomUUID().toString());
-                    }
-                    poll.setPollOptions(editPollOptionsAdapter.getList());
+                    clonePoll.setPollOptions(newPollOptionList);
+
+                    Map<String, Object> map = new HashMap<String, Object>();
+                    map.put("poll", clonePoll);
+
+                    serviceHandler.getPollHandler().updatePoll(new BaseFaroRequestCallback<Poll>() {
+                        @Override
+                        public void onFailure(Request request, IOException ex) {
+                            Log.e(TAG, "failed to send Poll update request");
+                        }
+
+                        @Override
+                        public void onResponse(final Poll poll, HttpError error) {
+                            if (error == null ) {
+                                Runnable myRunnable = new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Log.i(TAG, "Poll Update Response received Successfully");
+                                        pollListHandler.addPollToListAndMap(poll);
+                                        PollLandingPage.putExtra("eventID", eventID);
+                                        PollLandingPage.putExtra("pollID", pollID);
+                                        startActivity(PollLandingPage);
+                                        finish();
+                                    }
+                                };
+                                Handler mainHandler = new Handler(mContext.getMainLooper());
+                                mainHandler.post(myRunnable);
+                            }else {
+                                Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                            }
+                        }
+                    }, eventID, pollID, map);
                 }
-
-                PollLandingPage.putExtra("eventID", event.getEventId());
-                PollLandingPage.putExtra("pollID", poll.getId());
-                startActivity(PollLandingPage);
-                finish();
-            }
-        });
-
-        editPollCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                PollLandingPage.putExtra("eventID", event.getEventId());
-                PollLandingPage.putExtra("pollID", poll.getId());
-                startActivity(PollLandingPage);
-                finish();
             }
         });
 
@@ -181,7 +178,7 @@ public class EditPoll extends Activity {
         });
     }
 
-    public void confirmPollDeletePopUP(View v) {
+    private void confirmPollDeletePopUP(View v) {
         LayoutInflater layoutInflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         ViewGroup container = (ViewGroup) layoutInflater.inflate(R.layout.delete_popup, null);
         final PopupWindow popupWindow = new PopupWindow(container, RelativeLayout.LayoutParams.WRAP_CONTENT,
@@ -205,11 +202,10 @@ public class EditPoll extends Activity {
         delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO: Make API call and update server
                 serviceHandler.getPollHandler().deletePoll(new BaseFaroRequestCallback<String>() {
                     @Override
                     public void onFailure(Request request, IOException ex) {
-                        Log.e(TAG, "failed to delete poll");
+                        Log.e(TAG, "failed to delete clonePoll");
                     }
 
                     @Override
@@ -218,9 +214,9 @@ public class EditPoll extends Activity {
                             Runnable myRunnable = new Runnable() {
                                 @Override
                                 public void run() {
-                                    pollListHandler.removePollFromListAndMap(poll);
+                                    pollListHandler.removePollFromListAndMap(clonePoll);
                                     popupWindow.dismiss();
-                                    Toast.makeText(EditPoll.this, poll.getDescription() + "is Deleted", LENGTH_LONG).show();
+                                    Toast.makeText(EditPoll.this, clonePoll.getDescription() + "is Deleted", LENGTH_LONG).show();
                                     finish();
                                 }
                             };
@@ -242,23 +238,15 @@ public class EditPoll extends Activity {
         });
 
     }
-    //**********************************************************************************************
-    //**********************************************************************************************
-    //**********************************************************************************************
-    //**********************************************************************************************
-    //This would probably lead to increase in stack size for Intents since the previous intents are
-    //not popped out of the stack. Check how to see the stack size of the intents.
+
+
     @Override
     public void onBackPressed() {
-        PollLandingPage.putExtra("eventID", event.getEventId());
-        PollLandingPage.putExtra("pollID", poll.getId());
+        PollLandingPage.putExtra("eventID", eventID);
+        PollLandingPage.putExtra("pollID", pollID);
         startActivity(PollLandingPage);
         finish();
         super.onBackPressed();
     }
-    //**********************************************************************************************
-    //**********************************************************************************************
-    //**********************************************************************************************
-    //**********************************************************************************************
 }
 

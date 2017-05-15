@@ -72,6 +72,11 @@
 
     <string name="facebook_app_id">545550208965496</string>
 
+    <!-- Use the below app id belonging to farodeveloper@gmail.com when facebook unlocks the account -->
+    <!-- string name="facebook_app_id">692745024183708</string -->
+
+    <string name="fb_login_protocol_scheme">fb692745024183708</string>
+
     <!-- Error messages -->
     <string name="video_error_media_load_timeout">Media loading timed out</string>
     <string name="video_error_server_inaccessible">Media server was not reachable</string>
@@ -98,19 +103,19 @@
     <string name="multi_choice">Multi-Choice?</string>
     <string name="poll_description">Poll Description</string>
     <string name="poll_option">Poll Option</string>
-    <string name="title_activity_create_new_assignment">CreateNewAssignment</string>
     <string name="add_item">Add Item</string>
     <string name="title_activity_edit_assignment">EditAssignment</string>
     <string name="title_activity_more_options">MoreOptions</string>
     <string name="title_activity_more_options_page">MoreOptionsPage</string>
     <string name="title_activity_tab_try">TabTry</string>
-    <string name="section_format">Hello World from section: %1$d</string>
+    <string name="google_place_api">AIzaSyCX65e5Gnls0VjcSNauPQBZPOrJ2cuaSTY</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_invite_friend_page">InviteFriendPage</string>
     <string name="friends">Friends</string>
     <string name="add">Add</string>
+    <string name="location">Location</string>
+    <string name="title_activity_blank">Blank</string>
 
     <string name="screen_slide_text">Image</string>
 </resources>

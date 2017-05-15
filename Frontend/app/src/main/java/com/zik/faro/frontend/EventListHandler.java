@@ -91,7 +91,7 @@ public class EventListHandler {
                     Log.i(TAG, "Response received Successfully");
                     conditionallyAddEventToList(receivedEvent, eventInviteStatus);
                     EventInviteStatusWrapper eventInviteStatusWrapper = new EventInviteStatusWrapper(receivedEvent, EventInviteStatus.ACCEPTED);
-                    eventMap.put(receivedEvent.getEventId(), eventInviteStatusWrapper);
+                    eventMap.put(receivedEvent.getId(), eventInviteStatusWrapper);
                 } else {
                     Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                 }
@@ -117,10 +117,10 @@ public class EventListHandler {
          * If the received event is already present in the local database, then we need to delete that and
          * update it with the newly received Event.
          */
-        removeEventFromListAndMap(receivedEvent.getEventId());
+        removeEventFromListAndMap(receivedEvent.getId());
         conditionallyAddEventToList(receivedEvent, eventInviteStatus);
         EventInviteStatusWrapper eventInviteStatusWrapper = new EventInviteStatusWrapper(receivedEvent, eventInviteStatus);
-        eventMap.put(receivedEvent.getEventId(), eventInviteStatusWrapper);
+        eventMap.put(receivedEvent.getId(), eventInviteStatusWrapper);
     }
 
     public void addDownloadedEventsToListAndMap(List<EventInviteStatusWrapper> eventInviteStatusWrappers){
@@ -218,7 +218,7 @@ public class EventListHandler {
         Calendar eventCalendar;
         Calendar lastEventInListCalendar;
         EventAdapter eventAdapter;
-        EventInviteStatus eventInviteStatus = getUserEventStatus(event.getEventId());
+        EventInviteStatus eventInviteStatus = getUserEventStatus(event.getId());
         eventAdapter = getEventAdapter(eventInviteStatus);
         int lastEventIndex = eventAdapter.list.size() - 1;
         Event lastEventInList = eventAdapter.list.get(lastEventIndex);
@@ -229,7 +229,7 @@ public class EventListHandler {
         //TODO (Code Review) add condition to not add if it lies before the first or 0th event.
         //Cause in that case if newEventIndex is 0 then we shouldnt add it.
         if (eventCalendar.compareTo(lastEventInListCalendar) == 1){
-            eventMap.remove(event.getEventId());
+            eventMap.remove(event.getId());
         }
 
         //TODO Check for Map and List sync here. And somehow catch this error
@@ -260,7 +260,7 @@ public class EventListHandler {
     public void removeEventFromList(String eventID, List<Event> eventList){
         for (int i = 0; i < eventList.size(); i++){
             Event event = eventList.get(i);
-            if (event.getEventId().equals(eventID)){
+            if (event.getId().equals(eventID)){
                 eventList.remove(event);
                 return;
             }

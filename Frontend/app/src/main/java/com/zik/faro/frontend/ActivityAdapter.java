@@ -32,7 +32,6 @@ public class ActivityAdapter extends ArrayAdapter{
 
     public void insert(Activity activity, int index) {
         list.add(index, activity);
-        super.insert(activity, index);
     }
 
     @Override

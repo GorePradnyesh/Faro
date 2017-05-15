@@ -6,13 +6,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.zik.faro.data.Assignment;
+import com.zik.faro.frontend.data.AssignmentParentInfo;
 
 import java.util.LinkedList;
 import java.util.List;
 
 public class AssignmentAdapter extends ArrayAdapter {
     //TODO (Code Review) Implement sorted list instead of Linkedlist
-    public List<Assignment> list = new LinkedList<>();
+    public List<AssignmentParentInfo> list = new LinkedList<>();
 
     public AssignmentAdapter(Context context, int resource) {
         super(context, resource);
@@ -22,17 +23,10 @@ public class AssignmentAdapter extends ArrayAdapter {
         return this.list.size();
     }
 
-    public void insert(Assignment assignment, int index) {
-        list.add(index, assignment);
-        super.insert(assignment, index);
+    public void insert(AssignmentParentInfo assignmentParentInfo, int index) {
+        list.add(index, assignmentParentInfo);
     }
 
-    static class ImgHolder{
-        ImageView STATUS_IMG;
-        TextView EVNT_NAME;
-        TextView EVNT_START_DATE;
-        TextView EVNT_START_TIME;
-    }
     @Override
     public Object getItem(int position) {
         return this.list.get(position);

@@ -4,9 +4,10 @@ import java.util.List;
 import java.util.Set;
 
 import com.googlecode.objectify.Work;
-import com.zik.faro.data.PollOption;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateVersionException;
+import com.zik.faro.data.PollOption;
 import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.persistence.datastore.data.PollDo;
 
@@ -51,35 +52,71 @@ public class PollDatastoreImpl {
     	return count;
     }
     
-    public static void castVote(final String eventId, final String pollId,
-    		final Set<String> options, final String userId) throws DatastoreException, DataNotFoundException{
-    	Work<TransactionResult> w = new Work<TransactionResult>() {
+    public static PollDo updatePoll(final String eventId, final String pollId,
+    		final PollDo updatePoll, final String userId, final Set<String> options) throws DatastoreException, DataNotFoundException, UpdateVersionException{
+    	Work w = new Work<TransactionResult<PollDo>>() {
     		
 			@Override
-			public TransactionResult run(){
+			public TransactionResult<PollDo> run(){
 				PollDo poll;
 				try {
 					poll = loadPollById(pollId, eventId);
+					if(!BaseDatastoreImpl.isVersionOk(updatePoll, poll)){
+						return new TransactionResult<PollDo>(null, TransactionStatus.VERSIONMISSMATCH, "Incorrect entity version. Current version:"+poll.getVersion().toString());
+					}
 					
 					// Iterate over all poll options. 
 					// Since it is a list I cannot get O(1) operation either ways.
-					for(PollOption pollOption : poll.getPollOptions()){
-						if(options.contains(pollOption.getId())){
-							pollOption.getVoters().add(userId);
-						}else{
-							pollOption.getVoters().remove(userId);
+					if(options != null && !options.isEmpty()){
+						for(PollOption pollOption : poll.getPollOptions()){
+							if(options.contains(pollOption.getId())){
+								pollOption.getVoters().add(userId);
+							}else{
+								pollOption.getVoters().remove(userId);
+							}
 						}
 					}
-	                
+					
+					if(updatePoll.getCreatorId() != null){
+						poll.setCreatorId(updatePoll.getCreatorId());
+					}
+					
+					if(updatePoll.getDeadline() != null){
+						poll.setDeadline(updatePoll.getDeadline());
+					}
+					
+					if(updatePoll.getDescription() != null){
+						poll.setDescription(updatePoll.getDescription());
+					}
+					
+					if(updatePoll.getOwner() != null){
+						poll.setOwner(updatePoll.getOwner());
+					}
+					
+					if(updatePoll.getPollOptions() != null && !updatePoll.getPollOptions().isEmpty()){
+						for(PollOption option: updatePoll.getPollOptions()){
+							poll.addPollOptions(option);
+						}
+					}
+					
+					if(updatePoll.getStatus() != null){
+						poll.setStatus(updatePoll.getStatus());
+					}
+					
+					if(updatePoll.getWinnerId() != null && userId.equals(poll.getCreatorId())){
+						poll.setWinnerId(updatePoll.getWinnerId());
+					}
+	                BaseDatastoreImpl.versionIncrement(updatePoll, poll);
 	                storePoll(poll);
 				} catch (DataNotFoundException e) {
-					return TransactionResult.DATANOTFOUND;
+					return new TransactionResult<PollDo>(null, TransactionStatus.DATANOTFOUND);
 				}
-				return TransactionResult.SUCCESS;
+				return new TransactionResult<PollDo>(poll, TransactionStatus.SUCCESS);
 			}
 		};
-        TransactionResult result = DatastoreObjectifyDAL.update(w);
+        TransactionResult<PollDo> result = DatastoreObjectifyDAL.update(w);
         DatastoreUtil.processResult(result);
+        return result.getEntity();
     }
     
     public static void deletePoll(final String eventId, final String pollId){

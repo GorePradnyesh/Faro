@@ -6,10 +6,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.zik.faro.data.InviteeList;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -30,7 +33,12 @@ public class EventFriendAdapter extends ArrayAdapter {
 
     public void insert(InviteeList.Invitees invitees, int index) {
         list.add(index, invitees);
-        super.insert(invitees, index);
+        Collections.sort(list, new Comparator<InviteeList.Invitees>() {
+            @Override
+            public int compare(InviteeList.Invitees lhs, InviteeList.Invitees rhs) {
+                return lhs.getFirstName().compareTo(rhs.getFirstName());
+            }
+        });
     }
 
     @Override
@@ -39,6 +47,7 @@ public class EventFriendAdapter extends ArrayAdapter {
     }
 
     static class ImgHolder{
+        ImageView userPicture;
         TextView friendName;
     }
 
@@ -58,6 +67,7 @@ public class EventFriendAdapter extends ArrayAdapter {
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             row = inflater.inflate(R.layout.friend_row_style, parent, false);
+            holder.userPicture = (ImageView)row.findViewById(R.id.userPicture);
             holder.friendName = (TextView)row.findViewById(R.id.friendName);
             row.setTag(holder);
         }else{
@@ -71,6 +81,7 @@ public class EventFriendAdapter extends ArrayAdapter {
                 holder.friendName.setText("FNU");
             }
         }
+        holder.userPicture.setImageResource(R.drawable.user_pic);
         return row;
     }
 

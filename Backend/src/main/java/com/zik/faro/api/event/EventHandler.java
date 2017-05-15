@@ -1,15 +1,6 @@
 package com.zik.faro.api.event;
 
-import static com.zik.faro.commons.Constants.COUNT_PARAM;
-import static com.zik.faro.commons.Constants.EVENT_ADD_FRIENDS_CONST;
-import static com.zik.faro.commons.Constants.EVENT_DETAILS_PATH_CONST;
-import static com.zik.faro.commons.Constants.EVENT_DISABLE_CONTROL_PATH_CONST;
-import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM;
-import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM_STRING;
-import static com.zik.faro.commons.Constants.EVENT_INVITEES_PATH_CONST;
-import static com.zik.faro.commons.Constants.EVENT_PATH_CONST;
-import static com.zik.faro.commons.Constants.EVENT_REMOVE_ATTENDEE_PATH_CONST;
-import static com.zik.faro.commons.Constants.UPDATE_INVITE_STATUS_PATH_CONST;
+import static com.zik.faro.commons.Constants.*;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -30,6 +21,7 @@ import com.zik.faro.applogic.EventUserManagement;
 import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.AddFriendRequest;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.IllegalDataOperation;
@@ -94,16 +86,23 @@ public class EventHandler {
                      .entity(e.getMessage())
                      .build();
             throw new WebApplicationException(response);
+		} catch (UpdateVersionException e) {
+			Response response = Response.status(Response.Status.BAD_REQUEST)
+                    .entity(e.getMessage())
+                    .build();
+           throw new WebApplicationException(response);
 		}
     	return JResponse.ok(Constants.HTTP_OK).build();
     }
 
-    @Path(EVENT_DISABLE_CONTROL_PATH_CONST)
+    @Path(EVENT_UPDATE_PATH_CONST)
     @POST
-    public JResponse<String> disableEventControl(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
-        String userId = context.getUserPrincipal().getName();
+	@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public JResponse<Event> updateEvent(@PathParam(EVENT_ID_PATH_PARAM) final String eventId, final Event updateObj){
+        // TODO: Validation to make sure only event owner can update
+    	String userId = context.getUserPrincipal().getName();
         try {
-            EventManagement.disableEventControls(userId, eventId);
+        	return JResponse.ok(EventManagement.updateEvent(updateObj, eventId)).build();
         } catch (DataNotFoundException e) {
             Response response = Response.status(Response.Status.NOT_FOUND)
                     .entity(e.getMessage())
@@ -114,10 +113,14 @@ public class EventHandler {
                      .entity(e.getMessage())
                      .build();
             throw new WebApplicationException(response);
+		} catch (UpdateVersionException e) {
+			Response response = Response.status(Response.Status.BAD_REQUEST)
+                    .entity(e.getMessage())
+                    .build();
+           throw new WebApplicationException(response);
 		}
-        return JResponse.ok(Constants.HTTP_OK).build();
     }
-
+    
     @Path(EVENT_REMOVE_ATTENDEE_PATH_CONST)
     @POST
     public JResponse<String> removeAttendee(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,

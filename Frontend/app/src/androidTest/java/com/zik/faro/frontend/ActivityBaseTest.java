@@ -6,6 +6,7 @@ import android.test.suitebuilder.annotation.LargeTest;
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Event;
+import com.zik.faro.data.GeoPosition;
 import com.zik.faro.data.Location;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
@@ -40,7 +41,7 @@ public class ActivityBaseTest extends ApiBaseTest {
 
         // Create Event
         TestEventCreateCallback createCallback = new TestEventCreateCallback(waitSem, 200, null);
-        Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(), null, false, null, null, null, null);
+        Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(), null, null, false, null, null, null, null, null);
         serviceHandler.getEventHandler().createEvent(createCallback, eventCreateData);
         timeout = false;
         timeout = !waitSem.tryAcquire(testTimeout, TimeUnit.MILLISECONDS);
@@ -48,7 +49,7 @@ public class ActivityBaseTest extends ApiBaseTest {
         Assert.assertFalse(timeout);
         Assert.assertFalse(createCallback.failed);
         Assert.assertFalse(createCallback.unexpectedResponseCode);
-        String eventId = createCallback.receivedEvent.getEventId();
+        String eventId = createCallback.receivedEvent.getId();
 
         // Get Event;
         TestGetEventCallbackHandler callback = new TestGetEventCallbackHandler(waitSem, 200);
@@ -61,7 +62,8 @@ public class ActivityBaseTest extends ApiBaseTest {
         
         // Create Activity 
         String activityName = UUID.randomUUID().toString();
-        Activity activity = new Activity(eventId, activityName, "randomDescription", new Location("Location1"), Calendar.getInstance(), Calendar.getInstance(), null);
+        GeoPosition geoPosition = new GeoPosition(0,0);
+        Activity activity = new Activity(eventId, activityName,"randomDescription", new Location("Location1", "Address1", geoPosition), Calendar.getInstance(), Calendar.getInstance(), null);
         TestActivityCreateCallback createActivityCallback = new TestActivityCreateCallback(waitSem, 200);
         serviceHandler.getActivityHandler().createActivity(createActivityCallback, eventId, activity);
         timeout = !waitSem.tryAcquire(testTimeout, TimeUnit.MILLISECONDS);
@@ -83,7 +85,8 @@ public class ActivityBaseTest extends ApiBaseTest {
         
         // Create Activity 
         String activityName2 = UUID.randomUUID().toString();
-        Activity activity2 = new Activity(eventId, activityName, "randomDescription", new Location("Location1"), Calendar.getInstance(), Calendar.getInstance(), null);
+        Activity activity2 = new Activity(eventId, activityName,
+		"randomDescription", new Location("Location1", "Address1", geoPosition), Calendar.getInstance(), Calendar.getInstance(), null);
         TestActivityCreateCallback createActivityCallback2 = new TestActivityCreateCallback(waitSem, 200);
         serviceHandler.getActivityHandler().createActivity(createActivityCallback2, eventId, activity);
         timeout = !waitSem.tryAcquire(testTimeout, TimeUnit.MILLISECONDS);

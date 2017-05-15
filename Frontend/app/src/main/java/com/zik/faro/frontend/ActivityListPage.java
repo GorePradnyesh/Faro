@@ -73,7 +73,7 @@ public class ActivityListPage extends android.app.Activity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Activity activity = (Activity) parent.getItemAtPosition(position);
                 activityLandingPage.putExtra("activityID", activity.getId());
-                activityLandingPage.putExtra("eventID", event.getEventId());
+                activityLandingPage.putExtra("eventID", eventID);
                 //TODO: check if startActivityForResult is a better way
                 startActivity(activityLandingPage);
             }
@@ -105,36 +105,9 @@ public class ActivityListPage extends android.app.Activity {
         addActivity.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                createNewActivityPage.putExtra("eventID", event.getEventId());
+                createNewActivityPage.putExtra("eventID", eventID);
                 startActivity(createNewActivityPage);
             }
         });
-
-
-        //Make API call to get all activities for this event
-        serviceHandler.getActivityHandler().getActivities(new BaseFaroRequestCallback<List<Activity>>() {
-            @Override
-            public void onFailure(Request request, IOException ex) {
-                Log.e(TAG, "failed to get activity list");
-            }
-
-            @Override
-            public void onResponse(final List<Activity> activities, HttpError error) {
-                if (error == null ) {
-                    Runnable myRunnable = new Runnable() {
-                        @Override
-                        public void run() {
-                            Log.i(TAG, "Successfully received activities from the server!!");
-                            activityListHandler.addDownloadedActivitiesToListAndMap(activities);
-                        }
-                    };
-                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                    mainHandler.post(myRunnable);
-                }else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
-                }
-
-            }
-        }, eventID);
     }
 }

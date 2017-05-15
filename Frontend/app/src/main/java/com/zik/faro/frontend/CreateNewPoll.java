@@ -25,6 +25,7 @@ import com.zik.faro.data.PollOption;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
+import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 
 import java.io.IOException;
 
@@ -36,6 +37,9 @@ public class CreateNewPoll extends Activity {
     private static String eventID = null;
     private static Event event;
     Intent PollListPage = null;
+
+    static FaroUserContext faroUserContext = FaroUserContext.getInstance();
+    String myUserId = faroUserContext.getEmail();
 
     private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private static String TAG = "CreateNewPoll";
@@ -113,8 +117,8 @@ public class CreateNewPoll extends Activity {
                     return;
                 }
                 Poll poll;
-                poll = new Poll(eventID, "pollCreator", isMultiChoice.isChecked(),
-                        pollOptionsAdapter.list, "pollCreator", pollDescription.getText().toString(),
+                poll = new Poll(eventID, myUserId, isMultiChoice.isChecked(),
+                        pollOptionsAdapter.list, myUserId, pollDescription.getText().toString(),
                         ObjectStatus.OPEN);
 
                 serviceHandler.getPollHandler().createPoll(new BaseFaroRequestCallback<Poll>() {
@@ -131,7 +135,7 @@ public class CreateNewPoll extends Activity {
                                 public void run() {
                                     Log.i(TAG, "Poll Create Response received Successfully");
                                     pollListHandler.addPollToListAndMap(receivedPoll);
-                                    OpenPollLandingPage.putExtra("eventID", event.getEventId());
+                                    OpenPollLandingPage.putExtra("eventID", eventID);
                                     OpenPollLandingPage.putExtra("pollID", receivedPoll.getId());
                                     startActivity(OpenPollLandingPage);
                                     finish();

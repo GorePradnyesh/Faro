@@ -26,6 +26,8 @@ import com.zik.faro.data.Activity;
 import com.zik.faro.applogic.ActivityManagement;
 import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
+import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateVersionException;
 
 @Path(EVENT_PATH_CONST + EVENT_ID_PATH_PARAM_STRING + ACTIVITY_PATH_CONST)
 public class ActivityHandler {
@@ -92,6 +94,16 @@ public class ActivityHandler {
         	return JResponse.ok(ActivityManagement.updateActivity(activityUpdateData, eventId)).build();
 		} catch (DataNotFoundException e) {
 			Response response = Response.status(Response.Status.NOT_FOUND)
+                    .entity(e.getMessage())
+                    .build();
+            throw new WebApplicationException(response);
+		} catch (DatastoreException e) {
+			Response response = Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(e.getMessage())
+                    .build();
+            throw new WebApplicationException(response);
+		} catch (UpdateVersionException e) {
+			Response response = Response.status(Response.Status.BAD_REQUEST)
                     .entity(e.getMessage())
                     .build();
             throw new WebApplicationException(response);

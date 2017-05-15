@@ -7,13 +7,11 @@
     <uses-feature android:name="android.hardware.camera"
         android:required="false" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <uses-feature
         android:name="android.hardware.touchscreen"
         android:required="false" />
-    <uses-feature
-        android:name="android.software.leanback"
-        android:required="true" />
 
     <application
         android:name=".FaroApplication"
@@ -77,7 +75,7 @@
             android:label="@string/title_activity_create_new" />
         <activity android:name=".EditPoll" />
         <activity
-            android:name=".PickPollWinner"
+            android:name=".PickPollWinnerPage"
             android:label="@string/title_activity_pick_poll_winner" />
         <activity
             android:name=".ClosedPollLandingPage"
@@ -92,12 +90,6 @@
             android:name=".EditActivity"
             android:label="@string/title_activity_edit" />
         <activity
-            android:name=".CreateNewAssignment"
-            android:label="@string/title_activity_create_new_assignment" />
-        <activity
-            android:name=".AssignmentLandingPage"
-            android:label="@string/title_activity_assignment_landing_page" />
-        <activity
             android:name=".EditAssignment"
             android:label="@string/title_activity_edit_assignment" />
         <activity
@@ -105,7 +97,21 @@
             android:label="@string/title_activity_app_landing_page" />
         <activity
             android:name=".InviteFriendToEventPage"
-            android:label="InviteFriendToEventPage"/>
+            android:label="InviteFriendToEventPage" />
+        <activity
+            android:name=".AssignmentLandingPage"
+            android:label="AssignmentLandingPageTabs" />
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_place_api" />
+
+        <activity android:name=".EventFriendListLandingPage" />
+        <activity android:name=".UserProfilePage"></activity>
+
         <activity
             android:name=".ImageGridViewActivity"
             android:label="ImageGridView" />
@@ -119,6 +125,17 @@
             android:label="@string/app_name" />
         <activity android:name=".ScreenSlidePagerActivity"
             android:label=".ScreenSlidePagerActivity" />
+
+        <activity
+            android:name="com.facebook.CustomTabActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="@string/fb_login_protocol_scheme" />
+            </intent-filter>
+        </activity>
 
     </application>
 

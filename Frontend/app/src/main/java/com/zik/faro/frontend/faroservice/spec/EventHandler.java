@@ -17,4 +17,5 @@ public interface EventHandler {
     void getEventInvitees(final BaseFaroRequestCallback<InviteeList> callback, final String eventId);
     void addInviteesToEvent(final BaseFaroRequestCallback<String> callback, final String eventId, final AddFriendRequest addFriendRequest);
     void updateEventUserInviteStatus(final BaseFaroRequestCallback<String> callback, final String eventId, EventInviteStatus inviteStatus);
+    void updateEvent(final BaseFaroRequestCallback<Event> callback, String eventId, Event event);
 }

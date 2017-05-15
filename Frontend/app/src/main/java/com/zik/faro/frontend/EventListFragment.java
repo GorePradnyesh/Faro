@@ -26,7 +26,9 @@ import com.zik.faro.frontend.faroservice.HttpError;
 import java.io.IOException;
 import java.util.List;
 
-public class EventListFragment extends Fragment {
+public class EventListFragment extends Fragment{
+
+
     static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
     private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
@@ -39,7 +41,7 @@ public class EventListFragment extends Fragment {
 
     private void eventSelectedFromList(AdapterView<?> parent, int position, Intent eventLanding) {
         Event event = (Event) parent.getItemAtPosition(position);
-        eventLanding.putExtra("eventID", event.getEventId());
+        eventLanding.putExtra("eventID", event.getId());
         //TODO: check if startActivityForResult is a better way
         startActivity(eventLanding);
     }
@@ -47,6 +49,7 @@ public class EventListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.fragment_event_list, container, false);
         TabHost eventTabHost = (TabHost)view.findViewById(R.id.eventTabHost);
         eventTabHost.setup();

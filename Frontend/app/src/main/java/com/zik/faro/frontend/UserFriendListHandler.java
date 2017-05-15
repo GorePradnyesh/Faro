@@ -1,5 +1,8 @@
 package com.zik.faro.frontend;
 
+import com.google.gson.Gson;
+import com.zik.faro.data.Event;
+import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.MinUser;
 import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 
@@ -100,5 +103,13 @@ public class UserFriendListHandler {
             }
         }
         return friendFullName;
+    }
+
+    public MinUser getMinUserCloneFromMap(String emailID){
+        MinUser minUser = friendMap.get(emailID);
+        Gson gson = new Gson();
+        String json = gson.toJson(minUser);
+        MinUser cloneMinUser = gson.fromJson(json, MinUser.class);
+        return cloneMinUser;
     }
 }
