@@ -8,6 +8,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 import com.google.appengine.repackaged.org.apache.http.protocol.HTTP;
+import com.zik.faro.data.GeoPosition;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

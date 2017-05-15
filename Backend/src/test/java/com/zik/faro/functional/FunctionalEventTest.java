@@ -274,7 +274,7 @@ public class FunctionalEventTest {
     	Assert.assertEquals(expected.getEventName(), actual.getEventName());
         Assert.assertEquals(expected.getEndDate(), actual.getEndDate());
         Assert.assertEquals(expected.getStartDate(), actual.getStartDate());
-        Assert.assertEquals(expected.getLocation().locationName, actual.getLocation().locationName);
+        Assert.assertEquals(expected.getLocation().getLocationName(), actual.getLocation().getLocationName());
         Assert.assertEquals(expected.getLocation().getLocationName(), actual.getLocation().getLocationName());
         Assert.assertEquals(expected.getLocation().getLocationAddress(), actual.getLocation().getLocationAddress());
         Assert.assertEquals(expected.getLocation().getPosition(), actual.getLocation().getPosition());

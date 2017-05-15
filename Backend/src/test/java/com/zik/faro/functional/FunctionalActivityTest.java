@@ -57,7 +57,7 @@ public class FunctionalActivityTest {
         Assert.assertEquals(activityRequest.getName(), activityResponse.getName());
         Assert.assertEquals(activityRequest.getStartDate(), activityResponse.getStartDate());
         Assert.assertEquals(activityRequest.getEndDate(), activityResponse.getEndDate());
-        Assert.assertEquals(activityRequest.getLocation().locationName, activityResponse.getLocation().locationName);
+        Assert.assertEquals(activityRequest.getLocation().getLocationName(), activityResponse.getLocation().getLocationName());
         Assert.assertEquals(activityRequest.getEventId(), activityResponse.getEventId());
     }
     

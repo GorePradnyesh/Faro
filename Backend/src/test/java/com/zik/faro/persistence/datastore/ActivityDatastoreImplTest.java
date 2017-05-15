@@ -158,7 +158,7 @@ public class ActivityDatastoreImplTest {
     	
     	// Verify
     	Assert.assertEquals(retrievedActivity.getLocation().getLocationName(), "Fremont");
-    	Assert.assertEquals(retrievedActivity.getLocation().getAddress(), "CA");
+    	Assert.assertEquals(retrievedActivity.getLocation().getLocationAddress(), "CA");
     	Assert.assertEquals(retrievedActivity.getLocation().getPosition(), geoPosition2);
     	Assert.assertEquals(retrievedActivity.getDescription(), "Description changed");
     	

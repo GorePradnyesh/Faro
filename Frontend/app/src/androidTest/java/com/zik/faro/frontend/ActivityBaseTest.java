@@ -6,7 +6,7 @@ import android.test.suitebuilder.annotation.LargeTest;
 
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.Activity;
-import com.zik.faro.data.EventCreateData;
+import com.zik.faro.data.Event;
 import com.zik.faro.data.Location;
 import com.zik.faro.data.GeoPosition;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
@@ -44,7 +44,7 @@ public class ActivityBaseTest extends ApiBaseTest {
 
         // Create Event
         TestEventCreateCallback createCallback = new TestEventCreateCallback(waitSem, 200, null);
-        EventCreateData eventCreateData = new EventCreateData("MySampleEvent", Calendar.getInstance(), null, null, null);
+        Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(), null, null, false, null, null, null, null, null);
         serviceHandler.getEventHandler().createEvent(createCallback, eventCreateData);
         timeout = false;
         timeout = !waitSem.tryAcquire(testTimeout, TimeUnit.MILLISECONDS);
@@ -52,7 +52,7 @@ public class ActivityBaseTest extends ApiBaseTest {
         Assert.assertFalse(timeout);
         Assert.assertFalse(createCallback.failed);
         Assert.assertFalse(createCallback.unexpectedResponseCode);
-        String eventId = createCallback.receivedEvent.getEventId();
+        String eventId = createCallback.receivedEvent.getId();
 
         // Get Event;
         TestGetEventCallbackHandler callback = new TestGetEventCallbackHandler(waitSem, 200);

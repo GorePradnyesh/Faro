@@ -86,7 +86,7 @@ public class EventDatastoreImplTest {
         		Calendar.getInstance(),
                 false,
                 new ExpenseGroup("Lake Shasta", "shasta123"),
-                new Location("Home", "667 Encore Way", geoPosition));
+                new Location("Home", "667 Encore Way", geoPosition1));
     	EventDatastoreImpl.storeEventOnly(testEvent);
         // Update Event
     	EventDo updateObj = new EventDo();

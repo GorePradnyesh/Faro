@@ -315,8 +315,6 @@ public class EditAssignment extends android.app.Activity {
                         }, eventID, itemListMap);
                 }
             });
-
-
         }
     }
 
