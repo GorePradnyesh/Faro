@@ -44,6 +44,7 @@ public class EventFriendListFragment extends Fragment {
         ListView guestList  = (ListView)view.findViewById(R.id.guestList);
         guestList.setBackgroundColor(Color.BLACK);
         EventFriendAdapter eventFriendAdapter = eventFriendListHandler.getEventFriendAdapter(guestListType);
+        guestList.setTag("EventFriendListFragment");
         guestList.setAdapter(eventFriendAdapter);
 
         guestList.setOnItemClickListener(new AdapterView.OnItemClickListener() {

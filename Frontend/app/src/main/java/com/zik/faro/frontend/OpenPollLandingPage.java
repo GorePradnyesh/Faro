@@ -131,7 +131,7 @@ public class OpenPollLandingPage extends Activity {
 
             ScrollView checkboxScrollView = (ScrollView) findViewById(R.id.checkboxScrollView);
 
-            if (!(clonePoll.getCreatorId().equals(myUserId))) {
+            if (!(clonePoll.getOwner().equals(myUserId))) {
                 closePoll.setVisibility(View.GONE);
             }
 

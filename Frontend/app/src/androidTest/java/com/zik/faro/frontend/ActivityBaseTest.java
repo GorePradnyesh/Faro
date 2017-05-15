@@ -65,8 +65,8 @@ public class ActivityBaseTest extends ApiBaseTest {
         
         // Create Activity 
         String activityName = UUID.randomUUID().toString();
+        GeoPosition geoPosition = new GeoPosition(0,0);
         Activity activity = new Activity(eventId, activityName,
-		GeoPosition geoPosition = new GeoPosition(0,0);
 		"randomDescription", new Location("Location1", "Address1", geoPosition), Calendar.getInstance(), Calendar.getInstance(), null);
         TestActivityCreateCallback createActivityCallback = new TestActivityCreateCallback(waitSem, 200);
         serviceHandler.getActivityHandler().createActivity(createActivityCallback, eventId, activity);

@@ -64,25 +64,48 @@ public class EventFriendAdapter extends ArrayAdapter {
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         View row = convertView;
         EventFriendAdapter.ImgHolder holder = new EventFriendAdapter.ImgHolder();
+        InviteeList.Invitees invitees = null;
 
-        if (convertView == null) {
-            LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            row = inflater.inflate(R.layout.friend_row_style, parent, false);
-            holder.userPicture = (ImageView)row.findViewById(R.id.userPicture);
-            holder.friendName = (TextView)row.findViewById(R.id.friendName);
-            row.setTag(holder);
-        }else{
-            holder = (EventFriendAdapter.ImgHolder) row.getTag();
+        switch ((String)parent.getTag()){
+            case "EditAssignment":
+                if (convertView == null) {
+                    LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    row = inflater.inflate(R.layout.friend_row_style, parent, false);
+                    holder.friendName = (TextView)row.findViewById(R.id.friendName);
+                    row.setTag(holder);
+                }else{
+                    holder = (EventFriendAdapter.ImgHolder) row.getTag();
+                }
+                invitees = (InviteeList.Invitees) getItem(position);
+                if (invitees != null) {
+                    if (invitees.getFirstName() != null) {
+                        holder.friendName.setText(invitees.getFirstName());
+                    }else{
+                        holder.friendName.setText("FNU");
+                    }
+                }
+                break;
+            default:
+                if (convertView == null) {
+                    LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    row = inflater.inflate(R.layout.friend_row_style, parent, false);
+                    holder.userPicture = (ImageView) row.findViewById(R.id.userPicture);
+
+                    holder.friendName = (TextView)row.findViewById(R.id.friendName);
+                    row.setTag(holder);
+                }else{
+                    holder = (EventFriendAdapter.ImgHolder) row.getTag();
+                }
+                invitees = (InviteeList.Invitees) getItem(position);
+                if (invitees != null) {
+                    if (invitees.getFirstName() != null) {
+                        holder.friendName.setText(invitees.getFirstName());
+                    }else{
+                        holder.friendName.setText("FNU");
+                    }
+                }
+                holder.userPicture.setImageResource(R.drawable.user_pic);
         }
-        InviteeList.Invitees invitees = (InviteeList.Invitees) getItem(position);
-        if (invitees != null) {
-            if (invitees.getFirstName() != null) {
-                holder.friendName.setText(invitees.getFirstName());
-            }else{
-                holder.friendName.setText("FNU");
-            }
-        }
-        holder.userPicture.setImageResource(R.drawable.user_pic);
         return row;
     }
 

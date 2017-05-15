@@ -109,6 +109,7 @@ public class EditAssignment extends android.app.Activity {
             final Spinner inviteeSpinner = (Spinner) findViewById(R.id.inviteeSpinner);
             final Spinner itemUnitSpinner = (Spinner) findViewById(R.id.itemUnitSpinner);
 
+            inviteeSpinner.setTag("EditAssignment");
             inviteeSpinner.setAdapter(eventFriendListHandler.acceptedFriendAdapter);
 
             final Context mContext = this;
