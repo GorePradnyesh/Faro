@@ -1,6 +1,9 @@
 package com.zik.faro.auth;
 
 import com.google.common.base.Strings;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseToken;
+import com.google.firebase.tasks.OnSuccessListener;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
 import com.zik.faro.auth.jwt.FaroJwtClaims;
@@ -20,6 +23,10 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.security.SignatureException;
+import java.text.MessageFormat;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by granganathan on 1/28/15.
@@ -84,26 +91,48 @@ public class AuthFilter implements ContainerRequestFilter {
             // Validate the JWT token and obtain JWT claims
             // TODO: Create maven "production" and "test" profiles and
             // do complete JWT token validation only for "production" maven profile and
-            // not in "test" profile
-            //final FaroJwtClaims jwtClaims = FaroJwtTokenManager.obtainClaimsWithNoChecks(authHeaderValue);
+            // not in "test" profile;
 
-            final FaroJwtClaims jwtClaims = FaroJwtTokenManager.validateToken(authHeaderValue);
-            logger.info("jwtClaims : " + jwtClaims);
+            Map<String, Object> claims = FaroJwtTokenManager.obtainClaimsMapWithNoChecks(authHeaderValue);
 
-            // For new password API, check if the token has valid JWT id
-            if (requestPath.equals(newPasswordPath)) {
-                UserCredentialsDo userCredentials = UserCredentialsDatastoreImpl.loadUserCreds(jwtClaims.getUsername());
-                String userCredsUuid = userCredentials.getUserCredsUUid();
-                if (!userCredsUuid.equals(jwtClaims.getJwtId())) {
-                    throw new FaroWebAppException(FaroResponseStatus.UNAUTHORIZED, "Invalid token");
+            FaroJwtClaims jwtClaims = new FaroJwtClaims();
+            final FirebaseToken firebaseToken;
+
+            // Determine the verification of the JWT based on the type of JWT received
+            if (claims.containsKey("firebase")) {
+
+                firebaseToken = FirebaseAuth.getInstance().verifyIdToken(authHeaderValue)
+                        .addOnSuccessListener(new OnSuccessListener<FirebaseToken>() {
+                            @Override
+                            public void onSuccess(FirebaseToken decodedFirebaseToken) {
+                                String uid = decodedFirebaseToken.getUid();
+                                logger.info(MessageFormat.format("uid = {0}, decodedFirebaseToken = {1}", uid, decodedFirebaseToken));
+                            }
+                        }).getResult();
+
+                jwtClaims.withEmail(firebaseToken.getEmail())
+                        .withUsername(firebaseToken.getEmail());
+
+            } else {
+                jwtClaims = FaroJwtTokenManager.validateToken(authHeaderValue);
+                logger.info("jwtClaims : " + jwtClaims);
+
+                // For new password API, check if the token has valid JWT id
+                if (requestPath.equals(newPasswordPath)) {
+                    UserCredentialsDo userCredentials = UserCredentialsDatastoreImpl.loadUserCreds(jwtClaims.getUsername());
+                    String userCredsUuid = userCredentials.getUserCredsUUid();
+                    if (!userCredsUuid.equals(jwtClaims.getJwtId())) {
+                        throw new FaroWebAppException(FaroResponseStatus.UNAUTHORIZED, "Invalid token");
+                    }
                 }
             }
 
+            final FaroJwtClaims faroJwtClaims = jwtClaims;
             // Pass the JWT claims up to the resource classes through the SecurityContext object
             containerRequest.setSecurityContext(new SecurityContext() {
                 @Override
                 public Principal getUserPrincipal() {
-                    return jwtClaims;
+                    return faroJwtClaims;
                 }
 
 

@@ -5,7 +5,6 @@
     android:orientation="vertical"
     tools:context=".LoginActivity">
 
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -66,5 +65,13 @@
         android:layout_alignTop="@+id/BLogin"
         android:layout_centerHorizontal="true" />
 
+    <com.facebook.login.widget.LoginButton
+        android:id="@+id/fb_login_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/BLogin"
+        android:layout_below="@+id/BLogin"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="23dp" />
 
 </RelativeLayout>

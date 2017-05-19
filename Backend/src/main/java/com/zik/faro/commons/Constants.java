@@ -98,6 +98,8 @@ public final class Constants {
     public static final String AUTH_FORGOT_PASSWORD_FORM_PATH_CONST             = "/forgotPasswordForm";
     public static final String AUTH_NEW_PASSWORD_PATH_CONST                     = "/newPassword";
 
+    public static final String FIREBASE_AUTH_CONST                              = "/firebaseLogin";
+
     // -- Test -- //
     public static final String TESTS_API_PATH_CONST                             = "/test";
 

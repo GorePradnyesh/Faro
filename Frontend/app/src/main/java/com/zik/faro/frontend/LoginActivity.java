@@ -1,8 +1,11 @@
 package com.zik.faro.frontend;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -11,7 +14,23 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
+import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
 import com.google.common.base.Strings;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FacebookAuthProvider;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GetTokenResult;
 import com.squareup.okhttp.Request;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
@@ -32,16 +51,26 @@ public class LoginActivity extends Activity {
     private EditText passwordTextBox;
 
     static FaroUserContext faroUserContext = FaroUserContext.getInstance();
-
     static FaroCache faroCache;
 
     private Intent appLandingPageIntent;
+
+    private CallbackManager callbackManager;   // Facebook login callbackmanager
+
+    private FirebaseAuth firebaseAuth;
+
+    private Context context;
+
+    private Intent signupIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // Init the activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        context = this;
+        signupIntent = new Intent(getApplicationContext(), SignupActivity.class);
 
         final Intent LoginActivityReloadIntent = new Intent(this, com.zik.faro.frontend.LoginActivity.class);
 
@@ -56,11 +85,10 @@ public class LoginActivity extends Activity {
         // Setup token cache
         TokenCache tokenCache = TokenCache.getOrCreateTokenCache(LoginActivity.this);
 
-        //Setup Faro Cache
+        // Setup Faro Cache
         faroCache = FaroCache.getOrCreateFaroUserContextCache(LoginActivity.this);
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
-
 
         serverIPAddressEditText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -77,25 +105,142 @@ public class LoginActivity extends Activity {
             }
         });
 
+        // First create facebook callback manager
+        callbackManager = CallbackManager.Factory.create();
+
+        LoginButton fbLoginButton = (LoginButton) findViewById(R.id.fb_login_button);
+        fbLoginButton.setReadPermissions("email", "public_profile");
+        fbLoginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                Log.i(TAG, "fbLogin successful. loginResult =  " + loginResult);
+                handleFacebookAccessToken(loginResult.getAccessToken());
+            }
+
+            @Override
+            public void onCancel() {
+                Log.i(TAG, "fbLogin cancelled");
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+                Log.i(TAG, "fbLogin error", error);
+            }
+        });
+
+        // Initialize Firebase and Firebase Auth
+        //FirebaseApp.initializeApp(this);
+        firebaseAuth = FirebaseAuth.getInstance();
+
+        // Check if user is signed in
+        FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
+
+        Log.i(TAG, "firebaseUser = " + firebaseUser);
+        // If user is signed in, then go to the app landing page
+        /*if (firebaseUser != null) {
+            startActivity(appLandingPageIntent);
+            finish();
+        }*/
+
         String token = null;
         try {
             token = tokenCache.getToken();
             if (token != null) {
                 String email = faroCache.loadFaroCacheFromDisk("email");
-                if (email != null){
+                if (email != null) {
                     faroUserContext.setEmail(email);
                     startActivity(appLandingPageIntent);
                     finish();
-                }else{
+                } else {
                     Log.e(TAG, "email not found");
                 }
-            }else{
+            } else {
                 Log.i(TAG, "Token not found");
             }
-            Log.i(TAG, "token = " + token);
+
+            Log.d(TAG, "token = " + token);
         } catch (Exception e) {
             Log.i(TAG, "Could not obtain valid token");
         }
+
+
+
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // Pass the result back to the Facebook SDK
+        callbackManager.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void handleFacebookAccessToken(AccessToken token) {
+        // Get Firebase credential from the Fb access token
+        AuthCredential authCredential = FacebookAuthProvider.getCredential(token.getToken());
+
+        // Sign in the user using the Firebase credential.
+        // This method will create an account for the user in the case that it did not exist
+        firebaseAuth.signInWithCredential(authCredential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            Log.i(TAG, "firebaseAuth signInWithCredential complete");
+                            obtainFirebaseToken(task.getResult().getUser());
+                        }
+
+                    }
+                })
+                .addOnFailureListener(this, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        if (e instanceof FirebaseAuthUserCollisionException) {
+                            Log.i(TAG, "user already exists ");
+                        }
+                    }
+                });
+    }
+
+    private void obtainFirebaseToken(final FirebaseUser firebaseUser) {
+        firebaseUser.getToken(true)
+                .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+
+                    @Override
+                    public void onComplete(@NonNull Task<GetTokenResult> task) {
+                        if (task.isSuccessful()) {
+                            final String firebaseIdToken = task.getResult().getToken();
+                            Log.i(TAG, "firebaseIdToken = " + firebaseIdToken);
+
+                            Runnable runnable = new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    // Transition to the Signupactivity page
+
+                                    //signupIntent.putExtra("firebaseIdToken", firebaseIdToken);
+                                    //signupIntent.putExtra("firebaseUser", new Gson().toJson(firebaseUser));
+                                    startActivity(signupIntent);
+                                }
+                            };
+
+                            Handler mainHandler = new Handler(context.getMainLooper());
+                            mainHandler.post(runnable);
+                        }
+                    }
+
+                });
+
+
+
+
     }
 
     /**

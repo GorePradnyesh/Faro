@@ -74,6 +74,17 @@ public class FaroJwtTokenManager {
         }
     }
 
+    public static Map<String, Object> obtainClaimsMapWithNoChecks(String token) throws JwtTokenValidationException {
+        FaroJwtVerifier verifier = new FaroJwtVerifier(JWT_SIGNATURE_SECRET, null, FARO_JWT_ISSUER_VALUE);
+        try {
+            return verifier.obtainJwtClaimsWithoutValidations(token);
+        } catch (IOException e) {
+            logger.error("JWT token is invalid.", e);
+            throw new JwtTokenValidationException(e.getMessage());
+        }
+    }
+
+
     /**
      * Create the JWT token using the claims passed in
      * @param jwtClaims

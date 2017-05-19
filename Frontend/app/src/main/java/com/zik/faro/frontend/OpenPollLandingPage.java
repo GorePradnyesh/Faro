@@ -45,7 +45,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static android.widget.Toast.LENGTH_LONG;
 
-public class OpenPollLandingPage extends Activity {
+public class OpenPollLandingPage extends Activity implements FaroNotificationHandler {
 
     private static PollListHandler pollListHandler = PollListHandler.getInstance();
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
@@ -86,7 +86,7 @@ public class OpenPollLandingPage extends Activity {
     private static String TAG = "OpenPollLandingPage";
 
     @Override
-        protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_open_poll_landing_page);
 

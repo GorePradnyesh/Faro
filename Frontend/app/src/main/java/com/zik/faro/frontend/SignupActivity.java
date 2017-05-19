@@ -71,6 +71,22 @@ public class SignupActivity extends Activity {
             }
         });
 
+        // Determine if the signup needs to be done using firebasetoken and then populate the form
+        /*String firebaseIdToken = savedInstanceState.getString("firebaseIdToken");
+        if (firebaseIdToken != null) {
+            /*FirebaseUser firebaseUser = new Gson().fromJson(savedInstanceState.getString("firebaseUser"), FirebaseUser.class);
+            nameTextBox.setText(firebaseUser.getDisplayName());
+
+            emailTextBox.setText(firebaseUser.getEmail());
+            emailTextBox.setFocusable(false);
+            emailTextBox.setFocusableInTouchMode(false);
+            emailTextBox.setClickable(false);
+
+            passwordTextBox.setVisibility(View.INVISIBLE);
+            confirmPasswordBox.setVisibility(View.INVISIBLE);
+            Log.i(TAG, "firebaseIdToken = " + firebaseIdToken);
+        }*/
+
 
     }
 
