@@ -8,10 +8,8 @@ import android.util.Log;
 import com.zik.faro.frontend.ActivityLandingPage;
 import com.zik.faro.frontend.AppLandingPage;
 import com.zik.faro.frontend.AssignmentLandingPage;
-import com.zik.faro.frontend.ClosedPollLandingPage;
 import com.zik.faro.frontend.EventFriendListLandingPage;
 import com.zik.faro.frontend.EventLandingPage;
-import com.zik.faro.frontend.OpenPollLandingPage;
 import com.zik.faro.frontend.PollLandingPage;
 import com.zik.faro.frontend.R;
 
