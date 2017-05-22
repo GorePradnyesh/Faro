@@ -29,26 +29,22 @@ import java.util.List;
 public class PollListPage extends Activity {
 
     Intent EventLandingPage = null;
-    Intent OpenPollLandingPage = null;
-    Intent ClosedPollLandingPage = null;
+    Intent PollLandingPageIntent = null;
     static PollListHandler pollListHandler = PollListHandler.getInstance();
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static Event event;
     private static String eventID = null;
-    private static FaroServiceHandler serviceHandler;
+    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;;
 
-    private static String TAG = "PollListPage";
+    private static String TAG = "PollListPageIntent";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_poll_list_page);
 
-        serviceHandler = eventListHandler.serviceHandler;
-
         EventLandingPage = new Intent(PollListPage.this, EventLandingPage.class);
-        OpenPollLandingPage = new Intent(PollListPage.this, OpenPollLandingPage.class);
-        ClosedPollLandingPage = new Intent(PollListPage.this, ClosedPollLandingPage.class);
+        PollLandingPageIntent = new Intent(PollListPage.this, PollLandingPage.class);
         final Intent CreateNewPoll = new Intent(PollListPage.this, CreateNewPoll.class);
 
         Bundle extras = getIntent().getExtras();
@@ -97,7 +93,7 @@ public class PollListPage extends Activity {
         openPollsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                pollSelectedFromList(parent, position, OpenPollLandingPage);
+                pollSelectedFromList(parent, position, PollLandingPageIntent);
             }
         });
 
@@ -105,7 +101,7 @@ public class PollListPage extends Activity {
         closedPollsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                pollSelectedFromList(parent, position, ClosedPollLandingPage);
+                pollSelectedFromList(parent, position, PollLandingPageIntent);
             }
         });
 
@@ -157,24 +153,9 @@ public class PollListPage extends Activity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_poll_landing_page, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+    public void onBackPressed() {
+        pollListHandler.clearPollListsAndMap();
+        finish();
+        super.onBackPressed();
     }
 }

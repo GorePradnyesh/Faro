@@ -66,7 +66,7 @@ public class CreateNewPoll extends Activity {
         final Context mContext = this;
 
         PollListPage = new Intent(CreateNewPoll.this, PollListPage.class);
-        final Intent OpenPollLandingPage = new Intent(CreateNewPoll.this, OpenPollLandingPage.class);
+        final Intent PollLandingPageIntent = new Intent(CreateNewPoll.this, PollLandingPage.class);
 
         final PollOptionsAdapter pollOptionsAdapter = new PollOptionsAdapter(this, R.layout.poll_option_can_edit_row_style);
         pollOptionsList.setAdapter(pollOptionsAdapter);
@@ -137,9 +137,9 @@ public class CreateNewPoll extends Activity {
                                 public void run() {
                                     Log.i(TAG, "Poll Create Response received Successfully");
                                     pollListHandler.addPollToListAndMap(receivedPoll);
-                                    OpenPollLandingPage.putExtra("eventID", eventID);
-                                    OpenPollLandingPage.putExtra("pollID", receivedPoll.getId());
-                                    startActivity(OpenPollLandingPage);
+                                    PollLandingPageIntent.putExtra("eventID", eventID);
+                                    PollLandingPageIntent.putExtra("pollID", receivedPoll.getId());
+                                    startActivity(PollLandingPageIntent);
                                     finish();
                                 }
                             };

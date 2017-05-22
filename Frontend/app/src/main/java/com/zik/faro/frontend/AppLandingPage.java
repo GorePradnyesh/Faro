@@ -5,12 +5,18 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTabHost;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.messaging.FirebaseMessaging;
+
 public class AppLandingPage extends FragmentActivity{
     private FragmentTabHost mTabHost;
+
+    private static final String TAG = "AppLandingPage";
 
     /*
     fragment Activity code picked from
@@ -37,6 +43,9 @@ public class AppLandingPage extends FragmentActivity{
             String baseUrl = extras.getString("baseUrl");
             eventListHandler.CreateFaroServiceHandler(baseUrl);
         }
+
+        String token = FirebaseInstanceId.getInstance().getToken();
+        Log.d(TAG, "token is " + token);
 
         /*GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this *//* FragmentActivity *//*,
@@ -114,8 +123,6 @@ public class AppLandingPage extends FragmentActivity{
                 startActivity(CreateNewEventIntent);
             }
         });
-
-
     }
 
     private View getTabIndicator(Context context, int icon) {

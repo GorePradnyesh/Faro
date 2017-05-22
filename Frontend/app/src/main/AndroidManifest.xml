@@ -82,6 +82,8 @@
         <activity
             android:name=".AssignmentLandingPage"
             android:label="AssignmentLandingPageTabs" />
+        <activity android:name=".EventFriendListLandingPage" />
+        <activity android:name=".UserProfilePage" />
 
         <meta-data
             android:name="com.google.android.gms.version"
@@ -89,9 +91,24 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_place_api" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/colorAccent" />
 
-        <activity android:name=".EventFriendListLandingPage" />
-        <activity android:name=".UserProfilePage"></activity>
+        <service android:name=".notification.MyFirebaseMessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <activity android:name=".notification.ReceivedNotficationHandler">
+            <intent-filter>
+                <action android:name="RECEIVEDNOTIFICATIONHANDLER" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".PollLandingPage"></activity>
     </application>
 
 </manifest>

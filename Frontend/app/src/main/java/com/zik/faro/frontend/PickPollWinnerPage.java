@@ -65,10 +65,9 @@ public class PickPollWinnerPage extends Activity {
     private RelativeLayout popUpRelativeLayout;
     private static final Integer POLL_OPTION_ROW_HEIGHT = 150;
 
-    private Intent OpenPollLandingPage = null;
-    private Intent ClosedPollLandingPage = null;
+    private Intent PollLandingPageIntent = null;
 
-    private static String TAG = "OpenPollLandingPage";
+    private static String TAG = "PollPickWinnerPage";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,8 +79,7 @@ public class PickPollWinnerPage extends Activity {
         final TextView pollDesc = (TextView)findViewById(R.id.pollDescription);
         final Button selectWinner = (Button) findViewById(R.id.selectWinner);
 
-        OpenPollLandingPage = new Intent(PickPollWinnerPage.this, OpenPollLandingPage.class);
-        ClosedPollLandingPage = new Intent(PickPollWinnerPage.this, ClosedPollLandingPage.class);
+        PollLandingPageIntent = new Intent(PickPollWinnerPage.this, PollLandingPage.class);
 
         DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
@@ -194,9 +192,9 @@ public class PickPollWinnerPage extends Activity {
                                             Log.i(TAG, "Poll Update Response received Successfully");
                                             pollListHandler.removePollFromListAndMap(clonePoll);
                                             pollListHandler.addPollToListAndMap(receivedPoll);
-                                            ClosedPollLandingPage.putExtra("eventID", eventID);
-                                            ClosedPollLandingPage.putExtra("pollID", pollID);
-                                            startActivity(ClosedPollLandingPage);
+                                            PollLandingPageIntent.putExtra("eventID", eventID);
+                                            PollLandingPageIntent.putExtra("pollID", pollID);
+                                            startActivity(PollLandingPageIntent);
                                             finish();
                                         }
                                     };
@@ -253,15 +251,9 @@ public class PickPollWinnerPage extends Activity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        if (calledFrom.equals("OpenPollLandingPage")) {
-            OpenPollLandingPage.putExtra("eventID", eventID);
-            OpenPollLandingPage.putExtra("pollID", pollID);
-            startActivity(OpenPollLandingPage);
-        }else if (calledFrom.equals("ClosedPollLandingPage")){  //Can happen when need to change winner of a closed Poll
-            ClosedPollLandingPage.putExtra("eventID", eventID);
-            ClosedPollLandingPage.putExtra("pollID", pollID);
-            startActivity(ClosedPollLandingPage);
-        }
-        finish();
+        PollLandingPageIntent.putExtra("eventID", eventID);
+        PollLandingPageIntent.putExtra("pollID", pollID);
+        startActivity(PollLandingPageIntent);
+    finish();
     }
 }

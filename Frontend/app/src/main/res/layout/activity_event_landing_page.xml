@@ -4,171 +4,189 @@
     android:layout_height="match_parent"
     tools:context="com.zik.faro.frontend.EventLandingPage">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:id="@+id/eventNameText"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
-
-    <ImageButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/editButton"
-        android:clickable="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentTop="true"
-        android:paddingLeft="0dp"
-        android:paddingTop="0dp"
-        android:paddingRight="0dp"
-        android:paddingBottom="0dp"/>
-
-    <TextView
+    <LinearLayout
+        android:id="@+id/linlaHeaderProgress"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/eventDescriptionTextView"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:layout_below="@+id/eventNameText"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="10dp"/>
+        android:layout_height="match_parent"
+        android:gravity="center" >
+
+        <ProgressBar
+            android:id="@+id/pbHeaderProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+        </ProgressBar>
+    </LinearLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/startDateTimeLayout"
-        android:layout_below="@+id/eventDescriptionTextView"
-        android:layout_marginTop="10dp">
+        android:layout_height="match_parent"
+        android:id="@+id/eventLandingPageRelativeLayout">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/from"
-            android:id="@+id/from"
-            android:layout_alignParentStart="true"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:id="@+id/startDateAndTimeDisplay"
-            android:layout_toEndOf="@+id/from"/>
-    </RelativeLayout>
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:id="@+id/eventNameText"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true" />
 
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/endDateTimeLayout"
-        android:layout_below="@+id/startDateTimeLayout"
-        android:layout_marginTop="10dp">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/to"
-            android:id="@+id/to"
-            android:layout_alignParentStart="true" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:id="@+id/endDateAndTimeDisplay"
-            android:layout_toEndOf="@+id/to" />
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/mapStuff"
-        android:layout_below="@+id/endDateTimeLayout">
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/mapMarker"
+            android:id="@+id/editButton"
             android:clickable="true"
-            android:layout_alignParentRight="true"/>
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:paddingLeft="0dp"
+            android:paddingTop="0dp"
+            android:paddingRight="0dp"
+            android:paddingBottom="0dp"/>
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/locationAddressTextView"
-            android:gravity="center"
-            android:layout_marginTop="10dp"
-            android:layout_toLeftOf="@id/mapMarker"
-            android:linksClickable="true"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
-            android:layout_width="match_parent"
-            android:layout_height="170dp"
-            android:id="@+id/map"
-            tools:context="com.example.nakulshah.googlemaps.MapsActivity"
-            android:name="com.google.android.gms.maps.SupportMapFragment"
-            android:layout_below="@+id/mapMarker"
+            android:id="@+id/eventDescriptionTextView"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_below="@+id/eventNameText"
+            android:layout_alignParentStart="true"
             android:layout_marginTop="10dp"/>
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/startDateTimeLayout"
+            android:layout_below="@+id/eventDescriptionTextView"
+            android:layout_marginTop="10dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/from"
+                android:id="@+id/from"
+                android:layout_alignParentStart="true"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/startDateAndTimeDisplay"
+                android:layout_toEndOf="@+id/from"/>
+        </RelativeLayout>
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/endDateTimeLayout"
+            android:layout_below="@+id/startDateTimeLayout"
+            android:layout_marginTop="10dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/to"
+                android:id="@+id/to"
+                android:layout_alignParentStart="true" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/endDateAndTimeDisplay"
+                android:layout_toEndOf="@+id/to" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/mapStuff"
+            android:layout_below="@+id/endDateTimeLayout">
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/mapMarker"
+                android:clickable="true"
+                android:layout_alignParentRight="true"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/locationAddressTextView"
+                android:gravity="center"
+                android:layout_marginTop="10dp"
+                android:layout_toLeftOf="@id/mapMarker"
+                android:linksClickable="true"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="170dp"
+                android:id="@+id/map"
+                tools:context="com.example.nakulshah.googlemaps.MapsActivity"
+                android:name="com.google.android.gms.maps.SupportMapFragment"
+                android:layout_below="@+id/mapMarker"
+                android:layout_marginTop="10dp"/>
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/mapStuff"
+            android:layout_marginTop="10dp">
+            <ImageButton
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:id="@+id/pollImageButton"
+                android:clickable="true"/>
+
+            <ImageButton
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:id="@+id/eventAssignmentImageButton"
+                android:clickable="true"/>
+
+            <ImageButton
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:id="@+id/activityImageButton"
+                android:clickable="true"/>
+            <ImageButton
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:id="@+id/guestListImageButton"
+                android:clickable="true"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:id="@+id/statusButtons">
+            <Button
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:id="@+id/statusYes"
+                android:clickable="true"
+                android:text="@string/YES"/>
+            <Button
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:id="@+id/statusNo"
+                android:clickable="true"
+                android:text="@string/NO" />
+            <Button
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:id="@+id/statusMaybe"
+                android:clickable="true"
+                android:text="@string/MAYBE"/>
+        </LinearLayout>
     </RelativeLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/mapStuff"
-        android:layout_marginTop="10dp">
-        <ImageButton
-            android:layout_width="0px"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:id="@+id/pollImageButton"
-            android:clickable="true"/>
-
-        <ImageButton
-            android:layout_width="0px"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:id="@+id/eventAssignmentImageButton"
-            android:clickable="true"/>
-
-        <ImageButton
-            android:layout_width="0px"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:id="@+id/activityImageButton"
-            android:clickable="true"/>
-        <ImageButton
-            android:layout_width="0px"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:id="@+id/guestListImageButton"
-            android:clickable="true"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:id="@+id/statusButtons">
-        <Button
-            android:layout_width="0px"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:id="@+id/statusYes"
-            android:clickable="true"
-            android:text="@string/YES"/>
-        <Button
-            android:layout_width="0px"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:id="@+id/statusNo"
-            android:clickable="true"
-            android:text="@string/NO" />
-        <Button
-            android:layout_width="0px"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:id="@+id/statusMaybe"
-            android:clickable="true"
-            android:text="@string/MAYBE"/>
-    </LinearLayout>
 
 </RelativeLayout>
 

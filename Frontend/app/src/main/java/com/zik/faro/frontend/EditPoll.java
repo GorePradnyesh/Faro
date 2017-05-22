@@ -49,7 +49,7 @@ public class EditPoll extends Activity {
     private static String eventID = null;
     private String pollID;
     private static Poll clonePoll;
-    private Intent PollLandingPage;
+    private Intent PollLandingPageIntent;
 
     private static String TAG = "EditPoll";
 
@@ -82,7 +82,7 @@ public class EditPoll extends Activity {
 
         popUpRelativeLayout = (RelativeLayout) findViewById(R.id.editPollPage);
 
-        PollLandingPage = new Intent(EditPoll.this, OpenPollLandingPage.class);
+        PollLandingPageIntent = new Intent(EditPoll.this, PollLandingPage.class);
 
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
@@ -158,9 +158,9 @@ public class EditPoll extends Activity {
                                     public void run() {
                                         Log.i(TAG, "Poll Update Response received Successfully");
                                         pollListHandler.addPollToListAndMap(poll);
-                                        PollLandingPage.putExtra("eventID", eventID);
-                                        PollLandingPage.putExtra("pollID", pollID);
-                                        startActivity(PollLandingPage);
+                                        PollLandingPageIntent.putExtra("eventID", eventID);
+                                        PollLandingPageIntent.putExtra("pollID", pollID);
+                                        startActivity(PollLandingPageIntent);
                                         finish();
                                     }
                                 };
@@ -247,9 +247,9 @@ public class EditPoll extends Activity {
 
     @Override
     public void onBackPressed() {
-        PollLandingPage.putExtra("eventID", eventID);
-        PollLandingPage.putExtra("pollID", pollID);
-        startActivity(PollLandingPage);
+        PollLandingPageIntent.putExtra("eventID", eventID);
+        PollLandingPageIntent.putExtra("pollID", pollID);
+        startActivity(PollLandingPageIntent);
         finish();
         super.onBackPressed();
     }

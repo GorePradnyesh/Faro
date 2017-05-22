@@ -1,0 +1,121 @@
+{
+  "project_info": {
+    "project_number": "480570287743",
+    "firebase_url": "https://faro-56043.firebaseio.com",
+    "project_id": "faro-56043",
+    "storage_bucket": "faro-56043.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:480570287743:android:c21a661ed61746d2",
+        "android_client_info": {
+          "package_name": "com.zik.Faro.Android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "480570287743-sko3g3g0fkkm805406fbncjk0v3gcn7e.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zik.Faro.Android",
+            "certificate_hash": "8a9874f9fe61bd755efcc058e14038bf6d1cb487"
+          }
+        },
+        {
+          "client_id": "480570287743-p53ptb6gbjeqdg2ch2gut4di4k0nhmf5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zik.Faro.Android",
+            "certificate_hash": "ea69f7268ba4a056bd21349611994548df120aea"
+          }
+        },
+        {
+          "client_id": "480570287743-9ksotsqd53e8fd12cusmnm6nsunun5lj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMcCqDP0NC-kFdXHJ4ya8AjBR-6u6Ii7c"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "480570287743-9ksotsqd53e8fd12cusmnm6nsunun5lj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "480570287743-h1qohi5ag32q36idju8qgvh3ttf58uhm.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.zik.Faro.Ios"
+              }
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:480570287743:android:d48ca688c897b26d",
+        "android_client_info": {
+          "package_name": "com.zik.faro.frontend"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "480570287743-a1dk732b6g0euat6tpm5ie2e8qneco4u.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zik.faro.frontend",
+            "certificate_hash": "8a9874f9fe61bd755efcc058e14038bf6d1cb487"
+          }
+        },
+        {
+          "client_id": "480570287743-9ksotsqd53e8fd12cusmnm6nsunun5lj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMcCqDP0NC-kFdXHJ4ya8AjBR-6u6Ii7c"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "480570287743-9ksotsqd53e8fd12cusmnm6nsunun5lj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "480570287743-h1qohi5ag32q36idju8qgvh3ttf58uhm.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.zik.Faro.Ios"
+              }
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

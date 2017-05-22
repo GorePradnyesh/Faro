@@ -5,72 +5,89 @@
     android:layout_height="match_parent"
     tools:context="com.zik.faro.frontend.ClosedPollLandingPage"
     android:id="@+id/closedPollLandingPage">
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:id="@+id/pollDescription"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:id="@+id/winnerPollOptionTextView"
-        android:layout_below="@+id/pollDescription"
-        android:layout_centerHorizontal="true" />
 
-    <ScrollView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_above="@+id/statusButtons"
-        android:layout_below="@+id/winnerPollOptionTextView"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
-        android:id="@+id/checkboxScrollView">
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/voterButtonLinearLayout"
-                android:orientation="vertical"
-                android:layout_alignParentEnd="true" />
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:id="@+id/pollOptionsTextList"
-                android:layout_alignParentStart="true"
-                android:layout_toStartOf="@id/voterButtonLinearLayout"/>
-        </RelativeLayout>
-    </ScrollView>
     <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:id="@+id/statusButtons"
-        android:layout_centerInParent="true">
-        <Button
-            android:layout_width="0px"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:id="@+id/changeWinner"
-            android:clickable="true"
-            android:text="@string/change_winner"/>
-        <Button
-            android:layout_width="0px"
-            android:layout_height="wrap_content"
-            android:id="@+id/reOpenPoll"
-            android:clickable="true"
-            android:layout_weight="1"
-            android:text="@string/re_open_poll"
-            android:paddingLeft="0dp"
-            android:paddingTop="0dp"
-            android:paddingRight="0dp"
-            android:paddingBottom="0dp"/>
-    </LinearLayout>
+        android:id="@+id/linlaHeaderProgress"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center" >
 
+        <ProgressBar
+            android:id="@+id/pbHeaderProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+        </ProgressBar>
+    </LinearLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/closedPollLandingPageRelativeLayout">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:id="@+id/pollDescription"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:id="@+id/winnerPollOptionTextView"
+            android:layout_below="@+id/pollDescription"
+            android:layout_centerHorizontal="true" />
+
+        <ScrollView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@+id/statusButtons"
+            android:layout_below="@+id/winnerPollOptionTextView"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
+            android:id="@+id/checkboxScrollView">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/voterButtonLinearLayout"
+                    android:orientation="vertical"
+                    android:layout_alignParentEnd="true" />
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:id="@+id/pollOptionsTextList"
+                    android:layout_alignParentStart="true"
+                    android:layout_toStartOf="@id/voterButtonLinearLayout"/>
+            </RelativeLayout>
+        </ScrollView>
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:id="@+id/statusButtons"
+            android:layout_centerInParent="true">
+            <Button
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:id="@+id/changeWinner"
+                android:clickable="true"
+                android:text="@string/change_winner"/>
+            <Button
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:id="@+id/reOpenPoll"
+                android:clickable="true"
+                android:layout_weight="1"
+                android:text="@string/re_open_poll"
+                android:paddingLeft="0dp"
+                android:paddingTop="0dp"
+                android:paddingRight="0dp"
+                android:paddingBottom="0dp"/>
+        </LinearLayout>
+    </RelativeLayout>
 </RelativeLayout>

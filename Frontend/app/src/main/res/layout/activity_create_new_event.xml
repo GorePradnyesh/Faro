@@ -26,11 +26,12 @@
         android:textSize="@dimen/abc_text_size_medium_material" />
 
     <Button
+        android:id="@+id/startDateButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/startDateButton"
-        android:textSize="@dimen/abc_text_size_medium_material"
-        android:layout_below="@+id/startDateTextView" />
+        android:layout_alignParentBottom="false"
+        android:layout_below="@+id/startDateTextView"
+        android:textSize="@dimen/abc_text_size_medium_material" />
 
     <Button
         android:layout_width="wrap_content"
