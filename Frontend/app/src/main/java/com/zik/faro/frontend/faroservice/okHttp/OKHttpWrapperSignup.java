@@ -21,12 +21,19 @@ public class OKHttpWrapperSignup extends BaseFaroOKHttpWrapper implements Signup
 
     @Override
     public void signup(BaseFaroRequestCallback<String> callback, final FaroUser faroUser, final String password) {
-        this.signup(callback, faroUser, password, true);
+        this.signup(callback, faroUser, password, null, true);
     }
 
     @Override
-    public void signup(BaseFaroRequestCallback<String> callback, FaroUser faroUser, String password, boolean addToCache) {
-        FaroSignupDetails signupDetails = new FaroSignupDetails(faroUser, password);
+    public void signup(BaseFaroRequestCallback<String> callback, FaroUser faroUser, String password, String firebaseIdToken) {
+        this.signup(callback, faroUser, password, firebaseIdToken, true);
+    }
+
+    @Override
+    public void signup(BaseFaroRequestCallback<String> callback, FaroUser faroUser,
+                       String password, String firebaseIdToken, boolean addToCache) {
+
+        FaroSignupDetails signupDetails = new FaroSignupDetails(faroUser, password, firebaseIdToken);
         final String eventPostBody = mapper.toJson(signupDetails);
         Request request = new Request.Builder()
                 .url(baseHandlerURL.toString())

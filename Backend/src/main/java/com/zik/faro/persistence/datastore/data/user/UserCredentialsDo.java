@@ -17,16 +17,23 @@ public class UserCredentialsDo {
     private String             email;
     private String encryptedPassword;
     private String userCredsUUid;
+    private AuthProvider authProvider;
 
     private UserCredentialsDo() {}
 
     public UserCredentialsDo(String email, String encryptedPassword, String userCredsUUid) {
-        this.email = email;
+        this.authProvider = AuthProvider.FARO;
 
+        this.email = email;
         // Store the encrypted encryptedPassword
         this.encryptedPassword = encryptedPassword;
-
         this.userCredsUUid = userCredsUUid;
+    }
+
+    public UserCredentialsDo(String email, String userCredsUUid, AuthProvider authProvider) {
+        this.email = email;
+        this.userCredsUUid = userCredsUUid;
+        this.authProvider = authProvider;
     }
 
     public String getEncryptedPassword() {
@@ -51,5 +58,13 @@ public class UserCredentialsDo {
 
     public void setUserCredsUUid(String userCredsUUid) {
         this.userCredsUUid = userCredsUUid;
+    }
+
+    public AuthProvider getAuthProvider() {
+        return authProvider;
+    }
+
+    public void setAuthProvider(AuthProvider authProvider) {
+        this.authProvider = authProvider;
     }
 }

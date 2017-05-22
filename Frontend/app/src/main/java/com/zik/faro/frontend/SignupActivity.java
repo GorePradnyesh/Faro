@@ -3,13 +3,30 @@ package com.zik.faro.frontend;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
+import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
 import com.google.common.base.Strings;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FacebookAuthProvider;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GetTokenResult;
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
@@ -33,6 +50,10 @@ public class SignupActivity extends Activity {
     private EditText confirmPasswordBox;
 
     private Intent appLandingPageIntent;
+
+    private CallbackManager callbackManager;   // Facebook login callbackmanager
+
+    private FirebaseAuth firebaseAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,23 +92,117 @@ public class SignupActivity extends Activity {
             }
         });
 
-        // Determine if the signup needs to be done using firebasetoken and then populate the form
-        /*String firebaseIdToken = savedInstanceState.getString("firebaseIdToken");
-        if (firebaseIdToken != null) {
-            /*FirebaseUser firebaseUser = new Gson().fromJson(savedInstanceState.getString("firebaseUser"), FirebaseUser.class);
-            nameTextBox.setText(firebaseUser.getDisplayName());
+        // First create facebook callback manager
+        callbackManager = CallbackManager.Factory.create();
 
-            emailTextBox.setText(firebaseUser.getEmail());
+        // Setup the facebook signup/connect with button
+        LoginButton fbLoginButton = (LoginButton) findViewById(R.id.fb_login_button);
+        fbLoginButton.setReadPermissions("email", "public_profile");
+        fbLoginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                Log.i(TAG, "fbLogin successful. loginResult =  " + loginResult);
+                handleFacebookAccessToken(loginResult.getAccessToken());
+            }
+
+            @Override
+            public void onCancel() {
+                Log.i(TAG, "fbLogin cancelled");
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+                Log.i(TAG, "fbLogin error", error);
+            }
+        });
+
+        // Get Firebase Auth instance
+        firebaseAuth = FirebaseAuth.getInstance();
+
+        // Determine if the signup needs to be done using firebasetoken and then populate the form
+        /*Bundle extras = getIntent().getExtras();
+        firebaseIdToken = extras.getString("firebaseIdToken");
+        Log.i(TAG, "firebaseIdToken = " + firebaseIdToken);
+
+        if (firebaseIdToken != null) {
+            String firebaseUserEmail = extras.getString("firebaseUserEmail");
+            String firebaseUserDisplayName = extras.getString("firebaseUserDisplayName");
+
+            nameTextBox.setText(firebaseUserDisplayName);
+
+            emailTextBox.setText(firebaseUserEmail);
             emailTextBox.setFocusable(false);
             emailTextBox.setFocusableInTouchMode(false);
             emailTextBox.setClickable(false);
 
+            TextView passwordTextView = (TextView) findViewById(R.id.textViewPassword);
+            passwordTextView.setVisibility(View.INVISIBLE);
             passwordTextBox.setVisibility(View.INVISIBLE);
+
+            TextView confirmPasswordTextView = (TextView) findViewById(R.id.textViewConfirmPassword);
+            confirmPasswordTextView.setVisibility(View.INVISIBLE);
             confirmPasswordBox.setVisibility(View.INVISIBLE);
-            Log.i(TAG, "firebaseIdToken = " + firebaseIdToken);
         }*/
 
 
+    }
+
+    private void handleFacebookAccessToken(AccessToken token) {
+        // Get Firebase AuthCredential object from the Fb access token
+        AuthCredential authCredential = FacebookAuthProvider.getCredential(token.getToken());
+
+        // Now proceed with signup workflow
+
+        // Sign in the user using the Firebase credential.
+        // This method will create an account in Firebase for the user if it does not already exist
+        firebaseAuth.signInWithCredential(authCredential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            Log.i(TAG, "firebaseAuth signInWithCredential complete");
+                            signupWithFirebaseToken(task.getResult().getUser());
+                        }
+
+                    }
+                })
+                .addOnFailureListener(this, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        if (e instanceof FirebaseAuthUserCollisionException) {
+                            Log.i(TAG, "user already exists ");
+                        }
+                    }
+                });
+    }
+
+    private void signupWithFirebaseToken(final FirebaseUser firebaseUser) {
+        firebaseUser.getToken(true)
+                .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+
+                    @Override
+                    public void onComplete(@NonNull Task<GetTokenResult> task) {
+                        if (task.isSuccessful()) {
+                            final String firebaseIdToken = task.getResult().getToken();
+                            Log.i(TAG, "firebaseIdToken = " + firebaseIdToken);
+
+                            FaroUser newFaroUser = new FaroUser(firebaseUser.getEmail(), null, null,
+                                    null, null, null, null);
+                            newFaroUser.setFirstName(firebaseUser.getDisplayName());
+                            FirebaseUserSignupCallback firebaseUserSignupCallback = new FirebaseUserSignupCallback(firebaseUser);
+                            serviceHandler.getSignupHandler().signup(firebaseUserSignupCallback, newFaroUser, null, firebaseIdToken);
+                        }
+                    }
+
+                });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // Pass the result back to the Facebook SDK
+        callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
     /**
@@ -114,12 +229,12 @@ public class SignupActivity extends Activity {
             emailTextBox.setError("Enter valid Email address");
         }
 
-        if (Strings.isNullOrEmpty(password)) {
+        if (passwordTextBox.getVisibility() == View.VISIBLE && Strings.isNullOrEmpty(password)) {
             isValid = false;
             passwordTextBox.setError("Enter Password");
         }
 
-        if (Strings.isNullOrEmpty(comfirmPasswd)) {
+        if (confirmPasswordBox.getVisibility() == View.VISIBLE && Strings.isNullOrEmpty(comfirmPasswd)) {
             isValid = false;
             confirmPasswordBox.setError(null);
         }
@@ -146,32 +261,8 @@ public class SignupActivity extends Activity {
             null, null, null, null);
             newFaroUser.setFirstName(name);
 
-            serviceHandler.getSignupHandler().signup(new BaseFaroRequestCallback<String>() {
-                @Override
-                public void onFailure(Request request, IOException ex) {
-                    Log.i(TAG, "failed to send signup request");
-                }
-
-                @Override
-                public void onResponse(String token, HttpError error) {
-                    Log.i(TAG, "signup response, token = " + token);
-                    if (error == null ) {
-                        Log.i(TAG, "token = " + token);
-                        TokenCache.getTokenCache().setToken(token);
-                        FaroUserContext faroUserContext = FaroUserContext.getInstance();
-                        faroUserContext.setEmail(email);
-
-                        // Go to event list page
-                        startActivity(appLandingPageIntent);
-                        finish();
-                    } else {
-                        Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
-                        if (error.getCode() == 409) {
-                            Log.i(TAG, "User " + email + " already exists");
-                        }
-                    }
-                }
-            }, newFaroUser, password);
+            FarouserSignupCallback farouserSignupCallback = new FarouserSignupCallback(newFaroUser);
+            serviceHandler.getSignupHandler().signup(farouserSignupCallback, newFaroUser, password);
         }
     }
 
@@ -180,5 +271,71 @@ public class SignupActivity extends Activity {
         startActivity(new Intent(SignupActivity.this, LoginActivity.class));
         finish();
         super.onBackPressed();
+    }
+
+    private class FarouserSignupCallback implements BaseFaroRequestCallback<String> {
+        private FaroUser faroUser;
+
+        public FarouserSignupCallback(FaroUser faroUser) {
+            this.faroUser = faroUser;
+        }
+
+        @Override
+        public void onFailure(Request request, IOException ex) {
+            Log.i(TAG, "failed to send signup request");
+        }
+
+        @Override
+        public void onResponse(String token, HttpError error) {
+            Log.i(TAG, "signup response, token = " + token);
+            if (error == null) {
+                Log.i(TAG, "token = " + token);
+                TokenCache.getTokenCache().setToken(token);
+                FaroUserContext faroUserContext = FaroUserContext.getInstance();
+                faroUserContext.setEmail(faroUser.getEmail());
+
+                // Go to event list page
+                startActivity(appLandingPageIntent);
+                finish();
+            } else {
+                Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                if (error.getCode() == 409) {
+                    Log.i(TAG, "User " + faroUser.getEmail() + " already exists");
+                }
+            }
+        }
+    }
+
+    private class FirebaseUserSignupCallback implements BaseFaroRequestCallback<String> {
+        private FirebaseUser firebaseUser;
+
+        public FirebaseUserSignupCallback(FirebaseUser firebaseUser) {
+            this.firebaseUser = firebaseUser;
+        }
+
+        @Override
+        public void onFailure(Request request, IOException ex) {
+            Log.i(TAG, "failed to send signup request");
+        }
+
+        @Override
+        public void onResponse(String token, HttpError error) {
+            Log.i(TAG, "signup response, token = " + token);
+            if (error == null) {
+                Log.i(TAG, "token = " + token);
+                TokenCache.getTokenCache().setToken(token);
+                FaroUserContext faroUserContext = FaroUserContext.getInstance();
+                faroUserContext.setEmail(firebaseUser.getEmail());
+
+                // Go to event list page
+                startActivity(appLandingPageIntent);
+                finish();
+            } else {
+                Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                if (error.getCode() == 409) {
+                    Log.i(TAG, "User " + firebaseUser.getEmail() + " already exists");
+                }
+            }
+        }
     }
 }

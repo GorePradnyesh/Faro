@@ -3,12 +3,18 @@ package com.zik.faro.data.user;
 public class FaroSignupDetails {
     private FaroUser faroUser;
     private String password;
+    private String firebaseToken;
 
     private FaroSignupDetails() {}
 
     public FaroSignupDetails(FaroUser faroUser, String password) {
         this.faroUser = faroUser;
         this.password = password;
+    }
+
+    public FaroSignupDetails(FaroUser faroUser, String password, String firebaseToken) {
+        this(faroUser, password);
+        this.firebaseToken = firebaseToken;
     }
 
     public FaroUser getFaroUser() {
@@ -26,5 +32,13 @@ public class FaroSignupDetails {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public void setFirebaseToken(String firebaseToken) {
+        this.firebaseToken = firebaseToken;
+    }
+
+    public String getFirebaseToken() {
+        return firebaseToken;
     }
 }

@@ -9,6 +9,8 @@ import com.google.firebase.auth.FirebaseToken;
 import com.google.firebase.tasks.OnSuccessListener;
 import com.google.firebase.tasks.Task;
 import com.google.firebase.tasks.Tasks;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.zik.faro.auth.jwt.FaroJwtClaims;
 import com.zik.faro.auth.jwt.FaroJwtTokenManager;
 import com.zik.faro.auth.jwt.JwtTokenValidationException;
@@ -22,6 +24,7 @@ import java.io.IOException;
 import java.security.SignatureException;
 import java.text.MessageFormat;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,10 +36,9 @@ public class FaroJwtTokenManagerTest {
     private final Logger logger = Logger.getLogger(FaroJwtTokenManager.class);
 
     @Test
-    public void firebaseAuthVerifyTokenTest() throws Exception {
+    public void firebaseAuthVerifyTokenTest() throws IOException {
         // Example token obtained from firebase authentication on android
-        String token = "eyJhbGciOiJSUzI1NiIsImtpZCI6IjM0M2Q5ZjVhZDYwNWJjNDgzZjcxYmE4NjY5MWRmM2M3MzBjNjQxMGMifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vZmFyby01NjA0MyIsIm5hbWUiOiJHYXVyYXYgUmFuZ2FuYXRoYW4iLCJwaWN0dXJlIjoiaHR0cHM6Ly9zY29udGVudC54eC5mYmNkbi5uZXQvdi90MS4wLTEvcDEwMHgxMDAvMTI5MjMxMjFfMTAxNTY3MTQ5NzEyNDAwMDZfMjA4MjgwNzM2MjMxMzI3OTcxX24uanBnP29oPTg0ZTFmODQ1OTA0MDA2YTIwZDQwNTljNzY5YzNiOWQ4Jm9lPTU5QzFGRjQ1IiwiYXVkIjoiZmFyby01NjA0MyIsImF1dGhfdGltZSI6MTQ5NTE4MDY1NiwidXNlcl9pZCI6IjBFU0ZtNUlyVkdNcVl4NDVUSllRM3BzQWdRZzEiLCJzdWIiOiIwRVNGbTVJclZHTXFZeDQ1VEpZUTNwc0FnUWcxIiwiaWF0IjoxNDk1MTgwNjU3LCJleHAiOjE0OTUxODQyNTcsImVtYWlsIjoiZ2F1cmF2LnJhbmdhbmF0aGFuQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiZmlyZWJhc2UiOnsiaWRlbnRpdGllcyI6eyJmYWNlYm9vay5jb20iOlsiMTAxNTc0NDE4OTk1NDAwMDYiXSwiZW1haWwiOlsiZ2F1cmF2LnJhbmdhbmF0aGFuQGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6ImZhY2Vib29rLmNvbSJ9fQ.EUktKnFXxWSwK4Qbh8GwbBa7KPKBADPblO6WDc11RthJ-7nv21a6zia8ovF_Wd7MD5WpzPRlG727K0wH_kUNRGNzchsKv9M4hsErxu1KE8bWYGTkSQMLYBCupZQjH9FS6XVvc3jQV1-YbKROlxVF-QW-h687MCVOGlmH7PYD1Kk--el7XGR2SqkFZ1qbxIO2z1QBgrH7uJ6ixKJhNGpB0_1_arDGuTJlITks3O8SEzJ7En_qamjuWSRUODPw9DpW93VkwwZ-HCh_kJfaHa19UV5hVPKuWaoyzCKGl3MRC73TynJuEgmZ-aiGNAh_BS_RkqkEMsZqJ0pqs6ftI7OUwg";
-
+        String token = "eyJhbGciOiJSUzI1NiIsImtpZCI6ImNlYzQ2NWJkMTNhN2RhY2RmNTQ1ODk0OTJiMTdjZDNmNDFiNWNlNmYifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vZmFyby01NjA0MyIsIm5hbWUiOiJHYXVyYXYgUmFuZ2FuYXRoYW4iLCJwaWN0dXJlIjoiaHR0cHM6Ly9zY29udGVudC54eC5mYmNkbi5uZXQvdi90MS4wLTEvcDEwMHgxMDAvMTI5MjMxMjFfMTAxNTY3MTQ5NzEyNDAwMDZfMjA4MjgwNzM2MjMxMzI3OTcxX24uanBnP29oPTg0ZTFmODQ1OTA0MDA2YTIwZDQwNTljNzY5YzNiOWQ4Jm9lPTU5QzFGRjQ1IiwiYXVkIjoiZmFyby01NjA0MyIsImF1dGhfdGltZSI6MTQ5NTMyNTcyMywidXNlcl9pZCI6IjBFU0ZtNUlyVkdNcVl4NDVUSllRM3BzQWdRZzEiLCJzdWIiOiIwRVNGbTVJclZHTXFZeDQ1VEpZUTNwc0FnUWcxIiwiaWF0IjoxNDk1MzI1NzI0LCJleHAiOjE0OTUzMjkzMjQsImVtYWlsIjoiZ2F1cmF2LnJhbmdhbmF0aGFuQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiZmlyZWJhc2UiOnsiaWRlbnRpdGllcyI6eyJmYWNlYm9vay5jb20iOlsiMTAxNTc0NDE4OTk1NDAwMDYiXSwiZW1haWwiOlsiZ2F1cmF2LnJhbmdhbmF0aGFuQGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6ImZhY2Vib29rLmNvbSJ9fQ.A3D2IeXk4b6Ipt6yw-BZgnQrRsuU_PqV0XXSF0A4oOBubgcWvp1uoVGSWdl0RjLkXBed36q9TrdifQHiWU06kaibHaSfSXGfwCVsD_ai8C1wlfWIZ67d2Wbr1bAZiEDNequZAiQjUIsmE-p9dnd_6_NxXJXf39lL5mxlwIHEcoIaA0IQdKLp2Nc3KKhpZI3kr3OkvKY7HeXioWjf69GmQu38W0Nkov0GsyEL-BkAZKFf0bysysOVtXcVH8aU-RtMqNudR-tB67YyHB67Oyk6rIkSFewE2h3sZ-WlRkYyB3qF9DkSTNRbgMnnN1OATIgw9Prm-pTwDOEyaRKEufm4Eg\n";
         // Initialize the Firebase Admin SDK
         FileInputStream serviceAccount = null;
 
@@ -58,7 +60,14 @@ public class FaroJwtTokenManagerTest {
                     }
                 });
 
-        Tasks.await(task);
+
+        try {
+            Tasks.await(task);
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         assertThat(task.isComplete()).isTrue();
         assertThat(task.isSuccessful()).isTrue();
@@ -69,8 +78,13 @@ public class FaroJwtTokenManagerTest {
                 firebaseToken.getUid(), firebaseToken.getEmail(), firebaseToken.getIssuer(),
                 firebaseToken.getClaims(), firebaseToken.getName()));
 
+        Gson gson = new Gson();
+        String firebaseClaimJson = firebaseToken.getClaims().get("firebase").toString();
+        logger.info(firebaseClaimJson);
+
         assertThat(firebaseToken).isNotNull();
     }
+
 
     @Test
     public void createAndValidateTokenTest() throws Exception {
