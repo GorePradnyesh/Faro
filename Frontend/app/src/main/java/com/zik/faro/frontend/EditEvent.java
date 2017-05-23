@@ -27,11 +27,6 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.Place;
@@ -45,6 +40,11 @@ import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 import static android.widget.Toast.LENGTH_LONG;
 
 
@@ -55,7 +55,6 @@ import static android.widget.Toast.LENGTH_LONG;
 * user presses the OK button. Until then simply collect all the updated information in local
 * variables.*/
 public class EditEvent extends Activity {
-
     private Button startDateButton = null;
     private Button startTimeButton = null;
     private Button endTimeButton = null;
@@ -69,7 +68,7 @@ public class EditEvent extends Activity {
 
 
     private  static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler;
+    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private static Event cloneEvent;
 
     private Calendar startDateCalendar = Calendar.getInstance();
@@ -95,8 +94,6 @@ public class EditEvent extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_event);
-
-        serviceHandler = eventListHandler.serviceHandler;
 
         startDateButton = (Button) findViewById(R.id.startDateButton);
         startTimeButton = (Button) findViewById(R.id.startTimeButton);

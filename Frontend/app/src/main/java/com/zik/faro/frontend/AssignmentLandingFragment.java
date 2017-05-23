@@ -40,7 +40,7 @@ public class AssignmentLandingFragment extends Fragment{
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
     private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler;
+    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
     private static String TAG = "AssgnmntLandingFrgmnt";
 
@@ -56,8 +56,6 @@ public class AssignmentLandingFragment extends Fragment{
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.assignment_landing_fragment, container, false);
         super.onCreate(savedInstanceState);
-
-        serviceHandler = eventListHandler.serviceHandler;
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(getActivity()));
 

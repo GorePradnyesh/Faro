@@ -39,14 +39,13 @@ import java.util.Calendar;
 import static android.widget.Toast.LENGTH_LONG;
 
 public class EditActivity extends ActionBarActivity {
-
     private String eventID = null;
     private String activityID = null;
     private static Event event;
     private static Activity cloneActivity;
     private  static EventListHandler eventListHandler = EventListHandler.getInstance();
     private  static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler;
+    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
     private Button startDateButton = null;
     private Button startTimeButton = null;
@@ -71,8 +70,6 @@ public class EditActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_activity);
-
-        serviceHandler = eventListHandler.serviceHandler;
 
         startDateButton = (Button) findViewById(R.id.startDateButton);
         startTimeButton = (Button) findViewById(R.id.startTimeButton);

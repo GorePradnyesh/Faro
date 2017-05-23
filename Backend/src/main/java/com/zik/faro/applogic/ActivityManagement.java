@@ -35,8 +35,8 @@ public class ActivityManagement {
 		return ConversionUtils.fromDo(ActivityDatastoreImpl.loadActivityById(activityId, eventId));
 	}
 	
-	public static void deteleActivity(String eventId, String activityId){
-		ActivityDatastoreImpl.delelteActivityById(activityId, eventId);
+	public static void deleteActivity(String eventId, String activityId){
+		ActivityDatastoreImpl.deleteActivityById(activityId, eventId);
 	}
 	
 	public static Activity updateActivity(Activity updateActivity, String eventId) throws DataNotFoundException, DatastoreException, UpdateVersionException{

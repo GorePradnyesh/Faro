@@ -34,7 +34,7 @@ public class MyAssignmentsFragment extends Fragment{
 
     private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler;
+    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
 
     private ListView itemList;
@@ -59,8 +59,6 @@ public class MyAssignmentsFragment extends Fragment{
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.my_assignments_fragment, container, false);
         super.onCreate(savedInstanceState);
-
-        serviceHandler = eventListHandler.serviceHandler;
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(getActivity()));
 

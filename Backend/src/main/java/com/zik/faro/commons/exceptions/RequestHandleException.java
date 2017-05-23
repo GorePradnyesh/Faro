@@ -17,11 +17,10 @@ public class RequestHandleException implements ExceptionMapper<Throwable>
     @Override
     public Response toResponse(Throwable t) {
         if (t instanceof WebApplicationException) {
-            t.printStackTrace();
-        	logger.error("****** WEB APP EXCEPTION :" + t.getMessage());
+        	logger.error("****** WEB APP EXCEPTION :" + t.getMessage(), t);
             return ((WebApplicationException)t).getResponse();
         } else {
-            logger.error("****** UNCAUGHT EXCEPTION :" + t.getMessage());
+            logger.error("****** UNCAUGHT EXCEPTION :" + t.getMessage(), t);
         	return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     // Add an entity, etc.
                     .build();

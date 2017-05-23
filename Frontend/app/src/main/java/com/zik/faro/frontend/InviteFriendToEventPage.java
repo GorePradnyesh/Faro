@@ -3,9 +3,8 @@ package com.zik.faro.frontend;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.os.Handler;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -28,8 +27,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static android.widget.Toast.LENGTH_LONG;
 
@@ -37,7 +34,7 @@ public class InviteFriendToEventPage extends Activity {
 
     private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
     static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler;
+    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
 
     private List <MinUser> friendList;
@@ -56,8 +53,6 @@ public class InviteFriendToEventPage extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_invite_friend_to_event_page);
-
-        serviceHandler = eventListHandler.serviceHandler;
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 

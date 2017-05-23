@@ -35,7 +35,7 @@ public class FriendListFragment extends Fragment {
     private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
 
     static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler;
+    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private static String TAG = "FriendListFragment";
 
     private RelativeLayout popUpRelativeLayout;
@@ -49,8 +49,6 @@ public class FriendListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_friend_list, container, false);
         ImageButton inviteFriend = (ImageButton)view.findViewById(R.id.inviteFriend);
         inviteFriend.setImageResource(R.drawable.plus);
-
-        serviceHandler = eventListHandler.serviceHandler;
 
         ListView friendListView  = (ListView)view.findViewById(R.id.friendList);
         friendListView.setBackgroundColor(Color.BLACK);

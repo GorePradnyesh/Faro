@@ -30,7 +30,7 @@ import com.zik.faro.frontend.faroservice.HttpError;
 
 import static android.widget.Toast.LENGTH_LONG;
 
-public class CreateNewActivity extends android.app.Activity{
+public class CreateNewActivity extends android.app.Activity {
 
     private static String eventID = null;
     static EventListHandler eventListHandler = EventListHandler.getInstance();
@@ -49,15 +49,13 @@ public class CreateNewActivity extends android.app.Activity{
 
     Intent activityListPage = null;
 
-    private static FaroServiceHandler serviceHandler;
+    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private static String TAG = "CreateNewActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_new_activity);
-
-        serviceHandler = eventListHandler.serviceHandler;
 
         final EditText activityName = (EditText) findViewById(R.id.activityName);
         final EditText activityDescription = (EditText) findViewById(R.id.activityDescription);

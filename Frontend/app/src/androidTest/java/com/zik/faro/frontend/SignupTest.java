@@ -26,12 +26,13 @@ public class SignupTest extends ApplicationTestCase<Application> {
     @LargeTest
     public void testSignup() throws InterruptedException, MalformedURLException {
         final Semaphore waitSem = new Semaphore(0);
-        FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler(new URL(baseUrl));
+        FaroServiceHandler.initializeInstance(new URL(baseUrl));
+        FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
         String uuidEmail = UUID.randomUUID().toString()+ "@gmail.com";
         String password = UUID.randomUUID().toString();
 
         Utils.TestSignupCallback callback = new Utils.TestSignupCallback(waitSem, 200);
-        serviceHandler.getSignupHandler().signup(callback, new FaroUser(uuidEmail), password);
+        serviceHandler.getSignupHandler().signup(callback, new FaroUser(uuidEmail, null, null, null, null, null, null), password);
         boolean timeout;
         timeout = !waitSem.tryAcquire(30000, TimeUnit.MILLISECONDS);
 
@@ -41,7 +42,4 @@ public class SignupTest extends ApplicationTestCase<Application> {
         Assert.assertNotNull(callback.token);
         Assert.assertEquals(TokenCache.getTokenCache().getToken(), callback.token);
     }
-
-
-
 }

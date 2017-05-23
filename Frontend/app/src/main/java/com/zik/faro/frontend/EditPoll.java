@@ -24,7 +24,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.squareup.okhttp.Request;
-import com.zik.faro.data.Event;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.PollOption;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
@@ -36,15 +35,13 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static android.widget.Toast.LENGTH_LONG;
 
 public class EditPoll extends Activity {
-
-    private static PollListHandler pollListHandler = PollListHandler.getInstance();
+    static PollListHandler pollListHandler = PollListHandler.getInstance();
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler;
+    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
     private static String eventID = null;
     private String pollID;
@@ -61,8 +58,6 @@ public class EditPoll extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_poll);
-
-        serviceHandler = eventListHandler.serviceHandler;
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 

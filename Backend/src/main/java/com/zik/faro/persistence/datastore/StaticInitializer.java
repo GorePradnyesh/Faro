@@ -4,6 +4,7 @@ import com.googlecode.objectify.ObjectifyService;
 import com.zik.faro.persistence.datastore.data.ActivityDo;
 import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.persistence.datastore.data.EventUserDo;
+import com.zik.faro.persistence.datastore.data.FaroImageDo;
 import com.zik.faro.persistence.datastore.data.PollDo;
 import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 import com.zik.faro.persistence.datastore.data.user.FriendRelationDo;
@@ -20,5 +21,6 @@ public class StaticInitializer {
         ObjectifyService.register(EventUserDo.class);
         ObjectifyService.register(PollDo.class);
         ObjectifyService.register(FriendRelationDo.class);
+        ObjectifyService.register(FaroImageDo.class);
     }
 }

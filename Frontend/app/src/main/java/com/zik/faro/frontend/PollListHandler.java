@@ -1,16 +1,15 @@
 package com.zik.faro.frontend;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.google.gson.Gson;
 import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.Poll;
 
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 
 public class PollListHandler {
-
     /*
      * This is a Singleton class
      */

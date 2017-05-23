@@ -27,16 +27,15 @@ import java.io.IOException;
 import java.util.List;
 
 public class PollListPage extends Activity {
-
     Intent EventLandingPage = null;
     Intent PollLandingPageIntent = null;
     static PollListHandler pollListHandler = PollListHandler.getInstance();
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static Event event;
     private static String eventID = null;
-    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;;
+    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
-    private static String TAG = "PollListPageIntent";
+    private static String TAG = "PollListPage";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

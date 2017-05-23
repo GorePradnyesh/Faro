@@ -126,7 +126,7 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
         checkAndHandleNotification(extras);
     }
 
-    private void setupPageDetails(){
+    private void setupPageDetails() {
 
         DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);

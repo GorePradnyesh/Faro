@@ -5,11 +5,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.zik.faro.data.Activity;
-import com.zik.faro.data.Event;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -41,15 +39,14 @@ public class ActivityAdapter extends ArrayAdapter{
         return this.list.get(position);
     }
 
-    static class ImgHolder{
+    static class ImgHolder {
         TextView ACTIVITY_NAME;
         TextView ACTIVITY_START_DATE;
         TextView ACTIVITY_START_TIME;
     }
 
     @Override
-    public boolean isEnabled(int position)
-    {
+    public boolean isEnabled(int position) {
         return true;
     }
 
@@ -65,7 +62,7 @@ public class ActivityAdapter extends ArrayAdapter{
             holder.ACTIVITY_START_DATE = (TextView)row.findViewById(R.id.startDate);
             holder.ACTIVITY_START_TIME = (TextView)row.findViewById(R.id.startTime);
             row.setTag(holder);
-        }else{
+        } else {
             holder = (ImgHolder) row.getTag();
         }
         Activity activity = (Activity) getItem(position);
