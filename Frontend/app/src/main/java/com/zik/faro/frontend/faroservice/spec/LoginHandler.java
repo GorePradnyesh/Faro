@@ -7,5 +7,7 @@ import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
  */
 public interface LoginHandler {
     void login(final BaseFaroRequestCallback<String> callback, final String email, final String password);
-    void login(final BaseFaroRequestCallback<String> callback, final String email, final String password, boolean addToCache);
+    void login(final BaseFaroRequestCallback<String> callback, final String email, final String password, final String firebaseIdToken);
+    void login(final BaseFaroRequestCallback<String> callback, final String email, final String password,
+               final String firebaseIdToken, boolean addToCache);
 }

@@ -4,14 +4,6 @@
     android:layout_height="match_parent"
     tools:context="com.zik.faro.frontend.EventLandingPage">
 
-    <com.facebook.login.widget.LoginButton
-        android:id="@+id/login_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="30dp"
-        android:layout_marginBottom="30dp" />
-
     <fragment android:name="com.zik.faro.frontend.FbLoginFragment"
         android:id="@+id/fb_login_page"
         android:layout_weight="1"

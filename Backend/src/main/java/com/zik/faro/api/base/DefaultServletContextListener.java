@@ -7,6 +7,7 @@ import com.zik.faro.persistence.datastore.StaticInitializer;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -28,7 +29,7 @@ public class DefaultServletContextListener implements ServletContextListener {
         FileInputStream serviceAccount = null;
         try {
             // use the path to serviceAccountKey.json
-            serviceAccount = new FileInputStream("/Users/granganathan/Projects/Faro/Backend/faro-56043-firebase-adminsdk-out3y-bdb49f0641.json");
+            serviceAccount = new FileInputStream(new File("WEB-INF/classes/faro-56043-firebase-adminsdk-out3y-192c0b32ad.json"));
             FirebaseOptions options = new FirebaseOptions.Builder()
                     .setCredential(FirebaseCredentials.fromCertificate(serviceAccount))
                     .setDatabaseUrl("https://faro-56043.firebaseio.com/")
@@ -40,8 +41,6 @@ public class DefaultServletContextListener implements ServletContextListener {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
     }
 
     @Override

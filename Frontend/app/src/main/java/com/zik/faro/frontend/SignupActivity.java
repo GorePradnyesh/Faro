@@ -9,6 +9,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -96,7 +97,7 @@ public class SignupActivity extends Activity {
         callbackManager = CallbackManager.Factory.create();
 
         // Setup the facebook signup/connect with button
-        LoginButton fbLoginButton = (LoginButton) findViewById(R.id.fb_login_button);
+        LoginButton fbLoginButton = (LoginButton) findViewById(R.id.fb_signup_button);
         fbLoginButton.setReadPermissions("email", "public_profile");
         fbLoginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
@@ -118,33 +119,6 @@ public class SignupActivity extends Activity {
 
         // Get Firebase Auth instance
         firebaseAuth = FirebaseAuth.getInstance();
-
-        // Determine if the signup needs to be done using firebasetoken and then populate the form
-        /*Bundle extras = getIntent().getExtras();
-        firebaseIdToken = extras.getString("firebaseIdToken");
-        Log.i(TAG, "firebaseIdToken = " + firebaseIdToken);
-
-        if (firebaseIdToken != null) {
-            String firebaseUserEmail = extras.getString("firebaseUserEmail");
-            String firebaseUserDisplayName = extras.getString("firebaseUserDisplayName");
-
-            nameTextBox.setText(firebaseUserDisplayName);
-
-            emailTextBox.setText(firebaseUserEmail);
-            emailTextBox.setFocusable(false);
-            emailTextBox.setFocusableInTouchMode(false);
-            emailTextBox.setClickable(false);
-
-            TextView passwordTextView = (TextView) findViewById(R.id.textViewPassword);
-            passwordTextView.setVisibility(View.INVISIBLE);
-            passwordTextBox.setVisibility(View.INVISIBLE);
-
-            TextView confirmPasswordTextView = (TextView) findViewById(R.id.textViewConfirmPassword);
-            confirmPasswordTextView.setVisibility(View.INVISIBLE);
-            confirmPasswordBox.setVisibility(View.INVISIBLE);
-        }*/
-
-
     }
 
     private void handleFacebookAccessToken(AccessToken token) {
@@ -334,6 +308,12 @@ public class SignupActivity extends Activity {
                 Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                 if (error.getCode() == 409) {
                     Log.i(TAG, "User " + firebaseUser.getEmail() + " already exists");
+
+                    // Prompt to sign in using username back on the LoginActivity Page
+                    Intent loginIntent = new Intent(SignupActivity.this, LoginActivity.class);
+                    loginIntent.putExtra("email", firebaseUser.getEmail());
+                    startActivity(loginIntent);
+                    finish();
                 }
             }
         }

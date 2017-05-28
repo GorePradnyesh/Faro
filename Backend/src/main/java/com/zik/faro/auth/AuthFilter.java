@@ -55,6 +55,7 @@ public class AuthFilter implements ContainerRequestFilter {
         logger.info("---- Auth filter invoked. ----");
 
         String nativeLoginPath = Constants.AUTH_PATH_CONST + Constants.AUTH_LOGIN_PATH_CONST + "/";
+        String firebaseLoginPath = Constants.FIREBASE_AUTH_CONST + Constants.AUTH_LOGIN_PATH_CONST + "/";
         String nativeSignupPath = Constants.AUTH_PATH_CONST + Constants.AUTH_SIGN_UP_PATH_CONST + "/";
         String forgotPasswordPath = Constants.AUTH_PATH_CONST + Constants.AUTH_PASSWORD_PATH_CONST
                                     + Constants.AUTH_FORGOT_PASSWORD_PATH_CONST;
@@ -72,6 +73,7 @@ public class AuthFilter implements ContainerRequestFilter {
 
         // No authentication required for login/signup requests
         if (requestPath.equals(nativeLoginPath) ||
+                requestPath.equals(firebaseLoginPath) ||
                 requestPath.equals(nativeSignupPath) ||
                 requestPath.equals(forgotPasswordPath) ||
                 requestPath.equals(forgotPasswordFormPath)) {
@@ -93,37 +95,15 @@ public class AuthFilter implements ContainerRequestFilter {
             // do complete JWT token validation only for "production" maven profile and
             // not in "test" profile;
 
-            Map<String, Object> claims = FaroJwtTokenManager.obtainClaimsMapWithNoChecks(authHeaderValue);
+            FaroJwtClaims jwtClaims = FaroJwtTokenManager.validateToken(authHeaderValue);
+            logger.info("jwtClaims : " + jwtClaims);
 
-            FaroJwtClaims jwtClaims = new FaroJwtClaims();
-            final FirebaseToken firebaseToken;
-
-            // Determine the verification of the JWT based on the type of JWT received
-            if (claims.containsKey("firebase")) {
-
-                firebaseToken = FirebaseAuth.getInstance().verifyIdToken(authHeaderValue)
-                        .addOnSuccessListener(new OnSuccessListener<FirebaseToken>() {
-                            @Override
-                            public void onSuccess(FirebaseToken decodedFirebaseToken) {
-                                String uid = decodedFirebaseToken.getUid();
-                                logger.info(MessageFormat.format("uid = {0}, decodedFirebaseToken = {1}", uid, decodedFirebaseToken));
-                            }
-                        }).getResult();
-
-                jwtClaims.withEmail(firebaseToken.getEmail())
-                        .withUsername(firebaseToken.getEmail());
-
-            } else {
-                jwtClaims = FaroJwtTokenManager.validateToken(authHeaderValue);
-                logger.info("jwtClaims : " + jwtClaims);
-
-                // For new password API, check if the token has valid JWT id
-                if (requestPath.equals(newPasswordPath)) {
-                    UserCredentialsDo userCredentials = UserCredentialsDatastoreImpl.loadUserCreds(jwtClaims.getUsername());
-                    String userCredsUuid = userCredentials.getUserCredsUUid();
-                    if (!userCredsUuid.equals(jwtClaims.getJwtId())) {
-                        throw new FaroWebAppException(FaroResponseStatus.UNAUTHORIZED, "Invalid token");
-                    }
+            // For new password API, check if the token has valid JWT id
+            if (requestPath.equals(newPasswordPath)) {
+                UserCredentialsDo userCredentials = UserCredentialsDatastoreImpl.loadUserCreds(jwtClaims.getUsername());
+                String userCredsUuid = userCredentials.getUserCredsUUid();
+                if (!userCredsUuid.equals(jwtClaims.getJwtId())) {
+                    throw new FaroWebAppException(FaroResponseStatus.UNAUTHORIZED, "Invalid token");
                 }
             }
 

@@ -5,6 +5,7 @@ import static com.zik.faro.commons.Constants.AUTH_SIGN_UP_PATH_CONST;
 
 import java.text.MessageFormat;
 
+import javax.annotation.CheckForNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -80,14 +81,15 @@ public class SignupHandler {
 
         if (!Strings.isNullOrEmpty(firebaseTokenString)) {
             // Verify the firebase token and obtain claims
-            FirebaseToken firebaseToken = verifyFirebaseToken(firebaseTokenString);
+            FirebaseToken firebaseToken = FaroJwtTokenManager.verifyFirebaseToken(firebaseTokenString);
 
             // Find auth provider in use
             authProvider = findAuthProvider(firebaseToken);
-
+            if (authProvider == null) {
+                throw new FaroWebAppException(FaroResponseStatus.UNEXPECTED_ERROR, "error in signing up user. Auth provider could not be determined");
+            }
 
             // Lookup to see if user exists with the same id and uses FARO authProvider or a different provider
-
             try {
                 if (UserManagement.isExistingUser(newFaroUser.getEmail())) {
                     AuthProvider currentAuthProvider = UserCredentialsDatastoreImpl
@@ -140,36 +142,9 @@ public class SignupHandler {
         }
     }
 
-    private FirebaseToken verifyFirebaseToken(String token) {
-        Task<FirebaseToken> task = FirebaseAuth.getInstance().verifyIdToken(token);
-
-        try {
-            Tasks.await(task, 30, TimeUnit.SECONDS);
-
-            FirebaseToken firebaseToken = task.getResult();
-            logger.info(MessageFormat.format("firebaseToken uid = {0}, email = {1}, issuer = {2}, claims = {3}, name = {4}",
-                        firebaseToken.getUid(), firebaseToken.getEmail(), firebaseToken.getIssuer(),
-                        firebaseToken.getClaims(), firebaseToken.getName()));
-
-            return firebaseToken;
-
-        } catch (ExecutionException e) {
-            if (e.getCause() instanceof FirebaseAuthException) {
-                logger.error("Invalid firebase token", e);
-                throw new FaroWebAppException(FaroResponseStatus.UNAUTHORIZED, "invalid token");
-            } else {
-                throw new FaroWebAppException(FaroResponseStatus.UNEXPECTED_ERROR, "error in signing up user");
-            }
-        } catch (InterruptedException | TimeoutException e) {
-            logger.error("Failed to verify firebase token ", e);
-            throw new FaroWebAppException(FaroResponseStatus.UNEXPECTED_ERROR, "error in signing up user");
-        }
-    }
-
+    @CheckForNull
     private AuthProvider findAuthProvider(FirebaseToken firebaseToken) {
-        //Gson gson = new Gson();
-        //gson.toJsonTree(firebaseToken.getClaims().get("firebase")).getAsJsonObject().get("sign_in_provider").getAsJsonObject();
-        return AuthProvider.FACEBOOK;
+        return FaroJwtTokenManager.getAuthProvider(firebaseToken);
     }
 
 }

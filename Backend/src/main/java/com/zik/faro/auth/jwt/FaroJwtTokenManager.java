@@ -4,6 +4,15 @@ import com.auth0.jwt.FaroJwtVerifier;
 import com.auth0.jwt.JWTSigner;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.JWTVerifyException;
+import com.google.api.client.util.ArrayMap;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.FirebaseToken;
+import com.google.firebase.tasks.Task;
+import com.google.firebase.tasks.Tasks;
+import com.zik.faro.commons.FaroResponseStatus;
+import com.zik.faro.commons.exceptions.FaroWebAppException;
+import com.zik.faro.persistence.datastore.data.user.AuthProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,9 +20,12 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Created by granganathan on 2/6/15.
@@ -141,5 +153,47 @@ public class FaroJwtTokenManager {
                 .setJwtId(claimsMap.get(JwtClaimConstants.JWT_KEY) != null ? claimsMap.get(JwtClaimConstants.JWT_KEY).toString() : null);
 
         return faroJwtClaims;
+    }
+
+    public static FirebaseToken verifyFirebaseToken(String token) {
+        Task<FirebaseToken> task = FirebaseAuth.getInstance().verifyIdToken(token);
+
+        try {
+            Tasks.await(task, 30, TimeUnit.SECONDS);
+
+            FirebaseToken firebaseToken = task.getResult();
+            logger.info(MessageFormat.format("firebaseToken uid = {0}, email = {1}, issuer = {2}, claims = {3}, name = {4}",
+                    firebaseToken.getUid(), firebaseToken.getEmail(), firebaseToken.getIssuer(),
+                    firebaseToken.getClaims(), firebaseToken.getName()));
+
+            return firebaseToken;
+
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof FirebaseAuthException) {
+                logger.error("Invalid firebase token", e);
+                throw new FaroWebAppException(FaroResponseStatus.UNAUTHORIZED, "invalid token");
+            } else {
+                throw new FaroWebAppException(FaroResponseStatus.UNEXPECTED_ERROR, "error in signing up user");
+            }
+        } catch (InterruptedException | TimeoutException e) {
+            logger.error("Failed to verify firebase token ", e);
+            throw new FaroWebAppException(FaroResponseStatus.UNEXPECTED_ERROR, "error in signing up user");
+        }
+    }
+
+    public static AuthProvider getAuthProvider(FirebaseToken firebaseToken) {
+        String signInProvider = (String) ((ArrayMap<String, Object>) firebaseToken.getClaims().get("firebase")).get("sign_in_provider");
+        if (signInProvider != null) {
+            switch (signInProvider) {
+                case "facebook.com" :
+                    return AuthProvider.FACEBOOK;
+
+                case "google.com" :
+                    return  AuthProvider.GOOGLE;
+
+            }
+        }
+
+        return null;
     }
 }
