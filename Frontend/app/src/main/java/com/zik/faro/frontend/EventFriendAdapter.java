@@ -1,6 +1,8 @@
 package com.zik.faro.frontend;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -71,6 +73,7 @@ public class EventFriendAdapter extends ArrayAdapter {
                     LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                     row = inflater.inflate(R.layout.friend_row_style, parent, false);
                     holder.friendName = (TextView)row.findViewById(R.id.friendName);
+                    holder.userPicture = (ImageView) row.findViewById(R.id.userPicture);
                     row.setTag(holder);
                 }else{
                     holder = (EventFriendAdapter.ImgHolder) row.getTag();
@@ -82,6 +85,8 @@ public class EventFriendAdapter extends ArrayAdapter {
                     }else{
                         holder.friendName.setText("FNU");
                     }
+                    holder.friendName.setTextColor(Color.BLACK);
+                    holder.userPicture.setVisibility(View.GONE);
                 }
                 break;
             default:
@@ -117,6 +122,7 @@ public class EventFriendAdapter extends ArrayAdapter {
             LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             row = inflater.inflate(R.layout.friend_row_style, parent, false);
             holder.friendName = (TextView)row.findViewById(R.id.friendName);
+            holder.userPicture = (ImageView) row.findViewById(R.id.userPicture);
             row.setTag(holder);
         }else{
             holder = (EventFriendAdapter.ImgHolder) row.getTag();
@@ -129,6 +135,8 @@ public class EventFriendAdapter extends ArrayAdapter {
                 holder.friendName.setText("FNU");
             }
         }
+        holder.friendName.setTextColor(Color.BLACK);
+        holder.userPicture.setVisibility(View.GONE);
         return row;
     }
 }

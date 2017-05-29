@@ -1,11 +1,6 @@
 package com.zik.faro.frontend.notification;
 
-import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
-
-import org.json.JSONObject;
-
+// Implement this interface on all Activities which would be opened directly through a notification
 public interface NotificationPayloadHandler {
-    void checkAndHandleNotification(Bundle extras);
+    void checkAndHandleNotification();
 }

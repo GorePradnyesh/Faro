@@ -34,8 +34,7 @@ public class CreateNewPoll extends Activity {
 
     static PollListHandler pollListHandler = PollListHandler.getInstance();
     private  static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static String eventID = null;
-    private static Event event;
+    private String eventID = null;
     Intent PollListPage = null;
 
     static FaroUserContext faroUserContext = FaroUserContext.getInstance();
@@ -44,38 +43,51 @@ public class CreateNewPoll extends Activity {
     private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private static String TAG = "CreateNewPoll";
 
+    private EditText pollDescription = null;
+    private CheckBox isMultiChoice = null;
+    private EditText optionText = null;
+    private ImageButton addNewOptionButton = null;
+    private ListView pollOptionsList = null;
+    private Button createNewPollOK = null;
+    private PollOptionsAdapter pollOptionsAdapter = null;
+    private Intent PollLandingPageIntent = null;
+
+    Context mContext = this;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_new_poll);
 
-        final EditText pollDescription = (EditText)findViewById(R.id.pollDescription);
-        final CheckBox isMultiChoice = (CheckBox)findViewById(R.id.multiChoiceFlag);
-        final EditText optionText = (EditText)findViewById(R.id.pollOptionEditText);
+        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
-        final ImageButton addNewOptionButton = (ImageButton)findViewById(R.id.add_new_option);
+        Bundle extras = getIntent().getExtras();
+        if (extras == null) return;//TODO: How to handle this condition
+
+        eventID = extras.getString("eventID");
+
+        setupPageDetails();
+    }
+
+    private void setupPageDetails () {
+        pollDescription = (EditText)findViewById(R.id.pollDescription);
+        isMultiChoice = (CheckBox)findViewById(R.id.multiChoiceFlag);
+        optionText = (EditText)findViewById(R.id.pollOptionEditText);
+
+        addNewOptionButton = (ImageButton)findViewById(R.id.add_new_option);
         addNewOptionButton.setImageResource(R.drawable.plus);
         addNewOptionButton.setEnabled(false);
 
-        ListView pollOptionsList = (ListView)findViewById(R.id.pollOptionsList);
+        pollOptionsList = (ListView)findViewById(R.id.pollOptionsList);
 
-        final Button createNewPollOK = (Button) findViewById(R.id.createNewPollOK);
-
-        final Context mContext = this;
+        createNewPollOK = (Button) findViewById(R.id.createNewPollOK);
 
         PollListPage = new Intent(CreateNewPoll.this, PollListPage.class);
-        final Intent PollLandingPageIntent = new Intent(CreateNewPoll.this, PollLandingPage.class);
+        PollLandingPageIntent = new Intent(CreateNewPoll.this, PollLandingPage.class);
 
-        final PollOptionsAdapter pollOptionsAdapter = new PollOptionsAdapter(this, R.layout.poll_option_can_edit_row_style);
+        pollOptionsAdapter = new PollOptionsAdapter(this, R.layout.poll_option_can_edit_row_style);
         pollOptionsList.setAdapter(pollOptionsAdapter);
 
-        Bundle extras = getIntent().getExtras();
-        if(extras != null) {
-            eventID = extras.getString("eventID");
-            event = eventListHandler.getEventCloneFromMap(eventID);
-        }
-
-        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
         //Enable the addNewOptionButton only after Users enters an Option
         optionText.addTextChangedListener(new TextWatcher() {
@@ -116,39 +128,43 @@ public class CreateNewPoll extends Activity {
                     createNewPollOK.setEnabled(false);
                     return;
                 }
-                Poll poll;
-                poll = new Poll(eventID, myUserId, isMultiChoice.isChecked(),
+                Poll poll = new Poll(eventID, myUserId, isMultiChoice.isChecked(),
                         pollOptionsAdapter.list, myUserId, pollDescription.getText().toString(),
                         ObjectStatus.OPEN);
 
-                serviceHandler.getPollHandler().createPoll(new BaseFaroRequestCallback<Poll>() {
-                    @Override
-                    public void onFailure(Request request, IOException ex) {
-                        Log.e(TAG, "failed to send poll create request");
-                    }
-
-                    @Override
-                    public void onResponse(final Poll receivedPoll, HttpError error) {
-                        if (error == null ) {
-                            Runnable myRunnable = new Runnable() {
-                                @Override
-                                public void run() {
-                                    Log.i(TAG, "Poll Create Response received Successfully");
-                                    pollListHandler.addPollToListAndMap(receivedPoll);
-                                    PollLandingPageIntent.putExtra("eventID", eventID);
-                                    PollLandingPageIntent.putExtra("pollID", receivedPoll.getId());
-                                    startActivity(PollLandingPageIntent);
-                                    finish();
-                                }
-                            };
-                            Handler mainHandler = new Handler(mContext.getMainLooper());
-                            mainHandler.post(myRunnable);
-                        }else {
-                            Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
-                        }
-                    }
-                }, eventID, poll);
+                sendNewPollToServer(poll);
             }
         });
+    }
+
+
+    private void sendNewPollToServer (Poll poll) {
+        serviceHandler.getPollHandler().createPoll(new BaseFaroRequestCallback<Poll>() {
+            @Override
+            public void onFailure(Request request, IOException ex) {
+                Log.e(TAG, "failed to send poll create request");
+            }
+
+            @Override
+            public void onResponse(final Poll receivedPoll, HttpError error) {
+                if (error == null ) {
+                    Runnable myRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.i(TAG, "Poll Create Response received Successfully");
+                            pollListHandler.addPollToListAndMap(eventID, receivedPoll, mContext);
+                            PollLandingPageIntent.putExtra("eventID", eventID);
+                            PollLandingPageIntent.putExtra("pollID", receivedPoll.getId());
+                            startActivity(PollLandingPageIntent);
+                            finish();
+                        }
+                    };
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(myRunnable);
+                }else {
+                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                }
+            }
+        }, eventID, poll);
     }
 }

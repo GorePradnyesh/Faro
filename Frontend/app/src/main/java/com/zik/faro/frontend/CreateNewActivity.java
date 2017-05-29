@@ -144,7 +144,7 @@ public class CreateNewActivity extends android.app.Activity {
                                 public void run() {
                                     //Since update to server successful, adding activity to List and Map below
                                     Log.i(TAG, "Activity Create Response received Successfully");
-                                    activityListHandler.addActivityToListAndMap(receivedActivity);
+                                    activityListHandler.addActivityToListAndMap(eventID, receivedActivity, mContext);
                                     activityLanding.putExtra("eventID", eventID);
                                     activityLanding.putExtra("activityID", receivedActivity.getId());
                                     startActivity(activityLanding);

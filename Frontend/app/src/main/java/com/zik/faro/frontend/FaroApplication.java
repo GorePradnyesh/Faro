@@ -40,7 +40,27 @@ public class FaroApplication extends Application {
         appServerBaseUrl = MessageFormat.format(BASE_URL_TEMPLATE, appServerIP);
         setupFaroServiceHandler();
 
+        //Creating the global Handlers and initializing the Adapters for all
+        createGlobalHandlersAndAdapters();
+
         maxImagesUpload = Integer.parseInt(ConfigPropertiesUtil.getProperty(MAX_IMAGES_UPLOAD_KEY, this));
+    }
+
+    private void createGlobalHandlersAndAdapters() {
+        EventListHandler eventListHandler = EventListHandler.getInstance();
+        UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
+
+        if (eventListHandler.acceptedEventAdapter == null) {
+            eventListHandler.acceptedEventAdapter = new EventAdapter(this, R.layout.event_row_style);
+        }
+
+        if (eventListHandler.notAcceptedEventAdapter == null) {
+            eventListHandler.notAcceptedEventAdapter = new EventAdapter(this, R.layout.event_row_style);
+        }
+
+        if (userFriendListHandler.userFriendAdapter == null){
+            userFriendListHandler.userFriendAdapter = new UserFriendAdapter(this, R.layout.friend_row_style);
+        }
     }
 
     public String getAppServerIp() {

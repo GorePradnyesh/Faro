@@ -5,82 +5,106 @@
     android:layout_height="match_parent"
     tools:context="com.zik.faro.frontend.ActivityLandingPage">
 
-    <TextView
+    <LinearLayout
+        android:id="@+id/linlaHeaderProgress"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center" >
+
+        <ProgressBar
+            android:id="@+id/pbHeaderProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+        </ProgressBar>
+    </LinearLayout>
+
+    <ScrollView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:id="@+id/activityNameText"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:gravity="center" />
-
-    <ImageButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/editButton"
-        android:clickable="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentTop="true"
-        android:paddingLeft="0dp"
-        android:paddingTop="0dp"
-        android:paddingRight="0dp"
-        android:paddingBottom="0dp"/>
-
-    <RelativeLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/startDateTimeLayout"
-        android:layout_below="@+id/editButton"
-        android:layout_marginTop="10dp">
-        <TextView
+        android:id="@+id/mainScrollView">
+        <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/from"
-            android:id="@+id/from"
-            android:layout_alignParentStart="true"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:id="@+id/startDateAndTimeDisplay"
-            android:layout_toEndOf="@+id/from"/>
-    </RelativeLayout>
+            android:id="@+id/activityLandingPageRelativeLayout">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:id="@+id/activityNameText"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:gravity="center" />
 
-    <RelativeLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/endDateTimeLayout"
-        android:layout_below="@+id/startDateTimeLayout"
-        android:layout_marginTop="10dp">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/to"
-            android:id="@+id/to"
-            android:layout_alignParentStart="true" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:id="@+id/endDateAndTimeDisplay"
-            android:layout_toEndOf="@+id/to" />
-    </RelativeLayout>
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/editButton"
+                android:clickable="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentTop="true"
+                android:paddingLeft="0dp"
+                android:paddingTop="0dp"
+                android:paddingRight="0dp"
+                android:paddingBottom="0dp"/>
 
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/activityDescriptionTextView"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:layout_below="@+id/endDateTimeLayout"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="10dp"/>
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/startDateTimeLayout"
+                android:layout_below="@+id/editButton"
+                android:layout_marginTop="10dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="@string/from"
+                    android:id="@+id/from"
+                    android:layout_alignParentStart="true"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:id="@+id/startDateAndTimeDisplay"
+                    android:layout_toEndOf="@+id/from"/>
+            </RelativeLayout>
 
-    <ImageButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/activityAssignmentImageButton"
-        android:clickable="true"
-        android:layout_below="@+id/activityDescriptionTextView"/>
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/endDateTimeLayout"
+                android:layout_below="@+id/startDateTimeLayout"
+                android:layout_marginTop="10dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="@string/to"
+                    android:id="@+id/to"
+                    android:layout_alignParentStart="true" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:id="@+id/endDateAndTimeDisplay"
+                    android:layout_toEndOf="@+id/to" />
+            </RelativeLayout>
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/activityDescriptionTextView"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:layout_below="@+id/endDateTimeLayout"
+                android:layout_alignParentStart="true"
+                android:layout_marginTop="10dp"/>
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/activityAssignmentImageButton"
+                android:clickable="true"
+                android:layout_below="@+id/activityDescriptionTextView"/>
+        </RelativeLayout>
+    </ScrollView>
+
 </RelativeLayout>

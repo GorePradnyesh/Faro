@@ -18,13 +18,14 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.facebook.AccessToken;
@@ -40,6 +41,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.Event;
@@ -70,6 +72,7 @@ public class EventLandingPage extends FragmentActivity
     private DateFormat sdf = new SimpleDateFormat(" EEE, MMM d, yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
+    private static PollListHandler pollListHandler = PollListHandler.getInstance();
     private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
     private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
     private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
@@ -90,9 +93,10 @@ public class EventLandingPage extends FragmentActivity
     private Button uploadPhotosButton = null;
     private ImageButton guestListImageButton = null;
     private ImageButton mapMarker = null;
+    private ImageView transparentImageView = null;
 
     private String eventID;
-    final Context mContext = this;
+    private Context mContext = this;
     private Intent eventLandingPageReload;
 
     private static final int REQUEST_TAKE_PHOTO = 1;
@@ -120,6 +124,7 @@ public class EventLandingPage extends FragmentActivity
     private LatLng mEventLocation;
     private LatLng mDefaultLocation = new LatLng(0, 0);
     private SupportMapFragment mapFragment;
+    private ScrollView mainScrollView = null;
     private LinearLayout linlaHeaderProgress = null;
 
     private TextView event_name = null;
@@ -128,7 +133,12 @@ public class EventLandingPage extends FragmentActivity
     private TextView endDateAndTime = null;
     private TextView eventAddress = null;
 
+    private RelativeLayout mapsStuffRelativeLayout = null;
+
+    private Bundle extras = null;
+
     private RelativeLayout EventLandingPageRelativeLayout = null;
+    private LinearLayout photosStuffLinearLayout = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -142,8 +152,10 @@ public class EventLandingPage extends FragmentActivity
         EventLandingPageRelativeLayout = (RelativeLayout) findViewById(R.id.eventLandingPageRelativeLayout);
         EventLandingPageRelativeLayout.setVisibility(View.GONE);
 
-        Bundle extras = getIntent().getExtras();
-        checkAndHandleNotification(extras);
+        extras = getIntent().getExtras();
+        if (extras == null)return; //TODO: How to handle such conditions
+
+        checkAndHandleNotification();
     }
 
 
@@ -206,6 +218,7 @@ public class EventLandingPage extends FragmentActivity
             guestListImageButton.setVisibility(View.VISIBLE);
             activityButton.setVisibility(View.VISIBLE);
             editButton.setVisibility(View.VISIBLE);
+            photosStuffLinearLayout.setVisibility(View.VISIBLE);
         }else{
             statusYes.setVisibility(View.VISIBLE);
             statusNo.setVisibility(View.VISIBLE);
@@ -214,6 +227,7 @@ public class EventLandingPage extends FragmentActivity
             guestListImageButton.setVisibility(View.GONE);
             activityButton.setVisibility(View.GONE);
             editButton.setVisibility(View.GONE);
+            photosStuffLinearLayout.setVisibility(View.GONE);
         }
 
         if (inviteStatus == EventInviteStatus.INVITED) {
@@ -235,9 +249,9 @@ public class EventLandingPage extends FragmentActivity
     @Override
     public void onBackPressed() {
         eventListHandler.deleteEventFromMapIfNotInList(cloneEvent);
-        activityListHandler.clearActivityListAndMap();
-        eventFriendListHandler.clearFriendListAndMap();
-        assignmentListHandler.clearAssignmentListAndMap();
+        activityListHandler.clearActivityListAndMap(eventID, mContext);
+        eventFriendListHandler.clearFriendListAndMap(eventID, mContext);
+        assignmentListHandler.clearAssignmentListAndMap(eventID, mContext);
         finish();
         super.onBackPressed();
     }
@@ -326,10 +340,7 @@ public class EventLandingPage extends FragmentActivity
     }
 
     @Override
-    public void checkAndHandleNotification(Bundle extras) {
-
-        if (extras == null)return; //TODO: How to handle such conditions
-
+    public void checkAndHandleNotification() {
         String bundleType = extras.getString("bundleType");
         eventID = extras.getString("eventID");
 
@@ -395,6 +406,8 @@ public class EventLandingPage extends FragmentActivity
         mapMarker = (ImageButton) findViewById(R.id.mapMarker);
         mapMarker.setImageResource(R.drawable.map_marker);
 
+        mainScrollView = (ScrollView) findViewById(R.id.mainScrollView);
+        transparentImageView = (ImageView) findViewById(R.id.transparentImageOnMap);
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
 
         statusYes = (Button) findViewById(R.id.statusYes);
@@ -409,6 +422,9 @@ public class EventLandingPage extends FragmentActivity
         eventLandingPageReload = new Intent(EventLandingPage.this, EventLandingPage.class);
 
         linlaHeaderProgress = (LinearLayout) findViewById(R.id.linlaHeaderProgress);
+
+        photosStuffLinearLayout = (LinearLayout) findViewById(R.id.photosStuff);
+        mapsStuffRelativeLayout = (RelativeLayout) findViewById(R.id.mapStuff);
 
         statusYes.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -461,7 +477,7 @@ public class EventLandingPage extends FragmentActivity
             public void onClick(View v) {
                 EventFriendListLandingPageIntent.putExtra("eventID", eventID);
                 startActivity(EventFriendListLandingPageIntent);
-                finish();
+                //finish();
             }
         });
 
@@ -529,7 +545,11 @@ public class EventLandingPage extends FragmentActivity
         event_name.setText(ev_name);
 
         String eventDescr = cloneEvent.getEventDescription();
-        eventDescription.setText(eventDescr);
+        if (Strings.isNullOrEmpty(eventDescr)){
+            eventDescription.setVisibility(View.GONE);
+        } else {
+            eventDescription.setText(eventDescr);
+        }
 
         startDateAndTime.setText(sdf.format(cloneEvent.getStartDate().getTime()) + " at " +
                 stf.format(cloneEvent.getStartDate().getTime()));
@@ -539,9 +559,8 @@ public class EventLandingPage extends FragmentActivity
 
         final com.zik.faro.data.Location eventLocation = cloneEvent.getLocation();
         if (eventLocation == null){
-            eventAddress.setVisibility(View.GONE);
-            mapFragment.getView().setVisibility(View.GONE);
-            mapMarker.setVisibility(View.GONE);
+
+            mapsStuffRelativeLayout.setVisibility(View.GONE);
         }else{
             mEventLocation = new LatLng(eventLocation.getPosition().getLatitude(), eventLocation.getPosition().getLongitude());
             String str = GetLocationAddressString.getLocationAddressString(eventLocation);
@@ -577,12 +596,40 @@ public class EventLandingPage extends FragmentActivity
             setEventLocationOnMap();
         }
 
+        transparentImageView.setOnTouchListener(new View.OnTouchListener() {
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                int action = event.getAction();
+                switch (action) {
+                    case MotionEvent.ACTION_DOWN:
+                        // Disallow ScrollView to intercept touch events.
+                        mainScrollView.requestDisallowInterceptTouchEvent(true);
+                        // Disable touch on transparent view
+                        return false;
+
+                    case MotionEvent.ACTION_UP:
+                        // Allow ScrollView to intercept touch events.
+                        mainScrollView.requestDisallowInterceptTouchEvent(false);
+                        return true;
+
+                    case MotionEvent.ACTION_MOVE:
+                        mainScrollView.requestDisallowInterceptTouchEvent(true);
+                        return false;
+
+                    default:
+                        return true;
+                }
+            }
+        });
+
+
         //Make API call to get all all invitees for this event
         getEventInviteesFromServer();
 
         //Add event's assignment to the Assignment Handler
         Event originalEvent = eventListHandler.getOriginalEventFromMap(eventID);
-        assignmentListHandler.addAssignmentToListAndMap(originalEvent.getAssignment(), null);
+        assignmentListHandler.addAssignmentToListAndMap(eventID, originalEvent.getAssignment(), null, mContext);
 
         //Make API call to get all activities for this event
         getEventActivitiesFromServer();
@@ -608,7 +655,6 @@ public class EventLandingPage extends FragmentActivity
                         @Override
                         public void run() {
                             eventListHandler.addEventToListAndMap(receivedEvent, );
-                            eventListHandler.addDownloadedEventsToListAndMap();
                             setupPageDetails();
                         }
                     };
@@ -637,7 +683,7 @@ public class EventLandingPage extends FragmentActivity
                         @Override
                         public void run() {
                             Log.i(TAG, "Successfully received activities from the server!!");
-                            activityListHandler.addDownloadedActivitiesToListAndMap(activities, eventID);
+                            activityListHandler.addDownloadedActivitiesToListAndMap(eventID, activities, mContext);
                         }
                     };
                     Handler mainHandler = new Handler(mContext.getMainLooper());
@@ -822,7 +868,7 @@ public class EventLandingPage extends FragmentActivity
                         @Override
                         public void run() {
                             Log.i(TAG, "Successfully received Invitee List for the cloneEvent");
-                            eventFriendListHandler.addDownloadedFriendsToListAndMap(inviteeList);
+                            eventFriendListHandler.addDownloadedFriendsToListAndMap(eventID, inviteeList, mContext);
                         }
                     };
                     Handler mainHandler = new Handler(mContext.getMainLooper());

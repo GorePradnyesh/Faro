@@ -21,6 +21,8 @@ import com.zik.faro.data.MinUser;
  */
 public class EventFriendListFragment extends Fragment {
     private String guestListType;
+    private String eventID;
+    private Context mContext = getActivity();
 
     private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
 
@@ -33,6 +35,7 @@ public class EventFriendListFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             guestListType = getArguments().getString("listType");
+            eventID = getArguments().getString("eventID");
         }
     }
 
@@ -43,7 +46,7 @@ public class EventFriendListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_event_friend_list, container, false);
         ListView guestList  = (ListView)view.findViewById(R.id.guestList);
         guestList.setBackgroundColor(Color.BLACK);
-        EventFriendAdapter eventFriendAdapter = eventFriendListHandler.getEventFriendAdapter(guestListType);
+        EventFriendAdapter eventFriendAdapter = eventFriendListHandler.getEventFriendAdapter(eventID, guestListType, mContext);
         guestList.setTag("EventFriendListFragment");
         guestList.setAdapter(eventFriendAdapter);
 

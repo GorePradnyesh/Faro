@@ -59,9 +59,9 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
     private RelativeLayout OpenPollLandingPageRelativeLayout = null;
     private RelativeLayout ClosedPollLandingPageRelativeLayout = null;
 
-    private static Poll clonePoll;
-    private static String eventID = null;
-    private static String pollID = null;
+    private Poll clonePoll;
+    private String eventID = null;
+    private String pollID = null;
 
     private TextView pollDesc = null;
     private ImageButton editButton = null;
@@ -101,6 +101,10 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
 
     private TextView winnerPollOptionTV = null;
 
+    private String isNotification = null;
+
+    private Bundle extras = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -122,11 +126,17 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
         ClosedPollLandingPageRelativeLayout.setVisibility(View.GONE);
 
 
-        Bundle extras = getIntent().getExtras();
-        checkAndHandleNotification(extras);
+        extras = getIntent().getExtras();
+        checkAndHandleNotification();
     }
 
     private void setupPageDetails() {
+
+        clonePoll = pollListHandler.getPollCloneFromMap(pollID);
+        if (clonePoll == null){
+            Toast.makeText(PollLandingPage.this, "No Poll found", LENGTH_LONG).show();
+            finish();
+        }
 
         DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
@@ -315,6 +325,7 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
                 public void onClick(View v) {
                     PickPollWinnerIntent.putExtra("eventID", eventID);
                     PickPollWinnerIntent.putExtra("pollID", pollID);
+                    PickPollWinnerIntent.putExtra("bundleType", isNotification);
                     startActivity(PickPollWinnerIntent);
                     finish();
                 }
@@ -325,6 +336,7 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
                 public void onClick(View v) {
                     EditPollPageIntent.putExtra("eventID", eventID);
                     EditPollPageIntent.putExtra("pollID", pollID);
+                    EditPollPageIntent.putExtra("bundleType", isNotification);
                     startActivity(EditPollPageIntent);
                     finish();
                 }
@@ -391,6 +403,7 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
                 public void onClick(View v) {
                     PickPollWinnerIntent.putExtra("eventID", eventID);
                     PickPollWinnerIntent.putExtra("pollID", pollID);
+                    PickPollWinnerIntent.putExtra("bundleType", isNotification);
                     startActivity(PickPollWinnerIntent);
                     finish();
                 }
@@ -431,10 +444,11 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
                         @Override
                         public void run() {
                             Log.i(TAG, "Poll Update Response received Successfully");
-                            pollListHandler.removePollFromListAndMap(clonePoll);
-                            pollListHandler.addPollToListAndMap(receivedPoll);
+                            pollListHandler.removePollFromListAndMap(eventID, clonePoll, mContext);
+                            pollListHandler.addPollToListAndMap(eventID, receivedPoll, mContext);
                             PollLandingPageReloadIntent.putExtra("eventID", eventID);
                             PollLandingPageReloadIntent.putExtra("pollID", pollID);
+                            PollLandingPageReloadIntent.putExtra("bundleType", isNotification);
                             startActivity(PollLandingPageReloadIntent);
                             finish();
                         }
@@ -485,33 +499,32 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
     }
 
     @Override
-    public void checkAndHandleNotification(Bundle extras) {
+    public void checkAndHandleNotification() {
         if (extras == null) return; //TODO: How to handle such conditions
 
-        String bundleType = extras.getString("bundleType");
+        isNotification = extras.getString("bundleType");
         eventID = extras.getString("eventID");
         pollID = extras.getString("pollID");
 
         Log.d(TAG, "******eventID is " + eventID);
         Log.d(TAG, "******pollID is " + pollID);
 
-        if (bundleType == null) {
-            clonePoll = pollListHandler.getPollCloneFromMap(pollID);
-            if (clonePoll == null){
-                Toast.makeText(PollLandingPage.this, "No Poll found", LENGTH_LONG).show();
-                finish();
-            }
+        if (isNotification == null) {
             setupPageDetails();
-            return;
+        } else {               //Else the bundleType is "notification"
+            //API call to get updated poll
+            getUpdatedPollFromServer();
         }
-
-        //Else the bundleType is "notification"
-
-        //API call to get updated poll
-        getUpdatedPollFromServer();
-
     }
 
+
+    @Override
+    public void onBackPressed() {
+        if (isNotification != null) {
+            pollListHandler.removeNotificationPollFromListAndMap(eventID, pollID, mContext);
+        }
+        super.onBackPressed();
+    }
 
     private void updatePollToServer(){
         serviceHandler.getPollHandler().updatePoll(new BaseFaroRequestCallback<Poll>() {
@@ -526,12 +539,13 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
                     Runnable myRunnable = new Runnable() {
                         @Override
                         public void run() {
-                            pollListHandler.addPollToListAndMap(poll);
+                            pollListHandler.addPollToListAndMap(eventID, poll, mContext);
                             //Reload current activity
                             PollLandingPageReloadIntent.putExtra("eventID", eventID);
                             PollLandingPageReloadIntent.putExtra("pollID", pollID);
-                            finish();
+                            PollLandingPageReloadIntent.putExtra("bundleType", isNotification);
                             startActivity(PollLandingPageReloadIntent);
+                            finish();
                         }
                     };
                     Handler mainHandler = new Handler(mContext.getMainLooper());
@@ -557,7 +571,7 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
                     Runnable myRunnable = new Runnable() {
                         @Override
                         public void run() {
-                            clonePoll = receivedPoll;
+                            pollListHandler.addPollToListAndMap(eventID, receivedPoll, mContext);
                             setupPageDetails();
                         }
                     };

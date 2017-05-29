@@ -7,8 +7,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
@@ -27,40 +25,47 @@ import java.io.IOException;
 import java.util.List;
 
 public class PollListPage extends Activity {
-    Intent EventLandingPage = null;
-    Intent PollLandingPageIntent = null;
-    static PollListHandler pollListHandler = PollListHandler.getInstance();
+    private Intent EventLandingPage = null;
+    private Intent PollLandingPageIntent = null;
+    private static PollListHandler pollListHandler = PollListHandler.getInstance();
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static Event event;
-    private static String eventID = null;
+    private String eventID = null;
     private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
-
-    private static String TAG = "PollListPage";
+    private Intent CreateNewPoll = null;
+    private Bundle extras = null;
+    private TextView Poll = null;
+    private TabHost pollTabHost = null;
+    private ListView openPollsListView = null;
+    private ListView closedPollsListView = null;
+    private ImageButton createNewPoll = null;
+    private String TAG = "PollListPage";
+    private Context mContext = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_poll_list_page);
 
+        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
+
         EventLandingPage = new Intent(PollListPage.this, EventLandingPage.class);
         PollLandingPageIntent = new Intent(PollListPage.this, PollLandingPage.class);
-        final Intent CreateNewPoll = new Intent(PollListPage.this, CreateNewPoll.class);
+        CreateNewPoll = new Intent(PollListPage.this, CreateNewPoll.class);
 
-        Bundle extras = getIntent().getExtras();
-        if(extras == null) {
-            //TODO: Error condition. Handle it. Below code is incorrect
-            EventLandingPage.putExtra("eventID", event.getId());
-            startActivity(EventLandingPage);
-            finish();
-            return;
-        }
+        extras = getIntent().getExtras();
+        if(extras == null) return; //TODO How to handle this case?
 
+        setupPageDetails();
+
+        getPollsFromServer();
+    }
+
+    private void setupPageDetails () {
         eventID = extras.getString("eventID");
-        event = eventListHandler.getEventCloneFromMap(eventID);
 
-        TextView Poll = (TextView)findViewById(R.id.polls);
+        Poll = (TextView)findViewById(R.id.polls);
         //Poll.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-        TabHost pollTabHost = (TabHost)findViewById(R.id.polltabHost);
+        pollTabHost = (TabHost)findViewById(R.id.polltabHost);
         pollTabHost.setup();
 
         TabHost.TabSpec openTabSpec = pollTabHost.newTabSpec("openTab");
@@ -73,20 +78,17 @@ public class PollListPage extends Activity {
         closedTabSpec.setIndicator("Closed Polls");
         pollTabHost.addTab(closedTabSpec);
 
-        ListView openPollsListView  = (ListView)findViewById(R.id.openPollsList);
+        openPollsListView  = (ListView)findViewById(R.id.openPollsList);
         openPollsListView.setBackgroundColor(Color.BLACK);
 
-        ListView closedPollsListView  = (ListView)findViewById(R.id.closedPollsList);
+        closedPollsListView  = (ListView)findViewById(R.id.closedPollsList);
         closedPollsListView.setBackgroundColor(Color.BLACK);
 
-        openPollsListView.setAdapter(pollListHandler.openPollsAdapter);
-        closedPollsListView.setAdapter(pollListHandler.closedPollsAdapter);
+        openPollsListView.setAdapter(pollListHandler.getOpenPollAdapter(eventID, this));
+        closedPollsListView.setAdapter(pollListHandler.getClosedPollAdapter(eventID, this));
 
-
-        ImageButton createNewPoll = (ImageButton)findViewById(R.id.add_new_poll);
+        createNewPoll = (ImageButton)findViewById(R.id.add_new_poll);
         createNewPoll.setImageResource(R.drawable.plus);
-
-        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
         //Listener to go to the Create New Poll  Page for the poll selected in the "Open" list
         openPollsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -107,7 +109,7 @@ public class PollListPage extends Activity {
         createNewPoll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(pollListHandler.getCombinedListSize() == PollListHandler.MAX_TOTAL_POLLS_PER_EVENT) {
+                if(pollListHandler.getCombinedListSize(eventID, mContext) == PollListHandler.MAX_TOTAL_POLLS_PER_EVENT) {
                     //DO NOT ALLOW NEW POLL CREATION
                 }else {
                     CreateNewPoll.putExtra("eventID", eventID);
@@ -115,10 +117,10 @@ public class PollListPage extends Activity {
                 }
             }
         });
+    }
 
-        final Context mContext = this;
-
-        //Based on eventID make API call to get Polls for this event
+    private void getPollsFromServer (){
+        //Based on eventID make API call to get Polls for this cloneEvent
         serviceHandler.getPollHandler().getPolls(new BaseFaroRequestCallback<List<com.zik.faro.data.Poll>>() {
             @Override
             public void onFailure(Request request, IOException ex) {
@@ -132,7 +134,7 @@ public class PollListPage extends Activity {
                         @Override
                         public void run() {
                             Log.i(TAG, "Successfully received polls from the server!!");
-                            pollListHandler.addDownloadedPollsToListAndMap(polls);
+                            pollListHandler.addDownloadedPollsToListAndMap(eventID, polls, mContext);
                         }
                     };
                     Handler mainHandler = new Handler(mContext.getMainLooper());
@@ -153,7 +155,7 @@ public class PollListPage extends Activity {
 
     @Override
     public void onBackPressed() {
-        pollListHandler.clearPollListsAndMap();
+        pollListHandler.clearPollListsAndMap(eventID, mContext);
         finish();
         super.onBackPressed();
     }

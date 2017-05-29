@@ -38,7 +38,7 @@ import java.util.Calendar;
 
 import static android.widget.Toast.LENGTH_LONG;
 
-public class EditActivity extends ActionBarActivity {
+public class EditActivity extends android.app.Activity {
     private String eventID = null;
     private String activityID = null;
     private static Event event;
@@ -150,7 +150,7 @@ public class EditActivity extends ActionBarActivity {
                             Runnable myRunnable = new Runnable() {
                                 @Override
                                 public void run() {
-                                    activityListHandler.addActivityToListAndMap(cloneActivity);
+                                    activityListHandler.addActivityToListAndMap(eventID, cloneActivity, mContext);
                                     ActivityLandingPage.putExtra("eventID", eventID);
                                     ActivityLandingPage.putExtra("activityID", cloneActivity.getId());
                                     startActivity(ActivityLandingPage);
@@ -241,7 +241,7 @@ public class EditActivity extends ActionBarActivity {
                             Runnable myRunnable = new Runnable() {
                                 @Override
                                 public void run() {
-                                    activityListHandler.removeActivityFromListAndMap(activityID);
+                                    activityListHandler.removeActivityFromListAndMap(eventID, activityID, mContext);
                                     popupWindow.dismiss();
                                     Toast.makeText(EditActivity.this, cloneActivity.getName() + "is Deleted", LENGTH_LONG).show();
                                     finish();

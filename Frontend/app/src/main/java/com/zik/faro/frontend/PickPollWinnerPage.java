@@ -40,13 +40,13 @@ import static android.widget.Toast.LENGTH_LONG;
 
 public class PickPollWinnerPage extends Activity {
 
-    private static String eventID = null;
-    private static String pollID = null;
-    private static String calledFrom = null;
-    private static Poll clonePoll;
+    private String eventID = null;
+    private String pollID = null;
+    private String isNotification = null;
+
+    private Poll clonePoll;
 
     private static PollListHandler pollListHandler = PollListHandler.getInstance();
-    private static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
 
@@ -64,146 +64,164 @@ public class PickPollWinnerPage extends Activity {
 
     private Intent PollLandingPageIntent = null;
 
-    private static String TAG = "PollPickWinnerPage";
+    private String TAG = "PollPickWinnerPage";
+    private Bundle extras = null;
+
+    private Context mContext = this;
+    private TextView pollDesc = null;
+    private Button selectWinner = null;
+    private DisplayMetrics dm = null;
+    private LinearLayout pollOptionsListLinearLayout = null;
+    private LinearLayout voterButtonLinearLayout = null;
+    private Map<String, Object> map = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pick_poll_winner);
 
-        final TextView pollDesc = (TextView)findViewById(R.id.pollDescription);
-        final Button selectWinner = (Button) findViewById(R.id.selectWinner);
+        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
+
+        extras = getIntent().getExtras();
+        if (extras == null) return; //TODO How to handle this case?
+
+        setupPageDetails();
+    }
+
+    private void setupPageDetails () {
+        pollDesc = (TextView)findViewById(R.id.pollDescription);
+        selectWinner = (Button) findViewById(R.id.selectWinner);
 
         PollLandingPageIntent = new Intent(PickPollWinnerPage.this, PollLandingPage.class);
 
-        DisplayMetrics dm = new DisplayMetrics();
+        dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
         popupWidth = (int) (dm.widthPixels * 0.8);
         popupHeight = (int) (dm.heightPixels * 0.8);
 
-        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
+        eventID = extras.getString("eventID");
+        pollID = extras.getString("pollID");
+        isNotification = extras.getString("bundleType");
 
-        final Context mContext = this;
+        clonePoll = pollListHandler.getPollCloneFromMap(pollID);
 
-        Bundle extras = getIntent().getExtras();
-        if(extras != null) {
-            eventID = extras.getString("eventID");
-            pollID = extras.getString("pollID");
-            calledFrom = extras.getString("calledFrom");
-            clonePoll = pollListHandler.getPollCloneFromMap(pollID);
+        pollOptionsList = clonePoll.getPollOptions();
+        pollDesc.setText(clonePoll.getDescription());
 
-            pollOptionsList = clonePoll.getPollOptions();
-            pollDesc.setText(clonePoll.getDescription());
+        pollOptionsListLinearLayout  = (LinearLayout) findViewById(R.id.pollOptionsListLinearLayout);
+        voterButtonLinearLayout = (LinearLayout) findViewById(R.id.votersListLinearLayout);
 
-            final LinearLayout pollOptionsListLinearLayout  = (LinearLayout) findViewById(R.id.pollOptionsListLinearLayout);
-            final LinearLayout voterButtonLinearLayout = (LinearLayout) findViewById(R.id.votersListLinearLayout);
-
-            popUpRelativeLayout = (RelativeLayout) findViewById(R.id.pickPollWinner);
+        popUpRelativeLayout = (RelativeLayout) findViewById(R.id.pickPollWinner);
 
 
-            for (Integer i = 0; i < pollOptionsList.size(); i++) {
-                PollOption pollOption = pollOptionsList.get(i);
+        for (Integer i = 0; i < pollOptionsList.size(); i++) {
+            PollOption pollOption = pollOptionsList.get(i);
 
-                //Create textview for the poll Option
-                TextView pollOptionDescription = new TextView(this);
-                pollOptionDescription.setText(pollOption.getOption());
-                pollOptionDescription.setId(i);
-                pollOptionDescription.setGravity(Gravity.CENTER_VERTICAL);
-                pollOptionDescription.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        TextView selectedButton = (TextView) v;
-                        Integer id = selectedButton.getId();
-                        pollOptionsListLinearLayout.getChildAt(id).setBackgroundColor(Color.BLUE);
-                        voterButtonLinearLayout.getChildAt(id).setBackgroundColor(Color.BLUE);
-                        if (!pollOptionWinnerPosition.equals(INVALID_SELECTED_INDEX) && !pollOptionWinnerPosition.equals(id)) {
-                            pollOptionsListLinearLayout.getChildAt(pollOptionWinnerPosition).setBackgroundColor(Color.TRANSPARENT);
-                            voterButtonLinearLayout.getChildAt(pollOptionWinnerPosition).setBackgroundColor(Color.TRANSPARENT);
-                        }
-                        pollOptionWinnerPosition = id;
-                    }
-                });
-
-                //Create voter count button
-                Button voterCountButton = new Button(this);
-                int votersCount = pollOption.getVoters().size();
-                voterCountButton.setText("(" + Integer.toString(votersCount) + ")");
-                voterCountButton.setBackgroundColor(Color.TRANSPARENT);
-                voterCountButton.setId(i);
-                voterCountButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        voterListPopUP(v);
-                    }
-                });
-
-                if((pollOption.getId().equals(clonePoll.getWinnerId()))) {
-                    pollOptionDescription.setBackgroundColor(Color.BLUE);
-                    voterCountButton.setBackgroundColor(Color.BLUE);
-                    pollOptionWinnerPosition = i;
-                    previousPollOptionWinnerPosition = i;
-                }
-
-                //Insert poll Option and the voter count button into the LinearLayouts
-                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
-                        RelativeLayout.LayoutParams.MATCH_PARENT, POLL_OPTION_ROW_HEIGHT);
-                pollOptionsListLinearLayout.addView(pollOptionDescription, layoutParams);
-                voterButtonLinearLayout.addView(voterCountButton, layoutParams);
-            }
-
-            selectWinner.setOnClickListener(new View.OnClickListener() {
+            //Create textview for the poll Option
+            TextView pollOptionDescription = new TextView(this);
+            pollOptionDescription.setText(pollOption.getOption());
+            pollOptionDescription.setId(i);
+            pollOptionDescription.setGravity(Gravity.CENTER_VERTICAL);
+            pollOptionDescription.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (previousPollOptionWinnerPosition.equals(INVALID_SELECTED_INDEX) &&
-                            pollOptionWinnerPosition.equals(INVALID_SELECTED_INDEX)){
-                        Toast.makeText(PickPollWinnerPage.this, "Pick a winner", LENGTH_LONG).show();
-                    }else if (pollOptionWinnerPosition.equals(previousPollOptionWinnerPosition)){
-                        Toast.makeText(PickPollWinnerPage.this, "Winner not changed", LENGTH_LONG).show();
-                    }else{
-                        PollOption winnerPollOption = pollOptionsList.get(pollOptionWinnerPosition);
-
-                        Poll pollVersionObj = new Poll();
-                        pollVersionObj.setEventId(clonePoll.getEventId());
-                        pollVersionObj.setId(clonePoll.getId());
-                        pollVersionObj.setVersion(clonePoll.getVersion());
-                        pollVersionObj.setWinnerId(winnerPollOption.getId());
-                        pollVersionObj.setStatus(ObjectStatus.CLOSED);
-
-                        Map<String, Object> map = new HashMap<String, Object>();
-                        map.put("poll", pollVersionObj);
-
-                        serviceHandler.getPollHandler().updatePoll(new BaseFaroRequestCallback<Poll>() {
-                            @Override
-                            public void onFailure(Request request, IOException ex) {
-                                Log.e(TAG, "failed to send Poll update request");
-                            }
-
-                            @Override
-                            public void onResponse(final Poll receivedPoll, HttpError error) {
-                                if (error == null ) {
-                                    Runnable myRunnable = new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            Log.i(TAG, "Poll Update Response received Successfully");
-                                            pollListHandler.removePollFromListAndMap(clonePoll);
-                                            pollListHandler.addPollToListAndMap(receivedPoll);
-                                            PollLandingPageIntent.putExtra("eventID", eventID);
-                                            PollLandingPageIntent.putExtra("pollID", pollID);
-                                            startActivity(PollLandingPageIntent);
-                                            finish();
-                                        }
-                                    };
-                                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                                    mainHandler.post(myRunnable);
-                                }else {
-                                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
-                                }
-                            }
-                        }, eventID, pollID, map);
+                    TextView selectedButton = (TextView) v;
+                    Integer id = selectedButton.getId();
+                    pollOptionsListLinearLayout.getChildAt(id).setBackgroundColor(Color.BLUE);
+                    voterButtonLinearLayout.getChildAt(id).setBackgroundColor(Color.BLUE);
+                    if (!pollOptionWinnerPosition.equals(INVALID_SELECTED_INDEX) && !pollOptionWinnerPosition.equals(id)) {
+                        pollOptionsListLinearLayout.getChildAt(pollOptionWinnerPosition).setBackgroundColor(Color.TRANSPARENT);
+                        voterButtonLinearLayout.getChildAt(pollOptionWinnerPosition).setBackgroundColor(Color.TRANSPARENT);
                     }
+                    pollOptionWinnerPosition = id;
                 }
             });
+
+            //Create voter count button
+            Button voterCountButton = new Button(this);
+            int votersCount = pollOption.getVoters().size();
+            voterCountButton.setText("(" + Integer.toString(votersCount) + ")");
+            voterCountButton.setBackgroundColor(Color.TRANSPARENT);
+            voterCountButton.setId(i);
+            voterCountButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    voterListPopUP(v);
+                }
+            });
+
+            if((pollOption.getId().equals(clonePoll.getWinnerId()))) {
+                pollOptionDescription.setBackgroundColor(Color.BLUE);
+                voterCountButton.setBackgroundColor(Color.BLUE);
+                pollOptionWinnerPosition = i;
+                previousPollOptionWinnerPosition = i;
+            }
+
+            //Insert poll Option and the voter count button into the LinearLayouts
+            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.MATCH_PARENT, POLL_OPTION_ROW_HEIGHT);
+            pollOptionsListLinearLayout.addView(pollOptionDescription, layoutParams);
+            voterButtonLinearLayout.addView(voterCountButton, layoutParams);
         }
+
+        selectWinner.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (previousPollOptionWinnerPosition.equals(INVALID_SELECTED_INDEX) &&
+                        pollOptionWinnerPosition.equals(INVALID_SELECTED_INDEX)){
+                    Toast.makeText(PickPollWinnerPage.this, "Pick a winner", LENGTH_LONG).show();
+                }else if (pollOptionWinnerPosition.equals(previousPollOptionWinnerPosition)){
+                    Toast.makeText(PickPollWinnerPage.this, "Winner not changed", LENGTH_LONG).show();
+                }else{
+                    PollOption winnerPollOption = pollOptionsList.get(pollOptionWinnerPosition);
+
+                    Poll pollVersionObj = new Poll();
+                    pollVersionObj.setEventId(clonePoll.getEventId());
+                    pollVersionObj.setId(clonePoll.getId());
+                    pollVersionObj.setVersion(clonePoll.getVersion());
+                    pollVersionObj.setWinnerId(winnerPollOption.getId());
+                    pollVersionObj.setStatus(ObjectStatus.CLOSED);
+
+                    map = new HashMap<>();
+                    map.put("poll", pollVersionObj);
+
+                    updatePollToServer();
+                }
+            }
+        });
+
+    }
+
+    private void updatePollToServer () {
+        serviceHandler.getPollHandler().updatePoll(new BaseFaroRequestCallback<Poll>() {
+            @Override
+            public void onFailure(Request request, IOException ex) {
+                Log.e(TAG, "failed to send Poll update request");
+            }
+
+            @Override
+            public void onResponse(final Poll receivedPoll, HttpError error) {
+                if (error == null ) {
+                    Runnable myRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.i(TAG, "Poll Update Response received Successfully");
+                            pollListHandler.removePollFromListAndMap(eventID, clonePoll, mContext);
+                            pollListHandler.addPollToListAndMap(eventID, receivedPoll, mContext);
+                            PollLandingPageIntent.putExtra("eventID", eventID);
+                            PollLandingPageIntent.putExtra("pollID", pollID);
+                            PollLandingPageIntent.putExtra("bundleType", isNotification);
+                            startActivity(PollLandingPageIntent);
+                            finish();
+                        }
+                    };
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(myRunnable);
+                }else {
+                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                }
+            }
+        }, eventID, pollID, map);
     }
 
     private void voterListPopUP(View v) {
@@ -248,7 +266,8 @@ public class PickPollWinnerPage extends Activity {
         super.onBackPressed();
         PollLandingPageIntent.putExtra("eventID", eventID);
         PollLandingPageIntent.putExtra("pollID", pollID);
+        PollLandingPageIntent.putExtra("bundleType", isNotification);
         startActivity(PollLandingPageIntent);
-    finish();
+        finish();
     }
 }

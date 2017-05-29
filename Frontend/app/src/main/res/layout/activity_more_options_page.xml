@@ -12,6 +12,12 @@
         android:layout_gravity="center_horizontal"
         android:id="@+id/logout"
         android:text="Logout"/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:id="@+id/getNewToken"
+        android:text="Get New Token"/>
     <TextView
         android:id="@+id/text"
         android:layout_width="match_parent"
@@ -19,5 +25,4 @@
         android:gravity="center_vertical|center_horizontal"
         android:text="@string/hello_world"
         android:textAppearance="?android:attr/textAppearanceMedium" />
-
 </LinearLayout>

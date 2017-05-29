@@ -74,6 +74,8 @@ public class EditAssignment extends android.app.Activity {
     private int editItemPosition = -1;
     private boolean addEditedItem = false;
 
+    private final Context mContext = this;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,9 +110,7 @@ public class EditAssignment extends android.app.Activity {
             final Spinner itemUnitSpinner = (Spinner) findViewById(R.id.itemUnitSpinner);
 
             inviteeSpinner.setTag("EditAssignment");
-            inviteeSpinner.setAdapter(eventFriendListHandler.acceptedFriendAdapter);
-
-            final Context mContext = this;
+            inviteeSpinner.setAdapter(eventFriendListHandler.getAcceptedFriendAdapter(eventID, mContext));
 
 
             for (Unit unit : Unit.values()){
@@ -289,13 +289,13 @@ public class EditAssignment extends android.app.Activity {
                                                 receivedItemList = stringListMap.get(eventID);
                                             }
                                             cloneAssignment.setItems(receivedItemList);
-                                            assignmentListHandler.removeAssignmentFromListAndMap(cloneAssignment.getId());
+                                            assignmentListHandler.removeAssignmentFromListAndMap(eventID, cloneAssignment.getId(), mContext);
                                             if (activityID != null){
                                                 originalActivity.setAssignment(cloneAssignment);
                                             }else{
                                                 originalEvent.setAssignment(cloneAssignment);
                                             }
-                                            assignmentListHandler.addAssignmentToListAndMap(cloneAssignment, activityID);
+                                            assignmentListHandler.addAssignmentToListAndMap(eventID, cloneAssignment, activityID, mContext);
                                             AssignmentLandingPageTabsIntent.putExtra("eventID", eventID);
                                             AssignmentLandingPageTabsIntent.putExtra("activityID", activityID);
                                             AssignmentLandingPageTabsIntent.putExtra("assignmentID", assignmentID);
@@ -318,8 +318,8 @@ public class EditAssignment extends android.app.Activity {
 
     public int getAssigneePositionInList(String assigneeID){
         int i = 0;
-        for (i = 0; i < eventFriendListHandler.acceptedFriendAdapter.list.size(); i++){
-            InviteeList.Invitees invitees = eventFriendListHandler.acceptedFriendAdapter.list.get(i);
+        for (i = 0; i < eventFriendListHandler.getAcceptedFriendAdapter(eventID, mContext).list.size(); i++){
+            InviteeList.Invitees invitees = eventFriendListHandler.getAcceptedFriendAdapter(eventID, mContext).list.get(i);
             if (invitees.getEmail().equals(assigneeID)){
                 break;
             }

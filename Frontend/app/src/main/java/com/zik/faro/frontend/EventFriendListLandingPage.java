@@ -1,5 +1,6 @@
 package com.zik.faro.frontend;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTabHost;
@@ -23,6 +24,8 @@ public class EventFriendListLandingPage extends FragmentActivity {
 
     FaroUserContext faroUserContext = FaroUserContext.getInstance();
     String myUserId = faroUserContext.getEmail();
+
+    private Context mContext = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,30 +64,23 @@ public class EventFriendListLandingPage extends FragmentActivity {
         mTabHost.setup(this, getSupportFragmentManager(), android.R.id.tabcontent);
 
         mTabHost.addTab(
-                mTabHost.newTabSpec("tab1").setIndicator("Going" + "(" + eventFriendListHandler.getAcceptedFriendCount() + ")"),
+                mTabHost.newTabSpec("tab1").setIndicator("Going" + "(" + eventFriendListHandler.getAcceptedFriendCount(eventID, mContext) + ")"),
                 EventFriendListFragment.class, getBundleForListType("Going"));
         mTabHost.addTab(
-                mTabHost.newTabSpec("tab2").setIndicator("Maybe" + "(" + eventFriendListHandler.getMayBeFriendCount() + ")"),
+                mTabHost.newTabSpec("tab2").setIndicator("Maybe" + "(" + eventFriendListHandler.getMayBeFriendCount(eventID, mContext) + ")"),
                 EventFriendListFragment.class, getBundleForListType("Maybe"));
         mTabHost.addTab(
-                mTabHost.newTabSpec("tab3").setIndicator("Invited" + "(" + eventFriendListHandler.getInvitedFriendCount() + ")"),
+                mTabHost.newTabSpec("tab3").setIndicator("Invited" + "(" + eventFriendListHandler.getInvitedFriendCount(eventID, mContext) + ")"),
                 EventFriendListFragment.class, getBundleForListType("Invited"));
         mTabHost.addTab(
-                mTabHost.newTabSpec("tab4").setIndicator("Not Going" + "(" + eventFriendListHandler.getDeclinedFriendCount() + ")"),
+                mTabHost.newTabSpec("tab4").setIndicator("Not Going" + "(" + eventFriendListHandler.getDeclinedFriendCount(eventID, mContext) + ")"),
                 EventFriendListFragment.class, getBundleForListType("Not Going"));
     }
 
     private Bundle getBundleForListType(String listType){
         Bundle bundle = new Bundle();
+        bundle.putString("eventID", eventID);
         bundle.putString("listType", listType);
         return bundle;
-    }
-
-    @Override
-    public void onBackPressed() {
-        EventLandingPageIntent.putExtra("eventID", eventID);
-        startActivity(EventLandingPageIntent);
-        finish();
-        super.onBackPressed();
     }
 }

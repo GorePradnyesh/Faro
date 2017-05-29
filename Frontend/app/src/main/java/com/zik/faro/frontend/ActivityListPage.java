@@ -4,23 +4,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 
-import com.squareup.okhttp.Request;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Event;
-import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
-import com.zik.faro.frontend.faroservice.HttpError;
-
-import java.io.IOException;
-import java.util.List;
 
 /*
  * This is the page where all the activities are listed in chronological order.
@@ -30,7 +25,6 @@ import java.util.List;
 */
 
 public class ActivityListPage extends android.app.Activity {
-    private static Event event;
     private  static EventListHandler eventListHandler = EventListHandler.getInstance();
 
     static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
@@ -38,34 +32,55 @@ public class ActivityListPage extends android.app.Activity {
     private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
     private String eventID;
-    Intent eventLandingPage = null;
+
+    private Intent activityLandingPage = null;
+    private Intent createNewActivityPage = null;
+
     private static String TAG = "ActivityListPage";
+    private Context mContext = this;
+
+    private LinearLayout linlaHeaderProgress = null;
+    private RelativeLayout activityListPageRelativeLayout = null;
+
+    private ListView activityList;
+    private ImageButton addActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_activity_list_page);
 
-        ListView activityList  = (ListView)findViewById(R.id.activityList);
-        activityList.setBackgroundColor(Color.BLACK);
-        activityList.setAdapter(activityListHandler.activityAdapter);
-
-        ImageButton addActivity = (ImageButton)findViewById(R.id.addNewActivityButton);
-        addActivity.setImageResource(R.drawable.plus);
-
-        final Intent activityLandingPage = new Intent(ActivityListPage.this, ActivityLandingPage.class);
-        final Intent createNewActivityPage = new Intent(ActivityListPage.this, CreateNewActivity.class);
-        eventLandingPage = new Intent(ActivityListPage.this, EventLandingPage.class);
-
-        final Context mContext = this;
-
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
+        mContext = this;
+
+        linlaHeaderProgress = (LinearLayout) findViewById(R.id.linlaHeaderProgress);
+
+        activityListPageRelativeLayout = (RelativeLayout) findViewById(R.id.activityListPageRelativeLayout);
+        activityListPageRelativeLayout.setVisibility(View.GONE);
+
         Bundle extras = getIntent().getExtras();
-        if(extras != null) {
-            eventID = extras.getString("eventID");
-            event = eventListHandler.getEventCloneFromMap(eventID);
-        }
+        if (extras == null) return; //TODO: How to handle this condition?
+
+        eventID = extras.getString("eventID");
+
+        setupPageDetails();
+    }
+
+    private void setupPageDetails(){
+
+        linlaHeaderProgress.setVisibility(View.GONE);
+        activityListPageRelativeLayout.setVisibility(View.VISIBLE);
+
+        activityList  = (ListView)findViewById(R.id.activityList);
+        activityList.setBackgroundColor(Color.BLACK);
+        activityList.setAdapter(activityListHandler.getActivityAdapter(eventID, mContext));
+
+        addActivity = (ImageButton)findViewById(R.id.addNewActivityButton);
+        addActivity.setImageResource(R.drawable.plus);
+
+        activityLandingPage = new Intent(ActivityListPage.this, ActivityLandingPage.class);
+        createNewActivityPage = new Intent(ActivityListPage.this, CreateNewActivity.class);
 
         //Listener to go to the Activity Landing Page for the activity selected from the list
         activityList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -87,7 +102,7 @@ public class ActivityListPage extends android.app.Activity {
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                if(activityListHandler.getActivityListSize() > ActivityListHandler.MAX_ACTIVITIES_PAGE_SIZE) {
+                if(activityListHandler.getActivityListSize(eventID, mContext) > ActivityListHandler.MAX_ACTIVITIES_PAGE_SIZE) {
                     final int lastItem = firstVisibleItem + visibleItemCount;
                     if (lastItem == totalItemCount) {
                         /*TODO Make call to server to get activities after the last activity. Send the date

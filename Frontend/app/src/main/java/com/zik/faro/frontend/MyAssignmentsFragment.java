@@ -82,8 +82,9 @@ public class MyAssignmentsFragment extends Fragment{
 
 
         //Walk all items in all assignments and add my cloned Items to the myItemsAdapter
-        for (int i = 0; i < assignmentListHandler.assignmentAdapter.list.size(); i++){
-            AssignmentParentInfo assignmentParentInfo = assignmentListHandler.assignmentAdapter.list.get(i);
+        AssignmentAdapter assignmentAdapter = assignmentListHandler.getAssignmentAdapter(eventID, mContext);
+        for (int i = 0; i < assignmentAdapter.list.size(); i++){
+            AssignmentParentInfo assignmentParentInfo = assignmentAdapter.list.get(i);
             Assignment assignment = assignmentParentInfo.getAssignment();
 
             Assignment cloneAssignment = assignmentListHandler.getAssignmentCloneFromMap(assignment.getId());
