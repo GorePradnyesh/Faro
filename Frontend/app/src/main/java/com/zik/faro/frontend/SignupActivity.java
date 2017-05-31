@@ -9,12 +9,14 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -29,6 +31,7 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
 import com.squareup.okhttp.Request;
+import com.squareup.okhttp.internal.http.HttpConnection;
 import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
@@ -37,6 +40,7 @@ import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 import com.zik.faro.frontend.faroservice.auth.TokenCache;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 
 /**
  * Created by granganathan on 1/24/16.
@@ -49,6 +53,9 @@ public class SignupActivity extends Activity {
     private EditText emailTextBox;
     private EditText passwordTextBox;
     private EditText confirmPasswordBox;
+
+    private LinearLayout signupActivityProgressBarLayout;
+    private RelativeLayout signupActivityDetailsLayout;
 
     private Intent appLandingPageIntent;
 
@@ -71,6 +78,13 @@ public class SignupActivity extends Activity {
         passwordTextBox = (EditText)findViewById(R.id.signupPassword);
         confirmPasswordBox = (EditText)findViewById(R.id.confirmPassword);
         final EditText serverIPAddressEditText = (EditText)findViewById(R.id.ipAddress);
+
+        // Get the progress bar and login details layouts
+        signupActivityProgressBarLayout = (LinearLayout) findViewById(R.id.signupActivityProgressBarLayout);
+        signupActivityDetailsLayout = (RelativeLayout) findViewById(R.id.signupActivityDetailsLayout);
+
+        // Set visibility to gone on the progrss bar layout
+        signupActivityProgressBarLayout.setVisibility(View.GONE);
 
         appLandingPageIntent = new Intent(SignupActivity.this, AppLandingPage.class);
 
@@ -99,6 +113,14 @@ public class SignupActivity extends Activity {
         // Setup the facebook signup/connect with button
         LoginButton fbLoginButton = (LoginButton) findViewById(R.id.fb_signup_button);
         fbLoginButton.setReadPermissions("email", "public_profile");
+        fbLoginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i(TAG, "fb login button pressed. Bring up the progress bar");
+                signupActivityProgressBarLayout.setVisibility(View.VISIBLE);
+                signupActivityDetailsLayout.setVisibility(View.GONE);
+            }
+        });
         fbLoginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
@@ -210,7 +232,7 @@ public class SignupActivity extends Activity {
 
         if (confirmPasswordBox.getVisibility() == View.VISIBLE && Strings.isNullOrEmpty(comfirmPasswd)) {
             isValid = false;
-            confirmPasswordBox.setError(null);
+            confirmPasswordBox.setError("Enter Password again");
         }
 
         if (!Strings.isNullOrEmpty(password) &&
@@ -230,7 +252,7 @@ public class SignupActivity extends Activity {
         String password = passwordTextBox.getText().toString();
         String confirmPassword = confirmPasswordBox.getText().toString();
 
-        if(validate(name, email, password, confirmPassword)) {
+        if (validate(name, email, password, confirmPassword)) {
             FaroUser newFaroUser = new FaroUser(email, null, null,
             null, null, null, null);
             newFaroUser.setFirstName(name);
@@ -306,8 +328,11 @@ public class SignupActivity extends Activity {
                 finish();
             } else {
                 Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
-                if (error.getCode() == 409) {
+                if (error.getCode() == HttpURLConnection.HTTP_CONFLICT) {
                     Log.i(TAG, "User " + firebaseUser.getEmail() + " already exists");
+
+                    // Log out of Facebook
+                    LoginManager.getInstance().logOut();
 
                     // Prompt to sign in using username back on the LoginActivity Page
                     Intent loginIntent = new Intent(SignupActivity.this, LoginActivity.class);

@@ -48,7 +48,7 @@ public class AppLandingPage extends FragmentActivity{
             eventListHandler.notAcceptedEventAdapter = new EventAdapter(this, R.layout.event_row_style);
         }
 
-        if (userFriendListHandler.userFriendAdapter == null){
+        if (userFriendListHandler.userFriendAdapter == null) {
             userFriendListHandler.userFriendAdapter = new UserFriendAdapter(this, R.layout.friend_row_style);
         }
 
@@ -60,18 +60,22 @@ public class AppLandingPage extends FragmentActivity{
             assignmentListHandler.assignmentAdapter = new AssignmentAdapter(this, R.layout.event_row_style);
         }
 
-        if (eventFriendListHandler.acceptedFriendAdapter == null){
+        if (eventFriendListHandler.acceptedFriendAdapter == null) {
             eventFriendListHandler.acceptedFriendAdapter = new EventFriendAdapter(this, R.layout.friend_row_style);
         }
-        if (eventFriendListHandler.invitedFriendAdapter == null){
+
+        if (eventFriendListHandler.invitedFriendAdapter == null) {
             eventFriendListHandler.invitedFriendAdapter = new EventFriendAdapter(this, R.layout.friend_row_style);
         }
-        if (eventFriendListHandler.mayBeFriendAdapter == null){
+
+        if (eventFriendListHandler.mayBeFriendAdapter == null) {
             eventFriendListHandler.mayBeFriendAdapter = new EventFriendAdapter(this, R.layout.friend_row_style);
         }
-        if (eventFriendListHandler.declinedFriendAdapter == null){
+
+        if (eventFriendListHandler.declinedFriendAdapter == null) {
             eventFriendListHandler.declinedFriendAdapter = new EventFriendAdapter(this, R.layout.friend_row_style);
         }
+
         if (pollListHandler.openPollsAdapter == null) {
             pollListHandler.openPollsAdapter = new PollAdapter(this, R.layout.poll_list_page_row_style);
         }
@@ -108,8 +112,6 @@ public class AppLandingPage extends FragmentActivity{
                 startActivity(createNewEventIntent);
             }
         });
-
-
     }
 
     private View getTabIndicator(Context context, int icon) {

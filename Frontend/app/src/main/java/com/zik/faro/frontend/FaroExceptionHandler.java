@@ -7,8 +7,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Build;
 
-public class FaroExceptionHandler implements
-        java.lang.Thread.UncaughtExceptionHandler {
+public class FaroExceptionHandler implements Thread.UncaughtExceptionHandler {
     private final Activity myContext;
     private final String LINE_SEPARATOR = "\n";
 
@@ -16,6 +15,7 @@ public class FaroExceptionHandler implements
         myContext = context;
     }
 
+    @Override
     public void uncaughtException(Thread thread, Throwable exception) {
         StringWriter stackTrace = new StringWriter();
         exception.printStackTrace(new PrintWriter(stackTrace));
@@ -41,7 +41,7 @@ public class FaroExceptionHandler implements
         errorReport.append(LINE_SEPARATOR);
         errorReport.append("\n************ FIRMWARE ************\n");
         errorReport.append("SDK: ");
-        errorReport.append(Build.VERSION.SDK);
+        errorReport.append(Build.VERSION.SDK_INT);
         errorReport.append(LINE_SEPARATOR);
         errorReport.append("Release: ");
         errorReport.append(Build.VERSION.RELEASE);

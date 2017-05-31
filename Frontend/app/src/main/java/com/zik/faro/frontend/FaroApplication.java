@@ -1,5 +1,6 @@
 package com.zik.faro.frontend;
 
+import android.app.Activity;
 import android.app.Application;
 import android.util.Log;
 
@@ -29,7 +30,7 @@ public class FaroApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        // Initialize the SDK before executing any other operations,
+        // Initialize the Facebook SDK before executing any other operations,
         FacebookSdk.sdkInitialize(getApplicationContext());
         AppEventsLogger.activateApp(this);
 
