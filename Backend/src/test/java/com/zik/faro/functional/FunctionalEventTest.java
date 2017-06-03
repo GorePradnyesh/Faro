@@ -67,8 +67,8 @@ public class FunctionalEventTest {
     	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);
         Event ev = response.getEntity(Event.class);
         ClientResponse response1 = TestHelper.doGET(endpoint.toString(), "v1/event/"+ ev.getId()+"/details", new MultivaluedMapImpl(), token);
-        Event eventDetails = response1.getEntity(Event.class);
-        assertEntity(eventCreateData, eventDetails);
+        EventInviteStatusWrapper eventDetails = response1.getEntity(EventInviteStatusWrapper.class);
+        assertEntity(eventCreateData, eventDetails.getEvent());
     }
     
     // 3. getEventInvitees
@@ -82,8 +82,8 @@ public class FunctionalEventTest {
         Event ev = createEventResponse.getEntity(Event.class);
         // Verify indeed created by doing GET
         ClientResponse eventDetailsResponse = TestHelper.doGET(endpoint.toString(), "v1/event/"+ ev.getId()+"/details", new MultivaluedMapImpl(), token);
-        Event eventDetails = eventDetailsResponse.getEntity(Event.class);
-        assertEntity(eventCreateData, eventDetails);
+        EventInviteStatusWrapper eventDetails = eventDetailsResponse.getEntity(EventInviteStatusWrapper.class);
+        assertEntity(eventCreateData, eventDetails.getEvent());
         String[] friendIds = new String[4];
         for(int i = 0 ; i < friendIds.length ; i++){
         	friendIds[i] = UUID.randomUUID().toString() + "@gmail.com";
@@ -212,12 +212,12 @@ public class FunctionalEventTest {
     	
     	// Read
     	ClientResponse response1 = TestHelper.doGET(endpoint.toString(), "v1/event/"+ ev.getId()+"/details", new MultivaluedMapImpl(), token);
-        Event eventDetails = response1.getEntity(Event.class);
-        assertEntity(eventCreateData, eventDetails);
+        EventInviteStatusWrapper eventDetails = response1.getEntity(EventInviteStatusWrapper.class);
+        assertEntity(eventCreateData, eventDetails.getEvent());
         
         // Update
         Event updateObj = new Event();
-        updateObj.setId(eventDetails.getId());
+        updateObj.setId(eventDetails.getEvent().getId());
         
         updateObj.setEndDate(Calendar.getInstance());
         updateObj.setEventDescription("Updated description");
@@ -226,7 +226,7 @@ public class FunctionalEventTest {
         updateObj.setStartDate(Calendar.getInstance());
         updateObj.setStatus(ObjectStatus.CLOSED);
         
-        ClientResponse updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventDetails.getId()+"/updateEvent", token, updateObj);
+        ClientResponse updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventDetails.getEvent().getId()+"/updateEvent", token, updateObj);
         ev = updateResponse.getEntity(Event.class);
         Assert.assertEquals(updateObj.getEndDate(), ev.getEndDate());
         Assert.assertEquals(updateObj.getStartDate(), ev.getStartDate());
@@ -235,17 +235,18 @@ public class FunctionalEventTest {
         Assert.assertEquals(updateObj.getStatus(), ev.getStatus());
         Assert.assertEquals(updateObj.getLocation().getLocationName(), ev.getLocation().getLocationName());
         Assert.assertEquals(updateObj.getLocation().getLocationAddress(), ev.getLocation().getLocationAddress());
-        Assert.assertEquals(updateObj.getLocation().getPosition(), ev.getLocation().getPosition());
+        Assert.assertEquals(updateObj.getLocation().getPosition().getLatitude(), ev.getLocation().getPosition().getLatitude(),0);
+        Assert.assertEquals(updateObj.getLocation().getPosition().getLongitude(), ev.getLocation().getPosition().getLongitude(),0);
         assertVersion(updateObj, ev);
         
         // Update 2
         Event updateObj2 = new Event();
-        updateObj2.setId(eventDetails.getId());
+        updateObj2.setId(eventDetails.getEvent().getId());
         
         updateObj2.setControlFlag(true);
         updateObj2.setVersion(ev.getVersion());
         
-        updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventDetails.getId()+"/updateEvent", token, updateObj2);
+        updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventDetails.getEvent().getId()+"/updateEvent", token, updateObj2);
         ev = updateResponse.getEntity(Event.class);
         Assert.assertEquals(updateObj.getEndDate(), ev.getEndDate());
         Assert.assertEquals(updateObj.getStartDate(), ev.getStartDate());
@@ -254,7 +255,8 @@ public class FunctionalEventTest {
         Assert.assertEquals(updateObj.getStatus(), ev.getStatus());
         Assert.assertEquals(updateObj.getLocation().getLocationName(), ev.getLocation().getLocationName());
         Assert.assertEquals(updateObj.getLocation().getLocationAddress(), ev.getLocation().getLocationAddress());
-        Assert.assertEquals(updateObj.getLocation().getPosition(), ev.getLocation().getPosition());
+        Assert.assertEquals(ev.getLocation().getPosition().getLatitude(), updateObj.getLocation().getPosition().getLatitude(),0);
+        Assert.assertEquals(ev.getLocation().getPosition().getLongitude(), updateObj.getLocation().getPosition().getLongitude(),0);
         assertVersion(updateObj2, ev);
         Assert.assertTrue(ev.getControlFlag());
     }
@@ -277,7 +279,10 @@ public class FunctionalEventTest {
         Assert.assertEquals(expected.getLocation().getLocationName(), actual.getLocation().getLocationName());
         Assert.assertEquals(expected.getLocation().getLocationName(), actual.getLocation().getLocationName());
         Assert.assertEquals(expected.getLocation().getLocationAddress(), actual.getLocation().getLocationAddress());
-        Assert.assertEquals(expected.getLocation().getPosition(), actual.getLocation().getPosition());
+        if(expected.getLocation() != null && expected.getLocation().getPosition() != null){
+        	Assert.assertEquals(expected.getLocation().getPosition().getLatitude(), actual.getLocation().getPosition().getLatitude(),0);
+            Assert.assertEquals(expected.getLocation().getPosition().getLongitude(), actual.getLocation().getPosition().getLongitude(),0);
+        }
         Assert.assertNotNull(actual.getId());
         Assert.assertTrue(!actual.getControlFlag());
         Assert.assertNotNull(actual.getAssignment());

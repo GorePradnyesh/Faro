@@ -9,6 +9,7 @@ import javax.ws.rs.core.SecurityContext;
 
 import com.google.appengine.repackaged.org.apache.http.protocol.HTTP;
 import com.zik.faro.data.GeoPosition;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -23,6 +24,7 @@ import com.zik.faro.TestHelper;
 import com.zik.faro.api.event.EventCreateHandler;
 import com.zik.faro.api.event.EventHandler;
 import com.zik.faro.data.Event;
+import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.Location;
 import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.persistence.datastore.data.EventUserDo;
@@ -80,9 +82,9 @@ public class EventApiTest {
 		EventHandler eventHandler = new EventHandler();
 		Whitebox.setInternalState(eventHandler, securityContextMock);
 
-		event = eventHandler.getEventDetails(eventId).getEntity();
-		Assert.assertEquals(eventId, event.getId());
-		Assert.assertEquals(eventName, event.getEventName());
+		EventInviteStatusWrapper retrievedEvent = eventHandler.getEventDetails(eventId).getEntity();
+		Assert.assertEquals(eventId, retrievedEvent.getEvent().getId());
+		Assert.assertEquals(eventName, retrievedEvent.getEvent().getEventName());
 	}
 
 
@@ -106,9 +108,9 @@ public class EventApiTest {
 		EventHandler eventHandler = new EventHandler();
 		Whitebox.setInternalState(eventHandler, securityContextMock);
 
-		event = eventHandler.getEventDetails(eventId).getEntity();
-		Assert.assertEquals(eventId, event.getId());
-		Assert.assertEquals(eventName, event.getEventName());
+		EventInviteStatusWrapper retrievedEvent = eventHandler.getEventDetails(eventId).getEntity();
+		Assert.assertEquals(eventId, retrievedEvent.getEvent().getId());
+		Assert.assertEquals(eventName, retrievedEvent.getEvent().getEventName());
 
 		eventHandler.deleteEvent(eventId);
 		boolean eventDeleted = false;

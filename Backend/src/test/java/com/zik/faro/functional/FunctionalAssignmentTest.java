@@ -21,6 +21,7 @@ import com.zik.faro.TestHelper;
 import com.zik.faro.data.ActionStatus;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Event;
+import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.IllegalDataOperation;
 import com.zik.faro.data.Item;
 import com.zik.faro.data.Location;
@@ -54,7 +55,7 @@ public class FunctionalAssignmentTest {
     
     public void updateEventAndActivityAssignmentTodo() throws IllegalDataOperation, IOException{
     	ClientResponse response1 = TestHelper.doGET(endpoint.toString(), "v1/event/"+ eventId+"/details", new MultivaluedMapImpl(), token);
-        Event eventDetails = response1.getEntity(Event.class);
+        EventInviteStatusWrapper eventDetails = response1.getEntity(EventInviteStatusWrapper.class);
         
     	// Add event level assignment
         Map<String,List<Item>> map = new HashMap<String,List<Item>>();
@@ -68,8 +69,8 @@ public class FunctionalAssignmentTest {
     	
     	// Verify Event Level
     	response1 = TestHelper.doGET(endpoint.toString(), "v1/event/"+ eventId+"/details", new MultivaluedMapImpl(), token);
-        eventDetails = response1.getEntity(Event.class);
-        assertTodo(map.get(eventId), eventDetails.getAssignment().getItems());
+        eventDetails = response1.getEntity(EventInviteStatusWrapper.class);
+        assertTodo(map.get(eventId), eventDetails.getEvent().getAssignment().getItems());
     	
         // update above added item-todo for event level
         items.get(0).setCount(5);
