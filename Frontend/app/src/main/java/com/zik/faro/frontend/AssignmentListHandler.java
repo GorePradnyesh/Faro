@@ -97,16 +97,19 @@ public class AssignmentListHandler {
         assignmentMap.remove(assignmentID);
     }
 
-    public void removeNotificationAssignemntsFromListAndMap () {
-
-    }
-
     public String getActivityIDForAssignmentID(String assignmentID){
         AssignmentParentInfo assignmentParentInfo = assignmentMap.get(assignmentID);
         return assignmentParentInfo.getActivityID();
     }
 
-    public void clearAssignmentListAndMap(String eventID, Context context){
+    public void clearEverything() {
+        if (assignmentAdapterMap != null)
+            assignmentAdapterMap.clear();
+        if (assignmentMap != null)
+            assignmentMap.clear();
+    }
+
+    /*public void clearAssignmentListAndMap(String eventID, Context context){
         AssignmentAdapter assignmentAdapter = getAssignmentAdapter(eventID, context);
         if (assignmentAdapter != null){
             assignmentAdapter.list.clear();
@@ -114,5 +117,5 @@ public class AssignmentListHandler {
         if (assignmentMap != null){
             assignmentMap.clear();
         }
-    }
+    }*/
 }

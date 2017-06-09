@@ -42,7 +42,6 @@ public class PickPollWinnerPage extends Activity {
 
     private String eventID = null;
     private String pollID = null;
-    private String isNotification = null;
 
     private Poll clonePoll;
 
@@ -85,10 +84,6 @@ public class PickPollWinnerPage extends Activity {
         extras = getIntent().getExtras();
         if (extras == null) return; //TODO How to handle this case?
 
-        setupPageDetails();
-    }
-
-    private void setupPageDetails () {
         pollDesc = (TextView)findViewById(R.id.pollDescription);
         selectWinner = (Button) findViewById(R.id.selectWinner);
 
@@ -101,7 +96,6 @@ public class PickPollWinnerPage extends Activity {
 
         eventID = extras.getString("eventID");
         pollID = extras.getString("pollID");
-        isNotification = extras.getString("bundleType");
 
         clonePoll = pollListHandler.getPollCloneFromMap(pollID);
 
@@ -210,7 +204,6 @@ public class PickPollWinnerPage extends Activity {
                             pollListHandler.addPollToListAndMap(eventID, receivedPoll, mContext);
                             PollLandingPageIntent.putExtra("eventID", eventID);
                             PollLandingPageIntent.putExtra("pollID", pollID);
-                            PollLandingPageIntent.putExtra("bundleType", isNotification);
                             startActivity(PollLandingPageIntent);
                             finish();
                         }
@@ -266,7 +259,6 @@ public class PickPollWinnerPage extends Activity {
         super.onBackPressed();
         PollLandingPageIntent.putExtra("eventID", eventID);
         PollLandingPageIntent.putExtra("pollID", pollID);
-        PollLandingPageIntent.putExtra("bundleType", isNotification);
         startActivity(PollLandingPageIntent);
         finish();
     }

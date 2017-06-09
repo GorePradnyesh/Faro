@@ -38,7 +38,11 @@ public class EventFriendAdapter extends ArrayAdapter {
         Collections.sort(list, new Comparator<InviteeList.Invitees>() {
             @Override
             public int compare(InviteeList.Invitees lhs, InviteeList.Invitees rhs) {
-                return lhs.getFirstName().compareTo(rhs.getFirstName());
+                if (lhs.getFirstName() != null && rhs.getFirstName() != null) {
+                    return lhs.getFirstName().compareTo(rhs.getFirstName());
+                } else {
+                    return lhs.getEmail().compareTo(lhs.getEmail());
+                }
             }
         });
     }
@@ -83,7 +87,7 @@ public class EventFriendAdapter extends ArrayAdapter {
                     if (invitees.getFirstName() != null) {
                         holder.friendName.setText(invitees.getFirstName());
                     }else{
-                        holder.friendName.setText("FNU");
+                        holder.friendName.setText(invitees.getEmail());
                     }
                     holder.friendName.setTextColor(Color.BLACK);
                     holder.userPicture.setVisibility(View.GONE);
@@ -105,7 +109,7 @@ public class EventFriendAdapter extends ArrayAdapter {
                     if (invitees.getFirstName() != null) {
                         holder.friendName.setText(invitees.getFirstName());
                     }else{
-                        holder.friendName.setText("FNU");
+                        holder.friendName.setText(invitees.getEmail());
                     }
                 }
                 holder.userPicture.setImageResource(R.drawable.user_pic);
@@ -132,7 +136,7 @@ public class EventFriendAdapter extends ArrayAdapter {
             if (invitees.getFirstName() != null) {
                 holder.friendName.setText(invitees.getFirstName());
             }else{
-                holder.friendName.setText("FNU");
+                holder.friendName.setText(invitees.getEmail());
             }
         }
         holder.friendName.setTextColor(Color.BLACK);

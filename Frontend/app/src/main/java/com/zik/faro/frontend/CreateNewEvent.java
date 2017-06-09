@@ -274,7 +274,7 @@ public class CreateNewEvent extends Activity {
                     locationNameStr = place.getName().toString();
                 }
 
-                if (!place.getAddress().equals("")){
+                if (place.getAddress() != null && !place.getAddress().equals("")){
                     locationAddressStr = place.getAddress().toString();
                 }
 

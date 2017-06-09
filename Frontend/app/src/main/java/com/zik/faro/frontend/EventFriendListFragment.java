@@ -56,6 +56,8 @@ public class EventFriendListFragment extends Fragment {
                 final Intent UserProfilePageIntent = new Intent(getActivity(), UserProfilePage.class);
                 InviteeList.Invitees invitees = (InviteeList.Invitees)parent.getItemAtPosition(position);
                 UserProfilePageIntent.putExtra("userEmailID", invitees.getEmail());
+                UserProfilePageIntent.putExtra("eventID", eventID);
+                UserProfilePageIntent.putExtra("inviteStatus", guestListType);
                 startActivity(UserProfilePageIntent);
             }
         });

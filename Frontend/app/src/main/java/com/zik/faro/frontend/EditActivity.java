@@ -66,6 +66,8 @@ public class EditActivity extends android.app.Activity {
 
     final Context mContext = this;
 
+    private PopupWindow popupWindow;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,6 +100,7 @@ public class EditActivity extends android.app.Activity {
         if(extras != null) {
             eventID = extras.getString("eventID");
             activityID = extras.getString("activityID");
+
             event = eventListHandler.getEventCloneFromMap(eventID);
             cloneActivity = activityListHandler.getActivityCloneFromMap(activityID);
 
@@ -138,32 +141,8 @@ public class EditActivity extends android.app.Activity {
                 cloneActivity.setStartDate(startDateCalendar);
                 cloneActivity.setEndDate(endDateCalendar);
 
-                serviceHandler.getActivityHandler().updateActivity(new BaseFaroRequestCallback<String>() {
-                    @Override
-                    public void onFailure(Request request, IOException ex) {
-                        Log.e(TAG, "failed to update cloneactivity");
-                    }
+                updateActivityToServer();
 
-                    @Override
-                    public void onResponse(String s, HttpError error) {
-                        if (error == null ) {
-                            Runnable myRunnable = new Runnable() {
-                                @Override
-                                public void run() {
-                                    activityListHandler.addActivityToListAndMap(eventID, cloneActivity, mContext);
-                                    ActivityLandingPage.putExtra("eventID", eventID);
-                                    ActivityLandingPage.putExtra("activityID", cloneActivity.getId());
-                                    startActivity(ActivityLandingPage);
-                                    finish();
-                                }
-                            };
-                            Handler mainHandler = new Handler(mContext.getMainLooper());
-                            mainHandler.post(myRunnable);
-                        }else {
-                            Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
-                        }
-                    }
-                }, eventID, activityID, cloneActivity);
             }
         });
 
@@ -204,10 +183,11 @@ public class EditActivity extends android.app.Activity {
         });
     }
 
+
     private void confirmActivityDeletePopUP(View v) {
         LayoutInflater layoutInflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         ViewGroup container = (ViewGroup) layoutInflater.inflate(R.layout.delete_popup, null);
-        final PopupWindow popupWindow = new PopupWindow(container, RelativeLayout.LayoutParams.WRAP_CONTENT,
+        popupWindow = new PopupWindow(container, RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT, true);
 
         TextView message = (TextView)container.findViewById(R.id.questionTextView);
@@ -228,32 +208,7 @@ public class EditActivity extends android.app.Activity {
         delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                serviceHandler.getActivityHandler().deleteActivity(new BaseFaroRequestCallback<String>() {
-                    @Override
-                    public void onFailure(Request request, IOException ex) {
-                        Log.e(TAG, "failed to delete cloneactivity");
-                    }
-
-                    @Override
-                    public void onResponse(String s, HttpError error) {
-                        if (error == null ) {
-                            Runnable myRunnable = new Runnable() {
-                                @Override
-                                public void run() {
-                                    activityListHandler.removeActivityFromListAndMap(eventID, activityID, mContext);
-                                    popupWindow.dismiss();
-                                    Toast.makeText(EditActivity.this, cloneActivity.getName() + "is Deleted", LENGTH_LONG).show();
-                                    finish();
-                                }
-                            };
-                            Handler mainHandler = new Handler(mContext.getMainLooper());
-                            mainHandler.post(myRunnable);
-                        }else {
-                            Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
-                        }
-                    }
-                }, eventID, activityID);
+                deleteActivityFromServer();
             }
         });
 
@@ -461,6 +416,63 @@ public class EditActivity extends android.app.Activity {
             }
         }
     };
+
+    private void updateActivityToServer() {
+        serviceHandler.getActivityHandler().updateActivity(new BaseFaroRequestCallback<String>() {
+            @Override
+            public void onFailure(Request request, IOException ex) {
+                Log.e(TAG, "failed to update cloneactivity");
+            }
+
+            @Override
+            public void onResponse(String s, HttpError error) {
+                if (error == null ) {
+                    Runnable myRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            activityListHandler.addActivityToListAndMap(eventID, cloneActivity, mContext);
+                            ActivityLandingPage.putExtra("eventID", eventID);
+                            ActivityLandingPage.putExtra("activityID", cloneActivity.getId());
+                            startActivity(ActivityLandingPage);
+                            finish();
+                        }
+                    };
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(myRunnable);
+                }else {
+                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                }
+            }
+        }, eventID, activityID, cloneActivity);
+    }
+
+    private void deleteActivityFromServer() {
+        serviceHandler.getActivityHandler().deleteActivity(new BaseFaroRequestCallback<String>() {
+            @Override
+            public void onFailure(Request request, IOException ex) {
+                Log.e(TAG, "failed to delete cloneactivity");
+            }
+
+            @Override
+            public void onResponse(String s, HttpError error) {
+                if (error == null ) {
+                    Runnable myRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            activityListHandler.removeActivityFromListAndMap(eventID, activityID, mContext);
+                            popupWindow.dismiss();
+                            Toast.makeText(EditActivity.this, cloneActivity.getName() + "is Deleted", LENGTH_LONG).show();
+                            finish();
+                        }
+                    };
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(myRunnable);
+                }else {
+                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                }
+            }
+        }, eventID, activityID);
+    }
 
 
     @Override

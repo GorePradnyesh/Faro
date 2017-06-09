@@ -139,6 +139,7 @@ public class EventLandingPage extends FragmentActivity
 
     private RelativeLayout EventLandingPageRelativeLayout = null;
     private LinearLayout photosStuffLinearLayout = null;
+    private String isNotification = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -249,9 +250,6 @@ public class EventLandingPage extends FragmentActivity
     @Override
     public void onBackPressed() {
         eventListHandler.deleteEventFromMapIfNotInList(cloneEvent);
-        activityListHandler.clearActivityListAndMap(eventID, mContext);
-        eventFriendListHandler.clearFriendListAndMap(eventID, mContext);
-        assignmentListHandler.clearAssignmentListAndMap(eventID, mContext);
         finish();
         super.onBackPressed();
     }
@@ -341,12 +339,12 @@ public class EventLandingPage extends FragmentActivity
 
     @Override
     public void checkAndHandleNotification() {
-        String bundleType = extras.getString("bundleType");
+        isNotification = extras.getString("bundleType");
         eventID = extras.getString("eventID");
 
         Log.d(TAG, "******eventID is " + eventID);
 
-        if (bundleType == null){
+        if (isNotification == null){
             setupPageDetails();
             return;
         }

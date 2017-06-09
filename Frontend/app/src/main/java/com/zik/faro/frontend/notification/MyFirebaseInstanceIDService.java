@@ -1,11 +1,14 @@
 package com.zik.faro.frontend.notification;
 
+import android.content.Intent;
+import android.os.Handler;
 import android.util.Log;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
 
 public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
     private static final String TAG = "MyFirebaseIIDService";
+    public static final String  TOKEN_BROADCAST = "myFCMTokenBroadcast";
 
     /**
      * Called if InstanceID token is updated. This may occur if the security of
@@ -19,23 +22,20 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
         Log.d(TAG, "Refreshed token: " + refreshedToken);
 
-        // If you want to send messages to this application instance or
-        // manage this apps subscriptions on the server side, send the
-        // Instance ID token to your app server.
-        sendRegistrationToServer(refreshedToken);
+        /* Don't send the token to server from here. Since the token could be received here even
+         * before the user logs into the app. What can be done here is to setup a broadcast message
+         * to AppLanding Page to handle this.
+         */
+        /*Runnable myRunnable = new Runnable() {
+            @Override
+            public void run() {
+                getApplicationContext().sendBroadcast(new Intent(TOKEN_BROADCAST));
+            }
+        };
+
+        Handler mainHandler = new Handler(getApplicationContext().getMainLooper());
+        mainHandler.postDelayed(myRunnable, 30000);*/
+
     }
     // [END refresh_token]
-
-    /**
-     * Persist token to third-party servers.
-     *
-     * Modify this method to associate the user's FCM InstanceID token with any server-side account
-     * maintained by your application.
-     *
-     * @param token The new token.
-     */
-    private void sendRegistrationToServer(String token) {
-        // TODO: Implement this method to send token to your app server.
-    }
-
 };

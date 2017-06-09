@@ -4,50 +4,68 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.zik.faro.frontend.AssignmentLandingFragment">
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:id="@+id/assignmentDescription"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
-    <ImageButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/editButton"
-        android:clickable="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentTop="true"
-        android:paddingLeft="0dp"
-        android:paddingTop="0dp"
-        android:paddingRight="0dp"
-        android:paddingBottom="0dp"/>
-    <ListView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/itemList"
-        android:layout_centerHorizontal="true"
-        android:layout_above="@+id/statusButtons"
-        android:layout_below="@+id/editButton"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"/>
+
     <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:id="@+id/statusButtons"
-        android:layout_centerInParent="true">
-        <Button
-            android:layout_width="0px"
+        android:id="@+id/linlaHeaderProgress"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center">
+        <ProgressBar
+            android:id="@+id/pbHeaderProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"></ProgressBar>
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/assignmentLandingFragmentRelativeLayout">
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/updateAssignment"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:id="@+id/assignmentDescription"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true" />
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/editButton"
             android:clickable="true"
-            android:layout_weight="1"
-            android:text="UPDATE"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
             android:paddingLeft="0dp"
             android:paddingTop="0dp"
             android:paddingRight="0dp"
             android:paddingBottom="0dp"/>
-    </LinearLayout>
+        <ListView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/itemList"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@+id/statusButtons"
+            android:layout_below="@+id/editButton"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"/>
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:id="@+id/statusButtons"
+            android:layout_centerInParent="true">
+            <Button
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:id="@+id/updateAssignment"
+                android:clickable="true"
+                android:layout_weight="1"
+                android:text="UPDATE"
+                android:paddingLeft="0dp"
+                android:paddingTop="0dp"
+                android:paddingRight="0dp"
+                android:paddingBottom="0dp"/>
+        </LinearLayout>
+    </RelativeLayout>
+
 
 </RelativeLayout>

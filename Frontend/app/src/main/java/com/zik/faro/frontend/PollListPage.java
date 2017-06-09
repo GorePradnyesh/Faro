@@ -10,7 +10,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TabHost;
 import android.widget.TextView;
 
@@ -40,6 +42,8 @@ public class PollListPage extends Activity {
     private ImageButton createNewPoll = null;
     private String TAG = "PollListPage";
     private Context mContext = this;
+    private RelativeLayout pollListPageRelativeLayout = null;
+    private LinearLayout linlaHeaderProgress = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,13 +59,19 @@ public class PollListPage extends Activity {
         extras = getIntent().getExtras();
         if(extras == null) return; //TODO How to handle this case?
 
-        setupPageDetails();
+        linlaHeaderProgress = (LinearLayout)findViewById(R.id.linlaHeaderProgress);
+        pollListPageRelativeLayout = (RelativeLayout) findViewById(R.id.pollListPageRelativeLayout);
+        pollListPageRelativeLayout.setVisibility(View.GONE);
+
+        eventID = extras.getString("eventID");
 
         getPollsFromServer();
     }
 
-    private void setupPageDetails () {
-        eventID = extras.getString("eventID");
+    private void setupPageDetails() {
+
+        linlaHeaderProgress.setVisibility(View.GONE);
+        pollListPageRelativeLayout.setVisibility(View.VISIBLE);
 
         Poll = (TextView)findViewById(R.id.polls);
         //Poll.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
@@ -135,6 +145,7 @@ public class PollListPage extends Activity {
                         public void run() {
                             Log.i(TAG, "Successfully received polls from the server!!");
                             pollListHandler.addDownloadedPollsToListAndMap(eventID, polls, mContext);
+                            setupPageDetails();
                         }
                     };
                     Handler mainHandler = new Handler(mContext.getMainLooper());
@@ -155,7 +166,6 @@ public class PollListPage extends Activity {
 
     @Override
     public void onBackPressed() {
-        pollListHandler.clearPollListsAndMap(eventID, mContext);
         finish();
         super.onBackPressed();
     }

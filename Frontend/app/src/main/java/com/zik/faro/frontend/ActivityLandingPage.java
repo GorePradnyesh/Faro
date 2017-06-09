@@ -63,13 +63,12 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
         EditActivityPage = new Intent(ActivityLandingPage.this, EditActivity.class);
         AssignmentLandingPageIntent = new Intent(ActivityLandingPage.this, AssignmentLandingPage.class);
 
-        extras = getIntent().getExtras();
-        if(extras == null) return; //TODO How to handle this case?
-
         checkAndHandleNotification();
     }
 
     private void setupPageDetails () {
+
+        cloneActivity = activityListHandler.getActivityCloneFromMap(activityID);
 
         linlaHeaderProgress.setVisibility(View.GONE);
         activityLandingPageRelativeLayout.setVisibility(View.VISIBLE);
@@ -79,8 +78,6 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
 
         activityAssignmentButton = (ImageButton)findViewById(R.id.activityAssignmentImageButton);
         activityAssignmentButton.setImageResource(R.drawable.assignment_icon);
-
-        cloneActivity = activityListHandler.getActivityCloneFromMap(activityID);
 
         activityName = (TextView) findViewById(R.id.activityNameText);
         activityName.setText(cloneActivity.getName());
@@ -101,7 +98,6 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
             public void onClick(View v) {
                 EditActivityPage.putExtra("eventID", eventID);
                 EditActivityPage.putExtra("activityID", activityID);
-                EditActivityPage.putExtra("bundleType", isNotification);
                 startActivity(EditActivityPage);
                 finish();
             }
@@ -113,22 +109,16 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
                 AssignmentLandingPageIntent.putExtra("eventID", eventID);
                 AssignmentLandingPageIntent.putExtra("activityID", activityID);
                 AssignmentLandingPageIntent.putExtra("assignmentID", cloneActivity.getAssignment().getId());
-                AssignmentLandingPageIntent.putExtra("bundleType", isNotification);
                 startActivity(AssignmentLandingPageIntent);
             }
         });
     }
 
     @Override
-    public void onBackPressed() {
-        if (isNotification != null) {
-            activityListHandler.removeNotificationActivityFromListAndMap(eventID, mContext);
-        }
-        super.onBackPressed();
-    }
-
-    @Override
     public void checkAndHandleNotification() {
+        extras = getIntent().getExtras();
+        if(extras == null) return; //TODO How to handle this case?
+
         eventID = extras.getString("eventID");
         activityID = extras.getString("activityID");
         isNotification = extras.getString("bundleType");
@@ -145,7 +135,9 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
             // Button on the activity page and clicks on "My Items"
             getEventActivitiesFromServer();
 
-            //TODO : Do getEvent call here and store the assignemtn from the event as well.
+            //TODO : Do getEvent call here and store the assignment from the event as well.
+
+            //TODO: Have 2 flags for each API call and when both are true only then call setupPageDetails
         }
     }
 

@@ -1,7 +1,9 @@
 package com.zik.faro.frontend;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTabHost;
@@ -11,11 +13,19 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.zik.faro.frontend.notification.MyFirebaseInstanceIDService;
 
 public class AppLandingPage extends FragmentActivity{
     private FragmentTabHost mTabHost;
 
     private static final String TAG = "AppLandingPage";
+    private BroadcastReceiver broadcastReceiver;
+
+    private static PollListHandler pollListHandler = PollListHandler.getInstance();
+    private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
+    private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
+    private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
+
     /*
     fragment Activity code picked from
     https://maxalley.wordpress.com/2013/05/18/android-creating-a-tab-layout-with-fragmenttabhost-and-fragments/
@@ -29,10 +39,22 @@ public class AppLandingPage extends FragmentActivity{
 
         final Intent createNewEventIntent = new Intent(this, CreateNewEvent.class);
 
-        String token = FirebaseInstanceId.getInstance().getToken();
-        Log.d(TAG, "&&&&token is " + token);
-
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
+
+        // TODO Check if we have token in global memory in that case send it to server with userID
+        // Else firebase could take time to send the token as well. In this case the below receiver
+        // Will take care of updating our server with the tokenID. In this case the user will not
+        // be receiving notifications for that brief period.
+        broadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.d(TAG, "Received token. Send to server");
+                //Do an api call to our server to store the firebase token against the user
+
+            }
+        };
+
+        registerReceiver(broadcastReceiver, new IntentFilter(MyFirebaseInstanceIDService.TOKEN_BROADCAST));
 
         /*TODO For styling the tab layout checkout the following link
         * https://maxalley.wordpress.com/2014/09/08/android-styling-a-tab-layout-with-fragmenttabhost-and-fragments/
@@ -67,5 +89,14 @@ public class AppLandingPage extends FragmentActivity{
         ImageView iv = (ImageView) view.findViewById(R.id.imageView);
         iv.setImageResource(icon);
         return view;
+    }
+
+    @Override
+    protected void onResume() {
+        activityListHandler.clearEverything();
+        assignmentListHandler.clearEverything();
+        eventFriendListHandler.clearEverything();
+        pollListHandler.clearEverything();
+        super.onResume();
     }
 }

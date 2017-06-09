@@ -2,6 +2,7 @@ package com.zik.faro.frontend;
 
 import android.content.Context;
 
+import com.google.gson.Gson;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.InviteeList;
 import com.zik.faro.data.user.EventInviteStatus;
@@ -160,7 +161,20 @@ public class EventFriendListHandler {
         friendMap.remove(emailID);
     }
 
-    public void clearFriendListAndMap(String eventID, Context context){
+    public void clearEverything () {
+        if (acceptedFriendAdapterMap != null)
+            acceptedFriendAdapterMap.clear();
+        if (mayBeFriendAdapterMap != null)
+            mayBeFriendAdapterMap.clear();
+        if (invitedFriendAdapterMap != null)
+            invitedFriendAdapterMap.clear();
+        if (declinedFriendAdapterMap != null)
+            declinedFriendAdapterMap.clear();
+        if (friendMap != null)
+            friendMap.clear();
+    }
+
+    /*public void clearFriendListAndMap(String eventID, Context context){
         EventFriendAdapter acceptedFriendAdapter = getAcceptedFriendAdapter(eventID, context);
         EventFriendAdapter invitedFriendAdapter = getInvitedFriendAdapter(eventID, context);
         EventFriendAdapter mayBeFriendAdapter = getMayBeFriendAdapter(eventID, context);
@@ -184,7 +198,7 @@ public class EventFriendListHandler {
         if (friendMap != null){
             friendMap.clear();
         }
-    }
+    }*/
 
     boolean isFriendInvitedToEvent(String emailID){
         if (friendMap.containsKey(emailID)){
@@ -226,5 +240,13 @@ public class EventFriendListHandler {
             }
         }
         return friendFullName;
+    }
+
+    public InviteeList.Invitees getInviteesCloneFromMap(String emailID){
+        InviteeList.Invitees invitee = friendMap.get(emailID);
+        Gson gson = new Gson();
+        String json = gson.toJson(invitee);
+        InviteeList.Invitees cloneInvitee = gson.fromJson(json, InviteeList.Invitees.class);
+        return cloneInvitee;
     }
 }

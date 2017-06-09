@@ -144,25 +144,17 @@ public class ActivityListHandler {
         ActivityAdapter activityAdapter = getActivityAdapter(eventID, context);
         removeActivityFromList(activityID, activityAdapter.list);
         activityAdapter.notifyDataSetChanged();
+        Activity activity = activityMap.get(activityID);
+        if (activity != null && activity.getAssignment() != null) {
+            assignmentListHandler.removeAssignmentFromListAndMap(eventID,
+                    activity.getAssignment().getId(),
+                    context);
+        }
         activityMap.remove(activityID);
+
     }
 
-    // Walk through the list of activities for a given event and remove them from the map and then
-    // clear the list.
-    public void removeNotificationActivityFromListAndMap(String eventID, Context context){
-        ActivityAdapter activityAdapter = getActivityAdapter(eventID, context);
-        for (int i = 0; i < activityAdapter.getCount(); i++) {
-            Activity activity = activityAdapter.list.get(i);
-            activityMap.remove(activity.getId());
-        }
-
-        if (activityAdapter != null){
-            activityAdapter.list.clear();
-        }
-    }
-
-
-    public void clearActivityListAndMap(String eventID, Context context){
+    /*public void clearActivityListAndMap(String eventID, Context context){
         ActivityAdapter activityAdapter = getActivityAdapter(eventID, context);
         if (activityAdapter != null){
             activityAdapter.list.clear();
@@ -171,14 +163,7 @@ public class ActivityListHandler {
         if (activityMap != null){
             activityMap.clear();
         }
-    }
-
-    // Special handling for notification done. This is called from Activity Landing page only if it was
-    // opened through a notification.
-    public void removeNotificationActivityfromListAndMap(String eventID, String activityID, Context context){
-        removeActivityFromListAndMap(eventID, activityID, context);
-        clearActivityAdapterIfEmpty(eventID, activityID, context);
-    }
+    }*/
 
     private void clearActivityAdapterIfEmpty(String eventID, String activityID, Context context){
         ActivityAdapter activityAdapter = getActivityAdapter(eventID, context);
@@ -187,6 +172,11 @@ public class ActivityListHandler {
                 activityAdapterMap.remove(eventID);
             }
         }
+    }
+
+    public void clearEverything() {
+        activityAdapterMap.clear();
+        activityMap.clear();
     }
 
     //

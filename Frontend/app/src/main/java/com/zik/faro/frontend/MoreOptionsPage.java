@@ -36,7 +36,6 @@ public class MoreOptionsPage extends Fragment{
         final Intent LoginActivity = new Intent(getActivity(), com.zik.faro.frontend.LoginActivity.class);
         View v = inflater.inflate(R.layout.activity_more_options_page, container, false);
         Button logout = (Button)v.findViewById(R.id.logout);
-        Button getNewTokenButton = (Button)v.findViewById(R.id.getNewToken);
         TextView tv = (TextView) v.findViewById(R.id.text);
         tv.setText("Logged in as " + myUserId);
         logout.setOnClickListener(new View.OnClickListener() {
@@ -45,33 +44,22 @@ public class MoreOptionsPage extends Fragment{
                 //Clear all App related info here
                 eventListHandler.clearListAndMapOnLogout();
                 userFriendListHandler.clearFriendListAndMap();
-                TokenCache.getTokenCache().deleteToken();
+
+                //Delete Firebase token.
+                try {
+                    FirebaseInstanceId.getInstance().deleteInstanceId();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
 
                 // Log out of facebook
                 LoginManager.getInstance().logOut();
 
+                TokenCache.getTokenCache().deleteToken();
+
                 startActivity(LoginActivity);
                 getActivity().finish();
-            }
-        });
-
-        getNewTokenButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            //Delete Firebase token.
-                            FirebaseInstanceId.getInstance().deleteInstanceId();
-                            Log.d(TAG, "&&&&Token deleted");
-                            String token = FirebaseInstanceId.getInstance().getToken();
-                            Log.d(TAG, "&&&&token is " + token);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }).start();
 
             }
         });

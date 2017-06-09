@@ -44,7 +44,6 @@ public class EditPoll extends Activity {
 
     private String eventID = null;
     private String pollID;
-    private String isNotification = null;
     private Poll clonePoll;
     private Intent PollLandingPageIntent;
 
@@ -78,13 +77,8 @@ public class EditPoll extends Activity {
 
         eventID = extras.getString("eventID");
         pollID = extras.getString("pollID");
-        isNotification = extras.getString("bundleType");
         clonePoll = pollListHandler.getPollCloneFromMap(pollID);
 
-        setupPageDetails();
-    }
-
-    private void setupPageDetails() {
         pollDescription = (TextView) findViewById(R.id.pollDescription);
         isMultiChoice = (CheckBox)findViewById(R.id.multiChoiceFlag);
         optionText = (EditText)findViewById(R.id.pollOptionEditText);
@@ -179,7 +173,6 @@ public class EditPoll extends Activity {
                             pollListHandler.addPollToListAndMap(eventID, poll, mContext);
                             PollLandingPageIntent.putExtra("eventID", eventID);
                             PollLandingPageIntent.putExtra("pollID", pollID);
-                            PollLandingPageIntent.putExtra("bundleType", isNotification);
                             startActivity(PollLandingPageIntent);
                             finish();
                         }
@@ -262,7 +255,6 @@ public class EditPoll extends Activity {
     public void onBackPressed() {
         PollLandingPageIntent.putExtra("eventID", eventID);
         PollLandingPageIntent.putExtra("pollID", pollID);
-        PollLandingPageIntent.putExtra("bundleType", isNotification);
         startActivity(PollLandingPageIntent);
         finish();
         super.onBackPressed();

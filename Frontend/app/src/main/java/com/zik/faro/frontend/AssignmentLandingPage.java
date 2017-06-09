@@ -13,9 +13,12 @@ public class AssignmentLandingPage extends FragmentActivity {
     private FragmentTabHost mTabHost;
 
 
-    String activityID = null;
-    String eventID = null;
-    String assignmentID = null;
+    private String activityID = null;
+    private String eventID = null;
+    private String assignmentID = null;
+    private String isNotification = null;
+    private Context mContext = this;
+    private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,11 +30,13 @@ public class AssignmentLandingPage extends FragmentActivity {
             eventID = extras.getString("eventID");
             activityID = extras.getString("activityID");
             assignmentID = extras.getString("assignmentID");
+            isNotification = extras.getString("bundleType");
 
             Bundle bundle = new Bundle();
             bundle.putString("eventID", eventID);
             bundle.putString("activityID", activityID);
             bundle.putString("assignmentID", assignmentID);
+            bundle.putString("bundleType", isNotification);
 
             Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
             mTabHost = (FragmentTabHost) findViewById(android.R.id.tabhost);

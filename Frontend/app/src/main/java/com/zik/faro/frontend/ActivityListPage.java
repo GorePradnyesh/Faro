@@ -39,9 +39,6 @@ public class ActivityListPage extends android.app.Activity {
     private static String TAG = "ActivityListPage";
     private Context mContext = this;
 
-    private LinearLayout linlaHeaderProgress = null;
-    private RelativeLayout activityListPageRelativeLayout = null;
-
     private ListView activityList;
     private ImageButton addActivity;
 
@@ -54,23 +51,10 @@ public class ActivityListPage extends android.app.Activity {
 
         mContext = this;
 
-        linlaHeaderProgress = (LinearLayout) findViewById(R.id.linlaHeaderProgress);
-
-        activityListPageRelativeLayout = (RelativeLayout) findViewById(R.id.activityListPageRelativeLayout);
-        activityListPageRelativeLayout.setVisibility(View.GONE);
-
         Bundle extras = getIntent().getExtras();
         if (extras == null) return; //TODO: How to handle this condition?
 
         eventID = extras.getString("eventID");
-
-        setupPageDetails();
-    }
-
-    private void setupPageDetails(){
-
-        linlaHeaderProgress.setVisibility(View.GONE);
-        activityListPageRelativeLayout.setVisibility(View.VISIBLE);
 
         activityList  = (ListView)findViewById(R.id.activityList);
         activityList.setBackgroundColor(Color.BLACK);
@@ -116,7 +100,7 @@ public class ActivityListPage extends android.app.Activity {
 
         //TODO Implement function to refresh activity list. Watch Vipul Shah's video on youtube. The
         //link is https://www.youtube.com/watch?v=Phc9tVSG6Aw
-        //Listener to go to the Create Event page when clicked on add_event button.
+        //Listener to go to the Create Activity page when clicked on addActivity button.
         addActivity.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

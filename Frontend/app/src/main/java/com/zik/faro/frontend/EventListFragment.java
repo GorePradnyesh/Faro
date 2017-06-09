@@ -58,6 +58,33 @@ public class EventListFragment extends Fragment{
         startActivity(eventLanding);
     }
 
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        fragmentView = inflater.inflate(R.layout.fragment_event_list, container, false);
+
+        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(getActivity()));
+
+        receivedEvents = false;
+        receivedFriends = false;
+
+        mContext = this.getActivity();
+
+        linlaHeaderProgress = (LinearLayout)fragmentView.findViewById(R.id.linlaHeaderProgress);
+        eventListFragmentRelativeLayout = (RelativeLayout) fragmentView.findViewById(R.id.eventListFragmentRelativeLayout);
+        eventListFragmentRelativeLayout.setVisibility(View.GONE);
+
+        getEventsFromServer();
+
+        //Let this api call be on EventListFragment and not on FriendListFragment since this is where the
+        // global memory for friendlist is populated which is later used when inviting friends for
+        // events. If the user never goes to the FriendListFragment then this global memory would not be
+        // populated.
+        getFriendsFromServer();
+
+        return fragmentView;
+    }
+
     private void setupPageDetails(View view) {
 
         //Setup the page only after response for both eventlist and friendlist is received.
@@ -197,32 +224,5 @@ public class EventListFragment extends Fragment{
                 }
             }
         });
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(getActivity()));
-
-        receivedEvents = false;
-        receivedFriends = false;
-
-        fragmentView = inflater.inflate(R.layout.fragment_event_list, container, false);
-
-        mContext = this.getActivity();
-
-        linlaHeaderProgress = (LinearLayout)fragmentView.findViewById(R.id.linlaHeaderProgress);
-        eventListFragmentRelativeLayout = (RelativeLayout) fragmentView.findViewById(R.id.eventListFragmentRelativeLayout);
-        eventListFragmentRelativeLayout.setVisibility(View.GONE);
-
-        getEventsFromServer();
-
-        //Let this api call be on EventListFragment and not on FriendListFragment since this is where the
-        // global memory for friendlist is populated which is later used when inviting friends for
-        // events. If the user never goes to the FriendListFragment then this global memory would not be
-        // populated.
-        getFriendsFromServer();
-
-        return fragmentView;
     }
 }

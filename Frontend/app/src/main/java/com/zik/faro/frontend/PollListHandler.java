@@ -140,7 +140,16 @@ public class PollListHandler {
         }
     }
 
-    public void clearPollListsAndMap(String eventID, Context context){
+    public void clearEverything() {
+        if (openPollsAdapterMap != null)
+            openPollsAdapterMap.clear();
+        if (closedPollsAdapterMap != null)
+            closedPollsAdapterMap.clear();
+        if (pollMap != null)
+            pollMap.clear();
+    }
+
+    /*public void clearPollListsAndMap(String eventID, Context context){
         PollAdapter openPollsAdapter = getOpenPollAdapter(eventID, context);
         PollAdapter closedPollsAdapter = getClosedPollAdapter(eventID, context);
         if (openPollsAdapter != null) {
@@ -154,15 +163,7 @@ public class PollListHandler {
         if (pollMap != null) {
             pollMap.clear();
         }
-    }
-
-    // Special handling for notification done. This is called from Polllanding page only if it was
-    // opened through a notification.
-    public void removeNotificationPollFromListAndMap(String eventID, String pollID, Context context){
-        Poll poll = pollMap.get(pollID);
-        removePollFromListAndMap(eventID, poll, context);
-        clearPollAdaptersIfEmpty(eventID, poll, context);
-    }
+    }*/
 
     private void clearPollAdaptersIfEmpty(String eventID, Poll poll, Context context){
         PollAdapter openPollsAdapter = getOpenPollAdapter(eventID, context);

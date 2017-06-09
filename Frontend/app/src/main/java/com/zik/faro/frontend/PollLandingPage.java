@@ -147,8 +147,6 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
 
         popUpRelativeLayout = (RelativeLayout) findViewById(R.id.pollLandingPage);
 
-
-
         if (clonePoll.getStatus().equals(ObjectStatus.OPEN)){
             OpenPollLandingPageRelativeLayout.setVisibility(View.VISIBLE);
 
@@ -503,6 +501,7 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
         if (extras == null) return; //TODO: How to handle such conditions
 
         isNotification = extras.getString("bundleType");
+
         eventID = extras.getString("eventID");
         pollID = extras.getString("pollID");
 
@@ -515,15 +514,6 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
             //API call to get updated poll
             getUpdatedPollFromServer();
         }
-    }
-
-
-    @Override
-    public void onBackPressed() {
-        if (isNotification != null) {
-            pollListHandler.removeNotificationPollFromListAndMap(eventID, pollID, mContext);
-        }
-        super.onBackPressed();
     }
 
     private void updatePollToServer(){

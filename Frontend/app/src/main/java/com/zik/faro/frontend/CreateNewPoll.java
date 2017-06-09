@@ -66,10 +66,6 @@ public class CreateNewPoll extends Activity {
 
         eventID = extras.getString("eventID");
 
-        setupPageDetails();
-    }
-
-    private void setupPageDetails () {
         pollDescription = (EditText)findViewById(R.id.pollDescription);
         isMultiChoice = (CheckBox)findViewById(R.id.multiChoiceFlag);
         optionText = (EditText)findViewById(R.id.pollOptionEditText);
