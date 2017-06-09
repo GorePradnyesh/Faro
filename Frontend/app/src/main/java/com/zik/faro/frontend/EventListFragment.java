@@ -31,7 +31,7 @@ import java.util.List;
 public class EventListFragment extends Fragment{
 
 
-    static EventListHandler eventListHandler = EventListHandler.getInstance();
+    private static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
     private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private static String TAG = "EventListFragment";

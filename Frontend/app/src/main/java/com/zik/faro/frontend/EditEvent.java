@@ -67,7 +67,7 @@ public class EditEvent extends Activity {
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
 
 
-    private  static EventListHandler eventListHandler = EventListHandler.getInstance();
+    private static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private static Event cloneEvent;
 

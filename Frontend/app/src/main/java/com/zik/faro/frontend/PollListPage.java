@@ -27,10 +27,8 @@ import java.io.IOException;
 import java.util.List;
 
 public class PollListPage extends Activity {
-    private Intent EventLandingPage = null;
     private Intent PollLandingPageIntent = null;
     private static PollListHandler pollListHandler = PollListHandler.getInstance();
-    private static EventListHandler eventListHandler = EventListHandler.getInstance();
     private String eventID = null;
     private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private Intent CreateNewPoll = null;
@@ -52,7 +50,6 @@ public class PollListPage extends Activity {
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
-        EventLandingPage = new Intent(PollListPage.this, EventLandingPage.class);
         PollLandingPageIntent = new Intent(PollListPage.this, PollLandingPage.class);
         CreateNewPoll = new Intent(PollListPage.this, CreateNewPoll.class);
 

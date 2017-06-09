@@ -55,8 +55,8 @@ import static android.widget.Toast.LENGTH_LONG;
 public class CreateNewEvent extends Activity {
 
     //public static final int NO_CHANGES = 0;
-    static EventListHandler eventListHandler = EventListHandler.getInstance();
-    static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
+    private static EventListHandler eventListHandler = EventListHandler.getInstance();
+    private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
 
     private Calendar startDateCalendar = Calendar.getInstance();
     private Calendar endDateCalendar = Calendar.getInstance();

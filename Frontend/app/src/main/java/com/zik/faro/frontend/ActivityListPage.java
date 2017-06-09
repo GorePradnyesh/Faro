@@ -25,10 +25,8 @@ import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 */
 
 public class ActivityListPage extends android.app.Activity {
-    private  static EventListHandler eventListHandler = EventListHandler.getInstance();
-
-    static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
-
+    private static EventListHandler eventListHandler = EventListHandler.getInstance();
+    private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
     private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
     private String eventID;

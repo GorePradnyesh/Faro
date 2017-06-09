@@ -32,12 +32,11 @@ import java.io.IOException;
 
 public class CreateNewPoll extends Activity {
 
-    static PollListHandler pollListHandler = PollListHandler.getInstance();
-    private  static EventListHandler eventListHandler = EventListHandler.getInstance();
+    private static PollListHandler pollListHandler = PollListHandler.getInstance();
     private String eventID = null;
     Intent PollListPage = null;
 
-    static FaroUserContext faroUserContext = FaroUserContext.getInstance();
+    private static FaroUserContext faroUserContext = FaroUserContext.getInstance();
     String myUserId = faroUserContext.getEmail();
 
     private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();

@@ -50,7 +50,7 @@ public class UserProfilePage extends AppCompatActivity {
                 userProfilePicture.setImageResource(R.drawable.user_pic);
             }else {
                 cloneMinUser = userFriendListHandler.getMinUserCloneFromMap(userEmailID);
-                userName = userFriendListHandler.getFriendFullNameFromID(cloneMinUser.getEmail());
+                userName = userFriendListHandler.getFriendFullNameFromID(userEmailID);
                 userProfilePicture.setImageResource(R.drawable.user_pic);
             }
 

@@ -33,7 +33,6 @@ import static android.widget.Toast.LENGTH_LONG;
 public class InviteFriendToEventPage extends Activity {
 
     private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
-    static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
 

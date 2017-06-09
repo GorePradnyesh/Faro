@@ -35,12 +35,12 @@ import java.util.Map;
 
 public class AssignmentLandingFragment extends Fragment implements NotificationPayloadHandler {
 
-    private static Event originalEvent;
-    private static com.zik.faro.data.Activity originalActivity = null;
+    private Event originalEvent;
+    private com.zik.faro.data.Activity originalActivity = null;
     String activityID = null;
     String eventID = null;
     String assignmentID = null;
-    private static Assignment cloneAssignment = null;
+    private Assignment cloneAssignment = null;
 
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
