@@ -410,8 +410,6 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
             reOpenPoll.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //TODO update server of reopening the Poll
-
                     Poll pollVersionObj = new Poll();
                     pollVersionObj.setEventId(clonePoll.getEventId());
                     pollVersionObj.setId(clonePoll.getId());
@@ -574,5 +572,25 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
 
             }
         }, eventID, pollID);
+    }
+
+    @Override
+    protected void onResume() {
+        if (isNotification == null) {
+            // Check if the version is same. It can be different if this page is loaded and a notification
+            // is received for this later which updates the global memory but clonedata on this page remains
+            // stale.
+            // This check is not necessary when opening this page directly through a notification.
+            Long versionInGlobalMemory = pollListHandler.getOriginalPollFromMap(pollID).getVersion();
+            if (!clonePoll.getVersion().equals(versionInGlobalMemory)) {
+                Intent pollLandingPageReloadIntent = new Intent(PollLandingPage.this, PollLandingPage.class);
+                pollLandingPageReloadIntent.putExtra("eventID", eventID);
+                pollLandingPageReloadIntent.putExtra("pollID", pollID);
+                finish();
+                startActivity(pollLandingPageReloadIntent);
+            }
+        }
+
+        super.onResume();
     }
 }

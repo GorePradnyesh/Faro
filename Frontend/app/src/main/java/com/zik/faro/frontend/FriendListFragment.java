@@ -27,6 +27,7 @@ import com.zik.faro.data.MinUser;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
+import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 
 import java.io.IOException;
 
@@ -39,6 +40,8 @@ public class FriendListFragment extends Fragment {
     private static String TAG = "FriendListFragment";
 
     private RelativeLayout popUpRelativeLayout;
+    FaroUserContext faroUserContext = FaroUserContext.getInstance();
+    private String myUserId = faroUserContext.getEmail();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -114,7 +117,10 @@ public class FriendListFragment extends Fragment {
                 sendInvite.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        //TODO:Check if not inviting self. Check if entered emailID is not same as myUser ID
+                        if (emailIDEditText.getText().toString().equals(myUserId)) {
+                            //TODO: Add error popUp with "Cant invite self message"
+                            return;
+                        }
                         serviceHandler.getFriendsHandler().inviteFriend(new BaseFaroRequestCallback<String>() {
                             @Override
                             public void onFailure(Request request, IOException ex) {

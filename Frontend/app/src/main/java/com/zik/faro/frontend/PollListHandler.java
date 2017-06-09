@@ -52,6 +52,11 @@ public class PollListHandler {
         return clonePoll;
     }
 
+    public Poll getOriginalPollFromMap(String pollID){
+        Poll poll = pollMap.get(pollID);
+        return poll;
+    }
+
 
     //TODO Function call to remove items from the List and Map when user keeps scrolling and caches
     // lot of polls. Have a Max limit on number of polls we will cache else will use up a lot of
@@ -115,8 +120,7 @@ public class PollListHandler {
             case CLOSED:
                 return getClosedPollAdapter(eventID, context);
             default:
-                //TODO: How to catch this condition? This should never occur?
-                return null;
+                return getClosedPollAdapter(eventID, context);
         }
     }
 

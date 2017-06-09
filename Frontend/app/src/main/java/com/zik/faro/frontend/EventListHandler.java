@@ -74,8 +74,6 @@ public class EventListHandler {
     * Map.
     */
     public ErrorCodes updateEvent(final EventInviteStatusWrapper eventInviteStatusWrapper) {
-        //TODO: send new event update to server
-
         Event event = eventInviteStatusWrapper.getEvent();
         final EventInviteStatus eventInviteStatus = eventInviteStatusWrapper.getInviteStatus();
         serviceHandler.getEventHandler().createEvent(new BaseFaroRequestCallback<Event>() {
@@ -147,10 +145,10 @@ public class EventListHandler {
 
         EventAdapter eventAdapter;
         eventAdapter = getEventAdapter(eventInviteStatus);
+        if (eventAdapter == null) return;
 
         eventCalendar = event.getStartDate();
 
-        assert (eventAdapter != null);
         int lastEventIndex = eventAdapter.list.size() - 1;
         for (index = lastEventIndex; index >= 0; index--) {
             tempEvent = eventAdapter.list.get(index);
@@ -193,8 +191,7 @@ public class EventListHandler {
             case MAYBE:
                 return notAcceptedEventAdapter;
             default:
-                //TODO: How to catch this condition? This should never occur?
-                return null;
+                return notAcceptedEventAdapter;
         }
     }
 
@@ -220,6 +217,7 @@ public class EventListHandler {
         EventAdapter eventAdapter;
         EventInviteStatus eventInviteStatus = getUserEventStatus(event.getId());
         eventAdapter = getEventAdapter(eventInviteStatus);
+        if (eventAdapter == null) return;
         int lastEventIndex = eventAdapter.list.size() - 1;
         Event lastEventInList = eventAdapter.list.get(lastEventIndex);
 
@@ -237,19 +235,17 @@ public class EventListHandler {
         boolean issync = isMapAndListInSync();
     }
 
-    public Event getEventCloneFromMap(String eventID){
+    Event getEventCloneFromMap(String eventID){
         EventInviteStatusWrapper eventInviteStatusWrapper = eventMap.get(eventID);
         Event event = eventInviteStatusWrapper.getEvent();
         Gson gson = new Gson();
         String json = gson.toJson(event);
-        Event cloneEvent = gson.fromJson(json, Event.class);
-        return cloneEvent;
+        return gson.fromJson(json, Event.class);
     }
 
     public Event getOriginalEventFromMap (String eventID){
         EventInviteStatusWrapper eventInviteStatusWrapper = eventMap.get(eventID);
-        Event event = eventInviteStatusWrapper.getEvent();
-        return event;
+        return eventInviteStatusWrapper.getEvent();
     }
 
     public EventInviteStatus getUserEventStatus(String eventId) {

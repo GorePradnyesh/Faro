@@ -262,4 +262,20 @@ public class PickPollWinnerPage extends Activity {
         startActivity(PollLandingPageIntent);
         finish();
     }
+
+    @Override
+    protected void onResume() {
+        // Check if the version is same. It can be different if this page is loaded and a notification
+        // is received for this later which updates the global memory but clonedata on this page remains
+        // stale.
+        Long versionInGlobalMemory = pollListHandler.getOriginalPollFromMap(pollID).getVersion();
+        if (!clonePoll.getVersion().equals(versionInGlobalMemory)) {
+            Intent pickPollWinnerPageReloadIntent = new Intent(PickPollWinnerPage.this, PickPollWinnerPage.class);
+            pickPollWinnerPageReloadIntent.putExtra("eventID", eventID);
+            pickPollWinnerPageReloadIntent.putExtra("pollID", pollID);
+            finish();
+            startActivity(pickPollWinnerPageReloadIntent);
+        }
+        super.onResume();
+    }
 }

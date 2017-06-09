@@ -15,12 +15,10 @@ import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 public class EventFriendListLandingPage extends FragmentActivity {
     private FragmentTabHost mTabHost;
     private String eventID;
-    private static Event cloneEvent;
+    private Event cloneEvent;
 
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
-
-    private Intent EventLandingPageIntent = null;
 
     FaroUserContext faroUserContext = FaroUserContext.getInstance();
     String myUserId = faroUserContext.getEmail();
@@ -36,10 +34,7 @@ public class EventFriendListLandingPage extends FragmentActivity {
         ImageButton addFriendsImageButton = (ImageButton) findViewById(R.id.addFriendsImageButton);
         addFriendsImageButton.setImageResource(R.drawable.plus);
 
-
         final Intent InviteFriendToEventPage = new Intent(EventFriendListLandingPage.this, InviteFriendToEventPage.class);
-        EventLandingPageIntent = new Intent(EventFriendListLandingPage.this, EventLandingPage.class);
-
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
@@ -82,5 +77,20 @@ public class EventFriendListLandingPage extends FragmentActivity {
         bundle.putString("eventID", eventID);
         bundle.putString("listType", listType);
         return bundle;
+    }
+
+    @Override
+    protected void onResume() {
+        // Check if the version is same. It can be different if this page is loaded and a notification
+        // is received for this later which updates the global memory but clonedata on this page remains
+        // stale.
+        Long versionInGlobalMemory = eventListHandler.getOriginalEventFromMap(eventID).getVersion();
+        if (!cloneEvent.getVersion().equals(versionInGlobalMemory)) {
+            Intent eventFriendListLandingPageReloadIntent = new Intent(EventFriendListLandingPage.this, EventFriendListLandingPage.class);
+            eventFriendListLandingPageReloadIntent.putExtra("eventID", eventID);
+            finish();
+            startActivity(eventFriendListLandingPageReloadIntent);
+        }
+        super.onResume();
     }
 }

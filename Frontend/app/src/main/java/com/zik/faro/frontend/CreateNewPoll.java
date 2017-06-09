@@ -120,7 +120,6 @@ public class CreateNewPoll extends Activity {
             public void onClick(View v) {
 
                 if (pollOptionsAdapter.getCount() < 2){
-                    //TODO Display Popup asking for atleast 2 options
                     createNewPollOK.setEnabled(false);
                     return;
                 }

@@ -21,6 +21,7 @@ import com.zik.faro.data.ActionStatus;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Assignment;
 import com.zik.faro.data.Event;
+import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.Item;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
@@ -171,9 +172,7 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
             // event assignment. So get the event as well
             getEventActivitiesFromServer();
 
-            //TODO : Do getEvent call here and store the assignment from the event as well.
-
-            //TODO: Have 2 flags for each API call and when both are true only then call setupPageDetails
+            getEventFromServer();
         }
     }
 
@@ -245,5 +244,37 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
                 }
             }
         }, eventID, itemListMap);
+    }
+
+
+    public void getEventFromServer () {
+        serviceHandler.getEventHandler().getEvent(new BaseFaroRequestCallback<EventInviteStatusWrapper>() {
+            @Override
+            public void onFailure(Request request, IOException ex) {
+                Log.e(TAG, "failed to get Event from server");
+            }
+
+            @Override
+            public void onResponse(final EventInviteStatusWrapper eventInviteStatusWrapper, HttpError error) {
+                if (error == null ) {
+                    Runnable myRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.i(TAG, "Successfully received Event from server");
+                            receivedEvent = true;
+                            Event event = eventInviteStatusWrapper.getEvent();
+                            eventListHandler.addEventToListAndMap(event,
+                                    eventInviteStatusWrapper.getInviteStatus());
+                            assignmentListHandler.addAssignmentToListAndMap(eventID, event.getAssignment(), null, mContext);
+                            setupPageDetails();
+                        }
+                    };
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(myRunnable);
+                }else {
+                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                }
+            }
+        }, eventID);
     }
 }

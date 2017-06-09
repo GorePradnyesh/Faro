@@ -45,6 +45,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.Event;
+import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.InviteeList;
 import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
@@ -79,7 +80,7 @@ public class EventLandingPage extends FragmentActivity
 
     private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
-    private static Event cloneEvent;
+    private Event cloneEvent;
 
     private Button statusYes = null;
     private Button statusNo = null;
@@ -246,7 +247,6 @@ public class EventLandingPage extends FragmentActivity
         }
     }
 
-    //TODO Clear all cloneEvent related datastructures
     @Override
     public void onBackPressed() {
         eventListHandler.deleteEventFromMapIfNotInList(cloneEvent);
@@ -350,31 +350,15 @@ public class EventLandingPage extends FragmentActivity
         }
 
         //Else the bundleType is "notification"
-
-        /*******************************************************************
-         * Remove below code when server starts sending correct event ID.
-         ********************************************************************/
-        eventID = "af26e365-f569-452f-b44b-86fa8b032736";
-
-        //API call to get event
-        Runnable myRunnable = new Runnable() {
-            @Override
-            public void run() {
-                setupPageDetails();
-            }
-        };
-
-        Handler mainHandler = new Handler(mContext.getMainLooper());
-        mainHandler.postDelayed(myRunnable, 5000);
-        /********************************************************************
-         ********************************************************************/
-
-        //TODO: Call the get events API and insert into list and map. This API needs to change to return the invite status as well.
-        getUpdatedEventFromServer();
-
+        getEventFromServer();
     }
 
     private void setupPageDetails(){
+
+        cloneEvent = eventListHandler.getEventCloneFromMap(eventID);
+        if (cloneEvent == null){
+            return; //TODO How to handle such a case?
+        }
 
         linlaHeaderProgress.setVisibility(View.GONE);
         EventLandingPageRelativeLayout.setVisibility(View.VISIBLE);
@@ -530,11 +514,6 @@ public class EventLandingPage extends FragmentActivity
                 .build();
         mGoogleApiClient.connect();
 
-        cloneEvent = eventListHandler.getEventCloneFromMap(eventID);
-        if (cloneEvent == null){
-            return; //TODO How to handle such a case?
-        }
-
         eventStateBasedView(cloneEvent);
 
         controlFlagBasedView();
@@ -636,35 +615,33 @@ public class EventLandingPage extends FragmentActivity
         fbLoginFragment = (FbLoginFragment) getSupportFragmentManager().findFragmentById(R.id.fb_login_page);
     }
 
-    private void getUpdatedEventFromServer(){
-        /*
-        TODO: Call the get events API and insert into list and map. This API needs to change to return the invite status as well.
-        serviceHandler.getEventHandler().getUpdatedEventFromServer(new BaseFaroRequestCallback<Event>() {
+    private void getEventFromServer(){
+        serviceHandler.getEventHandler().getEvent(new BaseFaroRequestCallback<EventInviteStatusWrapper>() {
             @Override
             public void onFailure(Request request, IOException ex) {
-                Log.e(TAG, "failed to get the updated Event");
+                Log.e(TAG, "failed to get Event from server");
             }
 
             @Override
-            public void onResponse(final Event receivedEvent, HttpError error) {
+            public void onResponse(final EventInviteStatusWrapper eventInviteStatusWrapper, HttpError error) {
                 if (error == null ) {
-                    //Since update to server successful
                     Runnable myRunnable = new Runnable() {
                         @Override
                         public void run() {
-                            eventListHandler.addEventToListAndMap(receivedEvent, );
+                            Log.i(TAG, "Successfully received Event from server");
+                            Event event = eventInviteStatusWrapper.getEvent();
+                            eventListHandler.addEventToListAndMap(event,
+                                    eventInviteStatusWrapper.getInviteStatus());
                             setupPageDetails();
                         }
                     };
                     Handler mainHandler = new Handler(mContext.getMainLooper());
                     mainHandler.post(myRunnable);
-                }
-                else {
+                }else {
                     Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                 }
             }
         }, eventID);
-        */
     }
 
     public void getEventActivitiesFromServer(){
@@ -876,5 +853,23 @@ public class EventLandingPage extends FragmentActivity
                 }
             }
         }, eventID);
+    }
+
+    @Override
+    protected void onResume() {
+        if (isNotification == null) {
+            // Check if the version is same. It can be different if this page is loaded and a notification
+            // is received for this later which updates the global memory but clonedata on this page remains
+            // stale.
+            // This check is not necessary when opening this page directly through a notification.
+            Long versionInGlobalMemory = eventListHandler.getOriginalEventFromMap(eventID).getVersion();
+            if (!cloneEvent.getVersion().equals(versionInGlobalMemory)) {
+                Intent eventLandingPageReloadIntent = new Intent(EventLandingPage.this, EventLandingPage.class);
+                eventLandingPageReloadIntent.putExtra("eventID", eventID);
+                finish();
+                startActivity(eventLandingPageReloadIntent);
+            }
+        }
+        super.onResume();
     }
 }

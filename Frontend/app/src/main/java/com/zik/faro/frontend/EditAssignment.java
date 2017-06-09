@@ -52,9 +52,11 @@ import static android.widget.Toast.LENGTH_LONG;
  */
 public class EditAssignment extends android.app.Activity {
 
-    private static Event originalEvent;
-    private static Activity originalActivity = null;
-    private static Assignment cloneAssignment;
+    private Event originalEvent;
+    private Activity originalActivity = null;
+    private Event cloneEvent = null;
+    private Activity cloneActivity = null;
+    private Assignment cloneAssignment;
 
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
@@ -104,6 +106,7 @@ public class EditAssignment extends android.app.Activity {
             originalEvent = eventListHandler.getOriginalEventFromMap(eventID);
             if (activityID != null) {
                 originalActivity = activityListHandler.getOriginalActivityFromMap(activityID);
+                cloneActivity = activityListHandler.getActivityCloneFromMap(activityID);
             }
             cloneAssignment = assignmentListHandler.getAssignmentCloneFromMap(assignmentID);
 
@@ -394,4 +397,29 @@ public class EditAssignment extends android.app.Activity {
         finish();
     }
 
+    @Override
+    protected void onResume() {
+// Check if the version is same. It can be different if this page is loaded and a notification
+        // is received for this later which updates the global memory but clonedata on this page remains
+        // stale.
+        Long versionInGlobalMemory = null;
+        Long previousVersion = null;
+
+        if (activityID == null){
+            versionInGlobalMemory = eventListHandler.getOriginalEventFromMap(eventID).getVersion();
+            previousVersion = cloneEvent.getVersion();
+        } else {
+            versionInGlobalMemory = activityListHandler.getOriginalActivityFromMap(activityID).getVersion();
+            previousVersion = cloneActivity.getVersion();
+        }
+
+        if (!previousVersion.equals(versionInGlobalMemory)) {
+            Intent editAssignmentPageReloadIntent = new Intent(EditAssignment.this, EditAssignment.class);
+            editAssignmentPageReloadIntent.putExtra("eventID", eventID);
+            editAssignmentPageReloadIntent.putExtra("activityID", activityID);
+            editAssignmentPageReloadIntent.putExtra("assignmentID", assignmentID);
+            finish();
+            startActivity(editAssignmentPageReloadIntent);
+        }
+        super.onResume();    }
 }

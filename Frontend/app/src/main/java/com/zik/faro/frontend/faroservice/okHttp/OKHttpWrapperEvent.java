@@ -49,14 +49,14 @@ public class OKHttpWrapperEvent extends BaseFaroOKHttpWrapper implements EventHa
 
 
     // TODO: Temp use this actual implementation instead of event
-    public void getEvent(final BaseFaroRequestCallback<Event> callback, final String eventId){
+    public void getEvent(final BaseFaroRequestCallback<EventInviteStatusWrapper> callback, final String eventId){
         String token = TokenCache.getTokenCache().getToken();
         Request request = new Request.Builder()
                 .url(baseHandlerURL.toString() + eventId + "/details/")
                 .addHeader("Authentication", token)
                 .build();
 
-        this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<Event>(callback, Event.class));
+        this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<EventInviteStatusWrapper>(callback, EventInviteStatusWrapper.class));
     }
 
     public void createEvent(final BaseFaroRequestCallback<Event> callback, Event event){
