@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 
+import com.bumptech.glide.Glide;
 import com.zik.faro.data.MinUser;
 
 import java.util.Collections;
@@ -39,16 +40,19 @@ public class UserFriendAdapter extends ArrayAdapter {
             public int compare(MinUser lhs, MinUser rhs) {
                 String name1 = null;
                 String name2 = null;
+
                 if (lhs.getFirstName() != null) {
                     name1 = lhs.getFirstName();
-                }else {
+                } else {
                     name1 = lhs.getEmail();
                 }
+
                 if (rhs.getFirstName() != null){
                     name2 = rhs.getFirstName();
-                }else{
+                } else {
                     name2 = rhs.getEmail();
                 }
+
                 return name1.compareTo(name2);
             }
         });
@@ -83,18 +87,26 @@ public class UserFriendAdapter extends ArrayAdapter {
             holder.userPicture = (ImageView)row.findViewById(R.id.userPicture);
             holder.friendName = (TextView)row.findViewById(R.id.friendName);
             row.setTag(holder);
-        }else{
+        } else {
             holder = (ImgHolder) row.getTag();
         }
+
         MinUser minUser = (MinUser)getItem(position);
         if (minUser != null) {
             if (minUser.getFirstName() != null) {
                 holder.friendName.setText(minUser.getFirstName());
-            }else{
+            } else {
                 holder.friendName.setText(minUser.getEmail());
             }
         }
+
+        // Load the user's profile picture
+        // TODO Load the user profile picture if available
+        /*Glide.with(getContext())
+                .load((minUser.getPictureUrl() != null) ? minUser.getPictureUrl() : R.drawable.user_pic)
+                .into(holder.userPicture);*/
         holder.userPicture.setImageResource(R.drawable.user_pic);
+
         return row;
     }
 }

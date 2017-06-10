@@ -8,11 +8,15 @@ import com.zik.faro.persistence.datastore.data.user.UserCredentialsDo;
  */
 public class UserCredentialsDatastoreImpl {
 
-    public static void storeUserCreds(final UserCredentialsDo userCredentials) {
+    public static void storeUserCreds(UserCredentialsDo userCredentials) {
         DatastoreObjectifyDAL.storeObject(userCredentials);
     }
 
-    public static UserCredentialsDo loadUserCreds(final String userId) throws DataNotFoundException {
+    public static UserCredentialsDo loadUserCreds(String userId) throws DataNotFoundException {
         return DatastoreObjectifyDAL.loadObjectById(userId, UserCredentialsDo.class);
+    }
+
+    public static UserCredentialsDo loadUserCredsByAuthProviderUserId(String authProviderUserId) throws DataNotFoundException {
+       return DatastoreObjectifyDAL.loadFirstObjectByIndexedStringFieldEQ("authProviderUserId", authProviderUserId, UserCredentialsDo.class);
     }
 }

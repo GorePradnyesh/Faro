@@ -12,8 +12,19 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class UserFriendListHandler {
     private static UserFriendListHandler userFriendListHandler = null;
+    public UserFriendAdapter userFriendAdapter;
 
-    public static UserFriendListHandler getInstance(){
+    /*
+    * Map of friends needed to access friends downloaded from the server in O(1) time. The Key to the
+    * Map is the emailID  which returns the MinUser as the value.
+    */
+    private Map<String, MinUser> friendMap = new ConcurrentHashMap<>();
+
+    private static String TAG = "UserFriendListHandler";
+
+    private UserFriendListHandler(){}
+
+    public static UserFriendListHandler getInstance() {
         if (userFriendListHandler != null){
             return userFriendListHandler;
         }
@@ -26,24 +37,12 @@ public class UserFriendListHandler {
         }
     }
 
-    private UserFriendListHandler(){}
-
-    public UserFriendAdapter userFriendAdapter;
-
-    /*
-    * Map of friends needed to access friends downloaded from the server in O(1) time. The Key to the
-    * Map is the emailID  which returns the MinUser as the value.
-    */
-    private Map<String, MinUser> friendMap = new ConcurrentHashMap<>();
-
-    private static String TAG = "UserFriendListHandler";
-
-    private void addFriendToList(MinUser minUser){
+    private void addFriendToList(MinUser minUser) {
         userFriendAdapter.insert(minUser, 0);
         userFriendAdapter.notifyDataSetChanged();
     }
 
-    public void addFriendToListAndMap(MinUser minUser){
+    public void addFriendToListAndMap(MinUser minUser) {
         /*
          * If the received minUser is already present in the local database, then we need to delete that and
          * update it with the newly received minUser.
@@ -60,9 +59,9 @@ public class UserFriendListHandler {
         }
     }
 
-    public void removeFriendFromListAndMap(String emailID){
+    public void removeFriendFromListAndMap(String emailID) {
         MinUser minUser = friendMap.get(emailID);
-        if (minUser == null){
+        if (minUser == null) {
             return;
         }
         userFriendAdapter.list.remove(minUser);
@@ -70,12 +69,13 @@ public class UserFriendListHandler {
         friendMap.remove(emailID);
     }
 
-    public void clearFriendListAndMap(){
-        if (userFriendAdapter != null){
+    public void clearFriendListAndMap() {
+        if (userFriendAdapter != null) {
             userFriendAdapter.list.clear();
             userFriendAdapter.notifyDataSetChanged();
         }
-        if (friendMap != null){
+
+        if (friendMap != null) {
             friendMap.clear();
         }
     }
@@ -89,23 +89,24 @@ public class UserFriendListHandler {
         String myUserId = faroUserContext.getEmail();
 
         //TODO Cache my info and then retrieve FirstName and Last Name from there
-        if (emailID.equals(myUserId)){
+        if (emailID.equals(myUserId)) {
             return emailID;
         }
+
         MinUser minUser = friendMap.get(emailID);
         if (minUser != null) {
             friendFirstName = minUser.getFirstName();
             friendLastName = minUser.getLastName();
             if (friendLastName != null) {
                 friendFullName = friendFirstName + " " + friendLastName;
-            }else{
+            } else {
                 friendFullName = friendFirstName;
             }
         }
         return friendFullName;
     }
 
-    public MinUser getMinUserCloneFromMap(String emailID){
+    public MinUser getMinUserCloneFromMap(String emailID) {
         MinUser minUser = friendMap.get(emailID);
         Gson gson = new Gson();
         String json = gson.toJson(minUser);

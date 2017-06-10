@@ -13,24 +13,26 @@ import com.zik.faro.persistence.datastore.data.user.FriendRelationDo;
 
 public class FriendManagement {
 	
-	public static void createFriendRelation(final String existingUserId, final String friendId) throws IllegalDataOperation, DataNotFoundException{
+	public static FriendRelationDo createFriendRelation(final String existingUserId, final String friendId) throws IllegalDataOperation, DataNotFoundException {
 		
         
         // Create friend relation between user and new friend
     	// Create relation only if it does not exist.
     	// This method is invoked by "Invite Friend API and "Add Friend To An Event API"
     	try {
-			FriendRelationDatastoreImpl.loadFriendRelation(existingUserId,friendId);
+			return FriendRelationDatastoreImpl.loadFriendRelation(existingUserId,friendId);
 		} catch (DataNotFoundException e) {
 			// Either friend not a FaroUser or not user's friend. 
-			if(!UserManagement.isExistingUser(friendId)){
+			if (!UserManagement.isExistingUser(friendId)) {
 				// Create basic user with email and inviteStatus as INVITED(default)
 				FaroUser friend = new FaroUser();
 				friend.setEmail(friendId);
 				UserManagement.storeFaroUser(friendId, friend);
 				//TODO: Send out email
 			}
+
 			storeFriendRelation(existingUserId,	friendId);
+            return FriendRelationDatastoreImpl.loadFriendRelation(existingUserId,friendId);
 		} 
     }
 	

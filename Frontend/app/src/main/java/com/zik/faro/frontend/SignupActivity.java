@@ -16,6 +16,8 @@ import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
@@ -23,6 +25,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
@@ -32,6 +35,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.internal.http.HttpConnection;
+import com.zik.faro.data.MinUser;
 import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
@@ -39,8 +43,14 @@ import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 import com.zik.faro.frontend.faroservice.auth.TokenCache;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.text.MessageFormat;
+import java.util.List;
 
 /**
  * Created by granganathan on 1/24/16.
@@ -112,7 +122,7 @@ public class SignupActivity extends Activity {
 
         // Setup the facebook signup/connect with button
         LoginButton fbLoginButton = (LoginButton) findViewById(R.id.fb_signup_button);
-        fbLoginButton.setReadPermissions("email", "public_profile");
+        fbLoginButton.setReadPermissions("email", "public_profile", "user_photos", "user_friends");
         fbLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -322,6 +332,51 @@ public class SignupActivity extends Activity {
                 TokenCache.getTokenCache().setToken(token);
                 FaroUserContext faroUserContext = FaroUserContext.getInstance();
                 faroUserContext.setEmail(firebaseUser.getEmail());
+
+                // Find all Facebook friends who are also Faro users and set up friend relation with them
+                FbGraphApiService fbGraphApiService = new FbGraphApiService();
+                fbGraphApiService.findFacebookFriends(new GraphRequest.Callback() {
+                    public void onCompleted(GraphResponse response) {
+                        // handle the result
+                        if (response.getError() == null) {
+                            JSONObject jsonObject = response.getJSONObject();
+                            Log.i(TAG, MessageFormat.format("jsonObject = {0}", jsonObject));
+                            try {
+                                JSONArray friendsArray = jsonObject.getJSONArray("data");
+                                List<String> friendIds = Lists.newArrayList();
+                                if (friendsArray != null) {
+                                    for (int i = 0; i < friendsArray.length(); i++) {
+                                        JSONObject friend = friendsArray.getJSONObject(i);
+                                        String firstName = friend.getString("first_name");
+                                        String lastName = friend.getString("last_name");
+                                        String id = friend.getString("id");
+                                        friendIds.add(id);
+
+                                        Log.i(TAG, MessageFormat.format("friend first_name = {0}, last_name = {1}, id = {2}",
+                                                firstName, lastName, id));
+                                    }
+
+                                    // Setup friend relation with all of these friends
+                                    if (!friendIds.isEmpty()) {
+                                        serviceHandler.getFriendsHandler().inviteFacebookFriends(new BaseFaroRequestCallback<List<MinUser>>() {
+                                            @Override
+                                            public void onFailure(Request request, IOException ex) {
+                                                Log.e(TAG, "failed to establish friend relation with facebook friends");
+                                            }
+
+                                            @Override
+                                            public void onResponse(List<MinUser> minUsers, HttpError error) {
+                                                Log.i(TAG, "successfully established friend relation with facebook friends");
+                                            }
+                                        }, friendIds);
+                                    }
+                                }
+                            } catch (JSONException e) {
+                                Log.e(TAG, "Error processing response for friends list", e);
+                            }
+                        }
+                    }
+                });
 
                 // Go to event list page
                 startActivity(appLandingPageIntent);

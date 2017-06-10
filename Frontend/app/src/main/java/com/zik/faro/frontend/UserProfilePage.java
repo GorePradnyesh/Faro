@@ -5,17 +5,14 @@ import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.zik.faro.data.MinUser;
 import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 
 public class UserProfilePage extends AppCompatActivity {
-
     private String userName;
     private String userEmailID;
     private MinUser cloneMinUser;
-
-
-
 
     private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
 
@@ -34,15 +31,20 @@ public class UserProfilePage extends AppCompatActivity {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             userEmailID = extras.getString("userEmailID");
-            if (userEmailID.equals(myUserId)){
+            if (userEmailID.equals(myUserId)) {
                 //TOdo: Store my User's Fullname in faroUser context
                 userName = userEmailID;
-            }else{
+            } else {
                 cloneMinUser = userFriendListHandler.getMinUserCloneFromMap(userEmailID);
                 userName = userFriendListHandler.getFriendFullNameFromID(cloneMinUser.getEmail());
             }
 
+            // TODO : Load the user's profile picture
+            /*Glide.with(getApplicationContext())
+                    .load((cloneMinUser.getPictureUrl() != null) ? cloneMinUser.getPictureUrl() : R.drawable.user_pic)
+                    .into((userProfilePicture));*/
             userProfilePicture.setImageResource(R.drawable.user_pic);
+
             userNameTextView.setText(userName);
             userEmailIDTextView.setText("Email: " + userEmailID);
         }

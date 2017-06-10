@@ -1,15 +1,17 @@
 package com.zik.faro;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import java.io.IOException;
-import java.io.StringWriter;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.Principal;
+import java.security.interfaces.RSAPrivateKey;
 import java.util.Calendar;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.ws.rs.core.MediaType;
@@ -19,10 +21,20 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
+import com.google.api.client.util.ArrayMap;
+import com.google.common.collect.Maps;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseCredentials;
+import com.google.firebase.auth.FirebaseToken;
+import com.google.firebase.tasks.Task;
+import com.google.firebase.tasks.Tasks;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.Location;
 import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.functional.FunctionalEventTest;
+import org.assertj.core.util.Lists;
 import org.codehaus.jackson.Version;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.module.SimpleModule;
@@ -42,11 +54,23 @@ public class TestHelper {
     private static final String HOSTNAME_PROPERTY = "testHostname";
     private static final String PORT_PROPERTY = "port";
     private static SimpleModule simpleModule = new SimpleModule("SimpleModule", new Version(1,0,0,null));
-    static{
+
+    static {
     	simpleModule.addSerializer(Calendar.class, new CustomDateSerializer());
     	mapper.registerModule(simpleModule);
     }
-    
+
+    public static void initializeFirebaseAdminSdk() throws IOException {
+        // Initialize the Firebase Admin SDK
+        // use the path to serviceAccountKey json
+        FileInputStream serviceAccount = new FileInputStream(new File("/Users/gaurav/Projects/Faro/Backend/src/main/resources/faro-56043-firebase-adminsdk-out3y-192c0b32ad.json"));
+        FirebaseOptions options = new FirebaseOptions.Builder()
+                .setCredential(FirebaseCredentials.fromCertificate(serviceAccount))
+                .setDatabaseUrl("https://faro-56043.firebaseio.com/")
+                .build();
+
+        FirebaseApp.initializeApp(options);
+    }
     
     public static String getJsonRep(Object object) throws IOException {
         return mapper.writeValueAsString(object);
@@ -211,7 +235,77 @@ public class TestHelper {
         Assert.assertNotNull(response);
         return response;
     }
-    
+
+    public static TestFaroUser createTestFaroUser() throws Exception {
+        String newRandomEmail = UUID.randomUUID().toString() + "@gmail.com";
+        FaroUser newUser = new FaroUser(newRandomEmail,
+                "sachin",
+                "ramesh",
+                "tendulkar",
+                "splitwise",
+                null,
+                null);
+
+        return createTestFaroUser(new FaroSignupDetails(newUser, "hero123#"));
+
+    }
+
+    // TODO: Complete the creation workflow for facebook test user for unit/functional tests
+    public static TestFaroUser createTestFaroFacebookUser() throws Exception {
+        String newRandomEmail = UUID.randomUUID().toString() + "@gmail.com";
+        FaroUser newUser = new FaroUser(newRandomEmail,
+                "sachin",
+                "ramesh",
+                "tendulkar",
+                "splitwise",
+                null,
+                null);
+        /**
+         *
+         "firebase": {
+            "identities": {
+                "facebook.com": ["105332620054545"],
+                "email": ["jawahar_zzrbfdm_vyas@tfbnw.net"]
+            },
+            "sign_in_provider": "facebook.com"
+         }
+
+
+         */
+
+        String fbUserId = UUID.randomUUID().toString();
+
+        Map<String, Object> claims = Maps.newHashMap();
+
+        ArrayMap<String, Object> identities = new ArrayMap<>();
+        identities.put("facebook.com", Lists.newArrayList(fbUserId));
+
+        ArrayMap<String, Object> firebaseClaims = new ArrayMap<>();
+        firebaseClaims.put("sign_in_provider", "facebook.com");
+        firebaseClaims.put("identities", identities);
+
+        claims.put("firebase", firebaseClaims);
+
+        Task<String> task = FirebaseAuth.getInstance().createCustomToken(fbUserId);
+        Tasks.await(task);
+
+        assertThat(task.isSuccessful()).isTrue();
+
+        String firebaseToken = task.getResult();
+        assertThat(firebaseToken).isNotNull();
+
+        return createTestFaroUser(new FaroSignupDetails(newUser, null, firebaseToken));
+    }
+
+    public static TestFaroUser createTestFaroUser(FaroSignupDetails faroSignupDetails) throws Exception {
+        ClientResponse clientResponse = signupUser(faroSignupDetails);
+        String token = clientResponse.getEntity(String.class);
+
+        return new TestFaroUser(faroSignupDetails.getFaroUser(), token);
+    }
+
+
+
     public static String createUserAndGetToken() throws Exception{
     	String newRandomEmail = UUID.randomUUID().toString() + "@gmail.com";
         FaroUser newUser = new FaroUser(newRandomEmail,

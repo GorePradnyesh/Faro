@@ -30,7 +30,9 @@ public class BaseFaroOKHttpWrapper {
     BaseFaroOKHttpWrapper(final URL baseUrl, final String pathPrefix) {
         this.baseUrl = baseUrl;
         this.baseHandlerURL = this.constructUrl(this.baseUrl, pathPrefix);
-        this.httpClient = getOkHttpClient();
+        httpClient = getOkHttpClient();
+        //httpClient.setConnectTimeout(600, TimeUnit.SECONDS);
+        //httpClient.setReadTimeout(600, TimeUnit.SECONDS);
     }
     
     public URL constructUrl(final URL baseUrl, final String pathPrefix) {

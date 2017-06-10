@@ -1,7 +1,6 @@
 package com.zik.faro.data;
 
 public class MinUser {
-    
 	private String firstName;
     private String lastName;
     private String email;     

@@ -74,6 +74,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "480570287743-4fq5okrc554sbtg8nc23n4egoasrh38n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zik.faro.frontend",
+            "certificate_hash": "0b47964abcac85bef9fa378b0124530cec338eec"
+          }
+        },
+        {
           "client_id": "480570287743-a1dk732b6g0euat6tpm5ie2e8qneco4u.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

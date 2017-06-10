@@ -31,31 +31,39 @@ public final class Constants {
     public static final String IMAGE_ID_PATH_PARAM_STRING                       = "/{" + IMAGE_ID_PATH_PARAM + "}";
 
 
-    //---- Path Constants ---- //
+    // ---- Path Constants ---- //
+
+    // --- External expense managemtn path constants --- //
     public static final String EXPENSE_ID_PATH_CONST                            = "/expenseIds";
     public static final String EXPENSE_PATH_CONST                               = "/expense";
     public static final String CREATE_EXPENSE_GROUP_PATH_CONST                  = "/createExpenseGroup";
 
+    // ---- Friend Invitation path constants --- //
     public static final String FRIENDS_PATH_CONST                               = "/friends";
+    public static final String FACEBOOK_FRIENDS_PATH_CONST                      = "/fbFriendsInvite";
     public static final String INVITE_PATH_CONST                                = "/invite";
     public static final String REMOVE_PATH_CONST                                = "/remove";
 
+    // --- User profile path constants --- //
     public static final String PROFILE_PATH_CONST                               = "/profile";
     public static final String PROFILE_CREATE_PATH_CONST                        = "/create";
 
+    // --- Feedback path constant --- //
     public static final String FEEDBACK_PATH_CONST                              = "/feedback";
 
+    // --- Event path constants --- //
     public static final String EVENT_PATH_CONST                                 = "/event";
-    public static final String EVENTS_PATH_CONST                                 = "/events";
+    public static final String EVENTS_PATH_CONST                                = "/events";
     public static final String EVENT_DETAILS_PATH_CONST                         = "/details";
     public static final String EVENT_INVITEES_PATH_CONST                        = "/invitees";
     public static final String EVENT_DISABLE_CONTROL_PATH_CONST                 = "/disableControl";
     public static final String EVENT_REMOVE_ATTENDEE_PATH_CONST                 = "/removeAttendee";
-    public static final String UPDATE_INVITE_STATUS_PATH_CONST                 = "/updateInviteStatus";
+    public static final String UPDATE_INVITE_STATUS_PATH_CONST                  = "/updateInviteStatus";
     public static final String EVENT_CREATE_PATH_CONST                          = "/create";
     public static final String EVENT_ADD_FRIENDS_CONST							= "/add";
     public static final String EVENT_UPDATE_PATH_CONST							= "/updateEvent";
 
+    // --- Activity path constants --- //
     public static final String ACTIVITY_PATH_CONST                              = "/activity";
     public static final String ACTIVITIES_PATH_CONST                            = "/activities";
     public static final String ACTIVITY_UPDATE_PATH_CONST                       = "/update";
@@ -68,7 +76,7 @@ public final class Constants {
     public static final String ASSIGNMENT_PENDING_COUNT_PATH_CONST              = "/pending/count";
     public static final String ASSIGNMENT_DELETE_PATH_CONST                     = "/pending/count";
 
-    // ---- poll path constants ---- //
+    // ---- Poll path constants ---- //
     public static final String POLL_PATH_CONST                                  = "/poll";
     public static final String POLLS_PATH_CONST                                 = "/polls";
     public static final String POLL_UNVOTED_COUNT_CONST                         = "/unvoted/count";
@@ -78,16 +86,16 @@ public final class Constants {
     public static final String POLL_ADD_OPTION_PATH_CONST                       = "/addOption";
     public static final String POLL_CLOSE_PATH_CONST                            = "/close";
 
-    // ---- images path constants ---- //
+    // ---- Images path constants ---- //
     public static final String IMAGE_PATH_CONST                                 = "/image";
     public static final String IMAGES_PATH_CONST                                = "/images";
     public static final String IMAGES_CREATE_CONST                              = "/create";
 
-    // ---- misc constants ---- //
+    // ---- Misc constants ---- //
     public static final String ALL												= "all";
     public static final int MAX_ITEMS_TO_FETCH_FROM_DATASTORE					= 20;
 
-    // -- authentication path constants -- //
+    // -- Authentication path constants -- //
     public static final String AUTH_PATH_CONST                                  = "/nativeLogin";
     public static final String AUTH_LOGIN_PATH_CONST                            = "/login";
     public static final String AUTH_LOGOUT_PATH_CONST                           = "/logout";

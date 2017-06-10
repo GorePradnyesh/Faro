@@ -22,16 +22,26 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 
+import com.facebook.AccessToken;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.HttpMethod;
+import com.google.common.collect.Lists;
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.MinUser;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.List;
 
 public class FriendListFragment extends Fragment {
-
     private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
 
     static EventListHandler eventListHandler = EventListHandler.getInstance();
@@ -40,6 +50,8 @@ public class FriendListFragment extends Fragment {
 
     private RelativeLayout popUpRelativeLayout;
 
+    private Context mContext;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {super.onCreate(savedInstanceState);}
 
@@ -47,31 +59,30 @@ public class FriendListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_friend_list, container, false);
-        ImageButton inviteFriend = (ImageButton)view.findViewById(R.id.inviteFriend);
-        inviteFriend.setImageResource(R.drawable.plus);
+        ImageButton inviteFriendButton = (ImageButton)view.findViewById(R.id.inviteFriend);
+        inviteFriendButton.setImageResource(R.drawable.plus);
 
         ListView friendListView  = (ListView)view.findViewById(R.id.friendList);
         friendListView.setBackgroundColor(Color.BLACK);
         friendListView.setAdapter(userFriendListHandler.userFriendAdapter);
 
-        final Context mContext = this.getActivity();
+        mContext = getActivity();
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(getActivity()));
 
         friendListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                final Intent UserProfilePageIntent = new Intent(getActivity(), UserProfilePage.class);
+                final Intent userProfilePageIntent = new Intent(getActivity(), UserProfilePage.class);
                 MinUser minUser = (MinUser)parent.getItemAtPosition(position);
-                UserProfilePageIntent.putExtra("userEmailID", minUser.getEmail());
-                startActivity(UserProfilePageIntent);
+                userProfilePageIntent.putExtra("userEmailID", minUser.getEmail());
+                startActivity(userProfilePageIntent);
             }
         });
 
-
         popUpRelativeLayout = (RelativeLayout) view.findViewById(R.id.friendListFragment);
 
-        inviteFriend.setOnClickListener(new View.OnClickListener() {
+        inviteFriendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 LayoutInflater layoutInflater =
@@ -134,7 +145,7 @@ public class FriendListFragment extends Fragment {
                                     };
                                     Handler mainHandler = new Handler(mContext.getMainLooper());
                                     mainHandler.post(myRunnable);
-                                }else {
+                                } else {
                                     Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                                 }
                             }
@@ -143,6 +154,119 @@ public class FriendListFragment extends Fragment {
                 });
             }
         });
+
+        //addFbFriendsToListView();
+
         return view;
+    }
+
+    private void addFbFriendsToListView() {
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        Log.i(TAG, MessageFormat.format("accessToken = {0}", accessToken));
+
+        if (accessToken != null) {
+            Bundle params = new Bundle();
+            params.putString("fields", "email,id,first_name,last_name,picture");
+
+            FbGraphApiService fbGraphApiService = new FbGraphApiService();
+
+            fbGraphApiService.findFacebookFriends(new GraphRequest.Callback() {
+                public void onCompleted(GraphResponse response) {
+                            /* handle the result */
+                    if (response.getError() == null) {
+                        JSONObject jsonObject = response.getJSONObject();
+                        Log.i(TAG, MessageFormat.format("jsonObject = {0}", jsonObject));
+                        try {
+                            JSONArray friendsArray = jsonObject.getJSONArray("data");
+                            final List<MinUser> fbFriendsList = Lists.newArrayList();
+                            if (friendsArray != null) {
+                                for (int i = 0; i < friendsArray.length(); i++) {
+                                    JSONObject friend = friendsArray.getJSONObject(i);
+                                    String firstName = friend.getString("first_name");
+                                    String lastName = friend.getString("last_name");
+                                    String id = friend.getString("id");
+                                    JSONObject pictureData = friend.getJSONObject("picture").getJSONObject("data");
+                                    String pictureUrl = pictureData.getString("url");
+
+                                    // TODO : Exchange the fb user id with email
+
+                                    Log.i(TAG, MessageFormat.format("friendName = {0}, last_name = {1}, id = {2}",
+                                            firstName, lastName, id));
+
+                                    MinUser minUser = new MinUser(firstName, lastName, id);
+                                    minUser.setPictureUrl(pictureUrl);
+                                    fbFriendsList.add(minUser);
+                                }
+
+                                Handler mainHandler = new Handler(mContext.getMainLooper());
+                                mainHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        for (MinUser fbFriend : fbFriendsList) {
+                                            userFriendListHandler.addFriendToListAndMap(fbFriend);
+                                        }
+                                    }
+                                });
+                            }
+                        } catch (JSONException e) {
+                            Log.e(TAG, "Error processing response for friends list", e);
+                        }
+                    }
+                }
+            });
+
+            GraphRequest request = new GraphRequest(AccessToken.getCurrentAccessToken(),
+                    "/me/friends",
+                    null,
+                    HttpMethod.GET,
+                    new GraphRequest.Callback() {
+                        public void onCompleted(GraphResponse response) {
+                            /* handle the result */
+                            if (response.getError() == null) {
+                                JSONObject jsonObject = response.getJSONObject();
+                                Log.i(TAG, MessageFormat.format("jsonObject = {0}", jsonObject));
+                                try {
+                                    JSONArray friendsArray = jsonObject.getJSONArray("data");
+                                    final List<MinUser> fbFriendsList = Lists.newArrayList();
+                                    if (friendsArray != null) {
+                                        for (int i = 0; i < friendsArray.length(); i++) {
+                                            JSONObject friend = friendsArray.getJSONObject(i);
+                                            String firstName = friend.getString("first_name");
+                                            String lastName = friend.getString("last_name");
+                                            String id = friend.getString("id");
+                                            JSONObject pictureData = friend.getJSONObject("picture").getJSONObject("data");
+                                            String pictureUrl = pictureData.getString("url");
+
+                                            // TODO : Exchange the fb user id with email
+
+                                            Log.i(TAG, MessageFormat.format("friendName = {0}, last_name = {1}, id = {2}",
+                                                    firstName, lastName, id));
+
+                                            MinUser minUser = new MinUser(firstName, lastName, id);
+                                            minUser.setPictureUrl(pictureUrl);
+                                            fbFriendsList.add(minUser);
+                                        }
+
+                                        Handler mainHandler = new Handler(mContext.getMainLooper());
+                                        mainHandler.post(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                for (MinUser fbFriend : fbFriendsList) {
+                                                    userFriendListHandler.addFriendToListAndMap(fbFriend);
+                                                }
+                                            }
+                                        });
+                                    }
+                                } catch (JSONException e) {
+                                    Log.e(TAG, "Error processing response for friends list", e);
+                                }
+                            }
+                        }
+                    }
+            );
+
+            request.setParameters(params);
+            request.executeAsync();
+        }
     }
 }

@@ -164,7 +164,7 @@ public class LoginActivity extends Activity {
         // Set up the fblogin button
         // Setup the facebook signup/connect with button
         fbLoginButton = (LoginButton) findViewById(R.id.fb_login_button);
-        fbLoginButton.setReadPermissions("email", "public_profile", "user_photos");
+        fbLoginButton.setReadPermissions("email", "public_profile", "user_photos", "user_friends");
         fbLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

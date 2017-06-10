@@ -110,7 +110,7 @@ public class FbGraphApiService {
         if (albumId == null) {
             Log.i(TAG, "Album does not exist. Must create one. First check permissions to create");
             if (!accessToken.getPermissions().contains("user_photos")) {
-
+                // TODO : Must initiate permission request
             }
 
             // Create new album
@@ -330,7 +330,6 @@ public class FbGraphApiService {
                     Log.i(TAG, "Get image URLs of the uploaded photos ");
                     List<FaroImageBase> fbImages = obtainImageDownloadLinks(photoIdsMap, event);
 
-
                     // Store the image urls and image metadata on app server
                     FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
@@ -355,7 +354,44 @@ public class FbGraphApiService {
                 return Lists.newArrayList();
             }
         });
-
     }
 
+    public void findFacebookFriends(GraphRequest.Callback callback) {
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        Log.i(TAG, MessageFormat.format("accessToken = {0}", accessToken));
+
+        if (accessToken != null) {
+            Bundle params = new Bundle();
+            params.putString("fields", "email,id,first_name,last_name,picture");
+
+            GraphRequest request = new GraphRequest(AccessToken.getCurrentAccessToken(),
+                    "/me/friends",
+                    params,
+                    HttpMethod.GET,
+                    callback);
+
+            request.executeAsync();
+        }
+    }
+
+    /*public <T> void processGraphResponse(GraphResponse response, Class resultClass) {
+        try {
+            JSONArray jsonArray = response.getJSONObject().getJSONArray("data");
+
+            List<T> result = Lists.newArrayList();
+            if (jsonArray != null) {
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    result.add((T) convertJson(jsonArray.getJSONObject(i), resultClass));
+
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public <T> T convertJson(JSONObject jsonObject, Class resultClass) throws JSONException {
+        Gson gson = new Gson();
+        return (T) gson.fromJson(jsonObject.toString(), resultClass);
+    }*/
 }

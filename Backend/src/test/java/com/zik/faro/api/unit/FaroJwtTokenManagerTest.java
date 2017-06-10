@@ -2,16 +2,12 @@ package com.zik.faro.api.unit;
 
 import com.auth0.jwt.internal.org.apache.commons.codec.binary.Base64;
 import com.google.api.client.util.ArrayMap;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseCredentials;
 import com.google.firebase.auth.FirebaseToken;
 import com.google.firebase.tasks.OnSuccessListener;
 import com.google.firebase.tasks.Task;
 import com.google.firebase.tasks.Tasks;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import com.zik.faro.TestHelper;
 import com.zik.faro.auth.jwt.FaroJwtClaims;
 import com.zik.faro.auth.jwt.FaroJwtTokenManager;
 import com.zik.faro.auth.jwt.JwtTokenValidationException;
@@ -19,13 +15,10 @@ import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.SignatureException;
 import java.text.MessageFormat;
-import java.util.Map;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -41,18 +34,10 @@ public class FaroJwtTokenManagerTest {
     @Test
     public void firebaseAuthVerifyTokenTest() throws IOException {
         // Example token obtained from firebase authentication on android
-        String token = "eyJhbGciOiJSUzI1NiIsImtpZCI6IjVlYjY1M2NkNWVmYzFhZjE4MjkwM2ZmMTYzYjg3OTY4OTkxNWMyYWQifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vZmFyby01NjA0MyIsIm5hbWUiOiJOYWt1bCBTaGFoIiwicGljdHVyZSI6Imh0dHBzOi8vc2NvbnRlbnQueHguZmJjZG4ubmV0L3YvdDEuMC0xL3MxMDB4MTAwLzEzNzk4NDFfMTAxNTAwMDQ1NTI4MDE5MDFfNDY5MjA5NDk2ODk1MjIxNzU3X24uanBnP29oPWEwODJlMGYwMmFmY2E1ZjAzYWI1NzBjNzE3MzJiODcwJm9lPTU5QjMwMTk3IiwiYXVkIjoiZmFyby01NjA0MyIsImF1dGhfdGltZSI6MTQ5NTkzMTA4NSwidXNlcl9pZCI6ImRWbWtiYXVSOXhhblNuRFFQYkpTMG1xSUJYQzIiLCJzdWIiOiJkVm1rYmF1Ujl4YW5TbkRRUGJKUzBtcUlCWEMyIiwiaWF0IjoxNDk1OTMxMDg2LCJleHAiOjE0OTU5MzQ2ODYsImVtYWlsIjoibmFrdWxfeGtqamtsbV9zaGFoQHRmYm53Lm5ldCIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiZmlyZWJhc2UiOnsiaWRlbnRpdGllcyI6eyJmYWNlYm9vay5jb20iOlsiMTAyODU1NzMwMzAzNTE3Il0sImVtYWlsIjpbIm5ha3VsX3hramprbG1fc2hhaEB0ZmJudy5uZXQiXX0sInNpZ25faW5fcHJvdmlkZXIiOiJmYWNlYm9vay5jb20ifX0.x-BCZyO6DGvILYE9g16jrrgTi6OIQsdpRbQPFwOhEkYhh6tTOcQTwuf47IKbwaDlxKo8k2ThvtLGd45U6er8-2HmUkv-5CySIghs63jQtA4hLEo9yB55ETrx5-CXbllAqx5MZ-xQ3r_-VGmkRVILxANp8dFF1znHpqc-xdhLzunylcBmzrdfPGEWto8MPXRLt9_b6nqDS_p27wujmC8Gaju01Yi8myr80N3BedJrWh_lY8dq-2nzEqGEmoFxSdj54SEdwiYN0amr6QvWxGrbASAzxe-rgQY19O8AZhtwi8Q63lpECc8x2d4_Joe8uWp4vpLBZZgZzLkgxxE6wT1bsA";
-        // Initialize the Firebase Admin SDK
-        FileInputStream serviceAccount = null;
+        String token = "eyJhbGciOiJSUzI1NiIsImtpZCI6ImViMmE0MTc4YWJmZmQwOThhMzhhNGFmOWFlNWYwYWEzMDY3MjhhY2EifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vZmFyby01NjA0MyIsIm5hbWUiOiJKYXdhaGFyIFZ5YXMiLCJwaWN0dXJlIjoiaHR0cHM6Ly9zY29udGVudC54eC5mYmNkbi5uZXQvdi90MS4wLTEvczEwMHgxMDAvMTAzNTQ2ODZfMTAxNTAwMDQ1NTI4MDE4NTZfMjIwMzY3NTAxMTA2MTUzNDU1X24uanBnP29oPTFmNGM4ODYxNTYzYmY2ZDk2NTc3NDUyZjQyNjQyNGEzJm9lPTU5QjRGNDczIiwiYXVkIjoiZmFyby01NjA0MyIsImF1dGhfdGltZSI6MTQ5NjUzMjAyNiwidXNlcl9pZCI6IjR4cUwwcld5dUlmWGRXWDBSTDhFSUZ1dzJrNzMiLCJzdWIiOiI0eHFMMHJXeXVJZlhkV1gwUkw4RUlGdXcyazczIiwiaWF0IjoxNDk2NTMyMDI3LCJleHAiOjE0OTY1MzU2MjcsImVtYWlsIjoiamF3YWhhcl96enJiZmRtX3Z5YXNAdGZibncubmV0IiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7ImZhY2Vib29rLmNvbSI6WyIxMDUzMzI2MjAwNTQ1NDUiXSwiZW1haWwiOlsiamF3YWhhcl96enJiZmRtX3Z5YXNAdGZibncubmV0Il19LCJzaWduX2luX3Byb3ZpZGVyIjoiZmFjZWJvb2suY29tIn19.t8jy6E3lTJYNBZ53fpv0NclQ2JS_-bGP5gqOSpPSrqMXIVcHlwK2iMbJ8DZ8qOH_5GTvZWy_Td3_2aUiaaVaT5G6A-R8dwfJ_m1nBQ7eu8j4kjHVtrQFxNKEzXlNmNn49Vn3tvrthaRcu4D1pegP6OKGzI4w3X-Wo9oP4n4Gz2t6n7_RJ8-_Tj8z_9zzI7XtqIIZyCUjBIQh-BnO5Ewj9njsu0GEXisMGSxZCghySQ8bRYad2ioWjcd0Td3RF6PACHFqZwx51ymlIfcNrfw0VoF0w7THkW1q-SLdiF-cqAyQhFsmOmZIAaK4ufsziINei3xJCn7vLFq54YjqkTXTgw";
 
-        // use the path to serviceAccountKey json
-        serviceAccount = new FileInputStream(new File("faro-56043-firebase-adminsdk-out3y-192c0b32ad.json"));
-        FirebaseOptions options = new FirebaseOptions.Builder()
-                .setCredential(FirebaseCredentials.fromCertificate(serviceAccount))
-                .setDatabaseUrl("https://faro-56043.firebaseio.com/")
-                .build();
-
-        FirebaseApp.initializeApp(options);
+        // Init firebase
+        TestHelper.initializeFirebaseAdminSdk();
 
         // Verify the token
         Task<FirebaseToken> task = FirebaseAuth.getInstance().verifyIdToken(token)

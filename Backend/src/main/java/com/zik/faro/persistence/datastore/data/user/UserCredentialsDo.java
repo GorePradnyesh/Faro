@@ -18,6 +18,8 @@ public class UserCredentialsDo {
     private String encryptedPassword;
     private String userCredsUUid;
     private AuthProvider authProvider;
+    @Index
+    private String authProviderUserId;
 
     private UserCredentialsDo() {}
 
@@ -30,10 +32,11 @@ public class UserCredentialsDo {
         this.userCredsUUid = userCredsUUid;
     }
 
-    public UserCredentialsDo(String email, String userCredsUUid, AuthProvider authProvider) {
+    public UserCredentialsDo(String email, String userCredsUUid, AuthProvider authProvider, String authProviderUserId) {
         this.email = email;
         this.userCredsUUid = userCredsUUid;
         this.authProvider = authProvider;
+        this.authProviderUserId = authProviderUserId;
     }
 
     public String getEncryptedPassword() {
@@ -66,5 +69,13 @@ public class UserCredentialsDo {
 
     public void setAuthProvider(AuthProvider authProvider) {
         this.authProvider = authProvider;
+    }
+
+    public void setAuthProviderUserId(String authProviderUserId) {
+        this.authProviderUserId = authProviderUserId;
+    }
+
+    public String getAuthProviderUserId() {
+        return authProviderUserId;
     }
 }

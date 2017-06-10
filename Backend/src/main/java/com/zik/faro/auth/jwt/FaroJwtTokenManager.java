@@ -16,16 +16,19 @@ import com.zik.faro.persistence.datastore.data.user.AuthProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.CheckForNull;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
 
 /**
  * Created by granganathan on 2/6/15.
@@ -181,6 +184,12 @@ public class FaroJwtTokenManager {
         }
     }
 
+    /**
+     * Get the auth provider from the given firebase token
+     * @param firebaseToken
+     * @return AuthProvider
+     */
+    @CheckForNull
     public static AuthProvider getAuthProvider(FirebaseToken firebaseToken) {
         String signInProvider = (String) ((ArrayMap<String, Object>) firebaseToken.getClaims().get("firebase")).get("sign_in_provider");
         if (signInProvider != null) {
@@ -195,5 +204,25 @@ public class FaroJwtTokenManager {
         }
 
         return null;
+    }
+
+    /**
+     * Get the authprovider given user id from the given firebase token and AuthProvider
+     * @param authProvider
+     * @param firebaseToken
+     * @return
+     */
+    @CheckForNull
+    public static String getAuthProviderUserId(AuthProvider authProvider, FirebaseToken firebaseToken) {
+        ArrayMap<String, Object> firebaseClaims = (ArrayMap<String, Object>) firebaseToken.getClaims().get("firebase");
+        ArrayMap<String, Object> identities = (ArrayMap<String, Object>) firebaseClaims.get("identities");
+
+        String userId = null;
+        if (AuthProvider.FACEBOOK.equals(authProvider)) {
+            List<String> identitiesList = (List<String>) identities.get("facebook.com");
+            userId = identitiesList.get(0);
+        }
+
+        return userId;
     }
 }
