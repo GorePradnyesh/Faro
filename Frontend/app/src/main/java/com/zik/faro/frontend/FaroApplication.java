@@ -20,7 +20,7 @@ public class FaroApplication extends Application {
     private String TAG = "FaroApplication";
     private static final String APP_SERVER_IP_KEY = "APP_SERVER_IP";
     private static final String MAX_IMAGES_UPLOAD_KEY = "MAX_IMAGES_UPLOAD";
-    private static final String BASE_URL_TEMPLATE = "http://{0}:8080/v1/";
+    private static final String BASE_URL_TEMPLATE = "http://{0}/v1/";
     private String appServerIP;
     private int maxImagesUpload;
     private String appServerBaseUrl;
