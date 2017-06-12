@@ -7,12 +7,12 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TabHost;
 import android.widget.TextView;
 
@@ -27,42 +27,52 @@ import java.io.IOException;
 import java.util.List;
 
 public class PollListPage extends Activity {
-    Intent EventLandingPage = null;
-    Intent OpenPollLandingPage = null;
-    Intent ClosedPollLandingPage = null;
-    static PollListHandler pollListHandler = PollListHandler.getInstance();
-    private static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static Event event;
-    private static String eventID = null;
+    private Intent PollLandingPageIntent = null;
+    private static PollListHandler pollListHandler = PollListHandler.getInstance();
+    private String eventID = null;
     private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
-
-    private static String TAG = "PollListPage";
+    private Intent CreateNewPoll = null;
+    private Bundle extras = null;
+    private TextView Poll = null;
+    private TabHost pollTabHost = null;
+    private ListView openPollsListView = null;
+    private ListView closedPollsListView = null;
+    private ImageButton createNewPoll = null;
+    private String TAG = "PollListPage";
+    private Context mContext = this;
+    private RelativeLayout pollListPageRelativeLayout = null;
+    private LinearLayout linlaHeaderProgress = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_poll_list_page);
 
-        EventLandingPage = new Intent(PollListPage.this, EventLandingPage.class);
-        OpenPollLandingPage = new Intent(PollListPage.this, OpenPollLandingPage.class);
-        ClosedPollLandingPage = new Intent(PollListPage.this, ClosedPollLandingPage.class);
-        final Intent CreateNewPoll = new Intent(PollListPage.this, CreateNewPoll.class);
+        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
-        Bundle extras = getIntent().getExtras();
-        if(extras == null) {
-            //TODO: Error condition. Handle it. Below code is incorrect
-            EventLandingPage.putExtra("eventID", event.getId());
-            startActivity(EventLandingPage);
-            finish();
-            return;
-        }
+        PollLandingPageIntent = new Intent(PollListPage.this, PollLandingPage.class);
+        CreateNewPoll = new Intent(PollListPage.this, CreateNewPoll.class);
+
+        extras = getIntent().getExtras();
+        if(extras == null) return; //TODO How to handle this case?
+
+        linlaHeaderProgress = (LinearLayout)findViewById(R.id.linlaHeaderProgress);
+        pollListPageRelativeLayout = (RelativeLayout) findViewById(R.id.pollListPageRelativeLayout);
+        pollListPageRelativeLayout.setVisibility(View.GONE);
 
         eventID = extras.getString("eventID");
-        event = eventListHandler.getEventCloneFromMap(eventID);
 
-        TextView Poll = (TextView)findViewById(R.id.polls);
+        getPollsFromServer();
+    }
+
+    private void setupPageDetails() {
+
+        linlaHeaderProgress.setVisibility(View.GONE);
+        pollListPageRelativeLayout.setVisibility(View.VISIBLE);
+
+        Poll = (TextView)findViewById(R.id.polls);
         //Poll.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-        TabHost pollTabHost = (TabHost)findViewById(R.id.polltabHost);
+        pollTabHost = (TabHost)findViewById(R.id.polltabHost);
         pollTabHost.setup();
 
         TabHost.TabSpec openTabSpec = pollTabHost.newTabSpec("openTab");
@@ -75,26 +85,23 @@ public class PollListPage extends Activity {
         closedTabSpec.setIndicator("Closed Polls");
         pollTabHost.addTab(closedTabSpec);
 
-        ListView openPollsListView  = (ListView)findViewById(R.id.openPollsList);
+        openPollsListView  = (ListView)findViewById(R.id.openPollsList);
         openPollsListView.setBackgroundColor(Color.BLACK);
 
-        ListView closedPollsListView  = (ListView)findViewById(R.id.closedPollsList);
+        closedPollsListView  = (ListView)findViewById(R.id.closedPollsList);
         closedPollsListView.setBackgroundColor(Color.BLACK);
 
-        openPollsListView.setAdapter(pollListHandler.openPollsAdapter);
-        closedPollsListView.setAdapter(pollListHandler.closedPollsAdapter);
+        openPollsListView.setAdapter(pollListHandler.getOpenPollAdapter(eventID, this));
+        closedPollsListView.setAdapter(pollListHandler.getClosedPollAdapter(eventID, this));
 
-
-        ImageButton createNewPoll = (ImageButton)findViewById(R.id.add_new_poll);
+        createNewPoll = (ImageButton)findViewById(R.id.add_new_poll);
         createNewPoll.setImageResource(R.drawable.plus);
-
-        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
         //Listener to go to the Create New Poll  Page for the poll selected in the "Open" list
         openPollsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                pollSelectedFromList(parent, position, OpenPollLandingPage);
+                pollSelectedFromList(parent, position, PollLandingPageIntent);
             }
         });
 
@@ -102,14 +109,14 @@ public class PollListPage extends Activity {
         closedPollsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                pollSelectedFromList(parent, position, ClosedPollLandingPage);
+                pollSelectedFromList(parent, position, PollLandingPageIntent);
             }
         });
 
         createNewPoll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(pollListHandler.getCombinedListSize() == PollListHandler.MAX_TOTAL_POLLS_PER_EVENT) {
+                if(pollListHandler.getCombinedListSize(eventID, mContext) == PollListHandler.MAX_TOTAL_POLLS_PER_EVENT) {
                     //DO NOT ALLOW NEW POLL CREATION
                 }else {
                     CreateNewPoll.putExtra("eventID", eventID);
@@ -117,10 +124,10 @@ public class PollListPage extends Activity {
                 }
             }
         });
+    }
 
-        final Context mContext = this;
-
-        //Based on eventID make API call to get Polls for this event
+    private void getPollsFromServer (){
+        //Based on eventID make API call to get Polls for this cloneEvent
         serviceHandler.getPollHandler().getPolls(new BaseFaroRequestCallback<List<com.zik.faro.data.Poll>>() {
             @Override
             public void onFailure(Request request, IOException ex) {
@@ -134,7 +141,8 @@ public class PollListPage extends Activity {
                         @Override
                         public void run() {
                             Log.i(TAG, "Successfully received polls from the server!!");
-                            pollListHandler.addDownloadedPollsToListAndMap(polls);
+                            pollListHandler.addDownloadedPollsToListAndMap(eventID, polls, mContext);
+                            setupPageDetails();
                         }
                     };
                     Handler mainHandler = new Handler(mContext.getMainLooper());
@@ -154,24 +162,8 @@ public class PollListPage extends Activity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_poll_landing_page, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+    public void onBackPressed() {
+        finish();
+        super.onBackPressed();
     }
 }

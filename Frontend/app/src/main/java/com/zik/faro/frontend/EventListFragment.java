@@ -12,7 +12,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TabHost;
 
 import com.squareup.okhttp.Request;
@@ -26,13 +28,21 @@ import com.zik.faro.frontend.faroservice.HttpError;
 import java.io.IOException;
 import java.util.List;
 
-public class EventListFragment extends Fragment{
-
-
-    static EventListHandler eventListHandler = EventListHandler.getInstance();
+public class EventListFragment extends Fragment {
+    private static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
     private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private static String TAG = "EventListFragment";
+
+    private boolean receivedEvents = false;
+    private boolean receivedFriends = false;
+
+    private RelativeLayout eventListFragmentRelativeLayout = null;
+    private LinearLayout linlaHeaderProgress = null;
+
+    private Context mContext = null;
+
+    private View fragmentView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -49,8 +59,38 @@ public class EventListFragment extends Fragment{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        fragmentView = inflater.inflate(R.layout.fragment_event_list, container, false);
 
-        View view = inflater.inflate(R.layout.fragment_event_list, container, false);
+        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(getActivity()));
+
+        receivedEvents = false;
+        receivedFriends = false;
+
+        mContext = this.getActivity();
+
+        linlaHeaderProgress = (LinearLayout)fragmentView.findViewById(R.id.linlaHeaderProgress);
+        eventListFragmentRelativeLayout = (RelativeLayout) fragmentView.findViewById(R.id.eventListFragmentRelativeLayout);
+        eventListFragmentRelativeLayout.setVisibility(View.GONE);
+
+        getEventsFromServer();
+
+        //Let this api call be on EventListFragment and not on FriendListFragment since this is where the
+        // global memory for friendlist is populated which is later used when inviting friends for
+        // events. If the user never goes to the FriendListFragment then this global memory would not be
+        // populated.
+        getFriendsFromServer();
+
+        return fragmentView;
+    }
+
+    private void setupPageDetails(View view) {
+
+        //Setup the page only after response for both eventlist and friendlist is received.
+        if (!(receivedFriends && receivedEvents)) return;
+
+        linlaHeaderProgress.setVisibility(View.GONE);
+        eventListFragmentRelativeLayout.setVisibility(View.VISIBLE);
+
         TabHost eventTabHost = (TabHost)view.findViewById(R.id.eventTabHost);
         eventTabHost.setup();
 
@@ -77,9 +117,7 @@ public class EventListFragment extends Fragment{
 
         final Intent eventLanding = new Intent(getActivity(), EventLandingPage.class);
 
-        final Context mContext = this.getActivity();
 
-        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(getActivity()));
 
         //Listener to go to the Event Landing Page for the event selected in the "Accepted" list
         theAcceptedListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -117,8 +155,6 @@ public class EventListFragment extends Fragment{
             }
         });
 
-
-
         //TODO Implement function to refresh event list. Watch Vipul Shah's video on youtube. The
         //link is https://www.youtube.com/watch?v=Phc9tVSG6Aw
 
@@ -130,7 +166,9 @@ public class EventListFragment extends Fragment{
                 //finish();
             }
         });*/
+    }
 
+    private void getEventsFromServer() {
         //Make API calls to get events and also friend List for the user when he first logs in to set up the user completely
         serviceHandler.getEventHandler().getEvents(new BaseFaroRequestCallback<List<EventInviteStatusWrapper>>() {
             @Override
@@ -145,6 +183,8 @@ public class EventListFragment extends Fragment{
                         public void run() {
                             Log.i(TAG, "Successfully received events from the server!!");
                             eventListHandler.addDownloadedEventsToListAndMap(eventInviteStatusWrappers);
+                            receivedEvents = true;
+                            setupPageDetails(fragmentView);
                         }
                     };
                     Handler mainHandler = new Handler(mContext.getMainLooper());
@@ -154,7 +194,9 @@ public class EventListFragment extends Fragment{
                 }
             }
         });
+    }
 
+    public void getFriendsFromServer() {
         serviceHandler.getFriendsHandler().getFriends(new BaseFaroRequestCallback<List<MinUser>>() {
             @Override
             public void onFailure(Request request, IOException ex) {
@@ -169,6 +211,8 @@ public class EventListFragment extends Fragment{
                         public void run() {
                             Log.i(TAG, "Successfully received friends from the server!!");
                             userFriendListHandler.addDownloadedFriendsToListAndMap(minUsers);
+                            receivedFriends = true;
+                            setupPageDetails(fragmentView);
                         }
                     };
                     Handler mainHandler = new Handler(mContext.getMainLooper());
@@ -178,6 +222,5 @@ public class EventListFragment extends Fragment{
                 }
             }
         });
-        return view;
     }
 }

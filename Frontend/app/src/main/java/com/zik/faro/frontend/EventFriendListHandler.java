@@ -1,5 +1,9 @@
 package com.zik.faro.frontend;
 
+import android.content.Context;
+
+import com.google.gson.Gson;
+import com.zik.faro.data.Event;
 import com.zik.faro.data.InviteeList;
 import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
@@ -25,10 +29,10 @@ public class EventFriendListHandler {
 
     private EventFriendListHandler(){}
 
-    public EventFriendAdapter acceptedFriendAdapter;
-    public EventFriendAdapter mayBeFriendAdapter;
-    public EventFriendAdapter invitedFriendAdapter;
-    public EventFriendAdapter declinedFriendAdapter;
+    public Map<String, EventFriendAdapter> acceptedFriendAdapterMap = new ConcurrentHashMap<>();
+    public Map<String, EventFriendAdapter> mayBeFriendAdapterMap = new ConcurrentHashMap<>();
+    public Map<String, EventFriendAdapter> invitedFriendAdapterMap = new ConcurrentHashMap<>();
+    public Map<String, EventFriendAdapter> declinedFriendAdapterMap = new ConcurrentHashMap<>();
 
 
     /*
@@ -39,88 +43,142 @@ public class EventFriendListHandler {
 
     private static String TAG = "EventFriendListHandler";
 
-    private EventFriendAdapter getEventFriendAdapter(InviteeList.Invitees invitees){
+
+    public EventFriendAdapter getAcceptedFriendAdapter(String eventID, Context context){
+        EventFriendAdapter eventFriendAdapter = acceptedFriendAdapterMap.get(eventID);
+        if (eventFriendAdapter == null){
+            eventFriendAdapter = new EventFriendAdapter(context, R.layout.friend_row_style);
+            acceptedFriendAdapterMap.put(eventID, eventFriendAdapter);
+        }
+        return eventFriendAdapter;
+    }
+
+    public EventFriendAdapter getMayBeFriendAdapter(String eventID, Context context){
+        EventFriendAdapter eventFriendAdapter = mayBeFriendAdapterMap.get(eventID);
+        if (eventFriendAdapter == null){
+            eventFriendAdapter = new EventFriendAdapter(context, R.layout.friend_row_style);
+            mayBeFriendAdapterMap.put(eventID, eventFriendAdapter);
+        }
+        return eventFriendAdapter;
+    }
+
+    public EventFriendAdapter getInvitedFriendAdapter(String eventID, Context context){
+        EventFriendAdapter eventFriendAdapter = invitedFriendAdapterMap.get(eventID);
+        if (eventFriendAdapter == null){
+            eventFriendAdapter = new EventFriendAdapter(context, R.layout.friend_row_style);
+            invitedFriendAdapterMap.put(eventID, eventFriendAdapter);
+        }
+        return eventFriendAdapter;
+    }
+
+    public EventFriendAdapter getDeclinedFriendAdapter(String eventID, Context context){
+        EventFriendAdapter eventFriendAdapter = declinedFriendAdapterMap.get(eventID);
+        if (eventFriendAdapter == null){
+            eventFriendAdapter = new EventFriendAdapter(context, R.layout.friend_row_style);
+            declinedFriendAdapterMap.put(eventID, eventFriendAdapter);
+        }
+        return eventFriendAdapter;
+    }
+
+    private EventFriendAdapter getEventFriendAdapter(String eventID, InviteeList.Invitees invitees, Context context){
         switch (invitees.getInviteStatus()){
             case ACCEPTED:
-                return acceptedFriendAdapter;
+                return getAcceptedFriendAdapter(eventID, context);
             case MAYBE:
-                return mayBeFriendAdapter;
+                return getMayBeFriendAdapter(eventID, context);
             case INVITED:
-                return invitedFriendAdapter;
+                return getInvitedFriendAdapter(eventID, context);
             case DECLINED:
-                return declinedFriendAdapter;
+                return getDeclinedFriendAdapter(eventID, context);
             default:
-                return invitedFriendAdapter;
+                return getInvitedFriendAdapter(eventID, context);
         }
     }
 
-    public EventFriendAdapter getEventFriendAdapter(String status){
+    public EventFriendAdapter getEventFriendAdapter(String eventID, String status, Context context){
         switch (status){
             case "Going":
-                return acceptedFriendAdapter;
+                return getAcceptedFriendAdapter(eventID, context);
             case "Maybe":
-                return mayBeFriendAdapter;
+                return getMayBeFriendAdapter(eventID, context);
             case "Invited":
-                return invitedFriendAdapter;
+                return getInvitedFriendAdapter(eventID, context);
             case "Not Going":
-                return declinedFriendAdapter;
+                return getDeclinedFriendAdapter(eventID, context);
             default:
-                return invitedFriendAdapter;
+                return getInvitedFriendAdapter(eventID, context);
         }
     }
 
-    private void conditionallyAddFriendToList(InviteeList.Invitees invitees){
-        EventFriendAdapter eventFriendAdapter = getEventFriendAdapter(invitees);
+    private void conditionallyAddFriendToList(String eventID, InviteeList.Invitees invitees, Context context){
+        EventFriendAdapter eventFriendAdapter = getEventFriendAdapter(eventID, invitees, context);
         eventFriendAdapter.insert(invitees, 0);
         eventFriendAdapter.notifyDataSetChanged();
     }
 
-    public int getAcceptedFriendCount(){
-        return acceptedFriendAdapter.getCount();
+    public int getAcceptedFriendCount(String eventID, Context context){
+        return getAcceptedFriendAdapter(eventID, context).getCount();
     }
 
-    public int getInvitedFriendCount(){
-        return invitedFriendAdapter.getCount();
+    public int getInvitedFriendCount(String eventID, Context context){
+        return getInvitedFriendAdapter(eventID, context).getCount();
     }
 
-    public int getMayBeFriendCount(){
-        return mayBeFriendAdapter.getCount();
+    public int getMayBeFriendCount(String eventID, Context context){
+        return getMayBeFriendAdapter(eventID, context).getCount();
     }
 
-    public int getDeclinedFriendCount(){
-        return declinedFriendAdapter.getCount();
+    public int getDeclinedFriendCount(String eventID, Context context){
+        return getDeclinedFriendAdapter(eventID, context).getCount();
     }
 
-    public void addFriendToListAndMap(InviteeList.Invitees invitees){
+    public void addFriendToListAndMap(String eventID, InviteeList.Invitees invitees, Context context){
         /*
          * If the received Invitees is already present in the local database, then we need to delete that and
          * update it with the newly received Invitees.
          */
-        removeFriendFromListAndMap(invitees.getEmail());
-        conditionallyAddFriendToList(invitees);
+        removeFriendFromListAndMap(eventID, invitees.getEmail(), context);
+        conditionallyAddFriendToList(eventID, invitees, context);
         friendMap.put(invitees.getEmail(), invitees);
     }
 
 
-    public void addDownloadedFriendsToListAndMap(InviteeList inviteeList){
+    public void addDownloadedFriendsToListAndMap(String eventID, InviteeList inviteeList, Context context){
         for(Map.Entry<String, InviteeList.Invitees> entry: inviteeList.getUserStatusMap().entrySet()){
-            addFriendToListAndMap(entry.getValue());
+            addFriendToListAndMap(eventID, entry.getValue(), context);
         }
     }
 
-    public void removeFriendFromListAndMap(String emailID){
+    public void removeFriendFromListAndMap(String eventID, String emailID, Context context){
         InviteeList.Invitees invitees = friendMap.get(emailID);
         if (invitees == null){
             return;
         }
 
-        EventFriendAdapter eventFriendAdapter = getEventFriendAdapter(invitees);
+        EventFriendAdapter eventFriendAdapter = getEventFriendAdapter(eventID, invitees, context);
         eventFriendAdapter.list.remove(invitees);
         eventFriendAdapter.notifyDataSetChanged();
         friendMap.remove(emailID);
     }
 
-    public void clearFriendListAndMap(){
+    public void clearEverything () {
+        if (acceptedFriendAdapterMap != null)
+            acceptedFriendAdapterMap.clear();
+        if (mayBeFriendAdapterMap != null)
+            mayBeFriendAdapterMap.clear();
+        if (invitedFriendAdapterMap != null)
+            invitedFriendAdapterMap.clear();
+        if (declinedFriendAdapterMap != null)
+            declinedFriendAdapterMap.clear();
+        if (friendMap != null)
+            friendMap.clear();
+    }
+
+    /*public void clearFriendListAndMap(String eventID, Context context){
+        EventFriendAdapter acceptedFriendAdapter = getAcceptedFriendAdapter(eventID, context);
+        EventFriendAdapter invitedFriendAdapter = getInvitedFriendAdapter(eventID, context);
+        EventFriendAdapter mayBeFriendAdapter = getMayBeFriendAdapter(eventID, context);
+        EventFriendAdapter declinedFriendAdapter = getDeclinedFriendAdapter(eventID, context);
         if (acceptedFriendAdapter != null){
             acceptedFriendAdapter.list.clear();
             acceptedFriendAdapter.notifyDataSetChanged();
@@ -140,7 +198,7 @@ public class EventFriendListHandler {
         if (friendMap != null){
             friendMap.clear();
         }
-    }
+    }*/
 
     boolean isFriendInvitedToEvent(String emailID){
         if (friendMap.containsKey(emailID)){
@@ -182,5 +240,13 @@ public class EventFriendListHandler {
             }
         }
         return friendFullName;
+    }
+
+    public InviteeList.Invitees getInviteesCloneFromMap(String emailID){
+        InviteeList.Invitees invitee = friendMap.get(emailID);
+        Gson gson = new Gson();
+        String json = gson.toJson(invitee);
+        InviteeList.Invitees cloneInvitee = gson.fromJson(json, InviteeList.Invitees.class);
+        return cloneInvitee;
     }
 }

@@ -39,20 +39,29 @@ import java.util.Map;
 import static android.widget.Toast.LENGTH_LONG;
 
 public class EditPoll extends Activity {
-    static PollListHandler pollListHandler = PollListHandler.getInstance();
-    private static EventListHandler eventListHandler = EventListHandler.getInstance();
+    private static PollListHandler pollListHandler = PollListHandler.getInstance();
     private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
-    private static String eventID = null;
+    private String eventID = null;
     private String pollID;
-    private static Poll clonePoll;
-    private Intent PollLandingPage;
+    private Poll clonePoll;
+    private Intent PollLandingPageIntent;
 
     private static String TAG = "EditPoll";
 
     private RelativeLayout popUpRelativeLayout;
     private final List <PollOption> newPollOptionList = new LinkedList<>();
-    final Context mContext = this;
+    private Context mContext = this;
+    private TextView pollDescription = null;
+    private CheckBox isMultiChoice = null;
+    private EditText optionText = null;
+    private ImageButton addNewOptionButton = null;
+    private ListView editPollOptionsListView = null;
+    private Button editPollOK = null;
+    private Button deletePoll = null;
+    private PollOptionsAdapter editPollOptionsAdapter = null;
+    private Map<String, Object> map = null;
+    private PopupWindow popupWindow = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,33 +70,32 @@ public class EditPoll extends Activity {
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
-        final TextView pollDescription = (TextView) findViewById(R.id.pollDescription);
-        final CheckBox isMultiChoice = (CheckBox)findViewById(R.id.multiChoiceFlag);
-        final EditText optionText = (EditText)findViewById(R.id.pollOptionEditText);
+        PollLandingPageIntent = new Intent(EditPoll.this, PollLandingPage.class);
 
-        final ImageButton addNewOptionButton = (ImageButton)findViewById(R.id.add_new_option);
+        Bundle extras = getIntent().getExtras();
+        if (extras == null) return; //TODO How to handle this case?
+
+        eventID = extras.getString("eventID");
+        pollID = extras.getString("pollID");
+        clonePoll = pollListHandler.getPollCloneFromMap(pollID);
+
+        pollDescription = (TextView) findViewById(R.id.pollDescription);
+        isMultiChoice = (CheckBox)findViewById(R.id.multiChoiceFlag);
+        optionText = (EditText)findViewById(R.id.pollOptionEditText);
+
+        addNewOptionButton = (ImageButton)findViewById(R.id.add_new_option);
         addNewOptionButton.setImageResource(R.drawable.plus);
         addNewOptionButton.setEnabled(false);
 
-        ListView editPollOptionsListView = (ListView)findViewById(R.id.editPollOptionsList);
+        editPollOptionsListView = (ListView)findViewById(R.id.editPollOptionsList);
 
-        final Button editPollOK = (Button) findViewById(R.id.editPollOK);
+        editPollOK = (Button) findViewById(R.id.editPollOK);
         editPollOK.setEnabled(true);
-        final Button deletePoll = (Button)findViewById(R.id.deletePoll);
+        deletePoll = (Button)findViewById(R.id.deletePoll);
 
         popUpRelativeLayout = (RelativeLayout) findViewById(R.id.editPollPage);
 
-        PollLandingPage = new Intent(EditPoll.this, OpenPollLandingPage.class);
-
-        Bundle extras = getIntent().getExtras();
-        if(extras != null) {
-            eventID = extras.getString("eventID");
-            pollID = extras.getString("pollID");
-            clonePoll = pollListHandler.getPollCloneFromMap(pollID);
-        }
-
-
-        final PollOptionsAdapter editPollOptionsAdapter = new PollOptionsAdapter(this, R.layout.poll_option_can_edit_row_style);
+        editPollOptionsAdapter = new PollOptionsAdapter(this, R.layout.poll_option_can_edit_row_style);
         editPollOptionsListView.setAdapter(editPollOptionsAdapter);
 
         for (Integer i = 0; i < clonePoll.getPollOptions().size(); i++){
@@ -132,44 +140,14 @@ public class EditPoll extends Activity {
         editPollOK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 if(!newPollOptionList.isEmpty()) {
                     clonePoll.setPollOptions(newPollOptionList);
-
-                    Map<String, Object> map = new HashMap<String, Object>();
+                    map = new HashMap<>();
                     map.put("poll", clonePoll);
-
-                    serviceHandler.getPollHandler().updatePoll(new BaseFaroRequestCallback<Poll>() {
-                        @Override
-                        public void onFailure(Request request, IOException ex) {
-                            Log.e(TAG, "failed to send Poll update request");
-                        }
-
-                        @Override
-                        public void onResponse(final Poll poll, HttpError error) {
-                            if (error == null ) {
-                                Runnable myRunnable = new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Log.i(TAG, "Poll Update Response received Successfully");
-                                        pollListHandler.addPollToListAndMap(poll);
-                                        PollLandingPage.putExtra("eventID", eventID);
-                                        PollLandingPage.putExtra("pollID", pollID);
-                                        startActivity(PollLandingPage);
-                                        finish();
-                                    }
-                                };
-                                Handler mainHandler = new Handler(mContext.getMainLooper());
-                                mainHandler.post(myRunnable);
-                            }else {
-                                Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
-                            }
-                        }
-                    }, eventID, pollID, map);
+                    updatePollToServer();
                 }
             }
         });
-
         deletePoll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -178,10 +156,68 @@ public class EditPoll extends Activity {
         });
     }
 
+    private void updatePollToServer () {
+        serviceHandler.getPollHandler().updatePoll(new BaseFaroRequestCallback<Poll>() {
+            @Override
+            public void onFailure(Request request, IOException ex) {
+                Log.e(TAG, "failed to send Poll update request");
+            }
+
+            @Override
+            public void onResponse(final Poll poll, HttpError error) {
+                if (error == null ) {
+                    Runnable myRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.i(TAG, "Poll Update Response received Successfully");
+                            pollListHandler.addPollToListAndMap(eventID, poll, mContext);
+                            PollLandingPageIntent.putExtra("eventID", eventID);
+                            PollLandingPageIntent.putExtra("pollID", pollID);
+                            startActivity(PollLandingPageIntent);
+                            finish();
+                        }
+                    };
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(myRunnable);
+                }else {
+                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                }
+            }
+        }, eventID, pollID, map);
+    }
+
+    private void deletePollFromServer () {
+        serviceHandler.getPollHandler().deletePoll(new BaseFaroRequestCallback<String>() {
+            @Override
+            public void onFailure(Request request, IOException ex) {
+                Log.e(TAG, "failed to delete clonePoll");
+            }
+
+            @Override
+            public void onResponse(String s, HttpError error) {
+                if (error == null ) {
+                    Runnable myRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            pollListHandler.removePollFromListAndMap(eventID, clonePoll, mContext);
+                            popupWindow.dismiss();
+                            Toast.makeText(EditPoll.this, clonePoll.getDescription() + "is Deleted", LENGTH_LONG).show();
+                            finish();
+                        }
+                    };
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(myRunnable);
+                }else {
+                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                }
+            }
+        }, eventID, pollID);
+    }
+
     private void confirmPollDeletePopUP(View v) {
         LayoutInflater layoutInflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         ViewGroup container = (ViewGroup) layoutInflater.inflate(R.layout.delete_popup, null);
-        final PopupWindow popupWindow = new PopupWindow(container, RelativeLayout.LayoutParams.WRAP_CONTENT,
+        popupWindow = new PopupWindow(container, RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT, true);
 
         TextView message = (TextView)container.findViewById(R.id.questionTextView);
@@ -202,31 +238,7 @@ public class EditPoll extends Activity {
         delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                serviceHandler.getPollHandler().deletePoll(new BaseFaroRequestCallback<String>() {
-                    @Override
-                    public void onFailure(Request request, IOException ex) {
-                        Log.e(TAG, "failed to delete clonePoll");
-                    }
-
-                    @Override
-                    public void onResponse(String s, HttpError error) {
-                        if (error == null ) {
-                            Runnable myRunnable = new Runnable() {
-                                @Override
-                                public void run() {
-                                    pollListHandler.removePollFromListAndMap(clonePoll);
-                                    popupWindow.dismiss();
-                                    Toast.makeText(EditPoll.this, clonePoll.getDescription() + "is Deleted", LENGTH_LONG).show();
-                                    finish();
-                                }
-                            };
-                            Handler mainHandler = new Handler(mContext.getMainLooper());
-                            mainHandler.post(myRunnable);
-                        }else {
-                            Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
-                        }
-                    }
-                }, eventID, pollID);
+                deletePollFromServer();
             }
         });
 
@@ -236,17 +248,32 @@ public class EditPoll extends Activity {
                 popupWindow.dismiss();
             }
         });
-
     }
 
 
     @Override
     public void onBackPressed() {
-        PollLandingPage.putExtra("eventID", eventID);
-        PollLandingPage.putExtra("pollID", pollID);
-        startActivity(PollLandingPage);
+        PollLandingPageIntent.putExtra("eventID", eventID);
+        PollLandingPageIntent.putExtra("pollID", pollID);
+        startActivity(PollLandingPageIntent);
         finish();
         super.onBackPressed();
+    }
+
+    @Override
+    protected void onResume() {
+        // Check if the version is same. It can be different if this page is loaded and a notification
+        // is received for this later which updates the global memory but clonedata on this page remains
+        // stale.
+        Long versionInGlobalMemory = pollListHandler.getOriginalPollFromMap(pollID).getVersion();
+        if (!clonePoll.getVersion().equals(versionInGlobalMemory)) {
+            Intent editPollReloadIntent = new Intent(EditPoll.this, EditPoll.class);
+            editPollReloadIntent.putExtra("eventID", eventID);
+            editPollReloadIntent.putExtra("pollID", pollID);
+            finish();
+            startActivity(editPollReloadIntent);
+        }
+        super.onResume();
     }
 }
 

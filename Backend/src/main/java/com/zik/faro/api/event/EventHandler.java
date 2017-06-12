@@ -24,6 +24,7 @@ import com.zik.faro.commons.exceptions.DatastoreException;
 import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.AddFriendRequest;
 import com.zik.faro.data.Event;
+import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.IllegalDataOperation;
 import com.zik.faro.data.InviteeList;
 import com.zik.faro.data.user.EventInviteStatus;
@@ -37,9 +38,9 @@ public class EventHandler {
 	@Path(EVENT_DETAILS_PATH_CONST)
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public JResponse<Event> getEventDetails(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
+    public JResponse<EventInviteStatusWrapper> getEventDetails(@PathParam(EVENT_ID_PATH_PARAM) final String eventId){
         String userId = context.getUserPrincipal().getName();
-        Event retrievedEvent;
+        EventInviteStatusWrapper retrievedEvent;
 		try {
 			retrievedEvent = EventManagement.getEventDetails(userId, eventId);
 		} catch (DataNotFoundException e) {

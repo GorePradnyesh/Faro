@@ -18,11 +18,14 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.facebook.AccessToken;
@@ -38,14 +41,17 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.Event;
+import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.InviteeList;
 import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
+import com.zik.faro.frontend.notification.NotificationPayloadHandler;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,9 +66,10 @@ import static android.os.Environment.getExternalStoragePublicDirectory;
 public class EventLandingPage extends FragmentActivity
         implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener{
+        GoogleApiClient.OnConnectionFailedListener,
+        NotificationPayloadHandler{
 
-
+    public static final int NO_CHANGES = 0;
     private DateFormat sdf = new SimpleDateFormat(" EEE, MMM d, yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
@@ -73,7 +80,7 @@ public class EventLandingPage extends FragmentActivity
 
     private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
-    private static Event cloneEvent;
+    private Event cloneEvent;
 
     private Button statusYes = null;
     private Button statusNo = null;
@@ -87,9 +94,10 @@ public class EventLandingPage extends FragmentActivity
     private Button uploadPhotosButton = null;
     private ImageButton guestListImageButton = null;
     private ImageButton mapMarker = null;
+    private ImageView transparentImageView = null;
 
     private String eventID;
-    final Context mContext = this;
+    private Context mContext = this;
     private Intent eventLandingPageReload;
 
     private static final int REQUEST_TAKE_PHOTO = 1;
@@ -117,20 +125,252 @@ public class EventLandingPage extends FragmentActivity
     private LatLng mEventLocation;
     private LatLng mDefaultLocation = new LatLng(0, 0);
     private SupportMapFragment mapFragment;
+    private ScrollView mainScrollView = null;
+    private LinearLayout linlaHeaderProgress = null;
+
+    private TextView event_name = null;
+    private TextView eventDescription = null;
+    private TextView startDateAndTime = null;
+    private TextView endDateAndTime = null;
+    private TextView eventAddress = null;
+
+    private RelativeLayout mapsStuffRelativeLayout = null;
+
+    private Bundle extras = null;
+
+    private RelativeLayout EventLandingPageRelativeLayout = null;
+    private LinearLayout photosStuffLinearLayout = null;
+    private String isNotification = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_landing_page);
 
-        final TextView event_name = (TextView) findViewById(R.id.eventNameText);
-        TextView eventDescription = (TextView) findViewById(R.id.eventDescriptionTextView);
+        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
-        TextView startDateAndTime = (TextView) findViewById(R.id.startDateAndTimeDisplay);
+        linlaHeaderProgress = (LinearLayout) findViewById(R.id.linlaHeaderProgress);
 
-        TextView endDateAndTime = (TextView) findViewById(R.id.endDateAndTimeDisplay);
+        EventLandingPageRelativeLayout = (RelativeLayout) findViewById(R.id.eventLandingPageRelativeLayout);
+        EventLandingPageRelativeLayout.setVisibility(View.GONE);
 
-        TextView eventAddress = (TextView) findViewById(R.id.locationAddressTextView);
+        extras = getIntent().getExtras();
+        if (extras == null)return; //TODO: How to handle such conditions
+
+        checkAndHandleNotification();
+    }
+
+
+
+    private void updateUserEventInviteStatus(final EventInviteStatus eventInviteStatus) {
+        serviceHandler.getEventHandler().updateEventUserInviteStatus(new BaseFaroRequestCallback<String>() {
+            @Override
+            public void onFailure(Request request, IOException ex) {
+                Log.e(TAG, "failed to send cloneEvent Invite Status");
+            }
+
+            @Override
+            public void onResponse(String s, HttpError error) {
+                if (error == null ) {
+                    //Since update to server successful
+                    Runnable myRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            switch (eventInviteStatus){
+                                case ACCEPTED:
+                                    eventListHandler.addEventToListAndMap(cloneEvent, EventInviteStatus.ACCEPTED);
+                                    //Reload EventLandingPage
+                                    eventLandingPageReload.putExtra("eventID", eventID);
+                                    finish();
+                                    startActivity(eventLandingPageReload);
+                                    break;
+                                case MAYBE:
+                                    eventListHandler.addEventToListAndMap(cloneEvent, EventInviteStatus.MAYBE);
+                                    //Reload EventLandingPage
+                                    eventLandingPageReload.putExtra("eventID", eventID);
+                                    finish();
+                                    startActivity(eventLandingPageReload);
+                                    break;
+                                case DECLINED:
+                                    eventListHandler.removeEventFromListAndMap(eventID);
+                                    finish();
+                                    break;
+                            }
+                        }
+                    };
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(myRunnable);
+                } else {
+                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                }
+            }
+        }, eventID, eventInviteStatus);
+    }
+
+    private void eventStateBasedView(Event event){
+
+        EventInviteStatus inviteStatus = eventListHandler.getUserEventStatus(eventID);
+
+        if (inviteStatus == EventInviteStatus.ACCEPTED){
+            statusYes.setVisibility(View.GONE);
+            statusNo.setVisibility(View.GONE);
+            statusMaybe.setVisibility(View.GONE);
+            pollButton.setVisibility(View.VISIBLE);
+            eventAssignmentButton.setVisibility(View.VISIBLE);
+            guestListImageButton.setVisibility(View.VISIBLE);
+            activityButton.setVisibility(View.VISIBLE);
+            editButton.setVisibility(View.VISIBLE);
+            photosStuffLinearLayout.setVisibility(View.VISIBLE);
+        }else{
+            statusYes.setVisibility(View.VISIBLE);
+            statusNo.setVisibility(View.VISIBLE);
+            pollButton.setVisibility(View.GONE);
+            eventAssignmentButton.setVisibility(View.GONE);
+            guestListImageButton.setVisibility(View.GONE);
+            activityButton.setVisibility(View.GONE);
+            editButton.setVisibility(View.GONE);
+            photosStuffLinearLayout.setVisibility(View.GONE);
+        }
+
+        if (inviteStatus == EventInviteStatus.INVITED) {
+            statusMaybe.setVisibility(View.VISIBLE);
+        } else if (inviteStatus == EventInviteStatus.MAYBE){
+            statusMaybe.setVisibility(View.GONE);
+        }
+    }
+
+    private void controlFlagBasedView() {
+        if(cloneEvent.getEventCreatorId() == null) {
+            if (cloneEvent.getControlFlag()) {
+                editButton.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        eventListHandler.deleteEventFromMapIfNotInList(cloneEvent);
+        finish();
+        super.onBackPressed();
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+
+        // Get the location of the event and set the position of the map also mark mylocation on the map.
+        setEventLocationOnMap();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
+        mLocationPermissionGranted = false;
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    mLocationPermissionGranted = true;
+                }
+            }
+        }
+        setEventLocationOnMap();
+    }
+
+    private void setEventLocationOnMap() {
+        if (mMap == null) {
+            return;
+        }
+
+        /*
+         * Request location permission, so that we can get the location of the
+         * device. The result of the permission request is handled by a callback,
+         * onRequestPermissionsResult.
+         */
+        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            mLocationPermissionGranted = true;
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        }
+
+        if (mLocationPermissionGranted) {
+            mMap.setMyLocationEnabled(true);
+            mMap.getUiSettings().setMyLocationButtonEnabled(true);
+        } else {
+            mMap.setMyLocationEnabled(false);
+            mMap.getUiSettings().setMyLocationButtonEnabled(false);
+        }
+
+        if (mCameraPosition != null) {
+            mMap.moveCamera(CameraUpdateFactory.newCameraPosition(mCameraPosition));
+        } else if (mEventLocation != null){
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mEventLocation, DEFAULT_ZOOM));
+            mMap.addMarker(new MarkerOptions().position(mEventLocation));
+        } else {
+            Log.d(TAG, "Current location is null. Using defaults.");
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
+            mMap.getUiSettings().setMyLocationButtonEnabled(false);
+        }
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        mapFragment.getMapAsync(this);
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        Log.d(TAG, "Play services connection suspended");
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        // Todo: Refer to the reference doc for ConnectionResult to see what error codes might
+        // be returned in onConnectionFailed.
+        Log.d(TAG, "Play services connection failed: ConnectionResult.getErrorCode() = "
+                + connectionResult.getErrorCode());
+    }
+
+    @Override
+    public void checkAndHandleNotification() {
+        isNotification = extras.getString("bundleType");
+        eventID = extras.getString("eventID");
+
+        Log.d(TAG, "******eventID is " + eventID);
+
+        if (isNotification == null){
+            setupPageDetails();
+            return;
+        }
+
+        //Else the bundleType is "notification"
+        getEventFromServer();
+    }
+
+    private void setupPageDetails(){
+
+        cloneEvent = eventListHandler.getEventCloneFromMap(eventID);
+        if (cloneEvent == null){
+            return; //TODO How to handle such a case?
+        }
+
+        linlaHeaderProgress.setVisibility(View.GONE);
+        EventLandingPageRelativeLayout.setVisibility(View.VISIBLE);
+
+        event_name = (TextView) findViewById(R.id.eventNameText);
+        eventDescription = (TextView) findViewById(R.id.eventDescriptionTextView);
+
+        startDateAndTime = (TextView) findViewById(R.id.startDateAndTimeDisplay);
+
+        endDateAndTime = (TextView) findViewById(R.id.endDateAndTimeDisplay);
+
+        eventAddress = (TextView) findViewById(R.id.locationAddressTextView);
 
         pollButton = (ImageButton) findViewById(R.id.pollImageButton);
         pollButton.setImageResource(R.drawable.poll_icon);
@@ -148,12 +388,13 @@ public class EventLandingPage extends FragmentActivity
         mapMarker = (ImageButton) findViewById(R.id.mapMarker);
         mapMarker.setImageResource(R.drawable.map_marker);
 
+        mainScrollView = (ScrollView) findViewById(R.id.mainScrollView);
+        transparentImageView = (ImageView) findViewById(R.id.transparentImageOnMap);
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
 
         statusYes = (Button) findViewById(R.id.statusYes);
         statusNo = (Button) findViewById(R.id.statusNo);
         statusMaybe = (Button) findViewById(R.id.statusMaybe);
-
 
         final Intent PollListPage = new Intent(EventLandingPage.this, PollListPage.class);
         final Intent EditEvent = new Intent(EventLandingPage.this, EditEvent.class);
@@ -162,232 +403,271 @@ public class EventLandingPage extends FragmentActivity
         final Intent AssignmentLandingPageTabsIntent = new Intent(EventLandingPage.this, AssignmentLandingPage.class);
         eventLandingPageReload = new Intent(EventLandingPage.this, EventLandingPage.class);
 
-        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
+        linlaHeaderProgress = (LinearLayout) findViewById(R.id.linlaHeaderProgress);
 
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            eventID = extras.getString("eventID");
-            cloneEvent = eventListHandler.getEventCloneFromMap(eventID);
-            if (cloneEvent != null) {
+        photosStuffLinearLayout = (LinearLayout) findViewById(R.id.photosStuff);
+        mapsStuffRelativeLayout = (RelativeLayout) findViewById(R.id.mapStuff);
 
-                //Display elements based on Event Status
-                eventStateBasedView();
-
-                controlFlagBasedView();
-
-                String ev_name = cloneEvent.getEventName();
-                event_name.setText(ev_name);
-
-                String eventDescr = cloneEvent.getEventDescription();
-                eventDescription.setText(eventDescr);
-
-                startDateAndTime.setText(sdf.format(cloneEvent.getStartDate().getTime()) + " at " +
-                        stf.format(cloneEvent.getStartDate().getTime()));
-
-                endDateAndTime.setText(sdf.format(cloneEvent.getEndDate().getTime()) + " at " +
-                        stf.format(cloneEvent.getEndDate().getTime()));
-
-                statusYes.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        updateUserEventInviteStatus(EventInviteStatus.ACCEPTED);
-                    }
-                });
-
-                statusMaybe.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        updateUserEventInviteStatus(EventInviteStatus.MAYBE);
-                    }
-                });
-
-                statusNo.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        updateUserEventInviteStatus(EventInviteStatus.DECLINED);
-                    }
-                });
-
-                pollButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        PollListPage.putExtra("eventID", eventID);
-                        startActivity(PollListPage);
-                    }
-                });
-
-                eventAssignmentButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        AssignmentLandingPageTabsIntent.putExtra("eventID", eventID);
-                        AssignmentLandingPageTabsIntent.putExtra("assignmentID", cloneEvent.getAssignment().getId());
-                        startActivity(AssignmentLandingPageTabsIntent);
-                    }
-                });
-
-                activityButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        ActivityListPage.putExtra("eventID", eventID);
-                        startActivity(ActivityListPage);
-                    }
-                });
-
-                guestListImageButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        EventFriendListLandingPageIntent.putExtra("eventID", eventID);
-                        startActivity(EventFriendListLandingPageIntent);
-                        finish();
-                    }
-                });
-
-                editButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        EditEvent.putExtra("eventID", eventID);
-                        startActivity(EditEvent);
-                        finish();
-                    }
-                });
-
-                photosButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent imagesViewIntent = new Intent(EventLandingPage.this, ImageGridViewActivity.class);
-                        imagesViewIntent.putExtra("eventId", cloneEvent.getId());
-                        imagesViewIntent.putExtra("eventName", cloneEvent.getEventName());
-                        startActivity(imagesViewIntent);
-                    }
-                });
-
-                cameraButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (checkPermissionsForUploadingPhotos()) {
-                            // Proceed with the workflow to capture a photo and upload
-                            dispatchTakePictureIntent();
-                        }
-                    }
-                });
-
-                uploadPhotosButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        if (checkPermissionsForUploadingPhotos()) {
-                            // Proceed with upload photos workflow
-                            startPhotosUploadWorkflow();
-                        }
-                    }
-                });
-
-                // Build the Play services client for use by the Fused Location Provider and the Places API.
-                // Use the addApi() method to request the Google Places API and the Fused Location Provider.
-                mGoogleApiClient = new GoogleApiClient.Builder(this)
-                        .enableAutoManage(this /* FragmentActivity */,
-                                this /* OnConnectionFailedListener */)
-                        .addConnectionCallbacks(this)
-                        .addApi(LocationServices.API)
-                        .addApi(Places.GEO_DATA_API)
-                        .addApi(Places.PLACE_DETECTION_API)
-                        .build();
-                mGoogleApiClient.connect();
-
-                final com.zik.faro.data.Location eventLocation = cloneEvent.getLocation();
-                if (eventLocation == null) {
-                    eventAddress.setVisibility(View.GONE);
-                    mapFragment.getView().setVisibility(View.GONE);
-                    mapMarker.setVisibility(View.GONE);
-                } else {
-                    mEventLocation = new LatLng(eventLocation.getPosition().getLatitude(), eventLocation.getPosition().getLongitude());
-                    String str = GetLocationAddressString.getLocationAddressString(eventLocation);
-                    eventAddress.setText(str);
-                    eventAddress.setTextColor(Color.BLUE);
-                    eventAddress.setPaintFlags(eventAddress.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-
-                    mapMarker.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            setEventLocationOnMap();
-                        }
-                    });
-                    mapMarker.setBackgroundColor(Color.TRANSPARENT);
-
-                    eventAddress.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            // Creating url for Google Maps.
-                            double latitude = eventLocation.getPosition().getLatitude();
-                            double longitude = eventLocation.getPosition().getLongitude();
-                            String label = eventLocation.getLocationName();
-                            String uriBegin = "geo:" + latitude + "," + longitude;
-                            String query = latitude + "," + longitude + "(" + label + ")";
-                            String encodedQuery = Uri.encode(query);
-                            String uriString = uriBegin + "?q=" + encodedQuery + "&z=16";
-                            Uri uri = Uri.parse(uriString);
-
-                            Intent googleMapsAppIntent = new Intent(Intent.ACTION_VIEW, uri);
-                            startActivity(googleMapsAppIntent);
-                        }
-                    });
-                }
-
-                serviceHandler.getEventHandler().getEventInvitees(new BaseFaroRequestCallback<InviteeList>() {
-                    @Override
-                    public void onFailure(Request request, IOException ex) {
-                        Log.e(TAG, "failed to get cloneEvent Invitees");
-                    }
-
-                    @Override
-                    public void onResponse(final InviteeList inviteeList, HttpError error) {
-                        if (error == null) {
-                            Runnable myRunnable = new Runnable() {
-                                @Override
-                                public void run() {
-                                    Log.i(TAG, "Successfully received Invitee List for the cloneEvent");
-                                    eventFriendListHandler.addDownloadedFriendsToListAndMap(inviteeList);
-                                }
-                            };
-                            Handler mainHandler = new Handler(mContext.getMainLooper());
-                            mainHandler.post(myRunnable);
-                        } else {
-                            Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
-                        }
-                    }
-                }, eventID);
-
-                //Add event's assignment to the Assignment Handler
-                Event originalEvent = eventListHandler.getOriginalEventFromMap(eventID);
-                assignmentListHandler.addAssignmentToListAndMap(originalEvent.getAssignment(), null);
-
-                //Make API call to get all activities for this event
-                serviceHandler.getActivityHandler().getActivities(new BaseFaroRequestCallback<List<com.zik.faro.data.Activity>>() {
-                    @Override
-                    public void onFailure(Request request, IOException ex) {
-                        Log.e(TAG, "failed to get activity list");
-                    }
-
-                    @Override
-                    public void onResponse(final List<com.zik.faro.data.Activity> activities, HttpError error) {
-                        if (error == null) {
-                            Runnable myRunnable = new Runnable() {
-                                @Override
-                                public void run() {
-                                    Log.i(TAG, "Successfully received activities from the server!!");
-                                    activityListHandler.addDownloadedActivitiesToListAndMap(activities, eventID);
-                                }
-                            };
-                            Handler mainHandler = new Handler(mContext.getMainLooper());
-                            mainHandler.post(myRunnable);
-                        } else {
-                            Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
-                        }
-                    }
-                }, eventID);
-
-                fbLoginFragment = (FbLoginFragment) getSupportFragmentManager().findFragmentById(R.id.fb_login_page);
+        statusYes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateUserEventInviteStatus(EventInviteStatus.ACCEPTED);
             }
+        });
+
+        statusMaybe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateUserEventInviteStatus(EventInviteStatus.MAYBE);
+            }
+        });
+
+        statusNo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateUserEventInviteStatus(EventInviteStatus.DECLINED);
+            }
+        });
+
+        pollButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PollListPage.putExtra("eventID", eventID);
+                startActivity(PollListPage);
+            }
+        });
+
+        eventAssignmentButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AssignmentLandingPageTabsIntent.putExtra("eventID", eventID);
+                AssignmentLandingPageTabsIntent.putExtra("assignmentID", cloneEvent.getAssignment().getId());
+                startActivity(AssignmentLandingPageTabsIntent);
+            }
+        });
+
+        activityButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ActivityListPage.putExtra("eventID", eventID);
+                startActivity(ActivityListPage);
+            }
+        });
+
+        guestListImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EventFriendListLandingPageIntent.putExtra("eventID", eventID);
+                startActivity(EventFriendListLandingPageIntent);
+                //finish();
+            }
+        });
+
+        editButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EditEvent.putExtra("eventID", eventID);
+                startActivity(EditEvent);
+                finish();
+            }
+        });
+
+        photosButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent imagesViewIntent = new Intent(EventLandingPage.this, ImageGridViewActivity.class);
+                imagesViewIntent.putExtra("eventId", cloneEvent.getId());
+                imagesViewIntent.putExtra("eventName", cloneEvent.getEventName());
+                startActivity(imagesViewIntent);
+            }
+        });
+
+        cameraButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (checkPermissionsForUploadingPhotos()) {
+                    // Proceed with the workflow to capture a photo and upload
+                    dispatchTakePictureIntent();
+                }
+            }
+        });
+
+        uploadPhotosButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (checkPermissionsForUploadingPhotos()) {
+                    // Proceed with upload photos workflow
+                    startPhotosUploadWorkflow();
+                }
+            }
+        });
+
+        // Build the Play services client for use by the Fused Location Provider and the Places API.
+        // Use the addApi() method to request the Google Places API and the Fused Location Provider.
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this /* FragmentActivity */,
+                        this /* OnConnectionFailedListener */)
+                .addConnectionCallbacks(this)
+                .addApi(LocationServices.API)
+                .addApi(Places.GEO_DATA_API)
+                .addApi(Places.PLACE_DETECTION_API)
+                .build();
+        mGoogleApiClient.connect();
+
+        eventStateBasedView(cloneEvent);
+
+        controlFlagBasedView();
+
+        String ev_name = cloneEvent.getEventName();
+        event_name.setText(ev_name);
+
+        String eventDescr = cloneEvent.getEventDescription();
+        if (Strings.isNullOrEmpty(eventDescr)){
+            eventDescription.setVisibility(View.GONE);
+        } else {
+            eventDescription.setText(eventDescr);
         }
+
+        startDateAndTime.setText(sdf.format(cloneEvent.getStartDate().getTime()) + " at " +
+                stf.format(cloneEvent.getStartDate().getTime()));
+
+        endDateAndTime.setText(sdf.format(cloneEvent.getEndDate().getTime()) + " at " +
+                stf.format(cloneEvent.getEndDate().getTime()));
+
+        final com.zik.faro.data.Location eventLocation = cloneEvent.getLocation();
+        if (eventLocation == null){
+
+            mapsStuffRelativeLayout.setVisibility(View.GONE);
+        }else{
+            mEventLocation = new LatLng(eventLocation.getPosition().getLatitude(), eventLocation.getPosition().getLongitude());
+            String str = GetLocationAddressString.getLocationAddressString(eventLocation);
+            eventAddress.setText(str);
+            eventAddress.setTextColor(Color.BLUE);
+            eventAddress.setPaintFlags(eventAddress.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+
+            mapMarker.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    setEventLocationOnMap();
+                }
+            });
+            mapMarker.setBackgroundColor(Color.TRANSPARENT);
+
+            eventAddress.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // Creating url for Google Maps.
+                    double latitude = eventLocation.getPosition().getLatitude();
+                    double longitude = eventLocation.getPosition().getLongitude();
+                    String label = eventLocation.getLocationName();
+                    String uriBegin = "geo:" + latitude + "," + longitude;
+                    String query = latitude + "," + longitude + "(" + label + ")";
+                    String encodedQuery = Uri.encode(query);
+                    String uriString = uriBegin + "?q=" + encodedQuery + "&z=16";
+                    Uri uri = Uri.parse(uriString);
+
+                    Intent googleMapsAppIntent = new Intent(Intent.ACTION_VIEW, uri);
+                    startActivity(googleMapsAppIntent);
+                }
+            });
+            setEventLocationOnMap();
+        }
+
+        transparentImageView.setOnTouchListener(new View.OnTouchListener() {
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                int action = event.getAction();
+                switch (action) {
+                    case MotionEvent.ACTION_DOWN:
+                        // Disallow ScrollView to intercept touch events.
+                        mainScrollView.requestDisallowInterceptTouchEvent(true);
+                        // Disable touch on transparent view
+                        return false;
+
+                    case MotionEvent.ACTION_UP:
+                        // Allow ScrollView to intercept touch events.
+                        mainScrollView.requestDisallowInterceptTouchEvent(false);
+                        return true;
+
+                    case MotionEvent.ACTION_MOVE:
+                        mainScrollView.requestDisallowInterceptTouchEvent(true);
+                        return false;
+
+                    default:
+                        return true;
+                }
+            }
+        });
+
+
+        //Make API call to get all all invitees for this event
+        getEventInviteesFromServer();
+
+        //Add event's assignment to the Assignment Handler
+        Event originalEvent = eventListHandler.getOriginalEventFromMap(eventID);
+        assignmentListHandler.addAssignmentToListAndMap(eventID, originalEvent.getAssignment(), null, mContext);
+
+        //Make API call to get all activities for this event
+        getEventActivitiesFromServer();
+
+        // Initialize facebook fragment for login
+        fbLoginFragment = (FbLoginFragment) getSupportFragmentManager().findFragmentById(R.id.fb_login_page);
+    }
+
+    private void getEventFromServer(){
+        serviceHandler.getEventHandler().getEvent(new BaseFaroRequestCallback<EventInviteStatusWrapper>() {
+            @Override
+            public void onFailure(Request request, IOException ex) {
+                Log.e(TAG, "failed to get Event from server");
+            }
+
+            @Override
+            public void onResponse(final EventInviteStatusWrapper eventInviteStatusWrapper, HttpError error) {
+                if (error == null ) {
+                    Runnable myRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.i(TAG, "Successfully received Event from server");
+                            Event event = eventInviteStatusWrapper.getEvent();
+                            eventListHandler.addEventToListAndMap(event,
+                                    eventInviteStatusWrapper.getInviteStatus());
+                            setupPageDetails();
+                        }
+                    };
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(myRunnable);
+                }else {
+                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                }
+            }
+        }, eventID);
+    }
+
+    public void getEventActivitiesFromServer(){
+        serviceHandler.getActivityHandler().getActivities(new BaseFaroRequestCallback<List<com.zik.faro.data.Activity>>() {
+            @Override
+            public void onFailure(Request request, IOException ex) {
+                Log.e(TAG, "failed to get activity list");
+            }
+
+            @Override
+            public void onResponse(final List<com.zik.faro.data.Activity> activities, HttpError error) {
+                if (error == null) {
+                    Runnable myRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.i(TAG, "Successfully received activities from the server!!");
+                            activityListHandler.addDownloadedActivitiesToListAndMap(eventID, activities, mContext);
+                        }
+                    };
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(myRunnable);
+                } else {
+                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                }
+            }
+        }, eventID);
     }
 
     private boolean checkPermissionsForUploadingPhotos() {
@@ -557,40 +837,21 @@ public class EventLandingPage extends FragmentActivity
         cameraTakenPhotoPath = savedInstanceState.getString(CAPTURED_PHOTO_PATH_KEY);
     }
 
-    private void updateUserEventInviteStatus(final EventInviteStatus eventInviteStatus) {
-        serviceHandler.getEventHandler().updateEventUserInviteStatus(new BaseFaroRequestCallback<String>() {
+    public void getEventInviteesFromServer(){
+        serviceHandler.getEventHandler().getEventInvitees(new BaseFaroRequestCallback<InviteeList>() {
             @Override
             public void onFailure(Request request, IOException ex) {
-                Log.e(TAG, "failed to send cloneEvent Invite Status");
+                Log.e(TAG, "failed to get cloneEvent Invitees");
             }
 
             @Override
-            public void onResponse(String s, HttpError error) {
-                if (error == null ) {
-                    //Since update to server successful
+            public void onResponse(final InviteeList inviteeList, HttpError error) {
+                if (error == null) {
                     Runnable myRunnable = new Runnable() {
                         @Override
                         public void run() {
-                       switch (eventInviteStatus){
-                           case ACCEPTED:
-                               eventListHandler.addEventToListAndMap(cloneEvent, EventInviteStatus.ACCEPTED);
-                               //Reload EventLandingPage
-                               eventLandingPageReload.putExtra("eventID", eventID);
-                               finish();
-                               startActivity(eventLandingPageReload);
-                               break;
-                           case MAYBE:
-                               eventListHandler.addEventToListAndMap(cloneEvent, EventInviteStatus.MAYBE);
-                               //Reload EventLandingPage
-                               eventLandingPageReload.putExtra("eventID", eventID);
-                               finish();
-                               startActivity(eventLandingPageReload);
-                               break;
-                           case DECLINED:
-                               eventListHandler.removeEventFromListAndMap(eventID);
-                               finish();
-                               break;
-                       }
+                            Log.i(TAG, "Successfully received Invitee List for the cloneEvent");
+                            eventFriendListHandler.addDownloadedFriendsToListAndMap(eventID, inviteeList, mContext);
                         }
                     };
                     Handler mainHandler = new Handler(mContext.getMainLooper());
@@ -599,180 +860,24 @@ public class EventLandingPage extends FragmentActivity
                     Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                 }
             }
-        }, eventID, eventInviteStatus);
+        }, eventID);
     }
 
-    private void eventStateBasedView(){
-        EventInviteStatus inviteStatus = eventListHandler.getUserEventStatus(eventID);
-        
-        if (inviteStatus == EventInviteStatus.ACCEPTED){
-            statusYes.setVisibility(View.GONE);
-            statusNo.setVisibility(View.GONE);
-            statusMaybe.setVisibility(View.GONE);
-            pollButton.setVisibility(View.VISIBLE);
-            eventAssignmentButton.setVisibility(View.VISIBLE);
-            guestListImageButton.setVisibility(View.VISIBLE);
-            activityButton.setVisibility(View.VISIBLE);
-            editButton.setVisibility(View.VISIBLE);
-        } else {
-            statusYes.setVisibility(View.VISIBLE);
-            statusNo.setVisibility(View.VISIBLE);
-            pollButton.setVisibility(View.GONE);
-            eventAssignmentButton.setVisibility(View.GONE);
-            guestListImageButton.setVisibility(View.GONE);
-            activityButton.setVisibility(View.GONE);
-            editButton.setVisibility(View.GONE);
-        }
-
-        if (inviteStatus == EventInviteStatus.INVITED) {
-            statusMaybe.setVisibility(View.VISIBLE);
-        } else if (inviteStatus == EventInviteStatus.MAYBE){
-            statusMaybe.setVisibility(View.GONE);
-        }
-    }
-
-    private void controlFlagBasedView() {
-        if(cloneEvent.getEventCreatorId() == null) {
-            if (cloneEvent.getControlFlag()) {
-                editButton.setVisibility(View.GONE);
+    @Override
+    protected void onResume() {
+        if (isNotification == null) {
+            // Check if the version is same. It can be different if this page is loaded and a notification
+            // is received for this later which updates the global memory but clonedata on this page remains
+            // stale.
+            // This check is not necessary when opening this page directly through a notification.
+            Long versionInGlobalMemory = eventListHandler.getOriginalEventFromMap(eventID).getVersion();
+            if (!cloneEvent.getVersion().equals(versionInGlobalMemory)) {
+                Intent eventLandingPageReloadIntent = new Intent(EventLandingPage.this, EventLandingPage.class);
+                eventLandingPageReloadIntent.putExtra("eventID", eventID);
+                finish();
+                startActivity(eventLandingPageReloadIntent);
             }
         }
-    }
-
-    //TODO Clear all cloneEvent related datastructures
-    @Override
-    public void onBackPressed() {
-        eventListHandler.deleteEventFromMapIfNotInList(cloneEvent);
-        pollListHandler.clearPollListsAndMap();
-        activityListHandler.clearActivityListAndMap();
-        eventFriendListHandler.clearFriendListAndMap();
-        assignmentListHandler.clearAssignmentListAndMap();
-        finish();
-        super.onBackPressed();
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_event_landing_page, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-
-        // Get the location of the event and set the position of the map also mark mylocation on the map.
-        setEventLocationOnMap();
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String permissions[],
-                                           @NonNull int[] grantResults) {
-        mLocationPermissionGranted = false;
-
-        if (requestCode == PERMISSIONS_REQ_EXTERNAL_STORAGE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Woohoo ! permission was granted
-                startPhotosUploadWorkflow();
-            } else {
-                Log.i(TAG, "Permission to access EXTERNAL STORAGE to upload photos denied");
-            }
-        } else if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
-            // If request is cancelled, the result arrays are empty.
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                mLocationPermissionGranted = true;
-            }
-        }
-
-        setEventLocationOnMap();
-    }
-
-    /*@Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        if (requestCode == PERMISSIONS_REQ_EXTERNAL_STORAGE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Woohoo ! permission was granted
-                startPhotosUploadWorkflow();
-            } else {
-                Log.i(TAG, "Permission to access EXTERNAL STORAGE to upload photos denied");
-            }
-        }
-    }*/
-
-    private void setEventLocationOnMap() {
-        if (mMap == null) {
-            return;
-        }
-
-        /*
-         * Request location permission, so that we can get the location of the
-         * device. The result of the permission request is handled by a callback,
-         * onRequestPermissionsResult.
-         */
-        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            mLocationPermissionGranted = true;
-        } else {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-        }
-
-        if (mLocationPermissionGranted) {
-            mMap.setMyLocationEnabled(true);
-            mMap.getUiSettings().setMyLocationButtonEnabled(true);
-        } else {
-            mMap.setMyLocationEnabled(false);
-            mMap.getUiSettings().setMyLocationButtonEnabled(false);
-        }
-
-        if (mCameraPosition != null) {
-            mMap.moveCamera(CameraUpdateFactory.newCameraPosition(mCameraPosition));
-        } else if (mEventLocation != null){
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mEventLocation, DEFAULT_ZOOM));
-            mMap.addMarker(new MarkerOptions().position(mEventLocation));
-        } else {
-            Log.d(TAG, "Current location is null. Using defaults.");
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
-            mMap.getUiSettings().setMyLocationButtonEnabled(false);
-        }
-    }
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        mapFragment.getMapAsync(this);
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        Log.d(TAG, "Play services connection suspended");
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        // Todo: Refer to the reference doc for ConnectionResult to see what error codes might
-        // be returned in onConnectionFailed.
-        Log.d(TAG, "Play services connection failed: ConnectionResult.getErrorCode() = "
-                + connectionResult.getErrorCode());
+        super.onResume();
     }
 }

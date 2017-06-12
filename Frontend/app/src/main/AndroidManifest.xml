@@ -39,7 +39,6 @@
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -68,18 +67,12 @@
             android:name=".PollListPage"
             android:label="@string/title_activity_poll_landing_page" />
         <activity
-            android:name=".OpenPollLandingPage"
-            android:label="@string/title_activity_poll_landing_page" />
-        <activity
             android:name=".CreateNewActivity"
             android:label="@string/title_activity_create_new" />
         <activity android:name=".EditPoll" />
         <activity
             android:name=".PickPollWinnerPage"
             android:label="@string/title_activity_pick_poll_winner" />
-        <activity
-            android:name=".ClosedPollLandingPage"
-            android:label="@string/title_activity_closed_poll_landing_page" />
         <activity
             android:name=".ActivityListPage"
             android:label="@string/title_activity_activity_list_page" />
@@ -101,6 +94,8 @@
         <activity
             android:name=".AssignmentLandingPage"
             android:label="AssignmentLandingPageTabs" />
+        <activity android:name=".EventFriendListLandingPage" />
+        <activity android:name=".UserProfilePage" />
 
         <meta-data
             android:name="com.google.android.gms.version"
@@ -108,9 +103,28 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_place_api" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/colorAccent" />
 
-        <activity android:name=".EventFriendListLandingPage" />
-        <activity android:name=".UserProfilePage"></activity>
+        <service android:name=".notification.MyFirebaseMessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <service android:name=".notification.MyFirebaseInstanceIDService">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+            </intent-filter>
+        </service>
+
+        <activity android:name=".notification.ReceivedNotficationHandler">
+            <intent-filter>
+                <action android:name="RECEIVEDNOTIFICATIONHANDLER" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".PollLandingPage"/>
 
         <activity
             android:name=".ImageGridViewActivity"

@@ -1,6 +1,7 @@
 package com.zik.faro.frontend;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,7 +15,7 @@ import android.widget.DatePicker;
 
 import java.util.Calendar;
 
-public class EventCalendarView extends ActionBarActivity {
+public class EventCalendarView extends Activity {
 
     private CalendarView calendarView = null;
     private int yr, mon, dy;

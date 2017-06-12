@@ -16,6 +16,7 @@ import com.zik.faro.data.IllegalDataOperation;
 import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.persistence.datastore.EventDatastoreImpl;
+import com.zik.faro.persistence.datastore.EventUserDatastoreImpl;
 import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.persistence.datastore.data.EventUserDo;
 
@@ -36,9 +37,9 @@ public class EventManagement {
         EventDatastoreImpl.deleteEvent(eventId);
     }
 
-    public static Event getEventDetails(final String userId, final String eventId) throws DataNotFoundException{
-        EventDo event = EventDatastoreImpl.loadEventByID(eventId);
-        return ConversionUtils.fromDo(event);
+    public static EventInviteStatusWrapper getEventDetails(final String userId, final String eventId) throws DataNotFoundException{
+        EventUserDo eventUserDo = EventUserDatastoreImpl.loadEventUser(eventId, userId);
+        return new EventInviteStatusWrapper(ConversionUtils.fromDo(eventUserDo.getEvent()), eventUserDo.getInviteStatus());
     }
     
     public static Event updateEvent(final Event updateObj, final String eventId) throws DataNotFoundException, DatastoreException, UpdateVersionException {

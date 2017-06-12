@@ -63,6 +63,7 @@ public class SignupActivity extends Activity {
     private EditText emailTextBox;
     private EditText passwordTextBox;
     private EditText confirmPasswordBox;
+    private EditText serverIPAddressEditText;
 
     private LinearLayout signupActivityProgressBarLayout;
     private RelativeLayout signupActivityDetailsLayout;
@@ -87,7 +88,7 @@ public class SignupActivity extends Activity {
         emailTextBox = (EditText)findViewById(R.id.signupEmail);
         passwordTextBox = (EditText)findViewById(R.id.signupPassword);
         confirmPasswordBox = (EditText)findViewById(R.id.confirmPassword);
-        final EditText serverIPAddressEditText = (EditText)findViewById(R.id.ipAddress);
+        serverIPAddressEditText = (EditText)findViewById(R.id.ipAddress);
 
         // Get the progress bar and login details layouts
         signupActivityProgressBarLayout = (LinearLayout) findViewById(R.id.signupActivityProgressBarLayout);
@@ -97,25 +98,6 @@ public class SignupActivity extends Activity {
         signupActivityProgressBarLayout.setVisibility(View.GONE);
 
         appLandingPageIntent = new Intent(SignupActivity.this, AppLandingPage.class);
-
-        serverIPAddressEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (!serverIPAddressEditText.getText().toString().trim().isEmpty()) {
-                    ((FaroApplication)getApplication()).overRideAppServerIp(serverIPAddressEditText.getText().toString().trim());
-                }
-            }
-        });
 
         // First create facebook callback manager
         callbackManager = CallbackManager.Factory.create();
@@ -262,9 +244,12 @@ public class SignupActivity extends Activity {
         String password = passwordTextBox.getText().toString();
         String confirmPassword = confirmPasswordBox.getText().toString();
 
+        if (!serverIPAddressEditText.getText().toString().trim().isEmpty()) {
+            ((FaroApplication)getApplication()).overRideAppServerIp(serverIPAddressEditText.getText().toString().trim());
+        }
+
         if (validate(name, email, password, confirmPassword)) {
-            FaroUser newFaroUser = new FaroUser(email, null, null,
-            null, null, null, null);
+            FaroUser newFaroUser = new FaroUser(email, null, null, null, null, null, null);
             newFaroUser.setFirstName(name);
 
             FarouserSignupCallback farouserSignupCallback = new FarouserSignupCallback(newFaroUser);

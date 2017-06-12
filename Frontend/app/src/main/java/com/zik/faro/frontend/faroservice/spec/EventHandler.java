@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface EventHandler {
     void getEvents(final BaseFaroRequestCallback<List<EventInviteStatusWrapper>> callback);
-    void getEvent(final BaseFaroRequestCallback<Event> callback, final String eventId);
+    void getEvent(final BaseFaroRequestCallback<EventInviteStatusWrapper> callback, final String eventId);
     void createEvent(final BaseFaroRequestCallback<Event> callback, Event event);
     void deleteEvent(final BaseFaroRequestCallback<String> callback, final String eventId);
     void getEventInvitees(final BaseFaroRequestCallback<InviteeList> callback, final String eventId);

@@ -7,13 +7,19 @@ import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,9 +52,11 @@ import static android.widget.Toast.LENGTH_LONG;
  */
 public class EditAssignment extends android.app.Activity {
 
-    private static Event originalEvent;
-    private static Activity originalActivity = null;
-    private static Assignment cloneAssignment;
+    private Event originalEvent;
+    private Activity originalActivity = null;
+    private Event cloneEvent = null;
+    private Activity cloneActivity = null;
+    private Assignment cloneAssignment;
 
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
@@ -74,10 +82,18 @@ public class EditAssignment extends android.app.Activity {
     private int editItemPosition = -1;
     private boolean addEditedItem = false;
 
+    private final Context mContext = this;
+
+    private RelativeLayout popUpRelativeLayout = null;
+
+    private Map<String, List<Item>> itemListMap = new HashMap<String, List<Item>>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_assignment);
+
+        popUpRelativeLayout = (RelativeLayout) findViewById(R.id.editAssignmentRelativeLayout);
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
@@ -90,6 +106,7 @@ public class EditAssignment extends android.app.Activity {
             originalEvent = eventListHandler.getOriginalEventFromMap(eventID);
             if (activityID != null) {
                 originalActivity = activityListHandler.getOriginalActivityFromMap(activityID);
+                cloneActivity = activityListHandler.getActivityCloneFromMap(activityID);
             }
             cloneAssignment = assignmentListHandler.getAssignmentCloneFromMap(assignmentID);
 
@@ -108,9 +125,7 @@ public class EditAssignment extends android.app.Activity {
             final Spinner itemUnitSpinner = (Spinner) findViewById(R.id.itemUnitSpinner);
 
             inviteeSpinner.setTag("EditAssignment");
-            inviteeSpinner.setAdapter(eventFriendListHandler.acceptedFriendAdapter);
-
-            final Context mContext = this;
+            inviteeSpinner.setAdapter(eventFriendListHandler.getAcceptedFriendAdapter(eventID, mContext));
 
 
             for (Unit unit : Unit.values()){
@@ -210,7 +225,15 @@ public class EditAssignment extends android.app.Activity {
                 @Override
                 public void onClick(View v) {
                     String itemDescription = itemNameEditText.getText().toString();
-                    int itemCount = Integer.parseInt(itemCountEditText.getText().toString());
+                    int itemCount = 0;
+                    try {
+                        itemCount = Integer.parseInt(itemCountEditText.getText().toString());
+                    } catch (NumberFormatException e){
+                        itemCountEditText.setText("0");
+                        errorMsgPopUp("Number passed is too big");
+                        return;
+                    }
+
 
                     Item item = null;
                     try {
@@ -262,64 +285,67 @@ public class EditAssignment extends android.app.Activity {
                         }
                     }
 
-                    Map<String, List<Item>> itemListMap = new HashMap<String, List<Item>>();
                     if (activityID != null) {
                         itemListMap.put(activityID, updatedItemList);
                     }else {
                         itemListMap.put(eventID, updatedItemList);
                     }
 
-                    serviceHandler.getAssignmentHandler().updateAssignment(new BaseFaroRequestCallback<Map<String, List<Item>>>() {
-                            @Override
-                            public void onFailure(Request request, IOException ex) {
-                                Log.e(TAG, "failed to send new item list");
-                            }
-
-                            @Override
-                            public void onResponse(final Map<String, List<Item>> stringListMap, HttpError error) {
-                                if (error == null ) {
-                                    Runnable myRunnable = new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            Log.i(TAG, "Successfully updated items list to server");
-                                            List<Item> receivedItemList;
-                                            if (activityID != null) {
-                                                receivedItemList = stringListMap.get(activityID);
-                                            }else {
-                                                receivedItemList = stringListMap.get(eventID);
-                                            }
-                                            cloneAssignment.setItems(receivedItemList);
-                                            assignmentListHandler.removeAssignmentFromListAndMap(cloneAssignment.getId());
-                                            if (activityID != null){
-                                                originalActivity.setAssignment(cloneAssignment);
-                                            }else{
-                                                originalEvent.setAssignment(cloneAssignment);
-                                            }
-                                            assignmentListHandler.addAssignmentToListAndMap(cloneAssignment, activityID);
-                                            AssignmentLandingPageTabsIntent.putExtra("eventID", eventID);
-                                            AssignmentLandingPageTabsIntent.putExtra("activityID", activityID);
-                                            AssignmentLandingPageTabsIntent.putExtra("assignmentID", assignmentID);
-                                            startActivity(AssignmentLandingPageTabsIntent);
-                                            finish();
-                                        }
-                                    };
-                                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                                    mainHandler.post(myRunnable);
-                                }else {
-                                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
-                                }
-
-                            }
-                        }, eventID, itemListMap);
+                    updateAssignmentToServer();
                 }
             });
         }
     }
 
+    public void updateAssignmentToServer () {
+        serviceHandler.getAssignmentHandler().updateAssignment(new BaseFaroRequestCallback<Map<String, List<Item>>>() {
+            @Override
+            public void onFailure(Request request, IOException ex) {
+                Log.e(TAG, "failed to send new item list");
+            }
+
+            @Override
+            public void onResponse(final Map<String, List<Item>> stringListMap, HttpError error) {
+                if (error == null ) {
+                    Runnable myRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.i(TAG, "Successfully updated items list to server");
+                            List<Item> receivedItemList;
+                            if (activityID != null) {
+                                receivedItemList = stringListMap.get(activityID);
+                            }else {
+                                receivedItemList = stringListMap.get(eventID);
+                            }
+                            cloneAssignment.setItems(receivedItemList);
+                            assignmentListHandler.removeAssignmentFromListAndMap(eventID, cloneAssignment.getId(), mContext);
+                            if (activityID != null){
+                                originalActivity.setAssignment(cloneAssignment);
+                            }else{
+                                originalEvent.setAssignment(cloneAssignment);
+                            }
+                            assignmentListHandler.addAssignmentToListAndMap(eventID, cloneAssignment, activityID, mContext);
+                            AssignmentLandingPageTabsIntent.putExtra("eventID", eventID);
+                            AssignmentLandingPageTabsIntent.putExtra("activityID", activityID);
+                            AssignmentLandingPageTabsIntent.putExtra("assignmentID", assignmentID);
+                            startActivity(AssignmentLandingPageTabsIntent);
+                            finish();
+                        }
+                    };
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(myRunnable);
+                }else {
+                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                }
+
+            }
+        }, eventID, itemListMap);
+    }
+
     public int getAssigneePositionInList(String assigneeID){
         int i = 0;
-        for (i = 0; i < eventFriendListHandler.acceptedFriendAdapter.list.size(); i++){
-            InviteeList.Invitees invitees = eventFriendListHandler.acceptedFriendAdapter.list.get(i);
+        for (i = 0; i < eventFriendListHandler.getAcceptedFriendAdapter(eventID, mContext).list.size(); i++){
+            InviteeList.Invitees invitees = eventFriendListHandler.getAcceptedFriendAdapter(eventID, mContext).list.get(i);
             if (invitees.getEmail().equals(assigneeID)){
                 break;
             }
@@ -338,6 +364,29 @@ public class EditAssignment extends android.app.Activity {
         return i;
     }
 
+
+    private void errorMsgPopUp(String errorMsg){
+        LayoutInflater layoutInflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        ViewGroup container = (ViewGroup) layoutInflater.inflate(R.layout.error_message_popup, null);
+        final PopupWindow popupWindow = new PopupWindow(container,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT, true);
+
+        TextView errorMsgTextView = (TextView) container.findViewById(R.id.errorMsg);
+        errorMsgTextView.setText(errorMsg);
+
+
+        popupWindow.showAtLocation(popUpRelativeLayout, Gravity.CENTER, 0, 0);
+
+        container.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                popupWindow.dismiss();
+                return false;
+            }
+        });
+    }
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -348,4 +397,29 @@ public class EditAssignment extends android.app.Activity {
         finish();
     }
 
+    @Override
+    protected void onResume() {
+// Check if the version is same. It can be different if this page is loaded and a notification
+        // is received for this later which updates the global memory but clonedata on this page remains
+        // stale.
+        Long versionInGlobalMemory = null;
+        Long previousVersion = null;
+
+        if (activityID == null){
+            versionInGlobalMemory = eventListHandler.getOriginalEventFromMap(eventID).getVersion();
+            previousVersion = cloneEvent.getVersion();
+        } else {
+            versionInGlobalMemory = activityListHandler.getOriginalActivityFromMap(activityID).getVersion();
+            previousVersion = cloneActivity.getVersion();
+        }
+
+        if (!previousVersion.equals(versionInGlobalMemory)) {
+            Intent editAssignmentPageReloadIntent = new Intent(EditAssignment.this, EditAssignment.class);
+            editAssignmentPageReloadIntent.putExtra("eventID", eventID);
+            editAssignmentPageReloadIntent.putExtra("activityID", activityID);
+            editAssignmentPageReloadIntent.putExtra("assignmentID", assignmentID);
+            finish();
+            startActivity(editAssignmentPageReloadIntent);
+        }
+        super.onResume();    }
 }

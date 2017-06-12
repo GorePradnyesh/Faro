@@ -5,7 +5,7 @@ package com.zik.faro.commons;
  */
 public final class Constants {
 
-    public static final String HTTP_OK                                          = "OK";
+	public static final String HTTP_OK                                          = "OK";
 
     //----- Query String parameters ----- //
     public static final String FARO_USER_ID_PARAM                               = "userId";
@@ -94,6 +94,13 @@ public final class Constants {
     // ---- Misc constants ---- //
     public static final String ALL												= "all";
     public static final int MAX_ITEMS_TO_FETCH_FROM_DATASTORE					= 20;
+
+    // ---- notificatioin constants ---- //
+    public static final String FCM_ENDPOINT 									= "https://fcm.googleapis.com";
+    public static final String IID_ENDPOINT										= "https://iid.googleapis.com";
+    public static final String SEND_NOTIFICATION_PATH_CONST						= "/fcm/send";
+    public static final String CREATE_TOKEN_PATH_CONST_FIRST_PART				= "/iid/v1:batchAdd";
+
 
     // -- Authentication path constants -- //
     public static final String AUTH_PATH_CONST                                  = "/nativeLogin";

@@ -1,5 +1,6 @@
 package com.zik.faro.frontend;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTabHost;
@@ -14,15 +15,15 @@ import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 public class EventFriendListLandingPage extends FragmentActivity {
     private FragmentTabHost mTabHost;
     private String eventID;
-    private static Event cloneEvent;
+    private Event cloneEvent;
 
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
 
-    private Intent EventLandingPageIntent = null;
-
     FaroUserContext faroUserContext = FaroUserContext.getInstance();
     String myUserId = faroUserContext.getEmail();
+
+    private Context mContext = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,10 +34,7 @@ public class EventFriendListLandingPage extends FragmentActivity {
         ImageButton addFriendsImageButton = (ImageButton) findViewById(R.id.addFriendsImageButton);
         addFriendsImageButton.setImageResource(R.drawable.plus);
 
-
         final Intent InviteFriendToEventPage = new Intent(EventFriendListLandingPage.this, InviteFriendToEventPage.class);
-        EventLandingPageIntent = new Intent(EventFriendListLandingPage.this, EventLandingPage.class);
-
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
@@ -61,30 +59,38 @@ public class EventFriendListLandingPage extends FragmentActivity {
         mTabHost.setup(this, getSupportFragmentManager(), android.R.id.tabcontent);
 
         mTabHost.addTab(
-                mTabHost.newTabSpec("tab1").setIndicator("Going" + "(" + eventFriendListHandler.getAcceptedFriendCount() + ")"),
+                mTabHost.newTabSpec("tab1").setIndicator("Going" + "(" + eventFriendListHandler.getAcceptedFriendCount(eventID, mContext) + ")"),
                 EventFriendListFragment.class, getBundleForListType("Going"));
         mTabHost.addTab(
-                mTabHost.newTabSpec("tab2").setIndicator("Maybe" + "(" + eventFriendListHandler.getMayBeFriendCount() + ")"),
+                mTabHost.newTabSpec("tab2").setIndicator("Maybe" + "(" + eventFriendListHandler.getMayBeFriendCount(eventID, mContext) + ")"),
                 EventFriendListFragment.class, getBundleForListType("Maybe"));
         mTabHost.addTab(
-                mTabHost.newTabSpec("tab3").setIndicator("Invited" + "(" + eventFriendListHandler.getInvitedFriendCount() + ")"),
+                mTabHost.newTabSpec("tab3").setIndicator("Invited" + "(" + eventFriendListHandler.getInvitedFriendCount(eventID, mContext) + ")"),
                 EventFriendListFragment.class, getBundleForListType("Invited"));
         mTabHost.addTab(
-                mTabHost.newTabSpec("tab4").setIndicator("Not Going" + "(" + eventFriendListHandler.getDeclinedFriendCount() + ")"),
+                mTabHost.newTabSpec("tab4").setIndicator("Not Going" + "(" + eventFriendListHandler.getDeclinedFriendCount(eventID, mContext) + ")"),
                 EventFriendListFragment.class, getBundleForListType("Not Going"));
     }
 
     private Bundle getBundleForListType(String listType){
         Bundle bundle = new Bundle();
+        bundle.putString("eventID", eventID);
         bundle.putString("listType", listType);
         return bundle;
     }
 
     @Override
-    public void onBackPressed() {
-        EventLandingPageIntent.putExtra("eventID", eventID);
-        startActivity(EventLandingPageIntent);
-        finish();
-        super.onBackPressed();
+    protected void onResume() {
+        // Check if the version is same. It can be different if this page is loaded and a notification
+        // is received for this later which updates the global memory but clonedata on this page remains
+        // stale.
+        Long versionInGlobalMemory = eventListHandler.getOriginalEventFromMap(eventID).getVersion();
+        if (!cloneEvent.getVersion().equals(versionInGlobalMemory)) {
+            Intent eventFriendListLandingPageReloadIntent = new Intent(EventFriendListLandingPage.this, EventFriendListLandingPage.class);
+            eventFriendListLandingPageReloadIntent.putExtra("eventID", eventID);
+            finish();
+            startActivity(eventFriendListLandingPageReloadIntent);
+        }
+        super.onResume();
     }
 }

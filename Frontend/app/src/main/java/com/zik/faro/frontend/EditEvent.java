@@ -67,7 +67,7 @@ public class EditEvent extends Activity {
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
 
 
-    private  static EventListHandler eventListHandler = EventListHandler.getInstance();
+    private static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private static Event cloneEvent;
 
@@ -542,5 +542,20 @@ public class EditEvent extends Activity {
         startActivity(EventLanding);
         finish();
         super.onBackPressed();
+    }
+
+    @Override
+    protected void onResume() {
+        // Check if the version is same. It can be different if this page is loaded and a notification
+        // is received for this later which updates the global memory but clonedata on this page remains
+        // stale.
+        Long versionInGlobalMemory = eventListHandler.getOriginalEventFromMap(eventID).getVersion();
+        if (!cloneEvent.getVersion().equals(versionInGlobalMemory)){
+            Intent editEventPageReloadIntent = new Intent(EditEvent.this, EditEvent.class);
+            editEventPageReloadIntent.putExtra("eventID", eventID);
+            finish();
+            startActivity(editEventPageReloadIntent);
+        }
+        super.onResume();
     }
 }

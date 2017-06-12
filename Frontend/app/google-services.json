@@ -48,15 +48,15 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "480570287743-9ksotsqd53e8fd12cusmnm6nsunun5lj.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
               "client_id": "480570287743-h1qohi5ag32q36idju8qgvh3ttf58uhm.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
                 "bundle_id": "com.zik.Faro.Ios"
               }
+            },
+            {
+              "client_id": "480570287743-9ksotsqd53e8fd12cusmnm6nsunun5lj.apps.googleusercontent.com",
+              "client_type": 3
             }
           ]
         },
@@ -107,15 +107,15 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "480570287743-9ksotsqd53e8fd12cusmnm6nsunun5lj.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
               "client_id": "480570287743-h1qohi5ag32q36idju8qgvh3ttf58uhm.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
                 "bundle_id": "com.zik.Faro.Ios"
               }
+            },
+            {
+              "client_id": "480570287743-9ksotsqd53e8fd12cusmnm6nsunun5lj.apps.googleusercontent.com",
+              "client_type": 3
             }
           ]
         },

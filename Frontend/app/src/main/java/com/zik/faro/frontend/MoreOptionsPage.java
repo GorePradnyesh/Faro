@@ -3,6 +3,7 @@ package com.zik.faro.frontend;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,8 +11,11 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.facebook.login.LoginManager;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 import com.zik.faro.frontend.faroservice.auth.TokenCache;
+
+import java.io.IOException;
 
 public class MoreOptionsPage extends Fragment{
 
@@ -19,6 +23,7 @@ public class MoreOptionsPage extends Fragment{
     static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
     static FaroUserContext faroUserContext = FaroUserContext.getInstance();
     String myUserId = faroUserContext.getEmail();
+    String TAG = "MoreOptions";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -39,13 +44,23 @@ public class MoreOptionsPage extends Fragment{
                 //Clear all App related info here
                 eventListHandler.clearListAndMapOnLogout();
                 userFriendListHandler.clearFriendListAndMap();
-                TokenCache.getTokenCache().deleteToken();
+
+                //Delete Firebase token.
+                try {
+                    FirebaseInstanceId.getInstance().deleteInstanceId();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
 
                 // Log out of facebook
                 LoginManager.getInstance().logOut();
 
+                TokenCache.getTokenCache().deleteToken();
+
                 startActivity(LoginActivity);
                 getActivity().finish();
+
             }
         });
         return v;

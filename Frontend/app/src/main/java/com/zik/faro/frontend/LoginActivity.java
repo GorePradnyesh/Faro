@@ -58,7 +58,7 @@ public class LoginActivity extends Activity {
 
     private EditText emailTextBox;
     private EditText passwordTextBox;
-    EditText serverIPAddressEditText;
+    private EditText serverIPAddressEditText;
     private LoginButton fbLoginButton;
 
     static FaroUserContext faroUserContext = FaroUserContext.getInstance();
@@ -91,6 +91,8 @@ public class LoginActivity extends Activity {
         emailTextBox = (EditText)findViewById(R.id.TFEmail);
         passwordTextBox = (EditText)findViewById(R.id.TFPassword);
 
+        serverIPAddressEditText = (EditText)findViewById(R.id.ipAddress);
+
         // Get the progress bar and login details layouts
         loginActivityProgressBarLayout = (LinearLayout) findViewById(R.id.loginActivityProgressBarLayout);
         loginActivityDetailsLayout = (RelativeLayout) findViewById(R.id.loginActivityDetailsLayout);
@@ -110,21 +112,6 @@ public class LoginActivity extends Activity {
         faroCache = FaroCache.getOrCreateFaroUserContextCache(LoginActivity.this);
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
-
-        serverIPAddressEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (!serverIPAddressEditText.getText().toString().trim().isEmpty()) {
-                    ((FaroApplication)getApplication()).overRideAppServerIp(serverIPAddressEditText.getText().toString().trim());
-                }
-            }
-        });
 
         // Check if we have arrived on LoginActivity from the SignupActivity because third party signup process
         // determined that the user's account already exists
@@ -375,6 +362,10 @@ public class LoginActivity extends Activity {
         String password = passwordTextBox.getText().toString();
 
         Log.i(TAG, MessageFormat.format("username :{0} password :{1}", email, password));
+
+        if (!serverIPAddressEditText.getText().toString().trim().isEmpty()) {
+            ((FaroApplication)getApplication()).overRideAppServerIp(serverIPAddressEditText.getText().toString().trim());
+        }
 
         Log.i(TAG, "serverIP = " + ((FaroApplication)getApplication()).getAppServerIp());
 

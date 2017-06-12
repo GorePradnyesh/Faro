@@ -1,6 +1,8 @@
 package com.zik.faro.frontend;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,7 +38,11 @@ public class EventFriendAdapter extends ArrayAdapter {
         Collections.sort(list, new Comparator<InviteeList.Invitees>() {
             @Override
             public int compare(InviteeList.Invitees lhs, InviteeList.Invitees rhs) {
-                return lhs.getFirstName().compareTo(rhs.getFirstName());
+                if (lhs.getFirstName() != null && rhs.getFirstName() != null) {
+                    return lhs.getFirstName().compareTo(rhs.getFirstName());
+                } else {
+                    return lhs.getEmail().compareTo(lhs.getEmail());
+                }
             }
         });
     }
@@ -71,6 +77,7 @@ public class EventFriendAdapter extends ArrayAdapter {
                     LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                     row = inflater.inflate(R.layout.friend_row_style, parent, false);
                     holder.friendName = (TextView)row.findViewById(R.id.friendName);
+                    holder.userPicture = (ImageView) row.findViewById(R.id.userPicture);
                     row.setTag(holder);
                 }else{
                     holder = (EventFriendAdapter.ImgHolder) row.getTag();
@@ -80,8 +87,10 @@ public class EventFriendAdapter extends ArrayAdapter {
                     if (invitees.getFirstName() != null) {
                         holder.friendName.setText(invitees.getFirstName());
                     }else{
-                        holder.friendName.setText("FNU");
+                        holder.friendName.setText(invitees.getEmail());
                     }
+                    holder.friendName.setTextColor(Color.BLACK);
+                    holder.userPicture.setVisibility(View.GONE);
                 }
                 break;
             default:
@@ -100,7 +109,7 @@ public class EventFriendAdapter extends ArrayAdapter {
                     if (invitees.getFirstName() != null) {
                         holder.friendName.setText(invitees.getFirstName());
                     }else{
-                        holder.friendName.setText("FNU");
+                        holder.friendName.setText(invitees.getEmail());
                     }
                 }
                 holder.userPicture.setImageResource(R.drawable.user_pic);
@@ -117,6 +126,7 @@ public class EventFriendAdapter extends ArrayAdapter {
             LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             row = inflater.inflate(R.layout.friend_row_style, parent, false);
             holder.friendName = (TextView)row.findViewById(R.id.friendName);
+            holder.userPicture = (ImageView) row.findViewById(R.id.userPicture);
             row.setTag(holder);
         }else{
             holder = (EventFriendAdapter.ImgHolder) row.getTag();
@@ -126,9 +136,11 @@ public class EventFriendAdapter extends ArrayAdapter {
             if (invitees.getFirstName() != null) {
                 holder.friendName.setText(invitees.getFirstName());
             }else{
-                holder.friendName.setText("FNU");
+                holder.friendName.setText(invitees.getEmail());
             }
         }
+        holder.friendName.setTextColor(Color.BLACK);
+        holder.userPicture.setVisibility(View.GONE);
         return row;
     }
 }

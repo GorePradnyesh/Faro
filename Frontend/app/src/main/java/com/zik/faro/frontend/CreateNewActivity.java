@@ -32,7 +32,7 @@ import static android.widget.Toast.LENGTH_LONG;
 
 public class CreateNewActivity extends android.app.Activity {
 
-    private static String eventID = null;
+    private String eventID = null;
     static EventListHandler eventListHandler = EventListHandler.getInstance();
     static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
     Event event = null;
@@ -144,7 +144,7 @@ public class CreateNewActivity extends android.app.Activity {
                                 public void run() {
                                     //Since update to server successful, adding activity to List and Map below
                                     Log.i(TAG, "Activity Create Response received Successfully");
-                                    activityListHandler.addActivityToListAndMap(receivedActivity);
+                                    activityListHandler.addActivityToListAndMap(eventID, receivedActivity, mContext);
                                     activityLanding.putExtra("eventID", eventID);
                                     activityLanding.putExtra("activityID", receivedActivity.getId());
                                     startActivity(activityLanding);
@@ -161,7 +161,6 @@ public class CreateNewActivity extends android.app.Activity {
             }
         });
 
-        //TODO: User should be allowed to set date and time only within the events date and time
         startDateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
