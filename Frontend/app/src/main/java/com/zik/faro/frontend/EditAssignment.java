@@ -104,6 +104,7 @@ public class EditAssignment extends android.app.Activity {
             assignmentID = extras.getString("assignmentID");
 
             originalEvent = eventListHandler.getOriginalEventFromMap(eventID);
+            cloneEvent = eventListHandler.getEventCloneFromMap(eventID);
             if (activityID != null) {
                 originalActivity = activityListHandler.getOriginalActivityFromMap(activityID);
                 cloneActivity = activityListHandler.getActivityCloneFromMap(activityID);

@@ -1,0 +1,735 @@
+diff --git a/Frontend/app/src/main/java/com/zik/faro/frontend/AppLandingPage.java b/Frontend/app/src/main/java/com/zik/faro/frontend/AppLandingPage.java
+index f85ca6d..6caa7c0 100644
+--- a/Frontend/app/src/main/java/com/zik/faro/frontend/AppLandingPage.java
++++ b/Frontend/app/src/main/java/com/zik/faro/frontend/AppLandingPage.java
+@@ -13,19 +13,21 @@ import android.view.View;
+ import android.widget.ImageView;
+ 
+ import com.google.firebase.iid.FirebaseInstanceId;
++import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
+ import com.zik.faro.frontend.notification.MyFirebaseInstanceIDService;
+ 
+ public class AppLandingPage extends FragmentActivity{
+     private FragmentTabHost mTabHost;
+ 
+     private static final String TAG = "AppLandingPage";
+-    private BroadcastReceiver broadcastReceiver;
+ 
+     private static PollListHandler pollListHandler = PollListHandler.getInstance();
+     private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
+     private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
+     private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
+ 
++    static FaroUserContext faroUserContext = FaroUserContext.getInstance();
++
+     /*
+     fragment Activity code picked from
+     https://maxalley.wordpress.com/2013/05/18/android-creating-a-tab-layout-with-fragmenttabhost-and-fragments/
+@@ -41,20 +43,13 @@ public class AppLandingPage extends FragmentActivity{
+ 
+         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
+ 
+-        // TODO Check if we have token in global memory in that case send it to server with userID
+-        // Else firebase could take time to send the token as well. In this case the below receiver
+-        // Will take care of updating our server with the tokenID. In this case the user will not
+-        // be receiving notifications for that brief period.
+-        broadcastReceiver = new BroadcastReceiver() {
+-            @Override
+-            public void onReceive(Context context, Intent intent) {
+-                Log.d(TAG, "Received token. Send to server");
+-                //Do an api call to our server to store the firebase token against the user
+-
++        if (faroUserContext.getFirebaseToken() == null){
++            String firebaseToken = FirebaseInstanceId.getInstance().getToken();
++            if (firebaseToken != null) {
++                //TODO: make API call to our server to update the user's Firebase token.
++                Log.d(TAG, "== Making API call to our server with the firebase token");
+             }
+-        };
+-
+-        registerReceiver(broadcastReceiver, new IntentFilter(MyFirebaseInstanceIDService.TOKEN_BROADCAST));
++        }
+ 
+         /*TODO For styling the tab layout checkout the following link
+         * https://maxalley.wordpress.com/2014/09/08/android-styling-a-tab-layout-with-fragmenttabhost-and-fragments/
+diff --git a/Frontend/app/src/main/java/com/zik/faro/frontend/EditAssignment.java b/Frontend/app/src/main/java/com/zik/faro/frontend/EditAssignment.java
+index 36bc296..fed00e4 100644
+--- a/Frontend/app/src/main/java/com/zik/faro/frontend/EditAssignment.java
++++ b/Frontend/app/src/main/java/com/zik/faro/frontend/EditAssignment.java
+@@ -104,6 +104,7 @@ public class EditAssignment extends android.app.Activity {
+             assignmentID = extras.getString("assignmentID");
+ 
+             originalEvent = eventListHandler.getOriginalEventFromMap(eventID);
++            cloneEvent = eventListHandler.getEventCloneFromMap(eventID);
+             if (activityID != null) {
+                 originalActivity = activityListHandler.getOriginalActivityFromMap(activityID);
+                 cloneActivity = activityListHandler.getActivityCloneFromMap(activityID);
+diff --git a/Frontend/app/src/main/java/com/zik/faro/frontend/LoginActivity.java b/Frontend/app/src/main/java/com/zik/faro/frontend/LoginActivity.java
+index 4351c4b..196af7f 100644
+--- a/Frontend/app/src/main/java/com/zik/faro/frontend/LoginActivity.java
++++ b/Frontend/app/src/main/java/com/zik/faro/frontend/LoginActivity.java
+@@ -1,8 +1,10 @@
+ package com.zik.faro.frontend;
+ 
+ import android.app.Activity;
++import android.content.Context;
+ import android.content.Intent;
+ import android.os.Bundle;
++import android.os.Handler;
+ import android.text.Editable;
+ import android.text.TextWatcher;
+ import android.util.Log;
+@@ -11,7 +13,9 @@ import android.view.MenuItem;
+ import android.view.View;
+ import android.widget.EditText;
+ 
++import com.facebook.login.LoginManager;
+ import com.google.common.base.Strings;
++import com.google.firebase.iid.FirebaseInstanceId;
+ import com.squareup.okhttp.Request;
+ import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
+ import com.zik.faro.frontend.faroservice.FaroServiceHandler;
+@@ -22,6 +26,7 @@ import com.zik.faro.frontend.faroservice.auth.TokenCache;
+ import java.io.IOException;
+ import java.net.HttpURLConnection;
+ import java.text.MessageFormat;
++import java.util.Date;
+ 
+ public class LoginActivity extends Activity {
+     private String TAG = "LoginActivity";
+@@ -36,6 +41,7 @@ public class LoginActivity extends Activity {
+     static FaroCache faroCache;
+ 
+     private Intent appLandingPageIntent;
++    private Context mContext = null;
+ 
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+@@ -43,6 +49,8 @@ public class LoginActivity extends Activity {
+         super.onCreate(savedInstanceState);
+         setContentView(R.layout.activity_login);
+ 
++        mContext = this;
++
+         final Intent LoginActivityReloadIntent = new Intent(this, com.zik.faro.frontend.LoginActivity.class);
+ 
+         // Bind the data fields with the corresponding View components
+@@ -82,8 +90,10 @@ public class LoginActivity extends Activity {
+             token = tokenCache.getToken();
+             if (token != null) {
+                 String email = faroCache.loadFaroCacheFromDisk("email");
++                String firebaseToken = faroCache.loadFaroCacheFromDisk("firebaseToken");
+                 if (email != null){
+                     faroUserContext.setEmail(email);
++                    faroUserContext.setFirebaseToken(firebaseToken);
+                     startActivity(appLandingPageIntent);
+                     finish();
+                 }else{
+@@ -123,51 +133,130 @@ public class LoginActivity extends Activity {
+         return isValid;
+     }
+ 
+-    /**
+-     * Handle login button click
+-     * If login is successful, go to the event list page
+-     * else show dialog box with login error
+-     * @param view
+-     */
+-    public void onLoginClick(View view) {
+-        Log.i(TAG, "login button clicked");
++    private void loginUser () {
++        Runnable myRunnable = new Runnable() {
++            @Override
++            public void run() {
++                final String email = emailTextBox.getText().toString();
++                String password = passwordTextBox.getText().toString();
+ 
+-        final String email = emailTextBox.getText().toString();
+-        String password = passwordTextBox.getText().toString();
++                Log.i(TAG, MessageFormat.format("username :{0} password :{1}", email, password));
+ 
+-        Log.i(TAG, MessageFormat.format("username :{0} password :{1}", email, password));
++                Log.i(TAG, "serverIP = " + ((FaroApplication)getApplication()).getAppServerIp());
+ 
+-        Log.i(TAG, "serverIP = " + ((FaroApplication)getApplication()).getAppServerIp());
++                // Create Faro service handler
++                serviceHandler = FaroServiceHandler.getFaroServiceHandler();
+ 
+-        // Create Faro service handler
+-        serviceHandler = FaroServiceHandler.getFaroServiceHandler();
++                if (validate(email, password)) {
++                    serviceHandler.getLoginHandler().login(new BaseFaroRequestCallback<String>() {
++                        @Override
++                        public void onFailure(Request request, IOException ex) {
++                            Log.i(TAG, "failed to send login request");
++                        }
+ 
+-        if (validate(email, password)) {
+-            serviceHandler.getLoginHandler().login(new BaseFaroRequestCallback<String>() {
+-                @Override
+-                public void onFailure(Request request, IOException ex) {
+-                    Log.i(TAG, "failed to send login request");
++                        @Override
++                        public void onResponse(String token, HttpError error) {
++                            Log.i(TAG, "login response, token = " + token);
++                            if (error == null) {
++                                faroUserContext.setEmail(email);
++                                faroCache.saveFaroCacheToDisk("email", email);
++                                // Go to event list page
++                                //appLandingPageIntent.putExtra("baseUrl", baseUrl);
++                                startActivity(appLandingPageIntent);
++                                finish();
++                            } else {
++                                Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
++                                // Invalid login
++                                if (error.getCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
++                                    Log.i(TAG, "username/password not valid");
++                                }
++                            }
++                        }
++                    }, email, password);
+                 }
++            }
++        };
++        Handler mainHandler = new Handler(mContext.getMainLooper());
++        mainHandler.post(myRunnable);
++    }
+ 
++    private void deleteFirebaseToken () {
++        // TODO: Do the same for Facebook Login as well
++        //Delete Firebase token.
++        final String oldToken = FirebaseInstanceId.getInstance().getToken();
++        Log.d(TAG, "== Old Token is " + oldToken);
++        if (oldToken != null) {
++            new Thread(new Runnable() {
+                 @Override
+-                public void onResponse(String token, HttpError error) {
+-                    Log.i(TAG, "login response, token = " + token);
+-                    if (error == null) {
+-                        faroUserContext.setEmail(email);
+-                        faroCache.saveFaroCacheToDisk("email", email);
+-                        // Go to event list page
+-                        //appLandingPageIntent.putExtra("baseUrl", baseUrl);
+-                        startActivity(appLandingPageIntent);
+-                        finish();
+-                    } else {
+-                        Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+-                        // Invalid login
+-                        if (error.getCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
+-                            Log.i(TAG, "username/password not valid");
++                public void run() {
++                    try {
++                        String refreshedToken = oldToken;
++
++                        long startTime = System.currentTimeMillis();
++                        long elapsedTime = 0L;
++
++                        //Retry for 10 secs or until a new token is received
++                        while (elapsedTime < 10 * 1000) {
++                            FirebaseInstanceId.getInstance().deleteInstanceId();
++                            refreshedToken = FirebaseInstanceId.getInstance().getToken();
++                            if (refreshedToken == null || !refreshedToken.equals(oldToken))
++                                break;
++                            elapsedTime = (new Date()).getTime() - startTime;
+                         }
++
++                        Log.d(TAG, "== Refreshed Token is " + refreshedToken);
++
++                        if (refreshedToken == null) {
++                            loginUser();
++                        } else if (!refreshedToken.equals(oldToken)) {
++                            //TODO: Make API call to our server and update new token
++                            Log.d(TAG, "== Making API call to our server with the firebase token");
++                            // if (successfull) {
++                                faroUserContext.setFirebaseToken(refreshedToken);
++                                faroCache.saveFaroCacheToDisk("firebaseToken", refreshedToken);
++                                loginUser();
++                            //} else {
++                                //Ask user to retry
++                                return;
++                            //}
++                        } else if (refreshedToken.equals(oldToken)) {
++                            // Firebase token was not deleted. User needs to retry login
++                            // TODO: Display popUp to user that login is not possible so try again.
++                            return;
++                        }
++                    } catch (IOException e) {
++                        e.printStackTrace();
+                     }
+                 }
+-            }, email, password);
++            }).start();
++        } else {
++            loginUser();
++        }
++    }
++
++    /**
++     * Handle login button click
++     * If login is successful, go to the event list page
++     * else show dialog box with login error
++     * @param view
++     */
++    public void onLoginClick(View view) {
++        Log.i(TAG, "login button clicked");
++
++        if (faroUserContext.getFirebaseToken() != null){
++            //Token was not deleted from our server during logout so try deleting now.
++            //TODO: make API call to our server to delete Firebase token.
++            Log.d(TAG, "== Making API call to our server to delete the firebase token");
++            // If successful then continue else ask user to retry
++            //if (successful) {
++                faroUserContext.setFirebaseToken(null);
++                faroCache.saveFaroCacheToDisk("firebaseToken", null);
++                deleteFirebaseToken();
++            //} else {
++                //Ask User to try again
++            //}
++        } else {
++            deleteFirebaseToken();
+         }
+     }
+ 
+diff --git a/Frontend/app/src/main/java/com/zik/faro/frontend/MoreOptionsPage.java b/Frontend/app/src/main/java/com/zik/faro/frontend/MoreOptionsPage.java
+index a16bf9e..43c27f2 100644
+--- a/Frontend/app/src/main/java/com/zik/faro/frontend/MoreOptionsPage.java
++++ b/Frontend/app/src/main/java/com/zik/faro/frontend/MoreOptionsPage.java
+@@ -1,7 +1,9 @@
+ package com.zik.faro.frontend;
+ 
++import android.content.Context;
+ import android.content.Intent;
+ import android.os.Bundle;
++import android.os.Handler;
+ import android.support.v4.app.Fragment;
+ import android.util.Log;
+ import android.view.LayoutInflater;
+@@ -16,6 +18,7 @@ import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
+ import com.zik.faro.frontend.faroservice.auth.TokenCache;
+ 
+ import java.io.IOException;
++import java.util.Date;
+ 
+ public class MoreOptionsPage extends Fragment{
+ 
+@@ -24,9 +27,12 @@ public class MoreOptionsPage extends Fragment{
+     static FaroUserContext faroUserContext = FaroUserContext.getInstance();
+     String myUserId = faroUserContext.getEmail();
+     String TAG = "MoreOptions";
++    private Context mContext;
++    static FaroCache faroCache;
+ 
+     @Override
+     public void onCreate(Bundle savedInstanceState) {
++        mContext = this.getActivity();
+         super.onCreate(savedInstanceState);
+     }
+ 
+@@ -38,6 +44,10 @@ public class MoreOptionsPage extends Fragment{
+         Button logout = (Button)v.findViewById(R.id.logout);
+         TextView tv = (TextView) v.findViewById(R.id.text);
+         tv.setText("Logged in as " + myUserId);
++
++        //Setup Faro Cache
++        faroCache = FaroCache.getOrCreateFaroUserContextCache(mContext);
++
+         logout.setOnClickListener(new View.OnClickListener() {
+             @Override
+             public void onClick(View v) {
+@@ -45,22 +55,62 @@ public class MoreOptionsPage extends Fragment{
+                 eventListHandler.clearListAndMapOnLogout();
+                 userFriendListHandler.clearFriendListAndMap();
+ 
++                // Reset the faroUserContext
++                faroUserContext.setEmail(null);
++
++                // TODO: Send delete token API to our server. If successfull then cacheToken = null;
++                Log.d(TAG, "== Making API call to our server to delete the firebase token");
++                //if (successfull) {
++                    faroUserContext.setFirebaseToken(null);
++                    faroCache.saveFaroCacheToDisk("firebaseToken", null);
++                //}
++
+                 //Delete Firebase token.
+-                try {
+-                    FirebaseInstanceId.getInstance().deleteInstanceId();
+-                } catch (IOException e) {
+-                    e.printStackTrace();
+-                }
++                new Thread(new Runnable() {
++                    @Override
++                    public void run() {
++                        try {
++                            String oldToken = FirebaseInstanceId.getInstance().getToken();
++                            String refreshedToken = null;
++
++                            long startTime = System.currentTimeMillis();
++                            long elapsedTime = 0L;
+ 
++                            //Try to delete token from the Firebase server for 10 secs. Else check if
++                            // token still present in the cache during login and delete it then.
++                            // Allow login only after the token is deleted.
++                            while (elapsedTime < 10*1000) {
++                                FirebaseInstanceId.getInstance().deleteInstanceId();
++                                refreshedToken = FirebaseInstanceId.getInstance().getToken();
++                                if (refreshedToken == null || !refreshedToken.equals(oldToken)){
++                                    break;
++                                }
++                                elapsedTime = (new Date()).getTime() - startTime;
++                            }
+ 
+-                // Log out of facebook
+-                LoginManager.getInstance().logOut();
++                            if (refreshedToken != null && refreshedToken.equals(oldToken)) {
++                                Log.d(TAG, "== Failed to delete the Firebase token.");
++                            }
+ 
+-                TokenCache.getTokenCache().deleteToken();
++                            Runnable myRunnable = new Runnable() {
++                                @Override
++                                public void run() {
++                                    // Log out of facebook
++                                    LoginManager.getInstance().logOut();
+ 
+-                startActivity(LoginActivity);
+-                getActivity().finish();
++                                    TokenCache.getTokenCache().deleteToken();
+ 
++                                    startActivity(LoginActivity);
++                                    getActivity().finish();
++                                }
++                            };
++                            Handler mainHandler = new Handler(mContext.getMainLooper());
++                            mainHandler.post(myRunnable);
++                        } catch (IOException e) {
++                            e.printStackTrace();
++                        }
++                    }
++                }).start();
+             }
+         });
+         return v;
+diff --git a/Frontend/app/src/main/java/com/zik/faro/frontend/SignupActivity.java b/Frontend/app/src/main/java/com/zik/faro/frontend/SignupActivity.java
+index 40479a9..53cf8fd 100644
+--- a/Frontend/app/src/main/java/com/zik/faro/frontend/SignupActivity.java
++++ b/Frontend/app/src/main/java/com/zik/faro/frontend/SignupActivity.java
+@@ -1,8 +1,10 @@
+ package com.zik.faro.frontend;
+ 
+ import android.app.Activity;
++import android.content.Context;
+ import android.content.Intent;
+ import android.os.Bundle;
++import android.os.Handler;
+ import android.text.Editable;
+ import android.text.TextWatcher;
+ import android.util.Log;
+@@ -10,6 +12,7 @@ import android.view.View;
+ import android.widget.EditText;
+ 
+ import com.google.common.base.Strings;
++import com.google.firebase.iid.FirebaseInstanceId;
+ import com.squareup.okhttp.Request;
+ import com.zik.faro.data.user.FaroUser;
+ import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
+@@ -19,6 +22,9 @@ import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
+ import com.zik.faro.frontend.faroservice.auth.TokenCache;
+ 
+ import java.io.IOException;
++import java.net.HttpURLConnection;
++import java.text.MessageFormat;
++import java.util.Date;
+ 
+ /**
+  * Created by granganathan on 1/24/16.
+@@ -33,6 +39,9 @@ public class SignupActivity extends Activity {
+     private EditText confirmPasswordBox;
+ 
+     private Intent appLandingPageIntent;
++    private Context mContext = null;
++    static FaroCache faroCache;
++    static FaroUserContext faroUserContext = FaroUserContext.getInstance();
+ 
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+@@ -40,6 +49,11 @@ public class SignupActivity extends Activity {
+         super.onCreate(savedInstanceState);
+         setContentView(R.layout.activity_signup);
+ 
++        mContext = this;
++
++        //Setup Faro Cache
++        faroCache = FaroCache.getOrCreateFaroUserContextCache(SignupActivity.this);
++
+         // Create Faro service handler
+         serviceHandler = FaroServiceHandler.getFaroServiceHandler();
+ 
+@@ -118,44 +132,124 @@ public class SignupActivity extends Activity {
+         return isValid;
+     }
+ 
+-    public void onDoneClick(View view) {
+-        // Get the activity_signup data and validate
+-        final String name = nameTextBox.getText().toString();
+-        final String email = emailTextBox.getText().toString();
+-        String password = passwordTextBox.getText().toString();
+-        String confirmPassword = confirmPasswordBox.getText().toString();
+-
+-        if(validate(name, email, password, confirmPassword)) {
+-            FaroUser newFaroUser = new FaroUser(email, null, null,
+-            null, null, null, null);
+-            newFaroUser.setFirstName(name);
+-
+-            serviceHandler.getSignupHandler().signup(new BaseFaroRequestCallback<String>() {
+-                @Override
+-                public void onFailure(Request request, IOException ex) {
+-                    Log.i(TAG, "failed to send signup request");
++    private void signUpUser () {
++        Runnable myRunnable = new Runnable() {
++            @Override
++            public void run() {
++                // Get the activity_signup data and validate
++                final String name = nameTextBox.getText().toString();
++                final String email = emailTextBox.getText().toString();
++                String password = passwordTextBox.getText().toString();
++                String confirmPassword = confirmPasswordBox.getText().toString();
++
++                if (validate(name, email, password, confirmPassword)) {
++                    FaroUser newFaroUser = new FaroUser(email, null, null,
++                            null, null, null, null);
++                    newFaroUser.setFirstName(name);
++
++                    serviceHandler.getSignupHandler().signup(new BaseFaroRequestCallback<String>() {
++                        @Override
++                        public void onFailure(Request request, IOException ex) {
++                            Log.i(TAG, "failed to send signup request");
++                        }
++
++                        @Override
++                        public void onResponse(String token, HttpError error) {
++                            Log.i(TAG, "signup response, token = " + token);
++                            if (error == null) {
++                                Log.i(TAG, "token = " + token);
++                                TokenCache.getTokenCache().setToken(token);
++                                FaroUserContext faroUserContext = FaroUserContext.getInstance();
++                                faroUserContext.setEmail(email);
++
++                                // Go to event list page
++                                startActivity(appLandingPageIntent);
++                                finish();
++                            } else {
++                                Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
++                                if (error.getCode() == 409) {
++                                    Log.i(TAG, "User " + email + " already exists");
++                                }
++                            }
++                        }
++                    }, newFaroUser, password);
+                 }
++            }
++        };
++        Handler mainHandler = new Handler(mContext.getMainLooper());
++        mainHandler.post(myRunnable);
++    }
+ 
++    private void deleteFirebaseToken () {
++        //Delete Firebase token.
++        final String oldToken = FirebaseInstanceId.getInstance().getToken();
++        if (oldToken != null) {
++            new Thread(new Runnable() {
+                 @Override
+-                public void onResponse(String token, HttpError error) {
+-                    Log.i(TAG, "signup response, token = " + token);
+-                    if (error == null ) {
+-                        Log.i(TAG, "token = " + token);
+-                        TokenCache.getTokenCache().setToken(token);
+-                        FaroUserContext faroUserContext = FaroUserContext.getInstance();
+-                        faroUserContext.setEmail(email);
+-
+-                        // Go to event list page
+-                        startActivity(appLandingPageIntent);
+-                        finish();
+-                    } else {
+-                        Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+-                        if (error.getCode() == 409) {
+-                            Log.i(TAG, "User " + email + " already exists");
++                public void run() {
++                    try {
++
++                        String refreshedToken = oldToken;
++
++                        Log.d(TAG, "== Old Token is " + oldToken);
++
++                        long startTime = System.currentTimeMillis();
++                        long elapsedTime = 0L;
++
++                        //Retry for 10 secs or until a new token is received
++                        while (elapsedTime < 10 * 1000) {
++                            FirebaseInstanceId.getInstance().deleteInstanceId();
++                            refreshedToken = FirebaseInstanceId.getInstance().getToken();
++                            if (refreshedToken == null || !refreshedToken.equals(oldToken))
++                                break;
++                            elapsedTime = (new Date()).getTime() - startTime;
++                        }
++
++                        Log.d(TAG, "== Refreshed Token is " + refreshedToken);
++
++                        if (refreshedToken == null) {
++                            signUpUser();
++                        } else if (!refreshedToken.equals(oldToken)) {
++                            //TODO: Make API call to our server and update new token
++                            Log.d(TAG, "== Making API call to our server with the firebase token");
++                            // if (successfull) {
++                                faroUserContext.setFirebaseToken(refreshedToken);
++                                faroCache.saveFaroCacheToDisk("firebaseToken", refreshedToken);
++                                signUpUser();
++                            //} else {
++                                //Ask user to retry
++                                return;
++                            //}
++                        } else if (refreshedToken.equals(oldToken)) {
++                            // Firebase token was not deleted. User needs to retry login
++                            // TODO: Display popUp to user that login is not possible so try again.
++                            return;
+                         }
++                    } catch (IOException e) {
++                        e.printStackTrace();
+                     }
+                 }
+-            }, newFaroUser, password);
++            }).start();
++        } else {
++            signUpUser();
++        }
++    }
++
++    public void onDoneClick(View view) {
++        if (faroUserContext.getFirebaseToken() != null){
++            //Token was not deleted from our server during logout so try deleting now.
++            //TODO: make API call to our server to delete Firebase token.
++            Log.d(TAG, "== Making API call to our server to delete the firebase token");
++            // If successful then continue else ask user to retry
++            //if (successful) {
++                faroUserContext.setFirebaseToken(null);
++                faroCache.saveFaroCacheToDisk("firebaseToken", null);
++                deleteFirebaseToken();
++            //} else {
++                //Ask User to try again
++            //}
++        } else {
++            deleteFirebaseToken();
+         }
+     }
+ 
+diff --git a/Frontend/app/src/main/java/com/zik/faro/frontend/faroservice/auth/FaroUserContext.java b/Frontend/app/src/main/java/com/zik/faro/frontend/faroservice/auth/FaroUserContext.java
+index f8eec62..dc9d902 100644
+--- a/Frontend/app/src/main/java/com/zik/faro/frontend/faroservice/auth/FaroUserContext.java
++++ b/Frontend/app/src/main/java/com/zik/faro/frontend/faroservice/auth/FaroUserContext.java
+@@ -3,6 +3,7 @@ package com.zik.faro.frontend.faroservice.auth;
+ 
+ public class FaroUserContext {
+     private String email;
++    private String firebaseToken;
+     private static FaroUserContext faroUserContext = null;
+ 
+     public static FaroUserContext getInstance(){
+@@ -28,6 +29,14 @@ public class FaroUserContext {
+         this.email = email;
+     }
+ 
++    public String getFirebaseToken() {
++        return firebaseToken;
++    }
++
++    public void setFirebaseToken(String firebaseToken) {
++        this.firebaseToken = firebaseToken;
++    }
++
+     public FaroUserContext(String email){
+         this.email = email;
+         //FaroCache faroCache = FaroCache.getOrCreateFaroUserContextCache();
+diff --git a/Frontend/app/src/main/java/com/zik/faro/frontend/notification/FaroNotificationBuilder.java b/Frontend/app/src/main/java/com/zik/faro/frontend/notification/FaroNotificationBuilder.java
+index 3d6889b..cb6199f 100644
+--- a/Frontend/app/src/main/java/com/zik/faro/frontend/notification/FaroNotificationBuilder.java
++++ b/Frontend/app/src/main/java/com/zik/faro/frontend/notification/FaroNotificationBuilder.java
+@@ -43,7 +43,7 @@ public class FaroNotificationBuilder {
+                 intent = new Intent(context, ReceivedNotficationHandler.class);
+                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                 intent.putExtra("bundleType", "foregroundNotification");
+-                intent.putExtra("data", data.toString());
++                intent.putExtra("dataStr", data.toString());
+                 pendingIntent = PendingIntent.getActivity(context, 0 /* Request code */, intent,
+                         PendingIntent.FLAG_ONE_SHOT);
+                 Log.d(TAG, "In default case when building builder ====");
+@@ -53,7 +53,7 @@ public class FaroNotificationBuilder {
+         Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+ 
+                 notificationBuilder.setSmallIcon(R.drawable.blue)
+-                .setContentTitle(title + "====")
++                .setContentTitle(title)
+                 .setContentText(messageBody)
+                 .setAutoCancel(true)
+                 .setSound(defaultSoundUri)
+diff --git a/Frontend/app/src/main/java/com/zik/faro/frontend/notification/MyFirebaseInstanceIDService.java b/Frontend/app/src/main/java/com/zik/faro/frontend/notification/MyFirebaseInstanceIDService.java
+index ce3fcef..92758d6 100644
+--- a/Frontend/app/src/main/java/com/zik/faro/frontend/notification/MyFirebaseInstanceIDService.java
++++ b/Frontend/app/src/main/java/com/zik/faro/frontend/notification/MyFirebaseInstanceIDService.java
+@@ -5,10 +5,14 @@ import android.os.Handler;
+ import android.util.Log;
+ import com.google.firebase.iid.FirebaseInstanceId;
+ import com.google.firebase.iid.FirebaseInstanceIdService;
++import com.zik.faro.frontend.FaroCache;
++import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
+ 
+ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
+     private static final String TAG = "MyFirebaseIIDService";
+     public static final String  TOKEN_BROADCAST = "myFCMTokenBroadcast";
++    static FaroCache faroCache;
++    static FaroUserContext faroUserContext = FaroUserContext.getInstance();
+ 
+     /**
+      * Called if InstanceID token is updated. This may occur if the security of
+@@ -18,24 +22,27 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
+     // [START refresh_token]
+     @Override
+     public void onTokenRefresh() {
+-        // Get updated InstanceID token.
+-        String refreshedToken = FirebaseInstanceId.getInstance().getToken();
+-        Log.d(TAG, "Refreshed token: " + refreshedToken);
+ 
+-        /* Don't send the token to server from here. Since the token could be received here even
+-         * before the user logs into the app. What can be done here is to setup a broadcast message
+-         * to AppLanding Page to handle this.
+-         */
+-        /*Runnable myRunnable = new Runnable() {
+-            @Override
+-            public void run() {
+-                getApplicationContext().sendBroadcast(new Intent(TOKEN_BROADCAST));
+-            }
+-        };
++        //Setup Faro Cache
++        faroCache = FaroCache.getOrCreateFaroUserContextCache(MyFirebaseInstanceIDService.this);
+ 
+-        Handler mainHandler = new Handler(getApplicationContext().getMainLooper());
+-        mainHandler.postDelayed(myRunnable, 30000);*/
++        // Get updated InstanceID token.
++        String refreshedToken = FirebaseInstanceId.getInstance().getToken();
++        Log.d(TAG, "== Refreshed token: " + refreshedToken);
+ 
++        if (faroUserContext.getEmail() != null) {
++            // This condition is true only if there is a Faro user logged in at the time when the
++            // token was refreshed. So we need to make an API call to update he user's Firebase
++            // token on our server.
++            //TODO: make API call to our server to update the user's Firebase token.
++            Log.d(TAG, "== Making API call to our server with the firebase token");
++            //if (successful) {
++                faroUserContext.setFirebaseToken(refreshedToken);
++                faroCache.saveFaroCacheToDisk("firebaseToken", refreshedToken);
++            //} else {
++                // Next time when we come to Applanding page it will be retired
++            //}
++        }
+     }
+     // [END refresh_token]
+ };
+\ No newline at end of file

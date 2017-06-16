@@ -43,7 +43,7 @@ public class FaroNotificationBuilder {
                 intent = new Intent(context, ReceivedNotficationHandler.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.putExtra("bundleType", "foregroundNotification");
-                intent.putExtra("data", data.toString());
+                intent.putExtra("dataStr", data.toString());
                 pendingIntent = PendingIntent.getActivity(context, 0 /* Request code */, intent,
                         PendingIntent.FLAG_ONE_SHOT);
                 Log.d(TAG, "In default case when building builder ====");
@@ -53,7 +53,7 @@ public class FaroNotificationBuilder {
         Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
                 notificationBuilder.setSmallIcon(R.drawable.blue)
-                .setContentTitle(title + "====")
+                .setContentTitle(title)
                 .setContentText(messageBody)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
