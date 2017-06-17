@@ -71,7 +71,7 @@ public class LoginApiTest {
         createNewUser(faroUser, "pfloyd782$");
 
         LoginHandler loginHandler = new LoginHandler();
-        String token = loginHandler.login(faroUser.getEmail(), "pfloyd782$");
+        String token = loginHandler.login(faroUser.getId(), "pfloyd782$");
 
         Assert.assertNotNull(token);
     }

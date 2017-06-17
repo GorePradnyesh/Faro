@@ -61,22 +61,22 @@ public class SignupHandler {
             throw new FaroWebAppException(FaroResponseStatus.BAD_REQUEST, "User account details missing.");
         }
 
-        logger.info("faroUser email = " + faroSignupDetails.getFaroUser().getEmail());
+        logger.info("faroUser email = " + faroSignupDetails.getFaroUser().getId());
 
         if (Strings.isNullOrEmpty(password)) {
             throw new FaroWebAppException(FaroResponseStatus.BAD_REQUEST, "User password not specifed.");
         }
 
         // Lookup to sees if an user exists with the same id
-        if (UserManagement.isExistingUser(newFaroUser.getEmail())) {
+        if (UserManagement.isExistingUser(newFaroUser.getId())) {
             // Return  error code indicating user exists
             logger.info("User already exists");
-            throw new FaroWebAppException(FaroResponseStatus.ENTITY_EXISTS, MessageFormat.format("Username {0} already exists.", newFaroUser.getEmail()));
+            throw new FaroWebAppException(FaroResponseStatus.ENTITY_EXISTS, MessageFormat.format("Username {0} already exists.", newFaroUser.getId()));
         }
 
         try {
         	// Store the New user's credentials and user details
-            UserCredentialsDo userCreds = new UserCredentialsDo(newFaroUser.getEmail(),
+            UserCredentialsDo userCreds = new UserCredentialsDo(newFaroUser.getId(),
                                                             PasswordManager.getEncryptedPassword(password),
                                                             UUID.randomUUID().toString());
             UserCredentialsDatastoreImpl.storeUserCreds(userCreds);
@@ -86,7 +86,7 @@ public class SignupHandler {
             logger.error("Password could not be encrypted", e);
         }
 
-        return FaroJwtTokenManager.createToken(newFaroUser.getEmail());
+        return FaroJwtTokenManager.createToken(newFaroUser.getId());
     }
 
 }
