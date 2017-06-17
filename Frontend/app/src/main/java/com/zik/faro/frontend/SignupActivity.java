@@ -34,7 +34,6 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
 import com.squareup.okhttp.Request;
-import com.squareup.okhttp.internal.http.HttpConnection;
 import com.zik.faro.data.MinUser;
 import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
@@ -94,7 +93,7 @@ public class SignupActivity extends Activity {
         signupActivityProgressBarLayout = (LinearLayout) findViewById(R.id.signupActivityProgressBarLayout);
         signupActivityDetailsLayout = (RelativeLayout) findViewById(R.id.signupActivityDetailsLayout);
 
-        // Set visibility to gone on the progrss bar layout
+        // Set visibility to gone on the progress bar layout
         signupActivityProgressBarLayout.setVisibility(View.GONE);
 
         appLandingPageIntent = new Intent(SignupActivity.this, AppLandingPage.class);
@@ -177,11 +176,11 @@ public class SignupActivity extends Activity {
                             FaroUser newFaroUser = new FaroUser(firebaseUser.getEmail(), null, null,
                                     null, null, null, null);
                             newFaroUser.setFirstName(firebaseUser.getDisplayName());
+
                             FirebaseUserSignupCallback firebaseUserSignupCallback = new FirebaseUserSignupCallback(firebaseUser);
                             serviceHandler.getSignupHandler().signup(firebaseUserSignupCallback, newFaroUser, null, firebaseIdToken);
                         }
                     }
-
                 });
     }
 
@@ -285,7 +284,7 @@ public class SignupActivity extends Activity {
                 FaroUserContext faroUserContext = FaroUserContext.getInstance();
                 faroUserContext.setEmail(faroUser.getEmail());
 
-                // Go to event list page
+                // Go to event minUsers page
                 startActivity(appLandingPageIntent);
                 finish();
             } else {
@@ -357,13 +356,13 @@ public class SignupActivity extends Activity {
                                     }
                                 }
                             } catch (JSONException e) {
-                                Log.e(TAG, "Error processing response for friends list", e);
+                                Log.e(TAG, "Error processing response for friends minUsers", e);
                             }
                         }
                     }
                 });
 
-                // Go to event list page
+                // Go to event minUsers page
                 startActivity(appLandingPageIntent);
                 finish();
             } else {

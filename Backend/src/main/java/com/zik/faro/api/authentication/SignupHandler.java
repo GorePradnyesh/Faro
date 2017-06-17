@@ -3,24 +3,22 @@ package com.zik.faro.api.authentication;
 import static com.zik.faro.commons.Constants.AUTH_PATH_CONST;
 import static com.zik.faro.commons.Constants.AUTH_SIGN_UP_PATH_CONST;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.MessageFormat;
 
-import javax.annotation.CheckForNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
-import com.google.firebase.tasks.Task;
-import com.google.firebase.tasks.Tasks;
-import com.google.gson.Gson;
 import com.zik.faro.applogic.ConversionUtils;
+import com.zik.faro.commons.FacebookUtil;
+import com.zik.faro.data.ImageProvider;
 import com.zik.faro.data.user.AppInviteStatus;
-import com.zik.faro.persistence.datastore.data.user.AuthProvider;
+import com.zik.faro.persistence.datastore.data.user.*;
 import com.zik.faro.data.user.FaroUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,15 +32,10 @@ import com.zik.faro.auth.jwt.FaroJwtTokenManager;
 import com.zik.faro.commons.FaroResponseStatus;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.FaroWebAppException;
-import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
-import com.zik.faro.persistence.datastore.data.user.UserCredentialsDo;
 import com.zik.faro.persistence.datastore.UserCredentialsDatastoreImpl;
 import com.zik.faro.persistence.datastore.UserDatastoreImpl;
 
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 
 /**
@@ -62,20 +55,15 @@ public class SignupHandler {
 
         logger.info("faro user = " + faroSignupDetails.getFaroUser());
 
+        // Check username and password/firebase token are valid strings
+        validateFaroUserCredentials(faroSignupDetails);
+
         FaroUser newFaroUser = faroSignupDetails.getFaroUser();
         String password = faroSignupDetails.getPassword();
         String firebaseTokenString = faroSignupDetails.getFirebaseToken();
 
-        // Validate Faro user details specified and password
-        if (newFaroUser == null) {
-            throw new FaroWebAppException(FaroResponseStatus.BAD_REQUEST, "User account details missing.");
-        }
-
-        logger.info("faroUser email = " + faroSignupDetails.getFaroUser().getEmail());
-
-        if (Strings.isNullOrEmpty(password) && Strings.isNullOrEmpty(firebaseTokenString)) {
-            throw new FaroWebAppException(FaroResponseStatus.BAD_REQUEST, "User password/firebaseToken not specifed.");
-        }
+        // Validate Faro user details
+        validateFaroUserDetails(newFaroUser);
 
         AuthProvider authProvider = AuthProvider.FARO;
         String authProviderUserId = null;
@@ -123,10 +111,44 @@ public class SignupHandler {
             throw new FaroWebAppException(FaroResponseStatus.ENTITY_EXISTS, MessageFormat.format("Username {0} already exists.", newFaroUser.getEmail()));
         }
 
+        // construct and set the display picture url from the user's facebook userid
+        if (authProvider.equals(AuthProvider.FACEBOOK)) {
+            try {
+                newFaroUser.setSmallProfileImage(FacebookUtil.getFacebookSmallProfileImage(authProviderUserId));
+                newFaroUser.setLargeProfileImage(FacebookUtil.getFacebookLargeProfileImage(authProviderUserId));
+            } catch (MalformedURLException e) {
+                throw new FaroWebAppException(FaroResponseStatus.BAD_REQUEST,
+                        MessageFormat.format("Failed to save user's facebook profile image URL. username = {0}, authProviderUserId = {1}",
+                        newFaroUser.getEmail(), authProviderUserId));
+            }
+        }
+
         // Create the user account in datastore and return JWT token
         createUser(newFaroUser, password, authProvider, authProviderUserId);
 
         return FaroJwtTokenManager.createToken(newFaroUser.getEmail());
+    }
+
+    private void validateFaroUserCredentials(FaroSignupDetails faroSignupDetails) {
+        logger.info("faroUser email = " + faroSignupDetails.getFaroUser().getEmail());
+
+        if (Strings.isNullOrEmpty(faroSignupDetails.getPassword()) && Strings.isNullOrEmpty(faroSignupDetails.getFirebaseToken())) {
+            throw new FaroWebAppException(FaroResponseStatus.BAD_REQUEST, "User password/firebaseToken not specifed.");
+        }
+    }
+
+    private void validateFaroUserDetails(FaroUser newFaroUser) {
+        if (newFaroUser == null) {
+            throw new FaroWebAppException(FaroResponseStatus.BAD_REQUEST, "User account details missing.");
+        }
+
+        if (Strings.isNullOrEmpty(newFaroUser.getEmail())) {
+            throw new FaroWebAppException(FaroResponseStatus.BAD_REQUEST, "User email missing.");
+        }
+
+        if (Strings.isNullOrEmpty(newFaroUser.getFirstName())) {
+            throw new FaroWebAppException(FaroResponseStatus.BAD_REQUEST, "User first name missing.");
+        }
     }
 
     private void createUser(FaroUser newFaroUser, String password, AuthProvider authProvider, String authProviderUserId) {

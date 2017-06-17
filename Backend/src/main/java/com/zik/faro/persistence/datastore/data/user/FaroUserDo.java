@@ -15,15 +15,17 @@ import com.zik.faro.data.user.AppInviteStatus;
 @XmlRootElement
 public class FaroUserDo {
     @Id @Index
-    private String             email;
+    private String              email;
     @Index
-    private String             firstName;
-    private String             middleName;
-    private String             lastName;
-    private String             externalExpenseID;
-    private String             telephone;   
-    private Address address;
-    private AppInviteStatus inviteStatus = AppInviteStatus.INVITED;
+    private String              firstName;
+    private String              middleName;
+    private String              lastName;
+    private String              externalExpenseID;
+    private String              telephone;
+    private Address             address;
+    private AppInviteStatus     inviteStatus = AppInviteStatus.INVITED;
+    private LargeProfileImageDo largeProfileImage;
+    private SmallProfileImageDo smallProfileImage;
 
     // To be used for creating users who are invited by other faro users
     // Due to lack of info available, using only email
@@ -65,26 +67,20 @@ public class FaroUserDo {
         this(email, firstName, middleName, lastName, externalExpenseID, telephone, address, AppInviteStatus.ACCEPTED);
     }
 
+    public FaroUserDo() {}
+
     public void setIfNullExternalExpenseID(final String externalExpenseID) throws IllegalDataOperation {
-        if(this.externalExpenseID == null) {
+        if (this.externalExpenseID == null) {
             this.externalExpenseID = externalExpenseID;
-        }else{
+        } else {
             throw new IllegalDataOperation("Attempting to set a nonNull externalExpenseID");
         }
     }
 
-    // To Satisfy the JAXB no-arg constructor requirement
-    public FaroUserDo(){
-
+    public String getEmail() {
+        return email;
     }
 
-    /*Getters*/
-    
-    public String getEmail() { return this.email; }
-
-//    public String getEmail() {
-//        return email;
-//    }
 
     public String getFirstName() {
         return firstName;
@@ -138,24 +134,41 @@ public class FaroUserDo {
         this.address = address;
     }
 
-   @Override
-    public String toString() {
-
-       return MoreObjects.toStringHelper(this).add("email", getEmail())
-               .add("firstName", getFirstName())
-               .add("middleName", getMiddleName())
-               .add("lastName", getLastName())
-               .add("externalExpenseID", getExternalExpenseID())
-               .add("telephone", getTelephone())
-               .add("address", getAddress())
-               .toString();
+    public AppInviteStatus getInviteStatus() {
+        return inviteStatus;
     }
 
-public AppInviteStatus getInviteStatus() {
-	return inviteStatus;
-}
+    public void setInviteStatus(AppInviteStatus inviteStatus) {
+        this.inviteStatus = inviteStatus;
+    }
 
-public void setInviteStatus(AppInviteStatus inviteStatus) {
-	this.inviteStatus = inviteStatus;
-}
+    public LargeProfileImageDo getLargeProfileImage() {
+        return largeProfileImage;
+    }
+
+    public void setLargeProfileImage(LargeProfileImageDo largeProfileImage) {
+        this.largeProfileImage = largeProfileImage;
+    }
+
+    public SmallProfileImageDo getSmallProfileImage() {
+        return smallProfileImage;
+    }
+
+    public void setSmallProfileImage(SmallProfileImageDo smallProfileImage) {
+        this.smallProfileImage = smallProfileImage;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this).add("email", getEmail())
+                .add("firstName", getFirstName())
+                .add("middleName", getMiddleName())
+                .add("lastName", getLastName())
+                .add("externalExpenseID", getExternalExpenseID())
+                .add("telephone", getTelephone())
+                .add("address", getAddress())
+                .add("profileImageUrl", getLargeProfileImage().getPublicUrl())
+                .add("smallProfileImageUrl", getSmallProfileImage().getPublicUrl())
+                .toString();
+    }
 }

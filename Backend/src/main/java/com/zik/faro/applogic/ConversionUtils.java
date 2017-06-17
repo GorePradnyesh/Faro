@@ -6,15 +6,19 @@ import com.zik.faro.data.FaroImageBase;
 import com.zik.faro.data.FbImage;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.user.FaroUser;
+import com.zik.faro.data.user.LargeProfileImage;
+import com.zik.faro.data.user.SmallProfileImage;
 import com.zik.faro.persistence.datastore.data.ActivityDo;
 import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.persistence.datastore.data.FaroImageDo;
 import com.zik.faro.data.ImageProvider;
 import com.zik.faro.persistence.datastore.data.PollDo;
 import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
+import com.zik.faro.persistence.datastore.data.user.LargeProfileImageDo;
+import com.zik.faro.persistence.datastore.data.user.SmallProfileImageDo;
 
 public class ConversionUtils {
-	public static Event fromDo(EventDo eventDo){
+	public static Event fromDo(EventDo eventDo) {
 		Event event = new Event();
 		event.setAssignment(eventDo.getAssignment());
 		event.setControlFlag(eventDo.isControlFlag());
@@ -31,7 +35,7 @@ public class ConversionUtils {
 		return event;
 	}
 	
-	public static EventDo toDo(Event event){
+	public static EventDo toDo(Event event) {
 		EventDo eventDo = new EventDo();
 		eventDo.setAssignment(event.getAssignment());
 		eventDo.setControlFlag(event.getControlFlag());
@@ -48,7 +52,7 @@ public class ConversionUtils {
 		return eventDo;
 	}
 	
-	public static ActivityDo toDo(Activity activity){
+	public static ActivityDo toDo(Activity activity) {
 		ActivityDo activityDo = new ActivityDo();
 		activityDo.setAssignment(activity.getAssignment());
 		activityDo.setStartDate(activity.getStartDate());
@@ -62,7 +66,7 @@ public class ConversionUtils {
 		return activityDo;
 	}
 	
-	public static Activity fromDo(ActivityDo activityDo){
+	public static Activity fromDo(ActivityDo activityDo) {
 		Activity activity = new Activity();
 		activity.setAssignment(activityDo.getAssignment());
 		activity.setStartDate(activityDo.getStartDate());
@@ -76,7 +80,7 @@ public class ConversionUtils {
 		return activity;
 	}
 	
-	public static Poll fromDo(PollDo pollDo){
+	public static Poll fromDo(PollDo pollDo) {
 		Poll poll = new Poll();
 		poll.setCreatorId(pollDo.getCreatorId());
 		poll.setDeadline(pollDo.getDeadline());
@@ -92,7 +96,7 @@ public class ConversionUtils {
 		return poll;
 	}
 	
-	public static PollDo toDo(Poll poll){
+	public static PollDo toDo(Poll poll) {
 		PollDo pollDo = new PollDo();
 		pollDo.setCreatorId(poll.getCreatorId());
 		pollDo.setDeadline(poll.getDeadline());
@@ -108,21 +112,23 @@ public class ConversionUtils {
 		return pollDo;
 	}
 
-	public static FaroUserDo toDo(FaroUser faroUser){
+	public static FaroUserDo toDo(FaroUser faroUser) {
 		FaroUserDo faroUserDo = new FaroUserDo();
 		faroUserDo.setEmail(faroUser.getEmail());
 		faroUserDo.setFirstName(faroUser.getFirstName());
 		faroUserDo.setLastName(faroUser.getLastName());
 		faroUserDo.setMiddleName(faroUser.getMiddleName());
 		faroUserDo.setExternalExpenseID(faroUser.getExternalExpenseID());
-		faroUserDo.setTelephone(faroUser.getExternalExpenseID());
+		faroUserDo.setTelephone(faroUser.getTelephone());
 		faroUserDo.setAddress(faroUser.getAddress());
 		faroUserDo.setInviteStatus(faroUser.getInviteStatus());
+		faroUserDo.setLargeProfileImage(toDo(faroUser.getLargeProfileImage()));
+        faroUserDo.setSmallProfileImage(toDo(faroUser.getSmallProfileImage()));
 		return faroUserDo;
 	}
 
 
-	public static FaroUser fromDo(FaroUserDo faroUserDo){
+	public static FaroUser fromDo(FaroUserDo faroUserDo) {
 		FaroUser faroUser = new FaroUser();
 		faroUser.setEmail(faroUserDo.getEmail());
 		faroUser.setFirstName(faroUserDo.getFirstName());
@@ -132,6 +138,8 @@ public class ConversionUtils {
 		faroUser.setTelephone(faroUserDo.getExternalExpenseID());
 		faroUser.setAddress(faroUserDo.getAddress());
 		faroUser.setInviteStatus(faroUserDo.getInviteStatus());
+		faroUser.setLargeProfileImage(fromDo(faroUserDo.getLargeProfileImage()));
+		faroUser.setSmallProfileImage(fromDo(faroUserDo.getSmallProfileImage()));
 		return faroUser;
 	}
 
@@ -154,4 +162,35 @@ public class ConversionUtils {
 
 		return faroImage;
 	}
+
+	public static FaroImageDo toDo(FaroImageBase faroImage) {
+        FaroImageDo faroImageDo = new FaroImageDo()
+                .withImageName(faroImage.getImageName())
+                .withEventId(faroImage.getEventId())
+                .withFaroUserId(faroImage.getFaroUserId())
+                .withAlbumName(faroImage.getAlbumName())
+                .withPublicUrl(faroImage.getPublicUrl())
+                .withHeight(faroImage.getHeight())
+                .withWidth(faroImage.getWidth())
+                .withImageProvider(faroImage.getImageProvider())
+                .withCreatedTime(faroImage.getCreatedTime());
+
+        return faroImageDo;
+    }
+
+    public static LargeProfileImageDo toDo(LargeProfileImage largeProfileImage) {
+	    return new LargeProfileImageDo(largeProfileImage.getPublicUrl(), largeProfileImage.getImageProvider());
+    }
+
+    public static LargeProfileImage fromDo(LargeProfileImageDo largeProfileImageDo) {
+        return new LargeProfileImage(largeProfileImageDo.getPublicUrl(), largeProfileImageDo.getImageProvider());
+    }
+
+    public static SmallProfileImageDo toDo(SmallProfileImage smallProfileImage) {
+        return new SmallProfileImageDo(smallProfileImage.getPublicUrl(), smallProfileImage.getImageProvider());
+    }
+
+    public static SmallProfileImage fromDo(SmallProfileImageDo smallProfileImageDo) {
+        return new SmallProfileImage(smallProfileImageDo.getPublicUrl(), smallProfileImageDo.getImageProvider());
+    }
 }

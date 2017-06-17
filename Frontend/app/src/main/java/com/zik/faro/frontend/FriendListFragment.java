@@ -45,13 +45,14 @@ import java.util.List;
 public class FriendListFragment extends Fragment {
     private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
     private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
-    private static String TAG = "FriendListFragment";
 
     private RelativeLayout popUpRelativeLayout;
-    FaroUserContext faroUserContext = FaroUserContext.getInstance();
+    private FaroUserContext faroUserContext = FaroUserContext.getInstance();
     private String myUserId = faroUserContext.getEmail();
 
     private Context mContext;
+
+    private static String TAG = "FriendListFragment";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,19 +60,16 @@ public class FriendListFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_friend_list, container, false);
-        ImageButton inviteFriendButton = (ImageButton)view.findViewById(R.id.inviteFriend);
-        inviteFriendButton.setImageResource(R.drawable.plus);
 
+        mContext = getActivity();
+        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(getActivity()));
+
+        // Set up friends ListView
         ListView friendListView  = (ListView)view.findViewById(R.id.friendList);
         friendListView.setBackgroundColor(Color.BLACK);
         friendListView.setAdapter(userFriendListHandler.userFriendAdapter);
-
-        mContext = getActivity();
-
-        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(getActivity()));
 
         friendListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -83,18 +81,22 @@ public class FriendListFragment extends Fragment {
             }
         });
 
+        // Relaytive layout to be used to show the pop up window for adding friend
         popUpRelativeLayout = (RelativeLayout) view.findViewById(R.id.friendListFragment);
 
+        // Setup invite friend button
+        ImageButton inviteFriendButton = (ImageButton)view.findViewById(R.id.inviteFriend);
+        inviteFriendButton.setImageResource(R.drawable.plus);
+
         inviteFriendButton.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View v) {
-                LayoutInflater layoutInflater =
-                        (LayoutInflater) getActivity().getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                LayoutInflater layoutInflater = (LayoutInflater) getActivity().getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 ViewGroup container = (ViewGroup) layoutInflater.inflate(R.layout.invite_friend_popup, null);
-                final PopupWindow popupWindow = new PopupWindow(container, RelativeLayout.LayoutParams.WRAP_CONTENT,
-                        RelativeLayout.LayoutParams.WRAP_CONTENT, true);
-                final EditText emailIDEditText = (EditText) container.findViewById(R.id.friend_email_id);
-                final Button sendInvite = (Button) container.findViewById(R.id.send_invite_button);
+                final PopupWindow popupWindow = new PopupWindow(container, RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT, true);
+                final EditText emailIdEditText = (EditText) container.findViewById(R.id.friend_email_id);
+                final Button sendInviteButton = (Button) container.findViewById(R.id.send_invite_button);
 
                 popupWindow.showAtLocation(popUpRelativeLayout, Gravity.CENTER, 0, 0);
 
@@ -106,7 +108,7 @@ public class FriendListFragment extends Fragment {
                     }
                 });
 
-                emailIDEditText.addTextChangedListener(new TextWatcher() {
+                emailIdEditText.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -114,7 +116,7 @@ public class FriendListFragment extends Fragment {
 
                     @Override
                     public void onTextChanged(CharSequence s, int start, int before, int count) {
-                        sendInvite.setEnabled(!(emailIDEditText.getText().toString().trim().isEmpty()));
+                        sendInviteButton.setEnabled(!(emailIdEditText.getText().toString().trim().isEmpty()));
                     }
 
                     @Override
@@ -123,45 +125,45 @@ public class FriendListFragment extends Fragment {
                     }
                 });
 
-                sendInvite.setOnClickListener(new View.OnClickListener() {
+                sendInviteButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (emailIDEditText.getText().toString().equals(myUserId)) {
+                        final String friendEmailId = emailIdEditText.getText().toString().trim();
+
+                        if (friendEmailId.equals(myUserId)) {
                             //TODO: Add error popUp with "Cant invite self message"
                             return;
                         }
+
                         serviceHandler.getFriendsHandler().inviteFriend(new BaseFaroRequestCallback<String>() {
                             @Override
                             public void onFailure(Request request, IOException ex) {
-                                Log.e(TAG, "failed to send friend invite request");
+                                Log.e(TAG, MessageFormat.format("failed to send friend invite request for friend {0}", friendEmailId));
                             }
 
                             @Override
                             public void onResponse(String s, HttpError error) {
                                 if (error == null ) {
-                                    Runnable myRunnable = new Runnable() {
+                                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                                    mainHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
-                                            Log.i(TAG, "Friend invite sent Successfully");
-                                            //TODO it would be better if we return the MinUser object instead of a String
-                                            MinUser minUser = new MinUser("", "", emailIDEditText.getText().toString());
+                                            Log.i(TAG, MessageFormat.format("Friend invite for {0} succeeded", friendEmailId));
+                                            // TODO it would be better if we return the MinUser object instead of a String
+                                            MinUser minUser = new MinUser("", "", friendEmailId);
                                             userFriendListHandler.addFriendToListAndMap(minUser);
                                             popupWindow.dismiss();
                                         }
-                                    };
-                                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                                    mainHandler.post(myRunnable);
+                                    });
                                 } else {
                                     Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                                 }
                             }
-                        }, emailIDEditText.getText().toString());
+                        }, friendEmailId);
                     }
                 });
             }
         });
-
-        //addFbFriendsToListView();
 
         return view;
     }

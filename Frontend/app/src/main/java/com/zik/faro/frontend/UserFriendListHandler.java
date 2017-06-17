@@ -1,8 +1,6 @@
 package com.zik.faro.frontend;
 
 import com.google.gson.Gson;
-import com.zik.faro.data.Event;
-import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.MinUser;
 import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 
@@ -25,12 +23,12 @@ public class UserFriendListHandler {
     private UserFriendListHandler(){}
 
     public static UserFriendListHandler getInstance() {
-        if (userFriendListHandler != null){
+        if (userFriendListHandler != null) {
             return userFriendListHandler;
         }
 
         synchronized (UserFriendListHandler.class) {
-            if (userFriendListHandler == null){
+            if (userFriendListHandler == null) {
                 userFriendListHandler = new UserFriendListHandler();
             }
             return userFriendListHandler;
@@ -52,7 +50,7 @@ public class UserFriendListHandler {
         friendMap.put(minUser.getEmail(), minUser);
     }
 
-    public void addDownloadedFriendsToListAndMap(List<MinUser> minUserList){
+    public void addDownloadedFriendsToListAndMap(List<MinUser> minUserList) {
         for (int i = 0; i < minUserList.size(); i++){
             MinUser minUser = minUserList.get(i);
             addFriendToListAndMap(minUser);
@@ -64,14 +62,14 @@ public class UserFriendListHandler {
         if (minUser == null) {
             return;
         }
-        userFriendAdapter.list.remove(minUser);
+        userFriendAdapter.getMinUsers().remove(minUser);
         userFriendAdapter.notifyDataSetChanged();
         friendMap.remove(emailID);
     }
 
     public void clearFriendListAndMap() {
         if (userFriendAdapter != null) {
-            userFriendAdapter.list.clear();
+            userFriendAdapter.getMinUsers().clear();
             userFriendAdapter.notifyDataSetChanged();
         }
 

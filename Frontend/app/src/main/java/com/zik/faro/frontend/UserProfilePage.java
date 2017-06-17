@@ -51,11 +51,10 @@ public class UserProfilePage extends AppCompatActivity {
                 userProfilePicture.setImageResource(R.drawable.user_pic);
             }
 
-            // TODO : Load the user's profile picture
-            /*Glide.with(getApplicationContext())
-                    .load((cloneMinUser.getPictureUrl() != null) ? cloneMinUser.getPictureUrl() : R.drawable.user_pic)
-                    .into((userProfilePicture));*/
-            userProfilePicture.setImageResource(R.drawable.user_pic);
+            // Load the user's profile picture
+            Glide.with(getApplicationContext())
+                    .load((cloneMinUser.getProfileImageUrl() != null) ? cloneMinUser.getProfileImageUrl() : R.drawable.user_pic)
+                    .into((userProfilePicture));
 
             userNameTextView.setText(userName);
             userEmailIDTextView.setText("Email: " + userEmailID);

@@ -12,8 +12,10 @@ public class FaroUser {
     private String             lastName;
     private String             externalExpenseID;
     private String             telephone;
-    private Address address;
-    private AppInviteStatus inviteStatus = AppInviteStatus.INVITED; 
+    private Address            address;
+    private AppInviteStatus    inviteStatus = AppInviteStatus.INVITED;
+    private LargeProfileImage  largeProfileImage;
+    private SmallProfileImage  smallProfileImage;
 
 // Ideally this should be utilized on server side only. Commenting out until absolutely required
 // Assumption is user will be forced to give basic details along with email
@@ -46,9 +48,9 @@ public class FaroUser {
     }
 
     public void setIfNullExternalExpenseID(final String externalExpenseID) throws IllegalDataOperation {
-        if(this.externalExpenseID == null) {
+        if (this.externalExpenseID == null) {
             this.externalExpenseID = externalExpenseID;
-        }else{
+        } else{
             throw new IllegalDataOperation("Attempting to set a nonNull externalExpenseID");
         }
     }
@@ -61,10 +63,6 @@ public class FaroUser {
     /*Getters*/
 
     public String getEmail() { return this.email; }
-
-//    public String getEmail() {
-//        return email;
-//    }
 
     public String getFirstName() {
         return firstName;
@@ -118,6 +116,30 @@ public class FaroUser {
         this.address = address;
     }
 
+	public AppInviteStatus getInviteStatus() {
+		return inviteStatus;
+	}
+
+	public void setInviteStatus(AppInviteStatus inviteStatus) {
+		this.inviteStatus = inviteStatus;
+	}
+
+    public LargeProfileImage getLargeProfileImage() {
+        return largeProfileImage;
+    }
+
+    public void setLargeProfileImage(LargeProfileImage largeProfileImage) {
+        this.largeProfileImage = largeProfileImage;
+    }
+
+    public SmallProfileImage getSmallProfileImage() {
+        return smallProfileImage;
+    }
+
+    public void setSmallProfileImage(SmallProfileImage smallProfileImage) {
+        this.smallProfileImage = smallProfileImage;
+    }
+
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this).add("email", getEmail())
@@ -127,14 +149,9 @@ public class FaroUser {
                 .add("externalExpenseID", getExternalExpenseID())
                 .add("telephone", getTelephone())
                 .add("address", getAddress())
+                .add("profileImageUrl", getLargeProfileImage())
+                .add("thumbProfileImageUrl", getSmallProfileImage())
                 .toString();
     }
-
-	public AppInviteStatus getInviteStatus() {
-		return inviteStatus;
-	}
-
-	public void setInviteStatus(AppInviteStatus inviteStatus) {
-		this.inviteStatus = inviteStatus;
-	}
 }
+

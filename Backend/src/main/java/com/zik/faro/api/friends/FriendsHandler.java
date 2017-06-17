@@ -1,6 +1,7 @@
 package com.zik.faro.api.friends;
 
 import com.sun.jersey.api.JResponse;
+import com.zik.faro.applogic.UserManagement;
 import com.zik.faro.commons.FaroResponseStatus;
 import com.zik.faro.commons.exceptions.FaroWebAppException;
 import com.zik.faro.data.MinUser;
@@ -9,7 +10,9 @@ import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.ParamValidation;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.data.IllegalDataOperation;
+import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.persistence.datastore.UserCredentialsDatastoreImpl;
+import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 import com.zik.faro.persistence.datastore.data.user.FriendRelationDo;
 import com.zik.faro.persistence.datastore.data.user.UserCredentialsDo;
 import org.assertj.core.util.Lists;

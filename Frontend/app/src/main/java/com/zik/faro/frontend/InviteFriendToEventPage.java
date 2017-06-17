@@ -67,7 +67,7 @@ public class InviteFriendToEventPage extends Activity {
         final EditText searchFriend = (EditText)findViewById(R.id.searchFriend);
         Button updateInviteeList = (Button) findViewById(R.id.addFriends);
 
-        friendList = new ArrayList<>(userFriendListHandler.userFriendAdapter.getList());
+        friendList = new ArrayList<>(userFriendListHandler.userFriendAdapter.getMinUsers());
 
         initFriendList();
 

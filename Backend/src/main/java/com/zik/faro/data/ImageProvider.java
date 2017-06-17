@@ -5,4 +5,5 @@ package com.zik.faro.data;
  */
 public enum ImageProvider {
     FACEBOOK,
+    FARO
 }
