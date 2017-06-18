@@ -110,7 +110,7 @@ public class ConversionUtils {
 
 	public static FaroUserDo toDo(FaroUser faroUser){
 		FaroUserDo faroUserDo = new FaroUserDo();
-		faroUserDo.setEmail(faroUser.getEmail());
+		faroUserDo.setId(faroUser.getId());
 		faroUserDo.setFirstName(faroUser.getFirstName());
 		faroUserDo.setLastName(faroUser.getLastName());
 		faroUserDo.setMiddleName(faroUser.getMiddleName());
@@ -118,13 +118,16 @@ public class ConversionUtils {
 		faroUserDo.setTelephone(faroUser.getExternalExpenseID());
 		faroUserDo.setAddress(faroUser.getAddress());
 		faroUserDo.setInviteStatus(faroUser.getInviteStatus());
+		faroUserDo.setTokens(faroUser.getTokens());
+		faroUserDo.setUserTopic(faroUser.getUserTopic());
+		faroUserDo.setVersion(faroUser.getVersion());
 		return faroUserDo;
 	}
 
 
 	public static FaroUser fromDo(FaroUserDo faroUserDo){
 		FaroUser faroUser = new FaroUser();
-		faroUser.setEmail(faroUserDo.getEmail());
+		faroUser.setId(faroUserDo.getId());
 		faroUser.setFirstName(faroUserDo.getFirstName());
 		faroUser.setLastName(faroUserDo.getLastName());
 		faroUser.setMiddleName(faroUserDo.getMiddleName());
@@ -132,6 +135,9 @@ public class ConversionUtils {
 		faroUser.setTelephone(faroUserDo.getExternalExpenseID());
 		faroUser.setAddress(faroUserDo.getAddress());
 		faroUser.setInviteStatus(faroUserDo.getInviteStatus());
+		faroUser.setTokens(faroUserDo.getTokens());
+		faroUser.setUserTopic(faroUserDo.getUserTopic());
+		faroUser.setVersion(faroUserDo.getVersion());
 		return faroUser;
 	}
 

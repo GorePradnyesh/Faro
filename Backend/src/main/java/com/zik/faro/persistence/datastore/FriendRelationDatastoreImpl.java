@@ -53,11 +53,11 @@ public class FriendRelationDatastoreImpl {
     public static void removeFriendRelation(final FaroUserDo faroUser1, final FaroUserDo faroUser2) throws IllegalDataOperation{
     	
     	// Remove both sides of the relation. Similar to how we create a friend relation
-    	FriendRelationDo friendRelation = new FriendRelationDo(faroUser1.getEmail(), faroUser2.getEmail(),
+    	FriendRelationDo friendRelation = new FriendRelationDo(faroUser1.getId(), faroUser2.getId(),
                 faroUser2.getFirstName(), faroUser2.getLastName(), faroUser2.getExternalExpenseID());
     	DatastoreObjectifyDAL.deleteEntity(friendRelation);
 
-    	friendRelation = new FriendRelationDo(faroUser2.getEmail(), faroUser1.getEmail(),
+    	friendRelation = new FriendRelationDo(faroUser2.getId(), faroUser1.getId(),
                 faroUser1.getFirstName(), faroUser1.getLastName(), faroUser1.getExternalExpenseID());
     	DatastoreObjectifyDAL.deleteEntity(friendRelation);
     }

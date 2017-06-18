@@ -42,7 +42,7 @@ public class FunctionalLoginHandlerTest {
         // Create a user first
         FaroSignupDetails userSignupDetails = createNewTestUser();
 
-        ClientResponse response = TestHelper.login(userSignupDetails.getFaroUser().getEmail(), userSignupDetails.getPassword());
+        ClientResponse response = TestHelper.login(userSignupDetails.getFaroUser().getId(), userSignupDetails.getPassword());
 
         System.out.println("response = " + response);
         Assert.assertEquals(ClientResponse.Status.OK.getStatusCode(), response.getStatus());

@@ -5,7 +5,7 @@ package com.zik.faro.commons;
  */
 public final class Constants {
 
-    public static final String HTTP_OK                                          = "OK";
+	public static final String HTTP_OK                                          = "OK";
 
     //----- Query String parameters ----- //
     public static final String FARO_USER_ID_PARAM                               = "userId";
@@ -42,7 +42,11 @@ public final class Constants {
 
     public static final String PROFILE_PATH_CONST                               = "/profile";
     public static final String PROFILE_CREATE_PATH_CONST                        = "/create";
-
+    public static final String PROFILE_UPDATE_PATH_CONST                        = "/update";
+    public static final String PROFILE_UPSERT_PATH_CONST                        = "/upsert";
+    public static final String PROFILE_ADD_USER_REGISTRATION_TOKEN				= "/add/registrationToken";
+    public static final String PROFILE_REMOVE_USER_REGISTRATION_TOKEN			= "/remove/registrationToken";
+    
     public static final String FEEDBACK_PATH_CONST                              = "/feedback";
 
     public static final String EVENT_PATH_CONST                                 = "/event";
@@ -87,6 +91,13 @@ public final class Constants {
     public static final String ALL												= "all";
     public static final int MAX_ITEMS_TO_FETCH_FROM_DATASTORE					= 20;
 
+    // ---- notificatioin constants ---- //
+    public static final String FCM_ENDPOINT 									= "https://fcm.googleapis.com";
+    public static final String IID_ENDPOINT										= "https://iid.googleapis.com";
+    public static final String SEND_NOTIFICATION_PATH_CONST						= "/fcm/send";
+    public static final String CREATE_TOKEN_PATH_CONST_FIRST_PART				= "/iid/v1:batchAdd";
+    
+    
     // -- authentication path constants -- //
     public static final String AUTH_PATH_CONST                                  = "/nativeLogin";
     public static final String AUTH_LOGIN_PATH_CONST                            = "/login";

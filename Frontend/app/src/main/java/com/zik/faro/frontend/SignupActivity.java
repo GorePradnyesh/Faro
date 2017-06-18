@@ -31,6 +31,7 @@ public class SignupActivity extends Activity {
     private EditText emailTextBox;
     private EditText passwordTextBox;
     private EditText confirmPasswordBox;
+    private EditText serverIPAddressEditText;
 
     private Intent appLandingPageIntent;
 
@@ -48,30 +49,9 @@ public class SignupActivity extends Activity {
         emailTextBox = (EditText)findViewById(R.id.signupEmail);
         passwordTextBox = (EditText)findViewById(R.id.signupPassword);
         confirmPasswordBox = (EditText)findViewById(R.id.confirmPassword);
-        final EditText serverIPAddressEditText = (EditText)findViewById(R.id.ipAddress);
+        serverIPAddressEditText = (EditText)findViewById(R.id.ipAddress);
 
         appLandingPageIntent = new Intent(SignupActivity.this, AppLandingPage.class);
-
-        serverIPAddressEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (!serverIPAddressEditText.getText().toString().trim().isEmpty()) {
-                    ((FaroApplication)getApplication()).overRideAppServerIp(serverIPAddressEditText.getText().toString().trim());
-                }
-            }
-        });
-
-
     }
 
     /**
@@ -124,6 +104,10 @@ public class SignupActivity extends Activity {
         final String email = emailTextBox.getText().toString();
         String password = passwordTextBox.getText().toString();
         String confirmPassword = confirmPasswordBox.getText().toString();
+
+        if (!serverIPAddressEditText.getText().toString().trim().isEmpty()) {
+            ((FaroApplication)getApplication()).overRideAppServerIp(serverIPAddressEditText.getText().toString().trim());
+        }
 
         if(validate(name, email, password, confirmPassword)) {
             FaroUser newFaroUser = new FaroUser(email, null, null,

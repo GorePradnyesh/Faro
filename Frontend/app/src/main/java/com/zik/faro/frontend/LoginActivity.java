@@ -30,6 +30,7 @@ public class LoginActivity extends Activity {
 
     private EditText emailTextBox;
     private EditText passwordTextBox;
+    private EditText serverIPAddressEditText;
 
     static FaroUserContext faroUserContext = FaroUserContext.getInstance();
 
@@ -49,7 +50,7 @@ public class LoginActivity extends Activity {
         emailTextBox = (EditText)findViewById(R.id.TFEmail);
         passwordTextBox = (EditText)findViewById(R.id.TFPassword);
 
-        final EditText serverIPAddressEditText = (EditText)findViewById(R.id.ipAddress);
+        serverIPAddressEditText = (EditText)findViewById(R.id.ipAddress);
 
         appLandingPageIntent = new Intent(LoginActivity.this, AppLandingPage.class);
 
@@ -60,22 +61,6 @@ public class LoginActivity extends Activity {
         faroCache = FaroCache.getOrCreateFaroUserContextCache(LoginActivity.this);
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
-
-
-        serverIPAddressEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (!serverIPAddressEditText.getText().toString().trim().isEmpty()) {
-                    ((FaroApplication)getApplication()).overRideAppServerIp(serverIPAddressEditText.getText().toString().trim());
-                }
-            }
-        });
 
         String token = null;
         try {
@@ -136,6 +121,10 @@ public class LoginActivity extends Activity {
         String password = passwordTextBox.getText().toString();
 
         Log.i(TAG, MessageFormat.format("username :{0} password :{1}", email, password));
+
+        if (!serverIPAddressEditText.getText().toString().trim().isEmpty()) {
+            ((FaroApplication)getApplication()).overRideAppServerIp(serverIPAddressEditText.getText().toString().trim());
+        }
 
         Log.i(TAG, "serverIP = " + ((FaroApplication)getApplication()).getAppServerIp());
 

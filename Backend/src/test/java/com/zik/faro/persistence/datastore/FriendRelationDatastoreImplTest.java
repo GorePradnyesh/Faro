@@ -48,13 +48,13 @@ public class FriendRelationDatastoreImplTest {
         FaroUserDo user2 = new FaroUserDo("user2@gmail.com",
                 "user", null, "2","user2@splitwise.com",
                 "00000002", new Address(44, "Abby Road","SouthEnd London","UK", 566645));
-        FriendRelationDo relation = new FriendRelationDo(user1.getEmail(), user2.getEmail(), user1.getFirstName(), user1.getLastName(), user1.getExternalExpenseID());
-        Assert.assertEquals(user1.getEmail(), relation.getFromId());
-        Assert.assertEquals(user2.getEmail(), relation.getToId());
+        FriendRelationDo relation = new FriendRelationDo(user1.getId(), user2.getId(), user1.getFirstName(), user1.getLastName(), user1.getExternalExpenseID());
+        Assert.assertEquals(user1.getId(), relation.getFromId());
+        Assert.assertEquals(user2.getId(), relation.getToId());
 
-        FriendRelationDo invertedRelation = new FriendRelationDo(user2.getEmail(), user1.getEmail(), user2.getFirstName(), user2.getLastName(), user2.getExternalExpenseID());
-        Assert.assertEquals(user2.getEmail(), invertedRelation.getFromId());
-        Assert.assertEquals(user1.getEmail(), invertedRelation.getToId());
+        FriendRelationDo invertedRelation = new FriendRelationDo(user2.getId(), user1.getId(), user2.getFirstName(), user2.getLastName(), user2.getExternalExpenseID());
+        Assert.assertEquals(user2.getId(), invertedRelation.getFromId());
+        Assert.assertEquals(user1.getId(), invertedRelation.getToId());
     }
 
     @Test(expected = IllegalDataOperation.class)
@@ -65,7 +65,7 @@ public class FriendRelationDatastoreImplTest {
         FaroUserDo user2 = new FaroUserDo("user1@gmail.com",
                 "user", null, "1","user1@splitwise.com",
                 "00000001", new Address(44, "Abby Road","SouthEnd London","UK", 566645));
-        new FriendRelationDo(user1.getEmail(), user2.getEmail(), user1.getFirstName(), user1.getLastName(), user1.getExternalExpenseID());
+        new FriendRelationDo(user1.getId(), user2.getId(), user1.getFirstName(), user1.getLastName(), user1.getExternalExpenseID());
     }
 
     @Test
@@ -91,36 +91,36 @@ public class FriendRelationDatastoreImplTest {
         3<-->4
         */
         FriendRelationDatastoreImpl.storeFriendRelation(
-                new MinUser(user1.getFirstName(), user1.getLastName(), user1.getEmail(), user1.getExternalExpenseID()),
-                new MinUser(user2.getFirstName(), user2.getLastName(), user2.getEmail(), user2.getExternalExpenseID()));
+                new MinUser(user1.getFirstName(), user1.getLastName(), user1.getId(), user1.getExternalExpenseID()),
+                new MinUser(user2.getFirstName(), user2.getLastName(), user2.getId(), user2.getExternalExpenseID()));
         FriendRelationDatastoreImpl.storeFriendRelation(
-                new MinUser(user1.getFirstName(), user1.getLastName(), user1.getEmail(), user1.getExternalExpenseID()),
-                new MinUser(user3.getFirstName(), user3.getLastName(), user3.getEmail(), user3.getExternalExpenseID()));
+                new MinUser(user1.getFirstName(), user1.getLastName(), user1.getId(), user1.getExternalExpenseID()),
+                new MinUser(user3.getFirstName(), user3.getLastName(), user3.getId(), user3.getExternalExpenseID()));
         FriendRelationDatastoreImpl.storeFriendRelation(
-                new MinUser(user1.getFirstName(), user1.getLastName(), user1.getEmail(), user1.getExternalExpenseID()),
-                new MinUser(user4.getFirstName(), user4.getLastName(), user4.getEmail(), user4.getExternalExpenseID()));
+                new MinUser(user1.getFirstName(), user1.getLastName(), user1.getId(), user1.getExternalExpenseID()),
+                new MinUser(user4.getFirstName(), user4.getLastName(), user4.getId(), user4.getExternalExpenseID()));
         FriendRelationDatastoreImpl.storeFriendRelation(
-                new MinUser(user2.getFirstName(), user2.getLastName(), user2.getEmail(), user2.getExternalExpenseID()),
-                new MinUser(user4.getFirstName(), user4.getLastName(), user4.getEmail(), user4.getExternalExpenseID()));
+                new MinUser(user2.getFirstName(), user2.getLastName(), user2.getId(), user2.getExternalExpenseID()),
+                new MinUser(user4.getFirstName(), user4.getLastName(), user4.getId(), user4.getExternalExpenseID()));
         FriendRelationDatastoreImpl.storeFriendRelation(
-                new MinUser(user3.getFirstName(), user3.getLastName(), user3.getEmail(), user3.getExternalExpenseID()),
-                new MinUser(user4.getFirstName(), user4.getLastName(), user4.getEmail(), user4.getExternalExpenseID()));
+                new MinUser(user3.getFirstName(), user3.getLastName(), user3.getId(), user3.getExternalExpenseID()),
+                new MinUser(user4.getFirstName(), user4.getLastName(), user4.getId(), user4.getExternalExpenseID()));
 
-        List<FriendRelationDo> relationUser1 = FriendRelationDatastoreImpl.loadFriendsForUserId(user1.getEmail());
+        List<FriendRelationDo> relationUser1 = FriendRelationDatastoreImpl.loadFriendsForUserId(user1.getId());
         Assert.assertEquals(3, relationUser1.size());
-        List<FriendRelationDo> relationUser2 = FriendRelationDatastoreImpl.loadFriendsForUserId(user2.getEmail());
+        List<FriendRelationDo> relationUser2 = FriendRelationDatastoreImpl.loadFriendsForUserId(user2.getId());
         Assert.assertEquals(2, relationUser2.size());
-        List<FriendRelationDo> relationUser3 = FriendRelationDatastoreImpl.loadFriendsForUserId(user3.getEmail());
+        List<FriendRelationDo> relationUser3 = FriendRelationDatastoreImpl.loadFriendsForUserId(user3.getId());
         Assert.assertEquals(2, relationUser3.size());
-        List<FriendRelationDo> relationUser4 = FriendRelationDatastoreImpl.loadFriendsForUserId(user4.getEmail());
+        List<FriendRelationDo> relationUser4 = FriendRelationDatastoreImpl.loadFriendsForUserId(user4.getId());
         Assert.assertEquals(3, relationUser4.size());
 
-        FriendRelationDo relation12 = FriendRelationDatastoreImpl.loadFriendRelation(user1.getEmail(), user2.getEmail());
+        FriendRelationDo relation12 = FriendRelationDatastoreImpl.loadFriendRelation(user1.getId(), user2.getId());
         Assert.assertNotNull(relation12);
-        FriendRelationDo relation21 = FriendRelationDatastoreImpl.loadFriendRelation(user2.getEmail(), user1.getEmail());
+        FriendRelationDo relation21 = FriendRelationDatastoreImpl.loadFriendRelation(user2.getId(), user1.getId());
         Assert.assertNotNull(relation21);
         try{
-        	FriendRelationDo relation23 = FriendRelationDatastoreImpl.loadFriendRelation(user2.getEmail(), user3.getEmail());
+        	FriendRelationDo relation23 = FriendRelationDatastoreImpl.loadFriendRelation(user2.getId(), user3.getId());
         }catch(DataNotFoundException e){
         	Assert.assertNotNull(e);
         	return;
@@ -140,14 +140,14 @@ public class FriendRelationDatastoreImplTest {
                 "00000002", new Address(44, "Abby Road", "SouthEnd London", "UK", 566645));
 
         FriendRelationDatastoreImpl.storeFriendRelation(
-                new MinUser(user1.getFirstName(), user1.getLastName(), user1.getEmail(), user1.getExternalExpenseID()),
-                new MinUser(user2.getFirstName(), user2.getLastName(), user2.getEmail(), user2.getExternalExpenseID()));
+                new MinUser(user1.getFirstName(), user1.getLastName(), user1.getId(), user1.getExternalExpenseID()),
+                new MinUser(user2.getFirstName(), user2.getLastName(), user2.getId(), user2.getExternalExpenseID()));
 
-        List<FriendRelationDo> relationUser1 = FriendRelationDatastoreImpl.loadFriendsForUserId(user1.getEmail());
+        List<FriendRelationDo> relationUser1 = FriendRelationDatastoreImpl.loadFriendsForUserId(user1.getId());
         Assert.assertEquals(1, relationUser1.size());
 
         FriendRelationDatastoreImpl.removeFriendRelation(user1, user2);
-        List<FriendRelationDo> deletedRelations = FriendRelationDatastoreImpl.loadFriendsForUserId(user1.getEmail());
+        List<FriendRelationDo> deletedRelations = FriendRelationDatastoreImpl.loadFriendsForUserId(user1.getId());
         Assert.assertEquals(0, deletedRelations.size());
     }
 
@@ -162,16 +162,16 @@ public class FriendRelationDatastoreImplTest {
 
         /* Repeat 'n' times */
         FriendRelationDatastoreImpl.storeFriendRelation(
-                new MinUser(user1.getFirstName(), user1.getLastName(), user1.getEmail(), user1.getExternalExpenseID()),
-                new MinUser(user2.getFirstName(), user2.getLastName(), user2.getEmail(), user2.getExternalExpenseID()));
+                new MinUser(user1.getFirstName(), user1.getLastName(), user1.getId(), user1.getExternalExpenseID()),
+                new MinUser(user2.getFirstName(), user2.getLastName(), user2.getId(), user2.getExternalExpenseID()));
         FriendRelationDatastoreImpl.storeFriendRelation(
-                new MinUser(user1.getFirstName(), user1.getLastName(), user1.getEmail(), user1.getExternalExpenseID()),
-                new MinUser(user2.getFirstName(), user2.getLastName(), user2.getEmail(), user2.getExternalExpenseID()));
+                new MinUser(user1.getFirstName(), user1.getLastName(), user1.getId(), user1.getExternalExpenseID()),
+                new MinUser(user2.getFirstName(), user2.getLastName(), user2.getId(), user2.getExternalExpenseID()));
         FriendRelationDatastoreImpl.storeFriendRelation(
-                new MinUser(user1.getFirstName(), user1.getLastName(), user1.getEmail(), user1.getExternalExpenseID()),
-                new MinUser(user2.getFirstName(), user2.getLastName(), user2.getEmail(), user2.getExternalExpenseID()));
+                new MinUser(user1.getFirstName(), user1.getLastName(), user1.getId(), user1.getExternalExpenseID()),
+                new MinUser(user2.getFirstName(), user2.getLastName(), user2.getId(), user2.getExternalExpenseID()));
 
-        List<FriendRelationDo> relationUser1 = FriendRelationDatastoreImpl.loadFriendsForUserId(user1.getEmail());
+        List<FriendRelationDo> relationUser1 = FriendRelationDatastoreImpl.loadFriendsForUserId(user1.getId());
         Assert.assertEquals(1, relationUser1.size());
     }
 

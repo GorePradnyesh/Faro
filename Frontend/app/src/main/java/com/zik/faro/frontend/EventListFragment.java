@@ -28,9 +28,7 @@ import com.zik.faro.frontend.faroservice.HttpError;
 import java.io.IOException;
 import java.util.List;
 
-public class EventListFragment extends Fragment{
-
-
+public class EventListFragment extends Fragment {
     private static EventListHandler eventListHandler = EventListHandler.getInstance();
     private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
     private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
