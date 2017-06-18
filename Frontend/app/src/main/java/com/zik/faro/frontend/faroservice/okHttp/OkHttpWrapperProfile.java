@@ -41,4 +41,37 @@ public class OkHttpWrapperProfile extends BaseFaroOKHttpWrapper implements Profi
 
         this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<FaroUser>(callback, FaroUser.class));
     }
+
+    @Override
+    public void upsertProfile(BaseFaroRequestCallback<FaroUser> callback, FaroUser faroUser) {
+        Request request = new Request.Builder()
+                .url(baseHandlerURL.toString() + "upsert")
+                .put(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), mapper.toJson(faroUser) ))
+                .addHeader(authHeaderName, TokenCache.getTokenCache().getToken())
+                .build();
+
+        this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<FaroUser>(callback, FaroUser.class));
+    }
+
+    @Override
+    public void addRegistrationToken(BaseFaroRequestCallback<String> callback, String registrationToken) {
+        Request request = new Request.Builder()
+                .url(baseHandlerURL.toString() + "add/registrationToken")
+                .put(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), registrationToken))
+                .addHeader(authHeaderName, TokenCache.getTokenCache().getToken())
+                .build();
+
+        this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<String>(callback, String.class));
+    }
+
+    @Override
+    public void removeRegistrationToken(BaseFaroRequestCallback<String> callback, String registrationToken) {
+        Request request = new Request.Builder()
+                .url(baseHandlerURL.toString() + "remove/registrationToken")
+                .put(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), registrationToken))
+                .addHeader(authHeaderName, TokenCache.getTokenCache().getToken())
+                .build();
+
+        this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<String>(callback, String.class));
+    }
 }
