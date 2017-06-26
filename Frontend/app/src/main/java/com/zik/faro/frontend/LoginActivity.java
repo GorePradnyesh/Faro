@@ -26,7 +26,7 @@ import java.text.MessageFormat;
 public class LoginActivity extends Activity {
     private String TAG = "LoginActivity";
 
-    private static FaroServiceHandler serviceHandler;
+    private FaroServiceHandler serviceHandler;
 
     private EditText emailTextBox;
     private EditText passwordTextBox;

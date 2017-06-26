@@ -33,12 +33,12 @@ import java.io.IOException;
 
 public class FriendListFragment extends Fragment {
 
-    private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
+    private UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
+    private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private static String TAG = "FriendListFragment";
 
     private RelativeLayout popUpRelativeLayout;
-    FaroUserContext faroUserContext = FaroUserContext.getInstance();
+    private FaroUserContext faroUserContext = FaroUserContext.getInstance();
     private String myUserId = faroUserContext.getEmail();
 
     @Override

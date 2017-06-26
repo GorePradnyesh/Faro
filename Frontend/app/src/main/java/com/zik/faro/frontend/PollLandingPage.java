@@ -47,10 +47,10 @@ import static android.widget.Toast.LENGTH_LONG;
 
 public class PollLandingPage extends Activity implements NotificationPayloadHandler {
 
-    private static PollListHandler pollListHandler = PollListHandler.getInstance();
-    private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
-    private static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;;
+    private PollListHandler pollListHandler = PollListHandler.getInstance();
+    private UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
+    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;;
 
     private static String TAG = "PollLandngPage";
 
@@ -73,14 +73,14 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
     private RelativeLayout popUpRelativeLayout;
     private static final Integer POLL_OPTION_ROW_HEIGHT = 150;
 
-    Intent PollListPageIntent = null;
-    Intent PickPollWinnerIntent = null;
-    Intent EditPollPageIntent = null;
+    private Intent PollListPageIntent = null;
+    private Intent PickPollWinnerIntent = null;
+    private Intent EditPollPageIntent = null;
     private Intent PollLandingPageReloadIntent = null;
 
     private List<PollOption> pollOptionsList;
 
-    static FaroUserContext faroUserContext = FaroUserContext.getInstance();
+    private  FaroUserContext faroUserContext = FaroUserContext.getInstance();
     private String myUserId = faroUserContext.getEmail();
 
     //Below Integers to manage Single choice polls

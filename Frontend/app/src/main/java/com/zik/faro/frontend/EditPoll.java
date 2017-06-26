@@ -39,8 +39,8 @@ import java.util.Map;
 import static android.widget.Toast.LENGTH_LONG;
 
 public class EditPoll extends Activity {
-    private static PollListHandler pollListHandler = PollListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
+    private PollListHandler pollListHandler = PollListHandler.getInstance();
+    private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
     private String eventID = null;
     private String pollID;

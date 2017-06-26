@@ -53,7 +53,7 @@ public class EventListHandler {
     */
     private Map<String, EventInviteStatusWrapper> eventMap = new ConcurrentHashMap<>();
 
-    public static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
+    public FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
     private static String TAG = "EventListHandler";
 

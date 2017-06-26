@@ -43,9 +43,9 @@ public class EditActivity extends android.app.Activity {
     private String activityID = null;
     private Event event;
     private Activity cloneActivity;
-    private  static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private  static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
+    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
+    private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
     private Button startDateButton = null;
     private Button startTimeButton = null;
@@ -64,8 +64,7 @@ public class EditActivity extends android.app.Activity {
 
     private Intent ActivityLandingPage;
 
-
-    final Context mContext = this;
+    private final Context mContext = this;
 
     private PopupWindow popupWindow;
 

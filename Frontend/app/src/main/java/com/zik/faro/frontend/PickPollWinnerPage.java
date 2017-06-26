@@ -45,9 +45,9 @@ public class PickPollWinnerPage extends Activity {
 
     private Poll clonePoll;
 
-    private static PollListHandler pollListHandler = PollListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
-    private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
+    private PollListHandler pollListHandler = PollListHandler.getInstance();
+    private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
+    private UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
 
 
     private List<PollOption> pollOptionsList;

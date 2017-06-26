@@ -33,23 +33,23 @@ import static android.widget.Toast.LENGTH_LONG;
 public class CreateNewActivity extends android.app.Activity {
 
     private String eventID = null;
-    static EventListHandler eventListHandler = EventListHandler.getInstance();
-    static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
-    Event event = null;
+    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
+    private Event event = null;
 
-    Calendar startDateCalendar = Calendar.getInstance();
-    Calendar endDateCalendar = Calendar.getInstance();
-    Button startDateButton = null;
-    Button startTimeButton = null;
-    Button endTimeButton = null;
-    Button endDateButton = null;
+    private Calendar startDateCalendar = Calendar.getInstance();
+    private Calendar endDateCalendar = Calendar.getInstance();
+    private Button startDateButton = null;
+    private Button startTimeButton = null;
+    private Button endTimeButton = null;
+    private Button endDateButton = null;
 
     private DateFormat sdf = new SimpleDateFormat("MMM dd yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
 
-    Intent activityListPage = null;
+    private Intent activityListPage = null;
 
-    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
+    private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private static String TAG = "CreateNewActivity";
 
     @Override

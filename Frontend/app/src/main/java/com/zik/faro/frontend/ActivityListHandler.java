@@ -31,7 +31,7 @@ public class ActivityListHandler {
 
     public static final int MAX_ACTIVITIES_PAGE_SIZE = 100;
     private static final int MAX_TOTAL_ACTIVITIES_IN_CACHE = 500;
-    private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
+    private AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
 
     private Map <String, ActivityAdapter>activityAdapterMap = new ConcurrentHashMap<>();
 

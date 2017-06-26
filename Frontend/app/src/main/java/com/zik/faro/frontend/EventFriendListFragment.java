@@ -24,7 +24,7 @@ public class EventFriendListFragment extends Fragment {
     private String eventID;
     private Context mContext = getActivity();
 
-    private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
+    private EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
 
     public EventFriendListFragment() {
         // Required empty public constructor

@@ -19,11 +19,11 @@ import java.io.IOException;
 
 public class MoreOptionsPage extends Fragment{
 
-    static EventListHandler eventListHandler = EventListHandler.getInstance();
-    static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
-    static FaroUserContext faroUserContext = FaroUserContext.getInstance();
-    String myUserId = faroUserContext.getEmail();
-    String TAG = "MoreOptions";
+    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
+    private FaroUserContext faroUserContext = FaroUserContext.getInstance();
+    private String myUserId = faroUserContext.getEmail();
+    private String TAG = "MoreOptions";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

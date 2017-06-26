@@ -66,10 +66,9 @@ public class EditEvent extends Activity {
     private DateFormat sdf = new SimpleDateFormat("MMM dd yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
 
-
-    private static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
-    private static Event cloneEvent;
+    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
+    private Event cloneEvent;
 
     private Calendar startDateCalendar = Calendar.getInstance();
     private Calendar endDateCalendar = Calendar.getInstance();
@@ -80,15 +79,14 @@ public class EditEvent extends Activity {
     private String eventID;
     private static String TAG = "EditEvent";
 
-    Intent EventLanding = null;
+    private Intent EventLanding = null;
 
     private int PLACE_PICKER_REQUEST = 1;
 
-    final Context mContext = this;
+    private final Context mContext = this;
     private Activity mActivity = this;
 
     private Location location = null;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

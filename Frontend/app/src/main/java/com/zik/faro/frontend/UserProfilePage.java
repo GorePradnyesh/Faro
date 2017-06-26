@@ -18,13 +18,10 @@ public class UserProfilePage extends AppCompatActivity {
     private String eventID = null;
     private String inviteStatus = null;
 
+    private UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
+    private EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
 
-
-
-    private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
-    private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
-
-    FaroUserContext faroUserContext = FaroUserContext.getInstance();
+    private FaroUserContext faroUserContext = FaroUserContext.getInstance();
     private String myUserId = faroUserContext.getEmail();
 
     @Override

@@ -32,14 +32,14 @@ import java.io.IOException;
 
 public class CreateNewPoll extends Activity {
 
-    private static PollListHandler pollListHandler = PollListHandler.getInstance();
+    private PollListHandler pollListHandler = PollListHandler.getInstance();
     private String eventID = null;
-    Intent PollListPage = null;
+    private Intent PollListPage = null;
 
-    private static FaroUserContext faroUserContext = FaroUserContext.getInstance();
-    String myUserId = faroUserContext.getEmail();
+    private FaroUserContext faroUserContext = FaroUserContext.getInstance();
+    private String myUserId = faroUserContext.getEmail();
 
-    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
+    private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private static String TAG = "CreateNewPoll";
 
     private EditText pollDescription = null;
@@ -51,7 +51,7 @@ public class CreateNewPoll extends Activity {
     private PollOptionsAdapter pollOptionsAdapter = null;
     private Intent PollLandingPageIntent = null;
 
-    Context mContext = this;
+    private Context mContext = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

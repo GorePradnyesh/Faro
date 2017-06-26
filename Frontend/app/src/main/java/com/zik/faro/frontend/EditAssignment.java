@@ -58,11 +58,11 @@ public class EditAssignment extends android.app.Activity {
     private Activity cloneActivity = null;
     private Assignment cloneAssignment;
 
-    private static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
-    private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
-    private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
+    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
+    private AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
+    private EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
+    private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
     private String eventID = null;
     private String activityID = null;
@@ -73,9 +73,9 @@ public class EditAssignment extends android.app.Activity {
     private HashSet<Item> newItemSet = new HashSet<>();
     private HashSet<Item> originalItemSet = new HashSet<>();
 
-    Intent AssignmentLandingPageTabsIntent;
+    private Intent AssignmentLandingPageTabsIntent;
 
-    ArrayList <String> itemUnitArray = new ArrayList<>();
+    private ArrayList <String> itemUnitArray = new ArrayList<>();
 
     private static String TAG = "EditAssignment";
 

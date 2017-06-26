@@ -32,19 +32,19 @@ import java.util.Map;
 
 public class MyAssignmentsFragment extends Fragment{
 
-    private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
-    private static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
-    private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
+    private AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
+    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
+    private ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
 
     private ListView itemList;
     private Map<String, List<Item>> activityToItemListMap = new HashMap<>();
 
-    String eventID = null;
-    String passedActivityID = null;
-    String passedAssignmentID = null;
+    private String eventID = null;
+    private String passedActivityID = null;
+    private String passedAssignmentID = null;
 
-    FaroUserContext faroUserContext = FaroUserContext.getInstance();
+    private FaroUserContext faroUserContext = FaroUserContext.getInstance();
     private String myUserID = faroUserContext.getEmail();
 
     private static String TAG = "MyAssignmentsFragment";

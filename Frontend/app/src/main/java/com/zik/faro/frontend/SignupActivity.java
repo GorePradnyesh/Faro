@@ -25,7 +25,7 @@ import java.io.IOException;
  */
 public class SignupActivity extends Activity {
     private String TAG = "SignupActivity";
-    private static FaroServiceHandler serviceHandler = null;
+    private FaroServiceHandler serviceHandler = null;
 
     private EditText nameTextBox;
     private EditText emailTextBox;
@@ -40,9 +40,6 @@ public class SignupActivity extends Activity {
         // Init the activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
-
-        // Create Faro service handler
-        serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
         // Bind the data fields with the corresponding View components
         nameTextBox = (EditText)findViewById(R.id.signupName);
@@ -108,6 +105,9 @@ public class SignupActivity extends Activity {
         if (!serverIPAddressEditText.getText().toString().trim().isEmpty()) {
             ((FaroApplication)getApplication()).overRideAppServerIp(serverIPAddressEditText.getText().toString().trim());
         }
+
+        // Create Faro service handler
+        serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
         if(validate(name, email, password, confirmPassword)) {
             FaroUser newFaroUser = new FaroUser(email, null, null,

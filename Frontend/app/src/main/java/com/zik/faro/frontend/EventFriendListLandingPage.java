@@ -17,8 +17,8 @@ public class EventFriendListLandingPage extends FragmentActivity {
     private String eventID;
     private Event cloneEvent;
 
-    private static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
+    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
 
     FaroUserContext faroUserContext = FaroUserContext.getInstance();
     String myUserId = faroUserContext.getEmail();

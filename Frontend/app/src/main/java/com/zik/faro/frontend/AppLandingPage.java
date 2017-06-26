@@ -21,10 +21,10 @@ public class AppLandingPage extends FragmentActivity{
     private static final String TAG = "AppLandingPage";
     private BroadcastReceiver broadcastReceiver;
 
-    private static PollListHandler pollListHandler = PollListHandler.getInstance();
-    private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
-    private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
-    private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
+    private PollListHandler pollListHandler = PollListHandler.getInstance();
+    private ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
+    private AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
+    private EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
 
     /*
     fragment Activity code picked from
@@ -40,21 +40,6 @@ public class AppLandingPage extends FragmentActivity{
         final Intent createNewEventIntent = new Intent(this, CreateNewEvent.class);
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
-
-        // TODO Check if we have token in global memory in that case send it to server with userID
-        // Else firebase could take time to send the token as well. In this case the below receiver
-        // Will take care of updating our server with the tokenID. In this case the user will not
-        // be receiving notifications for that brief period.
-        broadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                Log.d(TAG, "Received token. Send to server");
-                //Do an api call to our server to store the firebase token against the user
-
-            }
-        };
-
-        registerReceiver(broadcastReceiver, new IntentFilter(MyFirebaseInstanceIDService.TOKEN_BROADCAST));
 
         /*TODO For styling the tab layout checkout the following link
         * https://maxalley.wordpress.com/2014/09/08/android-styling-a-tab-layout-with-fragmenttabhost-and-fragments/

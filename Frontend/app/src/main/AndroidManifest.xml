@@ -120,7 +120,7 @@
 
         <activity android:name=".notification.ReceivedNotficationHandler">
             <intent-filter>
-                <action android:name="RECEIVEDNOTIFICATIONHANDLER" />
+                <action android:name="DEFAULTACTION" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

@@ -21,21 +21,6 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
         // Get updated InstanceID token.
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
         Log.d(TAG, "Refreshed token: " + refreshedToken);
-
-        /* Don't send the token to server from here. Since the token could be received here even
-         * before the user logs into the app. What can be done here is to setup a broadcast message
-         * to AppLanding Page to handle this.
-         */
-        /*Runnable myRunnable = new Runnable() {
-            @Override
-            public void run() {
-                getApplicationContext().sendBroadcast(new Intent(TOKEN_BROADCAST));
-            }
-        };
-
-        Handler mainHandler = new Handler(getApplicationContext().getMainLooper());
-        mainHandler.postDelayed(myRunnable, 30000);*/
-
     }
     // [END refresh_token]
 };

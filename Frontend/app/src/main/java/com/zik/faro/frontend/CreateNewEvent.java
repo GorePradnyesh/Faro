@@ -55,8 +55,8 @@ import static android.widget.Toast.LENGTH_LONG;
 public class CreateNewEvent extends Activity {
 
     //public static final int NO_CHANGES = 0;
-    private static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
+    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
     private Calendar startDateCalendar = Calendar.getInstance();
     private Calendar endDateCalendar = Calendar.getInstance();
@@ -72,7 +72,6 @@ public class CreateNewEvent extends Activity {
     private DateFormat sdf = new SimpleDateFormat("MMM dd yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
 
-    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private static String TAG = "CreateNewEvent";
 
     private int PLACE_PICKER_REQUEST = 1;

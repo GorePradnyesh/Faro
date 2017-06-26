@@ -31,10 +31,10 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
     private DateFormat sdf = new SimpleDateFormat(" EEE, MMM d, yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
     private Activity cloneActivity = null;
-    private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
-    private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
-    private static EventListHandler eventListHandler = EventListHandler.getInstance();
+    private ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
+    private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
+    private AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
+    private EventListHandler eventListHandler = EventListHandler.getInstance();
     private String eventID = null;
     private String activityID = null;
     private ImageButton editButton = null;

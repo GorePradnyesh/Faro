@@ -37,15 +37,15 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
 
     private Event originalEvent;
     private com.zik.faro.data.Activity originalActivity = null;
-    String activityID = null;
-    String eventID = null;
-    String assignmentID = null;
+    private String activityID = null;
+    private String eventID = null;
+    private String assignmentID = null;
     private Assignment cloneAssignment = null;
 
-    private static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
-    private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
+    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
+    private AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
+    private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
     private static String TAG = "AssgnmntLandingFrgmnt";
 
