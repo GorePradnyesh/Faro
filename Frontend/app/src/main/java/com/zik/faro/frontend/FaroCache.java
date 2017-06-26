@@ -21,14 +21,14 @@ public class FaroCache {
         return instance;
     }
 
-    public static synchronized FaroCache getFaroUserContextCache(){
+    public static synchronized FaroCache getFaroUserContextCache() {
         if (instance == null) {
             throw new IllegalStateException("FaroUserContext cache has not been initialized.");
         }
         return instance;
     }
 
-    public void saveFaroCacheToDisk(String key, String value){
+    public void saveFaroCacheToDisk(String key, String value) {
         SharedPreferences.Editor editor = sharedPrefs.edit();
         editor.putString(key, value);
         editor.commit();
@@ -37,7 +37,7 @@ public class FaroCache {
         Log.i(TAG, key + "=" + storedValue);
     }
 
-    public String loadFaroCacheFromDisk(String key){
+    public String loadFaroCacheFromDisk(String key) {
         return sharedPrefs.getString(key, "");
     }
 

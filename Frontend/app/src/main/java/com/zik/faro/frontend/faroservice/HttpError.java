@@ -1,5 +1,7 @@
 package com.zik.faro.frontend.faroservice;
 
+import com.google.common.base.MoreObjects;
+
 public class HttpError {
     public int code;
     public String message;
@@ -15,5 +17,13 @@ public class HttpError {
 
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("code", code)
+                .add("message", message)
+                .toString();
     }
 }
