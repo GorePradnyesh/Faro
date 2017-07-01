@@ -5,15 +5,16 @@ public class FaroUserContext {
     private String email;
     private static FaroUserContext faroUserContext = null;
 
-    public static FaroUserContext getInstance(){
+    public static FaroUserContext getInstance() {
         if (faroUserContext != null) {
             return faroUserContext;
         }
 
         synchronized (FaroUserContext.class) {
-            if(faroUserContext == null) {
+            if (faroUserContext == null) {
                 faroUserContext = new FaroUserContext();
             }
+
             return faroUserContext;
         }
     }
@@ -28,9 +29,5 @@ public class FaroUserContext {
         this.email = email;
     }
 
-    public FaroUserContext(String email){
-        this.email = email;
-        //FaroCache faroCache = FaroCache.getOrCreateFaroUserContextCache();
-    }
 }
 

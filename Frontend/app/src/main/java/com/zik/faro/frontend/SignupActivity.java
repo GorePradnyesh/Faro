@@ -3,22 +3,15 @@ package com.zik.faro.frontend;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
 import com.google.common.base.Strings;
-import com.squareup.okhttp.Request;
 import com.zik.faro.data.user.FaroUser;
-import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
+import com.zik.faro.frontend.faroservice.FaroSignupJob;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
-import com.zik.faro.frontend.faroservice.HttpError;
-import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
-import com.zik.faro.frontend.faroservice.auth.TokenCache;
-
-import java.io.IOException;
+import com.zik.faro.frontend.faroservice.SignupJobResultHandler;
+import com.zik.faro.frontend.faroservice.okHttp.OkHttpResponse;
 
 /**
  * Created by granganathan on 1/24/16.
@@ -102,44 +95,31 @@ public class SignupActivity extends Activity {
         String password = passwordTextBox.getText().toString();
         String confirmPassword = confirmPasswordBox.getText().toString();
 
-        if (!serverIPAddressEditText.getText().toString().trim().isEmpty()) {
-            ((FaroApplication)getApplication()).overRideAppServerIp(serverIPAddressEditText.getText().toString().trim());
+        String serverIpAddress = serverIPAddressEditText.getText().toString().trim();
+        if (!Strings.isNullOrEmpty(serverIpAddress)) {
+            ((FaroApplication)getApplication()).overRideAppServerIp(serverIpAddress);
         }
 
         // Create Faro service handler
         serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
-        if(validate(name, email, password, confirmPassword)) {
-            FaroUser newFaroUser = new FaroUser(email, null, null,
-            null, null, null, null);
-            newFaroUser.setFirstName(name);
+        if (validate(name, email, password, confirmPassword)) {
+            FaroUser newFaroUser = new FaroUser(email, name, null, null, null, null, null);
 
-            serviceHandler.getSignupHandler().signup(new BaseFaroRequestCallback<String>() {
+            SignupJobResultHandler signupResultHandler = new SignupJobResultHandler<String>() {
                 @Override
-                public void onFailure(Request request, IOException ex) {
-                    Log.i(TAG, "failed to send signup request");
-                }
-
-                @Override
-                public void onResponse(String token, HttpError error) {
-                    Log.i(TAG, "signup response, token = " + token);
-                    if (error == null ) {
-                        Log.i(TAG, "token = " + token);
-                        TokenCache.getTokenCache().setToken(token);
-                        FaroUserContext faroUserContext = FaroUserContext.getInstance();
-                        faroUserContext.setEmail(email);
-
-                        // Go to event list page
+                public void handleResponse(OkHttpResponse<String> response) {
+                    // Go to event list page
+                    if (response.isSuccessful() && response.getResponseObject() != null) {
                         startActivity(appLandingPageIntent);
                         finish();
-                    } else {
-                        Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
-                        if (error.getCode() == 409) {
-                            Log.i(TAG, "User " + email + " already exists");
-                        }
                     }
+
+                    // TODO: Show popup with appropriate message if response is not successfull
                 }
-            }, newFaroUser, password);
+            };
+
+            FaroExecutionManager.execute(new FaroSignupJob(newFaroUser, password).addResultHandler(this, signupResultHandler));
         }
     }
 

@@ -6,17 +6,41 @@
     android:orientation="vertical"
     android:background="#eaecee">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:id="@+id/logout"
-        android:text="Logout"/>
-    <TextView
-        android:id="@+id/text"
+    <LinearLayout
+        android:id="@+id/moreOptionsPageProgressBarLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center_vertical|center_horizontal"
-        android:text="@string/hello_world"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:gravity="center" >
+
+        <ProgressBar
+            android:id="@+id/moreOptionsPageProgressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+        </ProgressBar>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/moreOptionsPageLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center" >
+
+        <Button
+            android:id="@+id/logout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Logout" />
+
+        <TextView
+            android:id="@+id/text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical|center_horizontal"
+            android:text="@string/hello_world"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    </LinearLayout>
+
 </LinearLayout>

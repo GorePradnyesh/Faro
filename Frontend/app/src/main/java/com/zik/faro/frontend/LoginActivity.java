@@ -3,8 +3,6 @@ package com.zik.faro.frontend;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -12,15 +10,13 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.google.common.base.Strings;
-import com.squareup.okhttp.Request;
-import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
+import com.zik.faro.frontend.faroservice.FaroLoginJob;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
-import com.zik.faro.frontend.faroservice.HttpError;
+import com.zik.faro.frontend.faroservice.SignupJobResultHandler;
 import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 import com.zik.faro.frontend.faroservice.auth.TokenCache;
+import com.zik.faro.frontend.faroservice.okHttp.OkHttpResponse;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.text.MessageFormat;
 
 public class LoginActivity extends Activity {
@@ -44,8 +40,6 @@ public class LoginActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        final Intent LoginActivityReloadIntent = new Intent(this, com.zik.faro.frontend.LoginActivity.class);
-
         // Bind the data fields with the corresponding View components
         emailTextBox = (EditText)findViewById(R.id.TFEmail);
         passwordTextBox = (EditText)findViewById(R.id.TFPassword);
@@ -57,7 +51,7 @@ public class LoginActivity extends Activity {
         // Setup token cache
         TokenCache tokenCache = TokenCache.getOrCreateTokenCache(LoginActivity.this);
 
-        //Setup Faro Cache
+        // Setup Faro Cache
         faroCache = FaroCache.getOrCreateFaroUserContextCache(LoginActivity.this);
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
@@ -67,14 +61,14 @@ public class LoginActivity extends Activity {
             token = tokenCache.getToken();
             if (token != null) {
                 String email = faroCache.loadFaroCacheFromDisk("email");
-                if (email != null){
+                if (email != null) {
                     faroUserContext.setEmail(email);
                     startActivity(appLandingPageIntent);
                     finish();
-                }else{
+                } else {
                     Log.e(TAG, "email not found");
                 }
-            }else{
+            } else {
                 Log.i(TAG, "Token not found");
             }
             Log.i(TAG, "token = " + token);
@@ -118,12 +112,13 @@ public class LoginActivity extends Activity {
         Log.i(TAG, "login button clicked");
 
         final String email = emailTextBox.getText().toString();
-        String password = passwordTextBox.getText().toString();
+        final String password = passwordTextBox.getText().toString();
 
         Log.i(TAG, MessageFormat.format("username :{0} password :{1}", email, password));
 
-        if (!serverIPAddressEditText.getText().toString().trim().isEmpty()) {
-            ((FaroApplication)getApplication()).overRideAppServerIp(serverIPAddressEditText.getText().toString().trim());
+        String serverIpAddress = serverIPAddressEditText.getText().toString().trim();
+        if (!Strings.isNullOrEmpty(serverIpAddress)) {
+            ((FaroApplication)getApplication()).overRideAppServerIp(serverIpAddress);
         }
 
         Log.i(TAG, "serverIP = " + ((FaroApplication)getApplication()).getAppServerIp());
@@ -132,32 +127,28 @@ public class LoginActivity extends Activity {
         serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
         if (validate(email, password)) {
-            serviceHandler.getLoginHandler().login(new BaseFaroRequestCallback<String>() {
-                @Override
-                public void onFailure(Request request, IOException ex) {
-                    Log.i(TAG, "failed to send login request");
-                }
+            SignupJobResultHandler<String> signupResultHandler = new SignupJobResultHandler<String>() {
 
                 @Override
-                public void onResponse(String token, HttpError error) {
-                    Log.i(TAG, "login response, token = " + token);
-                    if (error == null) {
-                        faroUserContext.setEmail(email);
-                        faroCache.saveFaroCacheToDisk("email", email);
-                        // Go to event list page
-                        //appLandingPageIntent.putExtra("baseUrl", baseUrl);
+                public void handleResponse(OkHttpResponse<String> response) {
+                    // Go to event list page
+                    if (response.isSuccessful() && response.getResponseObject() != null) {
                         startActivity(appLandingPageIntent);
                         finish();
-                    } else {
-                        Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
-                        // Invalid login
-                        if (error.getCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                            Log.i(TAG, "username/password not valid");
-                        }
                     }
+
+                    // TODO: Show popup with appropriate message if response is not successfull
                 }
-            }, email, password);
+            };
+
+            FaroExecutionManager.execute(new FaroLoginJob(email, password).addResultHandler(this, signupResultHandler));
         }
+    }
+
+    private void undoLogin() {
+        TokenCache.getTokenCache().deleteToken();
+        FaroUserContext.getInstance().setEmail(null);
+        FaroCache.getFaroUserContextCache().saveFaroCacheToDisk("email", null);
     }
 
     /**

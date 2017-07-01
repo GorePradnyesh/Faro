@@ -12,8 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.zik.faro.frontend.notification.MyFirebaseInstanceIDService;
+import com.zik.faro.frontend.notification.FaroFirebaseInstanceIDService;
 
 public class AppLandingPage extends FragmentActivity{
     private FragmentTabHost mTabHost;
