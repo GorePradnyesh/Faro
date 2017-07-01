@@ -6,7 +6,7 @@ import com.zik.faro.frontend.faroservice.HttpError;
 
 import java.io.IOException;
 
-public interface BaseFaroRequestCallback<T>{
-    public void onFailure(Request request, IOException ex);
-    public void onResponse(T t, HttpError error);
+public interface BaseFaroRequestCallback<T> {
+    void onFailure(Request request, IOException ex);
+    void onResponse(T t, HttpError error);
 }

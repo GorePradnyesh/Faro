@@ -73,17 +73,17 @@ public class PasswordHandlerTest {
 
         // Login
         LoginHandler loginHandler = new LoginHandler();
-        String loginToken = loginHandler.login(faroUser.getEmail(), oldPassword);
+        String loginToken = loginHandler.login(faroUser.getId(), oldPassword);
         // Verify login was successful
         Assert.assertNotNull(loginToken);
 
         PasswordHandler passwordHandler =  new PasswordHandler();
-        Whitebox.setInternalState(passwordHandler, TestHelper.setupMockSecurityContext(faroUser.getEmail()));
+        Whitebox.setInternalState(passwordHandler, TestHelper.setupMockSecurityContext(faroUser.getId()));
         passwordHandler.resetPassword(new FaroResetPasswordData(oldPassword, newPassword));
 
         // Verify login fails with old password
         try {
-            loginHandler.login(faroUser.getEmail(), oldPassword);
+            loginHandler.login(faroUser.getId(), oldPassword);
         } catch (Exception e) {
             Assert.assertTrue(e instanceof FaroWebAppException);
             FaroWebAppException faroWebAppException = (FaroWebAppException)e;
@@ -91,7 +91,7 @@ public class PasswordHandlerTest {
         }
 
         // Verify login succeeds with new password
-        loginToken = loginHandler.login(faroUser.getEmail(), newPassword);
+        loginToken = loginHandler.login(faroUser.getId(), newPassword);
         Assert.assertNotNull(loginToken);
     }
 
@@ -116,7 +116,7 @@ public class PasswordHandlerTest {
         Whitebox.setInternalState(passwordHandler, mockedUriInfo);
 
         // Obtain the forgot password url
-        String forgotPasswordUrl = passwordHandler.forgotPassword(faroUser.getEmail());
+        String forgotPasswordUrl = passwordHandler.forgotPassword(faroUser.getId());
         Assert.assertNotNull(forgotPasswordUrl);
         System.out.println("forgot password url = " + forgotPasswordUrl);
         String queryParamToken = getQueryParamFromUrl(forgotPasswordUrl, "token");
@@ -127,14 +127,14 @@ public class PasswordHandlerTest {
         System.out.println("forgot password form html page = " + htmlForm);
 
         // Set a new password
-        Whitebox.setInternalState(passwordHandler, TestHelper.setupMockSecurityContext(faroUser.getEmail()));
+        Whitebox.setInternalState(passwordHandler, TestHelper.setupMockSecurityContext(faroUser.getId()));
 
 
         passwordHandler.newPassword(newPassword);
 
         // Verify login succeeds with new password
         LoginHandler loginHandler = new LoginHandler();
-        String loginToken = loginHandler.login(faroUser.getEmail(), newPassword);
+        String loginToken = loginHandler.login(faroUser.getId(), newPassword);
         Assert.assertNotNull(loginToken);
     }
 

@@ -2,6 +2,7 @@ package com.zik.faro.api.authentication;
 
 import static com.zik.faro.commons.Constants.AUTH_PATH_CONST;
 import static com.zik.faro.commons.Constants.AUTH_SIGN_UP_PATH_CONST;
+import static com.zik.faro.commons.Constants.FARO_USER_ID_PARAM;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -65,6 +66,7 @@ public class SignupHandler {
         // Validate Faro user details
         validateFaroUserDetails(newFaroUser);
 
+        logger.info("faroUser email = " + faroSignupDetails.getFaroUser().getId());
         AuthProvider authProvider = AuthProvider.FARO;
         String authProviderUserId = null;
 
@@ -78,6 +80,12 @@ public class SignupHandler {
                 throw new FaroWebAppException(FaroResponseStatus.UNEXPECTED_ERROR, "error in signing up user. Auth provider could not be determined");
             }
 
+        // Lookup to sees if an user exists with the same id
+        if (UserManagement.isExistingUser(newFaroUser.getId())) {
+            // Return  error code indicating user exists
+            logger.info("User already exists");
+            throw new FaroWebAppException(FaroResponseStatus.ENTITY_EXISTS, MessageFormat.format("Username {0} already exists.", newFaroUser.getId()));
+        }
             authProviderUserId = FaroJwtTokenManager.getAuthProviderUserId(authProvider, firebaseToken);
             if (authProviderUserId == null) {
                 throw new FaroWebAppException(FaroResponseStatus.UNEXPECTED_ERROR, "error in signing up user. Auth provider user id could not be determined");
@@ -85,30 +93,30 @@ public class SignupHandler {
 
             // Lookup to see if user exists with the same id and uses FARO authProvider or a different provider
             try {
-                if (UserManagement.isExistingUser(newFaroUser.getEmail())) {
+                if (UserManagement.isExistingUser(newFaroUser.getId())) {
                     AuthProvider currentAuthProvider = UserCredentialsDatastoreImpl
-                            .loadUserCreds(newFaroUser.getEmail()).getAuthProvider();
+                            .loadUserCreds(newFaroUser.getId()).getAuthProvider();
 
                     if (AuthProvider.FARO.equals(currentAuthProvider)) {
-                        FaroUser existingfaroUser = UserManagement.loadFaroUser(newFaroUser.getEmail());
+                        FaroUser existingfaroUser = UserManagement.loadFaroUser(newFaroUser.getId());
 
                         if (!AppInviteStatus.INVITED.equals(existingfaroUser.getInviteStatus())) {
                             // Return  error code indicating user exists
-                            throw new FaroWebAppException(FaroResponseStatus.ENTITY_EXISTS, MessageFormat.format("Username {0} already exists.", newFaroUser.getEmail()));
+                            throw new FaroWebAppException(FaroResponseStatus.ENTITY_EXISTS, MessageFormat.format("Username {0} already exists.", newFaroUser.getId()));
                         }
                     } else if (!currentAuthProvider.equals(authProvider)) {
                         logger.info("User signup is being attempted with a different auth provider for an existing user");
-                        throw new FaroWebAppException(FaroResponseStatus.ENTITY_EXISTS, MessageFormat.format("Username {0} already exists.", newFaroUser.getEmail()));
+                        throw new FaroWebAppException(FaroResponseStatus.ENTITY_EXISTS, MessageFormat.format("Username {0} already exists.", newFaroUser.getId()));
                     }
                 }
             } catch (DataNotFoundException e) {
                 throw new FaroWebAppException(FaroResponseStatus.UNEXPECTED_ERROR, "error in signing up user");
             }
 
-        } else if (UserManagement.isExistingUser(newFaroUser.getEmail())) {
+        } else if (UserManagement.isExistingUser(newFaroUser.getId())) {
             // Lookup to sees if an user exists with the same id
             // Return  error code indicating user exists
-            throw new FaroWebAppException(FaroResponseStatus.ENTITY_EXISTS, MessageFormat.format("Username {0} already exists.", newFaroUser.getEmail()));
+            throw new FaroWebAppException(FaroResponseStatus.ENTITY_EXISTS, MessageFormat.format("Username {0} already exists.", newFaroUser.getId()));
         }
 
         // construct and set the display picture url from the user's facebook userid
@@ -119,18 +127,18 @@ public class SignupHandler {
             } catch (MalformedURLException e) {
                 throw new FaroWebAppException(FaroResponseStatus.BAD_REQUEST,
                         MessageFormat.format("Failed to save user's facebook profile image URL. username = {0}, authProviderUserId = {1}",
-                        newFaroUser.getEmail(), authProviderUserId));
+                        newFaroUser.getId(), authProviderUserId));
             }
         }
 
         // Create the user account in datastore and return JWT token
         createUser(newFaroUser, password, authProvider, authProviderUserId);
 
-        return FaroJwtTokenManager.createToken(newFaroUser.getEmail());
+        return FaroJwtTokenManager.createToken(newFaroUser.getId());
     }
 
     private void validateFaroUserCredentials(FaroSignupDetails faroSignupDetails) {
-        logger.info("faroUser email = " + faroSignupDetails.getFaroUser().getEmail());
+        logger.info("faroUser email = " + faroSignupDetails.getFaroUser().getId());
 
         if (Strings.isNullOrEmpty(faroSignupDetails.getPassword()) && Strings.isNullOrEmpty(faroSignupDetails.getFirebaseToken())) {
             throw new FaroWebAppException(FaroResponseStatus.BAD_REQUEST, "User password/firebaseToken not specifed.");
@@ -142,7 +150,7 @@ public class SignupHandler {
             throw new FaroWebAppException(FaroResponseStatus.BAD_REQUEST, "User account details missing.");
         }
 
-        if (Strings.isNullOrEmpty(newFaroUser.getEmail())) {
+        if (Strings.isNullOrEmpty(newFaroUser.getId())) {
             throw new FaroWebAppException(FaroResponseStatus.BAD_REQUEST, "User email missing.");
         }
 
@@ -153,13 +161,16 @@ public class SignupHandler {
 
     private void createUser(FaroUser newFaroUser, String password, AuthProvider authProvider, String authProviderUserId) {
         try {
+        	// Store the New user's credentials and user details
+            UserCredentialsDo userCreds = new UserCredentialsDo(newFaroUser.getId(),
+                                                            PasswordManager.getEncryptedPassword(password),
+                                                            UUID.randomUUID().toString());
             // Store the New user's credentials and user details
-            UserCredentialsDo userCreds = null;
 
             if (!AuthProvider.FARO.equals(authProvider)) {
-                userCreds = new UserCredentialsDo(newFaroUser.getEmail(), UUID.randomUUID().toString(), authProvider, authProviderUserId);
+                userCreds = new UserCredentialsDo(newFaroUser.getId(), UUID.randomUUID().toString(), authProvider, authProviderUserId);
             } else {
-                userCreds = new UserCredentialsDo(newFaroUser.getEmail(), PasswordManager.getEncryptedPassword(password),
+                userCreds = new UserCredentialsDo(newFaroUser.getId(), PasswordManager.getEncryptedPassword(password),
                         UUID.randomUUID().toString());
             }
 
@@ -170,5 +181,6 @@ public class SignupHandler {
             logger.error("Password could not be encrypted", e);
             throw new FaroWebAppException(FaroResponseStatus.UNEXPECTED_ERROR, "error in signing up user");
         }
+
     }
 }

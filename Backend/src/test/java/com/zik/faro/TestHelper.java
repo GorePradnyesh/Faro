@@ -94,7 +94,7 @@ public class TestHelper {
         }
         String port = System.getProperty(PORT_PROPERTY);
         if(port == null){
-            port = "8080";
+            port = "8888";
         }
         return new URL("http://" + hostname + ":" + port);
     }
@@ -176,6 +176,30 @@ public class TestHelper {
                 .header("authentication", authToken)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .post(ClientResponse.class,data);
+        Assert.assertNotNull(response);
+        return response;
+    	
+    }
+    
+    public static ClientResponse doPUT(String uri, String path, String authToken,
+    		Object postData) throws IOException{
+    	
+    	Client client = RestClient.getInstance().getClient();
+        WebResource webResource = client.resource(uri);
+        String data;
+        if(postData.getClass().equals(String.class)){
+        	data = (String) postData;
+        }else{
+        	data = mapper.writeValueAsString(postData);
+        }
+         
+        System.out.println(data);
+        ClientResponse response = webResource
+                .path(path)
+                .header("Content-Type", MediaType.APPLICATION_JSON_TYPE)
+                .header("authentication", authToken)
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .put(ClientResponse.class,data);
         Assert.assertNotNull(response);
         return response;
     	

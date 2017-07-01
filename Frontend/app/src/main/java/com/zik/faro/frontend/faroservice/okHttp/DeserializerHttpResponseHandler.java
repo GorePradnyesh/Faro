@@ -17,14 +17,7 @@ import java.util.Calendar;
 public class DeserializerHttpResponseHandler<T> implements Callback {
     private BaseFaroRequestCallback callback;
     private Class<T> responseClass;
-    private final static Gson mapper  = gsonBuilder();
-
-    private static Gson gsonBuilder(){
-        GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeHierarchyAdapter(Calendar.class, new CustomCalendarSerializer());
-        builder.registerTypeHierarchyAdapter(Calendar.class, new CustomCalendarDeserializer());
-        return builder.create();
-    }
+    private static final Gson mapper = gsonBuilder();
     private Type type;
 
     DeserializerHttpResponseHandler(final BaseFaroRequestCallback<T> callback, final Class<T> clazz) {
@@ -38,7 +31,14 @@ public class DeserializerHttpResponseHandler<T> implements Callback {
         this.responseClass = null;
         this.type = listType;
     }
-    
+
+    private static Gson gsonBuilder() {
+        GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeHierarchyAdapter(Calendar.class, new CustomCalendarSerializer());
+        builder.registerTypeHierarchyAdapter(Calendar.class, new CustomCalendarDeserializer());
+        return builder.create();
+    }
+
     @Override
     public void onFailure(Request request, IOException ex) {
         //TODO: Add logging
@@ -58,16 +58,14 @@ public class DeserializerHttpResponseHandler<T> implements Callback {
         }
 
         String jsonResponse = response.body().string();
-        if (this.responseClass == String.class) {
+        if (responseClass == String.class) {
             callback.onResponse(jsonResponse, null);
         } else if(responseClass != null){
-            T t = mapper.fromJson(jsonResponse, responseClass);
-            callback.onResponse(t, null);
+            callback.onResponse(mapper.fromJson(jsonResponse, responseClass), null);
         } else if(type != null){
             //use GSON to deserialize the response to a generic list Type
             // /*Test string */ jsonResponse = "[{\"controlFlag\":\"false\",\"eventId\":\"17bb0753-90cb-4de1-953e-7222870af2de\",\"eventName\":\"MySampleEvent1\",\"status\":\"OPEN\"}, {\"controlFlag\":\"false\",\"eventId\":\"27bb0753-90cb-4de1-953e-7222870af2de\",\"eventName\":\"MySampleEvent2\",\"status\":\"OPEN\"}]";
-            T collection = mapper.fromJson(jsonResponse, type);
-            callback.onResponse(collection, null);
+            callback.onResponse(mapper.fromJson(jsonResponse, type), null);
         }
     }
 }

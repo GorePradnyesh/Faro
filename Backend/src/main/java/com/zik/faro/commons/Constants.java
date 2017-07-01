@@ -47,6 +47,11 @@ public final class Constants {
     // --- User profile path constants --- //
     public static final String PROFILE_PATH_CONST                               = "/profile";
     public static final String PROFILE_CREATE_PATH_CONST                        = "/create";
+    public static final String PROFILE_UPDATE_PATH_CONST                        = "/update";
+    public static final String PROFILE_UPSERT_PATH_CONST                        = "/upsert";
+    public static final String PROFILE_ADD_USER_REGISTRATION_TOKEN				= "/add/registrationToken";
+    public static final String PROFILE_REMOVE_USER_REGISTRATION_TOKEN			= "/remove/registrationToken";
+
 
     // --- Feedback path constant --- //
     public static final String FEEDBACK_PATH_CONST                              = "/feedback";

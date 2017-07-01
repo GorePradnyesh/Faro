@@ -27,7 +27,7 @@ public class FriendManagement {
 			if (!UserManagement.isExistingUser(friendId)) {
 				// Create basic user with email and inviteStatus as INVITED(default)
 				FaroUser friend = new FaroUser();
-				friend.setEmail(friendId);
+				friend.setId(friendId);
 				UserManagement.storeFaroUser(friendId, friend);
 				//TODO: Send out email
 			}
@@ -54,8 +54,8 @@ public class FriendManagement {
         FaroUser invitedUser = users.get(invitedUserId);
 
         FriendRelationDatastoreImpl.storeFriendRelation(
-                new MinUser(requestingUser.getFirstName(), requestingUser.getLastName(), requestingUser.getEmail(), requestingUser.getExternalExpenseID()),
-                new MinUser(invitedUser.getFirstName(), invitedUser.getLastName(), invitedUser.getEmail(), invitedUser.getExternalExpenseID()));
+                new MinUser(requestingUser.getFirstName(), requestingUser.getLastName(), requestingUser.getId(), requestingUser.getExternalExpenseID()),
+                new MinUser(invitedUser.getFirstName(), invitedUser.getLastName(), invitedUser.getId(), invitedUser.getExternalExpenseID()));
         return;
     }
 

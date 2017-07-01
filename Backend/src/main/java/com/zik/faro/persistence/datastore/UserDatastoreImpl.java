@@ -1,7 +1,11 @@
 package com.zik.faro.persistence.datastore;
 
+import com.googlecode.objectify.Work;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
+import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.user.FaroUser;
+import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 
 import java.util.List;
@@ -12,6 +16,7 @@ public class UserDatastoreImpl {
     private static final String FIRST_NAME_FIELD_NAME = "firstName";
 
     public static void storeUser(final FaroUserDo user){
+    	//TODO: Create topic
         DatastoreObjectifyDAL.storeObject(user);
     }
 
@@ -40,5 +45,30 @@ public class UserDatastoreImpl {
         	return false;
         }
     	return false;
+    }
+    
+    public static FaroUserDo updateFaroUser(final String userId, final FaroUserDo updateObj) throws DataNotFoundException, DatastoreException, UpdateVersionException{
+        Work w = new Work<TransactionResult<FaroUserDo>>() {
+			
+			@Override
+			public TransactionResult<FaroUserDo> run() {
+				FaroUserDo userDo;
+				try {
+					userDo = DatastoreObjectifyDAL.loadObjectById(userId, FaroUserDo.class);
+				} catch (DataNotFoundException e) {
+					return new TransactionResult<FaroUserDo>(null, TransactionStatus.DATANOTFOUND);
+				}
+				if(!BaseDatastoreImpl.isVersionOk(updateObj, userDo)){
+					return new TransactionResult<FaroUserDo>(null, TransactionStatus.VERSIONMISSMATCH, "Incorrect entity version. Current version:"+userDo.getVersion().toString());
+				}
+				
+				BaseDatastoreImpl.versionIncrement(userDo, updateObj);
+                DatastoreObjectifyDAL.storeObject(updateObj);
+                return new TransactionResult<FaroUserDo>(updateObj, TransactionStatus.SUCCESS);
+			}
+		};
+        TransactionResult<FaroUserDo> result = DatastoreObjectifyDAL.update(w);
+        DatastoreUtil.processResult(result);
+        return result.getEntity();
     }
 }

@@ -32,6 +32,8 @@ import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.common.base.Strings;
+import com.zik.faro.frontend.faroservice.FacebookLoginJob;
+import com.zik.faro.frontend.faroservice.FaroLoginJob;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
@@ -44,17 +46,18 @@ import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
+import com.zik.faro.frontend.faroservice.SignupJobResultHandler;
 import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 import com.zik.faro.frontend.faroservice.auth.TokenCache;
+import com.zik.faro.frontend.faroservice.okHttp.OkHttpResponse;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.text.MessageFormat;
 
 public class LoginActivity extends Activity {
     private String TAG = "LoginActivity";
 
-    private static FaroServiceHandler serviceHandler;
+    private FaroServiceHandler serviceHandler;
 
     private EditText emailTextBox;
     private EditText passwordTextBox;
@@ -90,7 +93,6 @@ public class LoginActivity extends Activity {
         // Bind the data fields with the corresponding View components
         emailTextBox = (EditText)findViewById(R.id.TFEmail);
         passwordTextBox = (EditText)findViewById(R.id.TFPassword);
-
         serverIPAddressEditText = (EditText)findViewById(R.id.ipAddress);
 
         // Get the progress bar and login details layouts
@@ -100,9 +102,7 @@ public class LoginActivity extends Activity {
         // Set visibility to gone on the progress bar layout
         loginActivityProgressBarLayout.setVisibility(View.GONE);
 
-        serverIPAddressEditText = (EditText)findViewById(R.id.ipAddress);
-
-        // Intent for transitioning to AppLanding page after a successfull login
+        // Intent for transitioning to AppLanding page after a successful login
         appLandingPageIntent = new Intent(LoginActivity.this, AppLandingPage.class);
 
         // Setup token cache
@@ -112,6 +112,71 @@ public class LoginActivity extends Activity {
         faroCache = FaroCache.getOrCreateFaroUserContextCache(LoginActivity.this);
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
+
+        // Setup the facebook signup/connect with button
+        fbLoginButton = (LoginButton) findViewById(R.id.fb_login_button);
+        fbLoginButton.setReadPermissions("email", "public_profile", "user_photos", "user_friends");
+        fbLoginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.i(TAG, "fb login button pressed. Bring up the progress bar");
+                showLoginProgressLayout();
+            }
+        });
+        fbLoginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                Log.i(TAG, "fbLogin successful. loginResult =  " + loginResult);
+
+                SignupJobResultHandler<String> signupResultHandler = new SignupJobResultHandler<String>() {
+                    @Override
+                    public void handleResponse(OkHttpResponse<String> response) {
+                        if (response.isSuccessful() && response.getResponseObject() != null) {
+                            // Login successful. Go to App landing page
+                            startActivity(appLandingPageIntent);
+                            finish();
+                        } else if (response.getHttpError() != null) {
+                            // Make the progress bar go away and make the login details page visible
+                            showLoginDetailsLayout();
+
+                            // Logout of facebook to rest the LoginButton status
+                            LoginManager.getInstance().logOut();
+
+                            HttpError loginHttpError = response.getHttpError();
+                            if (loginHttpError.getCode() == HttpURLConnection.HTTP_CONFLICT) {
+                                // TODO : Since the Facebook authentication completed successfully, we can make use of
+                                // the user's facebook token for image upload.
+                                // Also link the users's facebook account with the Faro account and allow future login with facebook as well
+
+                                //emailTextBox.setText(firebaseUser.getEmail());
+
+                                //showLoginFailurePopup(MessageFormat.format("Username {0} already exists. Enter password to continue",
+                                //        firebaseUser.getEmail()));
+                            } else if (loginHttpError.getCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                                //showLoginFailurePopup(MessageFormat.format("Username {0} does not exist. Signup to create an account",
+                                //        firebaseUser.getEmail()));
+                            }
+                        }
+
+                    }
+                };
+
+                FaroExecutionManager.execute(new FacebookLoginJob(loginResult.getAccessToken())
+                        .addResultHandler((Activity) context, signupResultHandler));
+            }
+
+            @Override
+            public void onCancel() {
+                Log.i(TAG, "fbLogin cancelled");
+                updateLayoutOnUiThread();
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+                Log.i(TAG, "fbLogin error", error);
+                updateLayoutOnUiThread();
+            }
+        });
 
         // Check if we have arrived on LoginActivity from the SignupActivity because third party signup process
         // determined that the user's account already exists
@@ -147,40 +212,6 @@ public class LoginActivity extends Activity {
         }
 
         // If we reach here, it means the user is not signed in.
-
-        // Set up the fblogin button
-        // Setup the facebook signup/connect with button
-        fbLoginButton = (LoginButton) findViewById(R.id.fb_login_button);
-        fbLoginButton.setReadPermissions("email", "public_profile", "user_photos", "user_friends");
-        fbLoginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.i(TAG, "fb login button pressed. Bring up the progress bar");
-                showLoginProgressLayout();
-            }
-        });
-        fbLoginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
-            @Override
-            public void onSuccess(LoginResult loginResult) {
-                Log.i(TAG, "fbLogin successful. loginResult =  " + loginResult);
-                handleFacebookAccessToken(loginResult.getAccessToken());
-            }
-
-            @Override
-            public void onCancel() {
-                Log.i(TAG, "fbLogin cancelled");
-                updateLayoutOnUiThread();
-            }
-
-            @Override
-            public void onError(FacebookException error) {
-                Log.i(TAG, "fbLogin error", error);
-                updateLayoutOnUiThread();
-            }
-        });
-
-        // Get Firebase Auth instance
-        firebaseAuth = FirebaseAuth.getInstance();
     }
 
     @Override
@@ -191,7 +222,7 @@ public class LoginActivity extends Activity {
         callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void handleFacebookAccessToken(AccessToken token) {
+    /*private void handleFacebookAccessToken(AccessToken token) {
         // Get Firebase AuthCredential object from the Fb access token
         AuthCredential authCredential = FacebookAuthProvider.getCredential(token.getToken());
 
@@ -215,9 +246,9 @@ public class LoginActivity extends Activity {
                         updateLayoutOnUiThread();
                     }
                 });
-    }
+    }*/
 
-    private void loginWithFirebaseToken(final FirebaseUser firebaseUser) {
+    /*private void loginWithFirebaseToken(final FirebaseUser firebaseUser) {
         firebaseUser.getToken(true)
                 .addOnSuccessListener(new OnSuccessListener<GetTokenResult>() {
                     @Override
@@ -229,7 +260,7 @@ public class LoginActivity extends Activity {
                         FaroUser newFaroUser = new FaroUser(firebaseUser.getEmail(), null, null, null, null, null, null);
                         newFaroUser.setFirstName(firebaseUser.getDisplayName());
                         FirebaseUserLoginCallback firebaseUserLoginCallback = new FirebaseUserLoginCallback(firebaseUser);
-                        serviceHandler.getFirebaseLoginHandler().login(firebaseUserLoginCallback, newFaroUser.getEmail(), null, firebaseIdToken);
+                        serviceHandler.getFirebaseLoginHandler().login(firebaseUserLoginCallback, newFaroUser.getId(), null, firebaseIdToken);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -239,9 +270,9 @@ public class LoginActivity extends Activity {
                         updateLayoutOnUiThread();
                     }
                 });
-    }
+    }*/
 
-    private class FirebaseUserLoginCallback implements BaseFaroRequestCallback<String> {
+    /*private class FirebaseUserLoginCallback implements BaseFaroRequestCallback<String> {
         private FirebaseUser firebaseUser;
 
         public FirebaseUserLoginCallback(FirebaseUser firebaseUser) {
@@ -298,7 +329,7 @@ public class LoginActivity extends Activity {
 
             }
         }
-    }
+    }*/
 
     private void showLoginDetailsLayout() {
         loginActivityProgressBarLayout.setVisibility(View.GONE);
@@ -358,42 +389,34 @@ public class LoginActivity extends Activity {
     public void onLoginClick(View view) {
         Log.i(TAG, "login button clicked");
 
+        // Get login creds
         final String email = emailTextBox.getText().toString();
-        String password = passwordTextBox.getText().toString();
+        final String password = passwordTextBox.getText().toString();
 
         Log.i(TAG, MessageFormat.format("username :{0} password :{1}", email, password));
 
-        if (!serverIPAddressEditText.getText().toString().trim().isEmpty()) {
-            ((FaroApplication)getApplication()).overRideAppServerIp(serverIPAddressEditText.getText().toString().trim());
+        // server IP
+        String serverIpAddress = serverIPAddressEditText.getText().toString().trim();
+        if (!Strings.isNullOrEmpty(serverIpAddress)) {
+            ((FaroApplication)getApplication()).overRideAppServerIp(serverIpAddress);
         }
-
         Log.i(TAG, "serverIP = " + ((FaroApplication)getApplication()).getAppServerIp());
 
+        // obtain Faro service handler
+        serviceHandler = FaroServiceHandler.getFaroServiceHandler();
+
         if (validate(email, password)) {
-            serviceHandler.getLoginHandler().login(new BaseFaroRequestCallback<String>() {
-                @Override
-                public void onFailure(Request request, IOException ex) {
-                    Log.i(TAG, "failed to send login request");
-
-                    new Handler(context.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            showLoginFailurePopup("Login failed. Check your connection");
-                        }
-                    });
-                }
+            SignupJobResultHandler<String> signupResultHandler = new SignupJobResultHandler<String>() {
 
                 @Override
-                public void onResponse(String token, HttpError error) {
-                    Log.i(TAG, "login response, token = " + token);
-                    if (error == null) {
-                        faroUserContext.setEmail(email);
-                        faroCache.saveFaroCacheToDisk("email", email);
+                public void handleResponse(OkHttpResponse<String> response) {
+                    // Go to event list page or show popup with appropriate message if response is not successful
 
-                        // Login successful. Go to App landing page
+                    if (response.isSuccessful() && response.getResponseObject() != null) {
                         startActivity(appLandingPageIntent);
                         finish();
-                    } else {
+                    } else if (!response.isSuccessful()) {
+                        HttpError error = response.getHttpError();
                         Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                         // Invalid login
                         if (error.getCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
@@ -413,10 +436,28 @@ public class LoginActivity extends Activity {
                                 }
                             });
                         }
+                    } else {
+                        Log.i(TAG, "failed to send login request");
+
+                        new Handler(context.getMainLooper()).post(new Runnable() {
+                            @Override
+                            public void run() {
+                                showLoginFailurePopup("Login failed. Check your connection");
+                            }
+                        });
                     }
                 }
-            }, email, password);
+            };
+
+            FaroExecutionManager.execute(new FaroLoginJob(email, password).addResultHandler(this, signupResultHandler));
         }
+
+    }
+
+    private void undoLogin() {
+        TokenCache.getTokenCache().deleteToken();
+        FaroUserContext.getInstance().setEmail(null);
+        FaroCache.getFaroUserContextCache().saveFaroCacheToDisk("email", null);
     }
 
     private void showLoginFailurePopup(String message) {

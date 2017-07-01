@@ -1,6 +1,7 @@
 package com.zik.faro.frontend;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -36,8 +37,11 @@ import com.google.firebase.auth.GetTokenResult;
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.MinUser;
 import com.zik.faro.data.user.FaroUser;
-import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
+import com.zik.faro.frontend.faroservice.FacebookLoginJob;
+import com.zik.faro.frontend.faroservice.FaroSignupJob;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
+import com.zik.faro.frontend.faroservice.SignupJobResultHandler;
+import com.zik.faro.frontend.faroservice.okHttp.OkHttpResponse;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 import com.zik.faro.frontend.faroservice.auth.TokenCache;
@@ -72,12 +76,15 @@ public class SignupActivity extends Activity {
     private CallbackManager callbackManager;   // Facebook login callbackmanager
 
     private FirebaseAuth firebaseAuth;
+    private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // Init the activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
+
+        context = this;
 
         // Create Faro service handler
         serviceHandler = FaroServiceHandler.getFaroServiceHandler();
@@ -116,7 +123,26 @@ public class SignupActivity extends Activity {
             @Override
             public void onSuccess(LoginResult loginResult) {
                 Log.i(TAG, "fbLogin successful. loginResult =  " + loginResult);
-                handleFacebookAccessToken(loginResult.getAccessToken());
+
+                SignupJobResultHandler<String> signupResultHandler = new SignupJobResultHandler<String>() {
+                    @Override
+                    public void handleResponse(OkHttpResponse<String> response) {
+                        if (response.isSuccessful() && response.getResponseObject() != null) {
+                            // Login successful. Go to App landing page
+                            startActivity(appLandingPageIntent);
+                            finish();
+                        } else if (response.getHttpError() != null) {
+                            HttpError error = response.getHttpError();
+                            Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                            if (error.getCode() == 409) {
+                                //Log.i(TAG, "User " + faroUser.getEmail() + " already exists");
+                            }
+                        }
+                    }
+                };
+
+                FaroExecutionManager.execute(new FacebookLoginJob(loginResult.getAccessToken())
+                        .addResultHandler((Activity) context, signupResultHandler));
             }
 
             @Override
@@ -134,7 +160,7 @@ public class SignupActivity extends Activity {
         firebaseAuth = FirebaseAuth.getInstance();
     }
 
-    private void handleFacebookAccessToken(AccessToken token) {
+    /*private void handleFacebookAccessToken(AccessToken token) {
         // Get Firebase AuthCredential object from the Fb access token
         AuthCredential authCredential = FacebookAuthProvider.getCredential(token.getToken());
 
@@ -161,9 +187,9 @@ public class SignupActivity extends Activity {
                         }
                     }
                 });
-    }
+    }*/
 
-    private void signupWithFirebaseToken(final FirebaseUser firebaseUser) {
+    /*private void signupWithFirebaseToken(final FirebaseUser firebaseUser) {
         firebaseUser.getToken(true)
                 .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
 
@@ -182,7 +208,7 @@ public class SignupActivity extends Activity {
                         }
                     }
                 });
-    }
+    }*/
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -243,16 +269,28 @@ public class SignupActivity extends Activity {
         String password = passwordTextBox.getText().toString();
         String confirmPassword = confirmPasswordBox.getText().toString();
 
-        if (!serverIPAddressEditText.getText().toString().trim().isEmpty()) {
-            ((FaroApplication)getApplication()).overRideAppServerIp(serverIPAddressEditText.getText().toString().trim());
+        String serverIpAddress = serverIPAddressEditText.getText().toString().trim();
+        if (!Strings.isNullOrEmpty(serverIpAddress)) {
+            ((FaroApplication)getApplication()).overRideAppServerIp(serverIpAddress);
         }
 
         if (validate(name, email, password, confirmPassword)) {
-            FaroUser newFaroUser = new FaroUser(email, null, null, null, null, null, null);
-            newFaroUser.setFirstName(name);
+            FaroUser newFaroUser = new FaroUser(email, name, null, null, null, null, null);
 
-            FarouserSignupCallback farouserSignupCallback = new FarouserSignupCallback(newFaroUser);
-            serviceHandler.getSignupHandler().signup(farouserSignupCallback, newFaroUser, password);
+            SignupJobResultHandler signupResultHandler = new SignupJobResultHandler<String>() {
+                @Override
+                public void handleResponse(OkHttpResponse<String> response) {
+                    // Go to event list page
+                    if (response.isSuccessful() && response.getResponseObject() != null) {
+                        startActivity(appLandingPageIntent);
+                        finish();
+                    }
+
+                    // TODO: Show popup with appropriate message if response is not successfull
+                }
+            };
+
+            FaroExecutionManager.execute(new FaroSignupJob(newFaroUser, password).addResultHandler(this, signupResultHandler));
         }
     }
 
@@ -263,7 +301,7 @@ public class SignupActivity extends Activity {
         super.onBackPressed();
     }
 
-    private class FarouserSignupCallback implements BaseFaroRequestCallback<String> {
+    /*private class FarouserSignupCallback implements BaseFaroRequestCallback<String> {
         private FaroUser faroUser;
 
         public FarouserSignupCallback(FaroUser faroUser) {
@@ -294,9 +332,9 @@ public class SignupActivity extends Activity {
                 }
             }
         }
-    }
+    }*/
 
-    private class FirebaseUserSignupCallback implements BaseFaroRequestCallback<String> {
+    /*private class FirebaseUserSignupCallback implements BaseFaroRequestCallback<String> {
         private FirebaseUser firebaseUser;
 
         public FirebaseUserSignupCallback(FirebaseUser firebaseUser) {
@@ -362,7 +400,7 @@ public class SignupActivity extends Activity {
                     }
                 });
 
-                // Go to event minUsers page
+                // Go to event list page
                 startActivity(appLandingPageIntent);
                 finish();
             } else {
@@ -381,5 +419,5 @@ public class SignupActivity extends Activity {
                 }
             }
         }
-    }
+    }*/
 }

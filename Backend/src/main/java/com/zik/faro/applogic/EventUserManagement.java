@@ -23,7 +23,7 @@ public class EventUserManagement {
             FaroUserDo faroUser = user.getFaroUser();
 			invitees.addUserStatus(new MinUser(faroUser.getFirstName(),
                     faroUser.getLastName(),
-                    faroUser.getEmail()), user.getInviteStatus());
+                    faroUser.getId()), user.getInviteStatus());
 		}
 		return invitees;
 	}

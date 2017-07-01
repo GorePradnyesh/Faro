@@ -1,21 +1,28 @@
 package com.zik.faro.data.user;
 
-import com.google.common.base.MoreObjects;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
+import com.zik.faro.data.BaseEntity;
 import com.zik.faro.data.IllegalDataOperation;
 
-public class FaroUser {
-    private String             email;
-    private String             firstName;
-    private String             middleName;
-    private String             lastName;
-    private String             externalExpenseID;
-    private String             telephone;
-    private Address            address;
-    private AppInviteStatus    inviteStatus = AppInviteStatus.INVITED;
-    private LargeProfileImage  largeProfileImage;
-    private SmallProfileImage  smallProfileImage;
+public class FaroUser extends BaseEntity{
+    private String             	firstName;
+    private String             	middleName;
+    private String             	lastName;
+    private String             	externalExpenseID;
+    private String          	telephone;
+    private Address 			address;
+    private AppInviteStatus 	inviteStatus = AppInviteStatus.INVITED;
+    // List(because user can have multiple devices) of all registration tokens for a user for notification
+    private List<String> 		tokens = new ArrayList<String>();
+    // User's private topic to be used to multicast notifications to all his devices
+    private String 				userTopic;
+    private LargeProfileImage   largeProfileImage;
+    private SmallProfileImage   smallProfileImage;
+
 
 // Ideally this should be utilized on server side only. Commenting out until absolutely required
 // Assumption is user will be forced to give basic details along with email
@@ -30,12 +37,13 @@ public class FaroUser {
                       final String externalExpenseID,
                       final String telephone,
                       final Address address) {
-        // Ensure Email is a valid value as it is a mandatory field
+        super(email,1L);
+    	// Ensure Email is a valid value as it is a mandatory field
         if (Strings.isNullOrEmpty(email)) {
             throw new IllegalArgumentException("Email is null/empty");
         }
 
-        this.email = email;
+
         this.firstName = firstName;
         this.lastName = lastName;
         this.middleName = middleName;
@@ -60,10 +68,6 @@ public class FaroUser {
 
     }
 
-    /*Getters*/
-
-    public String getEmail() { return this.email; }
-
     public String getFirstName() {
         return firstName;
     }
@@ -86,10 +90,6 @@ public class FaroUser {
 
     public Address getAddress() {
         return address;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     public void setFirstName(String firstName) {
@@ -124,6 +124,26 @@ public class FaroUser {
 		this.inviteStatus = inviteStatus;
 	}
 
+    public List<String> getTokens() {
+        return tokens;
+    }
+
+    public void setTokens(List<String> tokens) {
+        this.tokens = tokens;
+    }
+
+    public void addToken(String token){
+        this.tokens.add(token);
+    }
+
+    public String getUserTopic() {
+        return userTopic;
+    }
+
+    public void setUserTopic(String userTopic) {
+        this.userTopic = userTopic;
+    }
+
     public LargeProfileImage getLargeProfileImage() {
         return largeProfileImage;
     }
@@ -142,7 +162,7 @@ public class FaroUser {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this).add("email", getEmail())
+        return MoreObjects.toStringHelper(this).add("email", getId())
                 .add("firstName", getFirstName())
                 .add("middleName", getMiddleName())
                 .add("lastName", getLastName())
@@ -154,4 +174,3 @@ public class FaroUser {
                 .toString();
     }
 }
-

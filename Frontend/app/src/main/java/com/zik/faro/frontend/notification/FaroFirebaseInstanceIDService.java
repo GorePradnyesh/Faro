@@ -6,8 +6,8 @@ import android.util.Log;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
 
-public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
-    private static final String TAG = "MyFirebaseIIDService";
+public class FaroFirebaseInstanceIDService extends FirebaseInstanceIdService {
+    private static final String TAG = "FirebaseInstIdService";
     public static final String  TOKEN_BROADCAST = "myFCMTokenBroadcast";
 
     /**
@@ -15,7 +15,6 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
      * the previous token had been compromised. Note that this is called when the InstanceID token
      * is initially generated so this is where you would retrieve the token.
      */
-    // [START refresh_token]
     @Override
     public void onTokenRefresh() {
         // Get updated InstanceID token.
@@ -26,16 +25,6 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
          * before the user logs into the app. What can be done here is to setup a broadcast message
          * to AppLanding Page to handle this.
          */
-        /*Runnable myRunnable = new Runnable() {
-            @Override
-            public void run() {
-                getApplicationContext().sendBroadcast(new Intent(TOKEN_BROADCAST));
-            }
-        };
-
-        Handler mainHandler = new Handler(getApplicationContext().getMainLooper());
-        mainHandler.postDelayed(myRunnable, 30000);*/
 
     }
-    // [END refresh_token]
 };

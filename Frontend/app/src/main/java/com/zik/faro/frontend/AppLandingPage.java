@@ -12,8 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.zik.faro.frontend.notification.MyFirebaseInstanceIDService;
+import com.zik.faro.frontend.notification.FaroFirebaseInstanceIDService;
 
 public class AppLandingPage extends FragmentActivity{
     private FragmentTabHost mTabHost;
@@ -54,7 +53,7 @@ public class AppLandingPage extends FragmentActivity{
             }
         };
 
-        registerReceiver(broadcastReceiver, new IntentFilter(MyFirebaseInstanceIDService.TOKEN_BROADCAST));
+        registerReceiver(broadcastReceiver, new IntentFilter(FaroFirebaseInstanceIDService.TOKEN_BROADCAST));
 
         /*TODO For styling the tab layout checkout the following link
         * https://maxalley.wordpress.com/2014/09/08/android-styling-a-tab-layout-with-fragmenttabhost-and-fragments/

@@ -27,6 +27,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.login.LoginManager;
@@ -254,70 +255,6 @@ public class EventLandingPage extends FragmentActivity
         super.onBackPressed();
     }
 
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-
-        // Get the location of the event and set the position of the map also mark mylocation on the map.
-        setEventLocationOnMap();
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String permissions[],
-                                           @NonNull int[] grantResults) {
-        mLocationPermissionGranted = false;
-        switch (requestCode) {
-            case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    mLocationPermissionGranted = true;
-                }
-            }
-        }
-        setEventLocationOnMap();
-    }
-
-    private void setEventLocationOnMap() {
-        if (mMap == null) {
-            return;
-        }
-
-        /*
-         * Request location permission, so that we can get the location of the
-         * device. The result of the permission request is handled by a callback,
-         * onRequestPermissionsResult.
-         */
-        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            mLocationPermissionGranted = true;
-        } else {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-        }
-
-        if (mLocationPermissionGranted) {
-            mMap.setMyLocationEnabled(true);
-            mMap.getUiSettings().setMyLocationButtonEnabled(true);
-        } else {
-            mMap.setMyLocationEnabled(false);
-            mMap.getUiSettings().setMyLocationButtonEnabled(false);
-        }
-
-        if (mCameraPosition != null) {
-            mMap.moveCamera(CameraUpdateFactory.newCameraPosition(mCameraPosition));
-        } else if (mEventLocation != null){
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mEventLocation, DEFAULT_ZOOM));
-            mMap.addMarker(new MarkerOptions().position(mEventLocation));
-        } else {
-            Log.d(TAG, "Current location is null. Using defaults.");
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
-            mMap.getUiSettings().setMyLocationButtonEnabled(false);
-        }
-    }
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
@@ -559,7 +496,7 @@ public class EventLandingPage extends FragmentActivity
                     // Creating url for Google Maps.
                     double latitude = eventLocation.getPosition().getLatitude();
                     double longitude = eventLocation.getPosition().getLongitude();
-                    String label = eventLocation.getLocationName();
+                    String label = GetLocationAddressString.getLocationAddressString(eventLocation);
                     String uriBegin = "geo:" + latitude + "," + longitude;
                     String query = latitude + "," + longitude + "(" + label + ")";
                     String encodedQuery = Uri.encode(query);
@@ -570,8 +507,10 @@ public class EventLandingPage extends FragmentActivity
                     startActivity(googleMapsAppIntent);
                 }
             });
-            setEventLocationOnMap();
+
+            checkPermissionForLocationServices ();
         }
+
 
         transparentImageView.setOnTouchListener(new View.OnTouchListener() {
 
@@ -614,6 +553,85 @@ public class EventLandingPage extends FragmentActivity
         // Initialize facebook fragment for login
         fbLoginFragment = (FbLoginFragment) getSupportFragmentManager().findFragmentById(R.id.fb_login_page);
     }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+
+        checkPermissionForLocationServices();
+
+        // Get the location of the event and set the position of the map also mark mylocation on the map.
+        setEventLocationOnMap();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
+        mLocationPermissionGranted = false;
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    mLocationPermissionGranted = true;
+                }
+            }
+        }
+        setEventLocationOnMap();
+    }
+
+    private void checkPermissionForLocationServices() {
+        /*
+         * Request location permission, so that we can get the location of the
+         * device. The result of the permission request is handled by a callback,
+         * onRequestPermissionsResult.
+         */
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                    android.Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
+                mLocationPermissionGranted = true;
+            } else {
+                if (shouldShowRequestPermissionRationale(android.Manifest.permission.ACCESS_FINE_LOCATION)){
+                    Toast.makeText(this, "Enable location services to see your location on the map", Toast.LENGTH_SHORT).show();
+                }
+                ActivityCompat.requestPermissions(this,
+                        new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                        PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+            }
+        } else {
+            mLocationPermissionGranted = true;
+        }
+
+        if (mMap != null) {
+            if (mLocationPermissionGranted) {
+                mMap.setMyLocationEnabled(true);
+                mMap.getUiSettings().setMyLocationButtonEnabled(true);
+            } else {
+                mMap.setMyLocationEnabled(false);
+                mMap.getUiSettings().setMyLocationButtonEnabled(false);
+            }
+        }
+    }
+
+    private void setEventLocationOnMap() {
+        if (mMap == null) {
+            return;
+        }
+
+        if (mCameraPosition != null) {
+            mMap.moveCamera(CameraUpdateFactory.newCameraPosition(mCameraPosition));
+        } else if (mEventLocation != null){
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mEventLocation, DEFAULT_ZOOM));
+            mMap.addMarker(new MarkerOptions().position(mEventLocation));
+        } else {
+            Log.d(TAG, "Current location is null. Using defaults.");
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
+            mMap.getUiSettings().setMyLocationButtonEnabled(false);
+        }
+    }
+
 
     private void getEventFromServer(){
         serviceHandler.getEventHandler().getEvent(new BaseFaroRequestCallback<EventInviteStatusWrapper>() {
