@@ -6,22 +6,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DataPayload {
-	private Map<String,String> kvMap;
+	private Map<String,String> faroData;
 	
 	public DataPayload(){
-		kvMap = new HashMap<String,String>();
+		faroData = new HashMap<String,String>();
 	}
 	
 	public Map<String,String> getMap(){
-		return kvMap;
+		return faroData;
 	}
 	
 	public void setMap(Map<String,String> kvMap){
-		this.kvMap = kvMap;
+		this.faroData = kvMap;
 	}
 	
 	public void addKVPair(String key, String value){
-		this.kvMap.put(key, value);
+		this.faroData.put(key, value);
 	}
 	
 }

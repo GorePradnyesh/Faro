@@ -56,6 +56,10 @@ public class PollDo extends BaseEntityDo{
         return eventId.getKey().getName();
     }
     
+    public Ref<EventDo> getEventRef(){
+    	return eventId;
+    }
+    
     public String getCreatorId() {
         return creatorId;
     }

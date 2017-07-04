@@ -1,6 +1,15 @@
 package com.zik.faro.api.event;
 
-import static com.zik.faro.commons.Constants.*;
+import static com.zik.faro.commons.Constants.COUNT_PARAM;
+import static com.zik.faro.commons.Constants.EVENT_ADD_FRIENDS_CONST;
+import static com.zik.faro.commons.Constants.EVENT_DETAILS_PATH_CONST;
+import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM;
+import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM_STRING;
+import static com.zik.faro.commons.Constants.EVENT_INVITEES_PATH_CONST;
+import static com.zik.faro.commons.Constants.EVENT_PATH_CONST;
+import static com.zik.faro.commons.Constants.EVENT_REMOVE_ATTENDEE_PATH_CONST;
+import static com.zik.faro.commons.Constants.EVENT_UPDATE_PATH_CONST;
+import static com.zik.faro.commons.Constants.UPDATE_INVITE_STATUS_PATH_CONST;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -65,8 +74,15 @@ public class EventHandler {
     @DELETE
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public JResponse<String> deleteEvent(@PathParam(EVENT_ID_PATH_PARAM) final String eventId) {
-        EventManagement.deleteEvent(eventId);
+        try{
+    	EventManagement.deleteEvent(eventId);
         EventUserManagement.deleteRelationForEvent(eventId);
+        } catch (DataNotFoundException e) {
+			Response response = Response.status(Response.Status.NOT_FOUND)
+					.entity(e.getMessage())
+					.build();
+            throw new WebApplicationException(response);
+		}
         return JResponse.ok(Constants.HTTP_OK).build();
     }
     

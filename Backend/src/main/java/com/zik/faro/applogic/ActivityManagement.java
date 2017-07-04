@@ -3,20 +3,27 @@ package com.zik.faro.applogic;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.zik.faro.data.Activity;
-import com.zik.faro.data.Assignment;
+import com.googlecode.objectify.Ref;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
 import com.zik.faro.commons.exceptions.UpdateVersionException;
-import com.zik.faro.persistence.datastore.data.ActivityDo;
+import com.zik.faro.data.Activity;
+import com.zik.faro.data.Assignment;
+import com.zik.faro.notifications.handler.ActivityNotificationHandler;
 import com.zik.faro.persistence.datastore.ActivityDatastoreImpl;
+import com.zik.faro.persistence.datastore.data.ActivityDo;
+import com.zik.faro.persistence.datastore.data.EventDo;
 
 public class ActivityManagement {
+	public static ActivityNotificationHandler activityNotificationHandler = new ActivityNotificationHandler();
+	
 	public static Activity createActivity(final Activity activity){
 		ActivityDo activityDo = new ActivityDo(activity.getEventId(), 
 				activity.getName(), activity.getDescription(), activity.getLocation(), 
 				activity.getStartDate(), activity.getEndDate(), new Assignment());
 		ActivityDatastoreImpl.storeActivity(activityDo);
+		EventDo eventDo = activityDo.getEventRef().get();
+		activityNotificationHandler.createActivityNotification(activityDo, eventDo);
 		return ConversionUtils.fromDo(activityDo);
 	}
 	
@@ -35,13 +42,18 @@ public class ActivityManagement {
 		return ConversionUtils.fromDo(ActivityDatastoreImpl.loadActivityById(activityId, eventId));
 	}
 	
-	public static void deleteActivity(String eventId, String activityId){
+	public static void deleteActivity(String eventId, String activityId) throws DataNotFoundException{
+		ActivityDo activityDo = ActivityDatastoreImpl.loadActivityById(activityId, eventId);
 		ActivityDatastoreImpl.deleteActivityById(activityId, eventId);
+		activityNotificationHandler.deleteActivityNotification(activityDo, activityDo.getEventRef().get());
 	}
 	
 	public static Activity updateActivity(Activity updateActivity, String eventId) throws DataNotFoundException, DatastoreException, UpdateVersionException{
 		ActivityDo updateActivityDo = ConversionUtils.toDo(updateActivity);
-		return ConversionUtils.fromDo(ActivityDatastoreImpl.updateActivity(updateActivityDo, eventId));
+		ActivityDo updated = ActivityDatastoreImpl.updateActivity(updateActivityDo, eventId);
+		EventDo eventDo = updated.getEventRef().get();
+		activityNotificationHandler.updateActivityNotification(updateActivityDo, eventDo);
+		return ConversionUtils.fromDo(updated);
 	}
 	
 	

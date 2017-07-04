@@ -57,6 +57,10 @@ public class ActivityDo extends BaseEntityDo{
     public String getEventId() {
         return eventId.getKey().getName();
     }
+    
+    public Ref<EventDo> getEventRef(){
+    	return eventId;
+    }
 
     public String getName() {
         return name;

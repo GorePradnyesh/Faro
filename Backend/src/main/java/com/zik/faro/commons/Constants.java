@@ -104,8 +104,29 @@ public final class Constants {
     public static final String FCM_ENDPOINT 									= "https://fcm.googleapis.com";
     public static final String IID_ENDPOINT										= "https://iid.googleapis.com";
     public static final String SEND_NOTIFICATION_PATH_CONST						= "/fcm/send";
-    public static final String CREATE_TOKEN_PATH_CONST_FIRST_PART				= "/iid/v1:batchAdd";
-
+    public static final String SUBSCRIBE_TOKEN_PATH								= "/iid/v1:batchAdd";
+    public static final String UNSUBSCRIBE_TOKEN_PATH							= "/iid/v1:batchRemove";
+    public static final String AUTHORIZATION_HEADER_KEY							= "authorization";
+    public static final String FARO_EVENT_TOPIC_CONST							= "/topics/";
+    public static final String CLICK_ACTION_DEFAULT								= "DEFAULTACTION";
+    public static final String NOTIFICATION_TYPE_EVENT_GENERIC					= "notificationType_EventGeneric";
+    public static final String NOTIFICATION_TYPE_EVENT_INVITE					= "notificationType_EventInvite";
+    public static final String NOTIFICATION_TYPE_EVENT_DELETED					= "notificationType_EventDeleted";
+    public static final String NOTIFICATION_TYPE_ACTIVITY_CREATED				= "notificationType_ActivityCreated";
+    public static final String NOTIFICATION_TYPE_ACTIVITY_GENERIC				= "notificationType_ActivityGeneric";
+    public static final String NOTIFICATION_TYPE_ACTIVITY_DELETED				= "notificationType_ActivityDeleted";
+    public static final String NOTIFICATION_TYPE_POLL_CREATED					= "notificationType_PollCreated";
+    public static final String NOTIFICATION_TYPE_POLL_GENERIC					= "notificationType_PollGeneric";
+    public static final String NOTIFICATION_TYPE_POLL_DELETED					= "notificationType_PollDeleted";
+    public static final String NOTIFICATION_TYPE_POLL_CLOSED					= "notificationType_PollClosed";
+    public static final String NOTIFICATION_TYPE_ASSIGNMENT_CREATED				= "notificationType_AssignmentCreated";
+    public static final String NOTIFICATION_TYPE_ASSIGNMENT_PENDING				= "notificationType_AssignmentPending";
+    public static final String NOTIFICATION_TYPE_MEDIA_ADDED					= "notificationType_MediaAdded";
+    public static final String NOTIFICATION_TYPE_UPLOAD_MEDIA_REMINDER			= "notificationType_UploadMediaReminder";
+    public static final String NOTIFICATION_TYPE_CONST							= "type";
+    public static final String NOTIFICATION_EVENTID_CONST						= "eventId";
+    public static final String NOTIFICATION_POLLID_CONST						= "pollId";
+    public static final String NOTIFICATION_ACTIVITYID_CONST					= "activityId";
 
     // -- Authentication path constants -- //
     public static final String AUTH_PATH_CONST                                  = "/nativeLogin";

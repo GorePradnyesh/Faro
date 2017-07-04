@@ -6,7 +6,7 @@ public class FirebaseHTTPResponse {
 	private String error;
 	private int statusCode;
 	// For create topic
-	private Error[] results;
+	private Error[] errorResults;
 	
 	public static class Error{
 		private String error;
@@ -38,5 +38,12 @@ public class FirebaseHTTPResponse {
 	public void setStatusCode(int statusCode) {
 		this.statusCode = statusCode;
 	}
+	public Error[] getErrorResults() {
+		return errorResults;
+	}
+	public void setErrorResults(Error[] errorResults) {
+		this.errorResults = errorResults;
+	}
+	
 	
 }

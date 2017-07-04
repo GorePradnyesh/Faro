@@ -115,8 +115,17 @@ public class ActivityHandler {
     @DELETE
     public JResponse<String> deleteActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                  @PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId){
-       ActivityManagement.deleteActivity(eventId, activityId);
-       return JResponse.ok(Constants.HTTP_OK).build();
+       try{
+    	   ActivityManagement.deleteActivity(eventId, activityId);
+           return JResponse.ok(Constants.HTTP_OK).build();
+       } catch (DataNotFoundException e) {
+       	
+           Response response = Response.status(Response.Status.NOT_FOUND)
+                   .entity(e.getMessage())
+                   .build();
+           throw new WebApplicationException(response);
+       }
+       
     }
     
 }

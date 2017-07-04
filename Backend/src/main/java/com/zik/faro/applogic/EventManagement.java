@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.FirebaseNotificationException;
 import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.AddFriendRequest;
 import com.zik.faro.data.Assignment;
@@ -15,26 +16,46 @@ import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.IllegalDataOperation;
 import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.user.FaroUser;
+import com.zik.faro.notifications.NotificationClient;
+import com.zik.faro.notifications.NotificationClientFactory;
+import com.zik.faro.notifications.handler.EventNotificationHandler;
 import com.zik.faro.persistence.datastore.EventDatastoreImpl;
 import com.zik.faro.persistence.datastore.EventUserDatastoreImpl;
+import com.zik.faro.persistence.datastore.UserDatastoreImpl;
 import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.persistence.datastore.data.EventUserDo;
+import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 
 public class EventManagement {
-
-	public static Event createEvent(final String userId, final Event ev){
+	
+	public static EventNotificationHandler eventNotificationHandler = new EventNotificationHandler();
+	
+	public static Event createEvent(final String userId, final Event ev) {
         // clientEvent object created with client constructor needs to be passed through
 		// server constructor to generate eventId and other defaults invisible to client
 		Event event = new Event(ev.getEventName(), ev.getStartDate(), ev.getEndDate(),
         		ev.getEventDescription(), ev.getControlFlag(), ev.getExpenseGroup(), 
         		ev.getLocation(), ObjectStatus.OPEN, new Assignment(), userId);
         EventDatastoreImpl.storeEvent(userId, ConversionUtils.toDo(event));
-        //TODO: send out notifications t
+        EventNotificationHandler handler = new EventNotificationHandler();
+        try{
+        	List<String> faroUserTokens = UserDatastoreImpl.loadFaroUserById(userId).getTokens();
+        	eventNotificationHandler.subscribeToTopic(handler.getTopicName(event.getId()), faroUserTokens.toArray(new String[0]));
+        }catch(Exception e){
+        	e.printStackTrace();
+        }
         return event;
     }
 
-    public static void deleteEvent(final String eventId) {
-        EventDatastoreImpl.deleteEvent(eventId);
+    public static void deleteEvent(final String eventId) throws DataNotFoundException {
+        EventDo eventDo = EventDatastoreImpl.loadEventByID(eventId);
+    	EventDatastoreImpl.deleteEvent(eventId);
+        try {
+			eventNotificationHandler.deleteEventNotification(eventDo);
+		} catch (FirebaseNotificationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 
     public static EventInviteStatusWrapper getEventDetails(final String userId, final String eventId) throws DataNotFoundException{
@@ -46,22 +67,48 @@ public class EventManagement {
         //TODO: Validate that the user has permissions to modify event, from the EventUser table
     	//TODO: Validate if the user is the owner of the event
     	EventDo eventDo = ConversionUtils.toDo(updateObj);
-    	return ConversionUtils.fromDo(EventDatastoreImpl.updateEvent(eventId, eventDo));
+    	EventDo updatedEvent = EventDatastoreImpl.updateEvent(eventId, eventDo);
+    	try {
+    		// TODO: For now keeping it generic. Need to filter based on properties updated
+    		eventNotificationHandler.updateEventNotificationGeneric(eventDo);
+		} catch (FirebaseNotificationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	return ConversionUtils.fromDo(updatedEvent);
     }
     
     public static void addFriendToEvent(final String eventId, final String userId, 
     		final AddFriendRequest friendRequest) throws DataNotFoundException, IllegalDataOperation{
     	FaroUser existingUser = UserManagement.loadFaroUser(userId);
-    	
+    	List<String> tokens = new ArrayList<String>();
     	for(String friendId : friendRequest.getFriendIds()){
     		// Create friend if not present and establish friend relation if not present
     		// TODO: If friend is not in the system, then we need to create a FaroUser with friend's email
     		// and send out the invite to him and after that establish friend relation with a "NOTACCEPTED" kind of state.
     		// Once user accepts invitation and joins Faro this has to be updated.
     		FriendManagement.createFriendRelation(existingUser.getId(), friendId);
-        	
         	// Add to event invitees
         	EventUserManagement.storeEventUser(eventId, friendId);
+        	EventInviteStatusWrapper eventWrapper = EventManagement.getEventDetails(userId, eventId);
+        	FaroUserDo friend = UserDatastoreImpl.loadFaroUserById(friendId);
+        	try {
+				eventNotificationHandler.inviteFriendToEventNotification(eventWrapper.getEvent(), ConversionUtils.fromDo(friend));
+			} catch (FirebaseNotificationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        	if(friend != null && friend.getTokens() != null){
+        		tokens.addAll(friend.getTokens());
+        	}
+    	}
+    	if(!tokens.isEmpty()){
+    		try{
+    			eventNotificationHandler.subscribeToTopic(eventNotificationHandler.getTopicName(eventId), 
+    					tokens.toArray(new String[0]));
+            }catch(Exception e){
+            	e.printStackTrace();
+            }
     	}
     }
     

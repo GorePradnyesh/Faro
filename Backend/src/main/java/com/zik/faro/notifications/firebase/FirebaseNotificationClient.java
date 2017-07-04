@@ -2,10 +2,14 @@ package com.zik.faro.notifications.firebase;
 
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Properties;
 
 import org.apache.http.client.HttpClient;
 
@@ -15,6 +19,28 @@ import com.zik.faro.notifications.NotificationClient;
 
 public class FirebaseNotificationClient implements NotificationClient<FirebaseHTTPRequest,FirebaseHTTPResponse>{
 	private Gson gson = new Gson();
+	private static String authHeaderValue = null;
+	private static Properties prop = null;
+	
+	public FirebaseNotificationClient(){
+		try{
+			loadPropertiesFile("config.properties");
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
+	}
+	
+	private void loadPropertiesFile(String fileName) throws Exception{
+		if(prop == null){
+			ClassLoader classLoader = getClass().getClassLoader();
+			File file = new File(classLoader.getResource(fileName).getFile());
+			prop = new Properties();
+			InputStream input = new FileInputStream(file);
+			prop.load(input);
+			authHeaderValue = prop.getProperty(Constants.AUTHORIZATION_HEADER_KEY);
+		}
+	}
 	
 	@Override
 	public FirebaseHTTPResponse send(FirebaseHTTPRequest t) throws Exception {
@@ -26,12 +52,20 @@ public class FirebaseNotificationClient implements NotificationClient<FirebaseHT
 	}
 
 	@Override
-	public FirebaseHTTPResponse createTopic(FirebaseHTTPRequest t) throws Exception {
+	public FirebaseHTTPResponse subscribeToTopic(FirebaseHTTPRequest t) throws Exception {
 		String payload = gson.toJson(t);
-		HttpURLConnection conn = doPost(payload, Constants.IID_ENDPOINT + Constants.CREATE_TOKEN_PATH_CONST_FIRST_PART);
+		HttpURLConnection conn = doPost(payload, Constants.IID_ENDPOINT + Constants.SUBSCRIBE_TOKEN_PATH);
 		FirebaseHTTPResponse resp = getResponseObject(conn);
         return resp;
-	}	
+	}
+	
+	@Override
+	public FirebaseHTTPResponse unsubscribeToTopic(FirebaseHTTPRequest t) throws Exception {
+		String payload = gson.toJson(t);
+		HttpURLConnection conn = doPost(payload, Constants.IID_ENDPOINT + Constants.UNSUBSCRIBE_TOKEN_PATH);
+		FirebaseHTTPResponse resp = getResponseObject(conn);
+        return resp;
+	}
 	
 	private HttpURLConnection doPost(String payload, String endpoint) throws Exception{
 		
@@ -42,7 +76,7 @@ public class FirebaseNotificationClient implements NotificationClient<FirebaseHT
 	    conn.addRequestProperty("Connection", "keep-alive");
 	    conn.addRequestProperty("Content-Type", "application/json");
 	    // TODO: Hard coding for now
-	    conn.addRequestProperty("Authorization", "key=AAAAb-Q4pn8:APA91bFsIiD5FRV2JfDp50FVRYpk3KlObZM4bwW9Zi6eO1UNVJ6G7OuJJQRK_c_Cr-oSnCGJBqUH6eRzL5bTx5GqY3r6IysvWLtmiZisQRFxmcx0eXJDnUJGiX-QTFJqRj4vQhxsieGQ");
+	    conn.addRequestProperty(Constants.AUTHORIZATION_HEADER_KEY, authHeaderValue);
 	    conn.setRequestMethod("POST");
 	    
 	    OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream());
