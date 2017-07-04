@@ -76,8 +76,10 @@ public class FriendManagement {
                     .withLastName(friendRelation.getToLName())
                     .withEmail(friendRelation.getToId())
                     .withExpenseUserId(friendRelation.getToExternalExpenseId())
-                    .withProfileImageUrl(friendUser.getLargeProfileImage().getPublicUrl().toString())
-                    .withThumbProfileImageUrl(friendUser.getSmallProfileImage().getPublicUrl().toString());
+                    .withProfileImageUrl(friendUser.getLargeProfileImage() != null ?
+                            friendUser.getLargeProfileImage().getPublicUrl().toString() : null)
+                    .withThumbProfileImageUrl(friendUser.getSmallProfileImage() != null ?
+                            friendUser.getSmallProfileImage().getPublicUrl().toString() : null);
 
             friendList.add(friend);
         }
