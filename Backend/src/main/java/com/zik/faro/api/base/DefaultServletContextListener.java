@@ -3,14 +3,16 @@ package com.zik.faro.api.base;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseCredentials;
+import com.zik.faro.commons.ConfigPropertiesUtil;
 import com.zik.faro.persistence.datastore.StaticInitializer;
+import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.MessageFormat;
 
 /**
  * Refer this document for more info
@@ -19,27 +21,27 @@ import java.io.IOException;
  * https://cloud.google.com/appengine/docs/java/config/appconfig
  */
 public class DefaultServletContextListener implements ServletContextListener {
+    private static final Logger logger = Logger.getLogger(DefaultServletContextListener.class);
+
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
-        System.out.println("---- INITIALIZING THE CUSTOM SERVLET CONTEXT @pgore ----");
-        //This will register all the necessary classes for using Objectify.
-        StaticInitializer.init();
-
-        // Initialize the Firebase Admin SDK
-        FileInputStream serviceAccount = null;
+        logger.info("---- INITIALIZING THE CUSTOM SERVLET CONTEXT @pgore ----");
+        // This will register all the necessary classes for using Objectify and load server config props
         try {
-            // use the path to serviceAccountKey.json
-            serviceAccount = new FileInputStream(new File("WEB-INF/classes/faro-56043-firebase-adminsdk-out3y-22880b75a7.json"));
+            StaticInitializer.init();
+
+            // Initialize the Firebase Admin SDK
+            // use the path to serviceAccountKey json
+            FileInputStream serviceAccount = new FileInputStream(new File(MessageFormat.format("WEB-INF/classes/{0}",
+                    ConfigPropertiesUtil.getFirebaseServiceAccountJsonFileName())));
             FirebaseOptions options = new FirebaseOptions.Builder()
                     .setCredential(FirebaseCredentials.fromCertificate(serviceAccount))
-                    .setDatabaseUrl("https://faro-56043.firebaseio.com/")
+                    .setDatabaseUrl(ConfigPropertiesUtil.getFirebaseDatabaseUrl())
                     .build();
 
             FirebaseApp.initializeApp(options);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Failed to configure app server", e);
         }
     }
 

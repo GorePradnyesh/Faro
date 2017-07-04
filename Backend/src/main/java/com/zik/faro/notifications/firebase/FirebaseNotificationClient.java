@@ -2,16 +2,12 @@ package com.zik.faro.notifications.firebase;
 
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Properties;
 
-import org.apache.http.client.HttpClient;
+import com.zik.faro.commons.ConfigPropertiesUtil;
 
 import com.google.gson.Gson;
 import com.zik.faro.commons.Constants;
@@ -19,27 +15,10 @@ import com.zik.faro.notifications.NotificationClient;
 
 public class FirebaseNotificationClient implements NotificationClient<FirebaseHTTPRequest,FirebaseHTTPResponse>{
 	private Gson gson = new Gson();
-	private static String authHeaderValue = null;
-	private static Properties prop = null;
-	
-	public FirebaseNotificationClient(){
-		try{
-			loadPropertiesFile("config.properties");
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		
-	}
-	
-	private void loadPropertiesFile(String fileName) throws Exception{
-		if(prop == null){
-			ClassLoader classLoader = getClass().getClassLoader();
-			File file = new File(classLoader.getResource(fileName).getFile());
-			prop = new Properties();
-			InputStream input = new FileInputStream(file);
-			prop.load(input);
-			authHeaderValue = prop.getProperty(Constants.AUTHORIZATION_HEADER_KEY);
-		}
+	private static String authHeaderValue;
+
+	public FirebaseNotificationClient() {
+		authHeaderValue = ConfigPropertiesUtil.getFirebaseAuthorizationKey();
 	}
 	
 	@Override

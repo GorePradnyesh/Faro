@@ -71,7 +71,6 @@ public class EventLandingPage extends FragmentActivity
         GoogleApiClient.OnConnectionFailedListener,
         NotificationPayloadHandler{
 
-    public static final int NO_CHANGES = 0;
     private DateFormat sdf = new SimpleDateFormat(" EEE, MMM d, yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
     private EventListHandler eventListHandler = EventListHandler.getInstance();
