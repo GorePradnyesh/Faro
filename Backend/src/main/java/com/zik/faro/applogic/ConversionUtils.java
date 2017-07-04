@@ -185,18 +185,30 @@ public class ConversionUtils {
     }
 
     public static LargeProfileImageDo toDo(LargeProfileImage largeProfileImage) {
-	    return new LargeProfileImageDo(largeProfileImage.getPublicUrl(), largeProfileImage.getImageProvider());
+	    if (largeProfileImage != null) {
+            return new LargeProfileImageDo(largeProfileImage.getPublicUrl(), largeProfileImage.getImageProvider());
+        }
+        return null;
     }
 
     public static LargeProfileImage fromDo(LargeProfileImageDo largeProfileImageDo) {
-        return new LargeProfileImage(largeProfileImageDo.getPublicUrl(), largeProfileImageDo.getImageProvider());
+        if (largeProfileImageDo != null) {
+            return new LargeProfileImage(largeProfileImageDo.getPublicUrl(), largeProfileImageDo.getImageProvider());
+        }
+        return null;
     }
 
     public static SmallProfileImageDo toDo(SmallProfileImage smallProfileImage) {
-        return new SmallProfileImageDo(smallProfileImage.getPublicUrl(), smallProfileImage.getImageProvider());
+        if (smallProfileImage != null) {
+            return new SmallProfileImageDo(smallProfileImage.getPublicUrl(), smallProfileImage.getImageProvider());
+        }
+        return null;
     }
 
     public static SmallProfileImage fromDo(SmallProfileImageDo smallProfileImageDo) {
-        return new SmallProfileImage(smallProfileImageDo.getPublicUrl(), smallProfileImageDo.getImageProvider());
+        if (smallProfileImageDo != null) {
+            return new SmallProfileImage(smallProfileImageDo.getPublicUrl(), smallProfileImageDo.getImageProvider());
+        }
+        return null;
     }
 }

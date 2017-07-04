@@ -39,12 +39,12 @@ public class OKHttpWrapperLogin extends BaseFaroOKHttpWrapper implements LoginHa
     @Override
     public void login(BaseFaroRequestCallback<String> callback, String email, String password, boolean addToCache) {
         httpClient.newCall(createLoginRequest(email, password, null)).enqueue(
-                new DeserializerHttpResponseHandler<String>(new LoginHandlerCallback(callback, addToCache, email), String.class));
+                new DeserializerHttpResponseHandler<>(new LoginHandlerCallback(callback, addToCache, email), String.class));
     }
 
     @Override
     public OkHttpResponse<String> login(String email, String password, boolean addToCache) throws IOException {
-        return null;
+        return login(email, password, null, addToCache);
     }
 
     @Override
@@ -52,16 +52,18 @@ public class OKHttpWrapperLogin extends BaseFaroOKHttpWrapper implements LoginHa
         Response response = httpClient.newCall(createLoginRequest(email, password, firebaseIdToken)).execute();
 
         if (response.isSuccessful()
-                && response.body() !=null
-                && addToCache) {
+                && response.body() != null) {
 
             String token = response.body().string();
-            saveTokenAndUserContext(token, email);
 
-            return new OkHttpResponse<String>(token, null);
+            if (addToCache) {
+                saveTokenAndUserContext(token, email);
+            }
+
+            return new OkHttpResponse<>(token);
         }
 
-        return new OkHttpResponse<String>(null, new HttpError(response.code(), response.message()));
+        return new OkHttpResponse<>(new HttpError(response.code(), response.message()));
     }
 
     private Request createLoginRequest(String email, String password, String firebaseIdToken) {

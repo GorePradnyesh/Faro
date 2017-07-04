@@ -16,6 +16,10 @@ public class OkHttpResponse<T> {
         this.httpError = httpError;
     }
 
+    public OkHttpResponse(T responseObject) {
+        this(responseObject, null);
+    }
+
     public OkHttpResponse(HttpError httpError) {
         this(null, httpError);
     }

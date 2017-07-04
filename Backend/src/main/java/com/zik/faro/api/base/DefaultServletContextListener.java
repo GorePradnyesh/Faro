@@ -29,7 +29,7 @@ public class DefaultServletContextListener implements ServletContextListener {
         FileInputStream serviceAccount = null;
         try {
             // use the path to serviceAccountKey.json
-            serviceAccount = new FileInputStream(new File("WEB-INF/classes/faro-56043-firebase-adminsdk-out3y-192c0b32ad.json"));
+            serviceAccount = new FileInputStream(new File("WEB-INF/classes/faro-56043-firebase-adminsdk-out3y-0a5c2a5dcb.json"));
             FirebaseOptions options = new FirebaseOptions.Builder()
                     .setCredential(FirebaseCredentials.fromCertificate(serviceAccount))
                     .setDatabaseUrl("https://faro-56043.firebaseio.com/")

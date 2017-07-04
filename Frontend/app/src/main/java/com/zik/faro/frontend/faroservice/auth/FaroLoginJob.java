@@ -1,6 +1,4 @@
-package com.zik.faro.frontend.faroservice;
-
-import android.app.Activity;
+package com.zik.faro.frontend.faroservice.auth;
 
 import com.zik.faro.frontend.faroservice.okHttp.OkHttpResponse;
 

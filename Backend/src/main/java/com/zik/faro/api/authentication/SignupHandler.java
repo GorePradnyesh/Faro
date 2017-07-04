@@ -76,19 +76,9 @@ public class SignupHandler {
 
             // Find auth provider in use
             authProvider = FaroJwtTokenManager.getAuthProvider(firebaseToken);
+            authProviderUserId = FaroJwtTokenManager.getAuthProviderUserId(authProvider, firebaseToken);
             if (authProvider == null) {
                 throw new FaroWebAppException(FaroResponseStatus.UNEXPECTED_ERROR, "error in signing up user. Auth provider could not be determined");
-            }
-
-        // Lookup to sees if an user exists with the same id
-        if (UserManagement.isExistingUser(newFaroUser.getId())) {
-            // Return  error code indicating user exists
-            logger.info("User already exists");
-            throw new FaroWebAppException(FaroResponseStatus.ENTITY_EXISTS, MessageFormat.format("Username {0} already exists.", newFaroUser.getId()));
-        }
-            authProviderUserId = FaroJwtTokenManager.getAuthProviderUserId(authProvider, firebaseToken);
-            if (authProviderUserId == null) {
-                throw new FaroWebAppException(FaroResponseStatus.UNEXPECTED_ERROR, "error in signing up user. Auth provider user id could not be determined");
             }
 
             // Lookup to see if user exists with the same id and uses FARO authProvider or a different provider
@@ -134,6 +124,7 @@ public class SignupHandler {
         // Create the user account in datastore and return JWT token
         createUser(newFaroUser, password, authProvider, authProviderUserId);
 
+        // Generate a JWT token
         return FaroJwtTokenManager.createToken(newFaroUser.getId());
     }
 
@@ -162,10 +153,7 @@ public class SignupHandler {
     private void createUser(FaroUser newFaroUser, String password, AuthProvider authProvider, String authProviderUserId) {
         try {
         	// Store the New user's credentials and user details
-            UserCredentialsDo userCreds = new UserCredentialsDo(newFaroUser.getId(),
-                                                            PasswordManager.getEncryptedPassword(password),
-                                                            UUID.randomUUID().toString());
-            // Store the New user's credentials and user details
+            UserCredentialsDo userCreds;
 
             if (!AuthProvider.FARO.equals(authProvider)) {
                 userCreds = new UserCredentialsDo(newFaroUser.getId(), UUID.randomUUID().toString(), authProvider, authProviderUserId);

@@ -357,21 +357,31 @@ public class FbGraphApiService {
     }
 
     public void findFacebookFriends(GraphRequest.Callback callback) {
+        GraphRequest graphRequest = createFindFriendsRequest();
+        graphRequest.setCallback(callback);
+        graphRequest.executeAsync();
+    }
+
+    public GraphResponse findFacebookFriends() {
+        return createFindFriendsRequest().executeAndWait();
+    }
+
+    private GraphRequest createFindFriendsRequest() {
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
         Log.i(TAG, MessageFormat.format("accessToken = {0}", accessToken));
 
         if (accessToken != null) {
             Bundle params = new Bundle();
-            params.putString("fields", "email,id,first_name,last_name,picture");
+            params.putString("fields", "email, id, first_name, last_name, picture");
 
-            GraphRequest request = new GraphRequest(AccessToken.getCurrentAccessToken(),
+            return new GraphRequest(AccessToken.getCurrentAccessToken(),
                     "/me/friends",
                     params,
-                    HttpMethod.GET,
-                    callback);
+                    HttpMethod.GET);
 
-            request.executeAsync();
         }
+
+        throw new IllegalStateException("Access token is null. Not logged into FB account");
     }
 
     /*public <T> void processGraphResponse(GraphResponse response, Class resultClass) {

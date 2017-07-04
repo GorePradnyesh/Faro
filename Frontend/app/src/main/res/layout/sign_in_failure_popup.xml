@@ -12,7 +12,7 @@
         android:layout_centerVertical="true">
 
         <TextView
-            android:id="@+id/loginFailureTextView"
+            android:id="@+id/signInFailureTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
@@ -22,12 +22,12 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/loginFailureTextView">
+            android:layout_below="@+id/signInFailureTextView">
             <Button
                 android:layout_width="0px"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:id="@+id/loginFailureOkButton"
+                android:id="@+id/signinFailureOkButton"
                 android:text="@string/OK"/>
         </LinearLayout>
 
