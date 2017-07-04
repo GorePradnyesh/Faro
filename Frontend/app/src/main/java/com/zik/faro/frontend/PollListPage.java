@@ -28,9 +28,9 @@ import java.util.List;
 
 public class PollListPage extends Activity {
     private Intent PollLandingPageIntent = null;
-    private static PollListHandler pollListHandler = PollListHandler.getInstance();
+    private PollListHandler pollListHandler = PollListHandler.getInstance();
     private String eventID = null;
-    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
+    private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private Intent CreateNewPoll = null;
     private Bundle extras = null;
     private TextView Poll = null;

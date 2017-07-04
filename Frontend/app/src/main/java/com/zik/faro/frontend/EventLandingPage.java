@@ -73,13 +73,13 @@ public class EventLandingPage extends FragmentActivity
     public static final int NO_CHANGES = 0;
     private DateFormat sdf = new SimpleDateFormat(" EEE, MMM d, yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
-    private static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static PollListHandler pollListHandler = PollListHandler.getInstance();
-    private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
-    private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
-    private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
+    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private PollListHandler pollListHandler = PollListHandler.getInstance();
+    private ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
+    private EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
+    private AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
 
-    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
+    private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
     private Event cloneEvent;
 

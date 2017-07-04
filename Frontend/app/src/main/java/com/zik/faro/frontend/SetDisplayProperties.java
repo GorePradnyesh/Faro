@@ -7,10 +7,7 @@ import com.zik.faro.data.user.EventInviteStatus;
 
 public class SetDisplayProperties {
 
-    static EventListHandler eventListHandler = EventListHandler.getInstance();
-
-    static public int getEventStatusImage(Event event){
-        EventInviteStatus eventInviteStatus = eventListHandler.getUserEventStatus(event.getId());
+    static public int getEventStatusImage(EventInviteStatus eventInviteStatus){
         switch (eventInviteStatus){
             case ACCEPTED:
                 return R.drawable.green;

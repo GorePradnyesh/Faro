@@ -111,7 +111,7 @@
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/colorAccent" />
 
-        <service android:name=".notification.MyFirebaseMessagingService">
+        <service android:name=".notification.FaroFirebaseMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
@@ -124,7 +124,7 @@
 
         <activity android:name=".notification.ReceivedNotficationHandler">
             <intent-filter>
-                <action android:name="RECEIVEDNOTIFICATIONHANDLER" />
+                <action android:name="DEFAULTACTION" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

@@ -17,7 +17,7 @@ import com.zik.faro.frontend.R;
 
 import org.json.JSONObject;
 
-public class MyFirebaseMessagingService extends FirebaseMessagingService {
+public class FaroFirebaseMessagingService extends FirebaseMessagingService {
     private static final String TAG = "MyFirebaseMsgService";
 
     @Override

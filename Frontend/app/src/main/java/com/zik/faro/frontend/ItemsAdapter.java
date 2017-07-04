@@ -23,9 +23,9 @@ public class ItemsAdapter extends ArrayAdapter {
 
     private Context context;
 
-    FaroUserContext faroUserContext = FaroUserContext.getInstance();
+    private FaroUserContext faroUserContext = FaroUserContext.getInstance();
 
-    private static EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
+    private EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
 
     public ItemsAdapter(Context context, int resource) {
         super(context, resource);

@@ -15,15 +15,13 @@ import com.zik.faro.data.Event;
 
 public class AssignmentLandingPage extends FragmentActivity {
     private FragmentTabHost mTabHost;
-
-
     private String activityID = null;
     private String eventID = null;
     private String assignmentID = null;
     private String isNotification = null;
-    private static AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
-    private static EventListHandler eventListHandler = EventListHandler.getInstance();
-    private static ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
+    private AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
+    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
     private Activity cloneActivity = null;
     private Event cloneEvent = null;
 

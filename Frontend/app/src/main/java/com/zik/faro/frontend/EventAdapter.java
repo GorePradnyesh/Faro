@@ -20,10 +20,11 @@ public class EventAdapter extends ArrayAdapter {
     DateFormat sdf = new SimpleDateFormat("EEE, MMM dd yyyy");
     DateFormat stf = new SimpleDateFormat("hh:mm a");
 
+    private EventListHandler eventListHandler = EventListHandler.getInstance();
+
     public EventAdapter(Context context, int resource) {
         super(context, resource);
     }
-
 
     public int getCount() {
         return this.list.size();
@@ -69,7 +70,7 @@ public class EventAdapter extends ArrayAdapter {
         }
         Event event = (Event) getItem(position);
         holder.EVNT_NAME.setText(event.getEventName());
-        holder.STATUS_IMG.setImageResource(SetDisplayProperties.getEventStatusImage(event));
+        holder.STATUS_IMG.setImageResource(SetDisplayProperties.getEventStatusImage(eventListHandler.getUserEventStatus(event.getId())));
         holder.EVNT_START_DATE.setText(sdf.format(event.getStartDate().getTime()));
         holder.EVNT_START_TIME.setText(stf.format(event.getStartDate().getTime()));
         return row;
