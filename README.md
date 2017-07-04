@@ -80,3 +80,7 @@ Backend Dev Environment Setup Instructions :
 You may build/run completely from IntelliJ as well, but make sure to specify the Maven home in intellij
 Open IntelliJ Preferences, under Build Tools->Maven, set the Maven home directory
 
+## Deploy to google cloud
+```
+mvn appengine:update -Dmaven.test.skip=true
+```
