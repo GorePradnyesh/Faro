@@ -28,6 +28,7 @@ import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
+import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 import java.io.IOException;
 
@@ -66,7 +67,7 @@ public class FriendListFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 final Intent UserProfilePageIntent = new Intent(getActivity(), UserProfilePage.class);
                 MinUser minUser = (MinUser)parent.getItemAtPosition(position);
-                UserProfilePageIntent.putExtra("userEmailID", minUser.getEmail());
+                FaroIntentInfoBuilder.userProfileIntent(UserProfilePageIntent, minUser.getEmail(), null);
                 startActivity(UserProfilePageIntent);
             }
         });
@@ -82,7 +83,7 @@ public class FriendListFragment extends Fragment {
                 ViewGroup container = (ViewGroup) layoutInflater.inflate(R.layout.invite_friend_popup, null);
                 final PopupWindow popupWindow = new PopupWindow(container, RelativeLayout.LayoutParams.WRAP_CONTENT,
                         RelativeLayout.LayoutParams.WRAP_CONTENT, true);
-                final EditText emailIDEditText = (EditText) container.findViewById(R.id.friend_email_id);
+                final EditText emailIdEditText = (EditText) container.findViewById(R.id.friend_email_id);
                 final Button sendInvite = (Button) container.findViewById(R.id.send_invite_button);
 
                 popupWindow.showAtLocation(popUpRelativeLayout, Gravity.CENTER, 0, 0);
@@ -95,7 +96,7 @@ public class FriendListFragment extends Fragment {
                     }
                 });
 
-                emailIDEditText.addTextChangedListener(new TextWatcher() {
+                emailIdEditText.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -103,7 +104,7 @@ public class FriendListFragment extends Fragment {
 
                     @Override
                     public void onTextChanged(CharSequence s, int start, int before, int count) {
-                        sendInvite.setEnabled(!(emailIDEditText.getText().toString().trim().isEmpty()));
+                        sendInvite.setEnabled(!(emailIdEditText.getText().toString().trim().isEmpty()));
                     }
 
                     @Override
@@ -115,7 +116,7 @@ public class FriendListFragment extends Fragment {
                 sendInvite.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (emailIDEditText.getText().toString().equals(myUserId)) {
+                        if (emailIdEditText.getText().toString().equals(myUserId)) {
                             //TODO: Add error popUp with "Cant invite self message"
                             return;
                         }
@@ -133,7 +134,7 @@ public class FriendListFragment extends Fragment {
                                         public void run() {
                                             Log.i(TAG, "Friend invite sent Successfully");
                                             //TODO it would be better if we return the MinUser object instead of a String
-                                            MinUser minUser = new MinUser("", "", emailIDEditText.getText().toString());
+                                            MinUser minUser = new MinUser("", "", emailIdEditText.getText().toString());
                                             userFriendListHandler.addFriendToListAndMap(minUser);
                                             popupWindow.dismiss();
                                         }
@@ -144,7 +145,7 @@ public class FriendListFragment extends Fragment {
                                     Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                                 }
                             }
-                        }, emailIDEditText.getText().toString());
+                        }, emailIdEditText.getText().toString());
                     }
                 });
             }

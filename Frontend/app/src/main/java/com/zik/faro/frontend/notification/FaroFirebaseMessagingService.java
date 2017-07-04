@@ -1,18 +1,12 @@
 package com.zik.faro.frontend.notification;
 
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
-import com.zik.faro.frontend.AppLandingPage;
-import com.zik.faro.frontend.R;
 
 
 import org.json.JSONObject;
@@ -45,7 +39,7 @@ public class FaroFirebaseMessagingService extends FirebaseMessagingService {
 
     private void sendNotification(String title, String messageBody, String notificationType, JSONObject data) {
         NotificationCompat.Builder notificationBuilder =
-                FaroNotificationBuilder.getNotficationBuilder(this, title,
+                FaroNotificationBuilder.getNotificationBuilder(this, title,
                         messageBody, notificationType, data);
 
         NotificationManager notificationManager =

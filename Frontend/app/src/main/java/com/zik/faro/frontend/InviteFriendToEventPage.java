@@ -22,6 +22,7 @@ import com.zik.faro.data.MinUser;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
+import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ public class InviteFriendToEventPage extends Activity {
     private List <MinUser> friendList;
     private static final Integer FRIEND_ROW_HEIGHT = 100;
     private static String TAG = "InviteFriendToEventPage";
-    private String eventID;
+    private String eventId;
 
     private HashSet<String>invitedSet = new HashSet<>();
     private HashSet<String>unInvitedSet = new HashSet<>();
@@ -59,7 +60,7 @@ public class InviteFriendToEventPage extends Activity {
 
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
-            eventID = extras.getString("eventID");
+            eventId = extras.getString(FaroIntentConstants.EVENT_ID);
         }
 
         EventFriendListLandingPageIntent = new Intent(InviteFriendToEventPage.this, EventFriendListLandingPage.class);
@@ -79,7 +80,7 @@ public class InviteFriendToEventPage extends Activity {
                 }
                 if (!invitedSet.isEmpty()){
 
-                    //Getting the keys i.e. the emailIDs from the map and creating a list
+                    //Getting the keys i.e. the emailIds from the map and creating a list
                     final List <String>inviteNewInviteesIDList = new ArrayList<String>();
                     inviteNewInviteesIDList.addAll(invitedSet);
 
@@ -102,7 +103,7 @@ public class InviteFriendToEventPage extends Activity {
                                     public void run() {
                                         Log.i(TAG, "Friends successfully invited to the event");
                                         Toast.makeText(InviteFriendToEventPage.this, "Successfully Invited friends", LENGTH_LONG).show();
-                                        EventFriendListLandingPageIntent.putExtra("eventID", eventID);
+                                        FaroIntentInfoBuilder.eventIntent(EventFriendListLandingPageIntent, eventId);
                                         startActivity(EventFriendListLandingPageIntent);
                                         finish();
                                     }
@@ -113,7 +114,7 @@ public class InviteFriendToEventPage extends Activity {
                                 Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                             }
                         }
-                    }, eventID, addFriendRequest);
+                    }, eventId, addFriendRequest);
                 }
 
                 //TODO implement uninvite friend
@@ -242,7 +243,7 @@ public class InviteFriendToEventPage extends Activity {
 
     @Override
     public void onBackPressed() {
-        EventFriendListLandingPageIntent.putExtra("eventID", eventID);
+        FaroIntentInfoBuilder.eventIntent(EventFriendListLandingPageIntent, eventId);
         startActivity(EventFriendListLandingPageIntent);
         finish();
         super.onBackPressed();

@@ -39,6 +39,7 @@ import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
+import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -76,7 +77,7 @@ public class EditEvent extends Activity {
 
     private RelativeLayout popUpRelativeLayout;
 
-    private String eventID;
+    private String eventId;
     private static String TAG = "EditEvent";
 
     private Intent EventLanding = null;
@@ -123,8 +124,8 @@ public class EditEvent extends Activity {
         */
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
-            eventID = extras.getString("eventID");
-            cloneEvent = eventListHandler.getEventCloneFromMap(eventID);
+            eventId = extras.getString(FaroIntentConstants.EVENT_ID);
+            cloneEvent = eventListHandler.getEventCloneFromMap(eventId);
             if (cloneEvent != null) {
                 String ev_name = cloneEvent.getEventName();
                 eventName.setText(ev_name);
@@ -220,7 +221,7 @@ public class EditEvent extends Activity {
                                     //Since update to server successful, adding event to List and Map below
                                     Log.i(TAG, "Event Create Response received Successfully");
                                     eventListHandler.addEventToListAndMap(receivedEvent, EventInviteStatus.ACCEPTED);
-                                    EventLanding.putExtra("eventID", eventID);
+                                    FaroIntentInfoBuilder.eventIntent(EventLanding, eventId);
                                     startActivity(EventLanding);
                                     finish();
                                 }
@@ -231,7 +232,7 @@ public class EditEvent extends Activity {
                             Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                         }
                     }
-                }, eventID, cloneEvent);
+                }, eventId, cloneEvent);
             }
         });
 
@@ -328,7 +329,7 @@ public class EditEvent extends Activity {
                             Runnable myRunnable = new Runnable() {
                                 @Override
                                 public void run() {
-                                    eventListHandler.removeEventFromListAndMap(eventID);
+                                    eventListHandler.removeEventFromListAndMap(eventId);
                                     popupWindow.dismiss();
                                     Toast.makeText(EditEvent.this, cloneEvent.getEventName() + "is Deleted", LENGTH_LONG).show();
                                     finish();
@@ -340,7 +341,7 @@ public class EditEvent extends Activity {
                             Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                         }
                     }
-                }, eventID);
+                }, eventId);
             }
         });
 
@@ -536,7 +537,7 @@ public class EditEvent extends Activity {
 
     @Override
     public void onBackPressed() {
-        EventLanding.putExtra("eventID", eventID);
+        FaroIntentInfoBuilder.eventIntent(EventLanding, eventId);
         startActivity(EventLanding);
         finish();
         super.onBackPressed();
@@ -547,10 +548,10 @@ public class EditEvent extends Activity {
         // Check if the version is same. It can be different if this page is loaded and a notification
         // is received for this later which updates the global memory but clonedata on this page remains
         // stale.
-        Long versionInGlobalMemory = eventListHandler.getOriginalEventFromMap(eventID).getVersion();
+        Long versionInGlobalMemory = eventListHandler.getOriginalEventFromMap(eventId).getVersion();
         if (!cloneEvent.getVersion().equals(versionInGlobalMemory)){
             Intent editEventPageReloadIntent = new Intent(EditEvent.this, EditEvent.class);
-            editEventPageReloadIntent.putExtra("eventID", eventID);
+            FaroIntentInfoBuilder.eventIntent(editEventPageReloadIntent, eventId);
             finish();
             startActivity(editEventPageReloadIntent);
         }

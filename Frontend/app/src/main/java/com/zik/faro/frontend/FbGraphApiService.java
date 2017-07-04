@@ -26,6 +26,7 @@ import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
+import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -225,8 +226,7 @@ public class FbGraphApiService {
 
         // Create an explicit intent for the Image GridView Activity in your app
         Intent imagesViewIntent = new Intent(context, ImageGridViewActivity.class);
-        imagesViewIntent.putExtra("eventId", event.getId());
-        imagesViewIntent.putExtra("eventName", event.getEventName());
+        FaroIntentInfoBuilder.eventIntent(imagesViewIntent, event.getId());
 
         // The stack builder object will contain an artificial back stack for the
         // started Activity.

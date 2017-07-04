@@ -36,6 +36,7 @@ import com.zik.faro.data.Unit;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
+import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -64,10 +65,10 @@ public class EditAssignment extends android.app.Activity {
     private EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
     private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
-    private String eventID = null;
-    private String activityID = null;
-    private String assigneeID = null;
-    private String assignmentID = null;
+    private String eventId = null;
+    private String activityId = null;
+    private String assigneeId = null;
+    private String assignmentId = null;
     private Unit selectedUnit;
 
     private HashSet<Item> newItemSet = new HashSet<>();
@@ -99,21 +100,21 @@ public class EditAssignment extends android.app.Activity {
 
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
-            eventID = extras.getString("eventID");
-            activityID = extras.getString("activityID");
-            assignmentID = extras.getString("assignmentID");
+            eventId = extras.getString(FaroIntentConstants.EVENT_ID);
+            activityId = extras.getString(FaroIntentConstants.ACTIVITY_ID);
+            assignmentId = extras.getString(FaroIntentConstants.ASSIGNMENT_ID);
 
-            originalEvent = eventListHandler.getOriginalEventFromMap(eventID);
-            cloneEvent = eventListHandler.getEventCloneFromMap(eventID);
+            originalEvent = eventListHandler.getOriginalEventFromMap(eventId);
+            cloneEvent = eventListHandler.getEventCloneFromMap(eventId);
 
-            if (activityID != null) {
-                originalActivity = activityListHandler.getOriginalActivityFromMap(activityID);
-                cloneActivity = activityListHandler.getActivityCloneFromMap(activityID);
+            if (activityId != null) {
+                originalActivity = activityListHandler.getOriginalActivityFromMap(activityId);
+                cloneActivity = activityListHandler.getActivityCloneFromMap(activityId);
             }
-            cloneAssignment = assignmentListHandler.getAssignmentCloneFromMap(assignmentID);
+            cloneAssignment = assignmentListHandler.getAssignmentCloneFromMap(assignmentId);
 
             TextView assignmentDescription = (TextView)findViewById(R.id.assignmentDescription);
-            if (activityID != null) {
+            if (activityId != null) {
                 assignmentDescription.setText("Assignment for " + originalActivity.getName());
             }else {
                 assignmentDescription.setText("Assignment for " + originalEvent.getEventName());
@@ -127,7 +128,7 @@ public class EditAssignment extends android.app.Activity {
             final Spinner itemUnitSpinner = (Spinner) findViewById(R.id.itemUnitSpinner);
 
             inviteeSpinner.setTag("EditAssignment");
-            inviteeSpinner.setAdapter(eventFriendListHandler.getAcceptedFriendAdapter(eventID, mContext));
+            inviteeSpinner.setAdapter(eventFriendListHandler.getAcceptedFriendAdapter(eventId, mContext));
 
 
             for (Unit unit : Unit.values()){
@@ -201,7 +202,7 @@ public class EditAssignment extends android.app.Activity {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     InviteeList.Invitees invitees = (InviteeList.Invitees) parent.getItemAtPosition(position);
-                    assigneeID = invitees.getEmail();
+                    assigneeId = invitees.getEmail();
                 }
 
                 @Override
@@ -239,7 +240,7 @@ public class EditAssignment extends android.app.Activity {
 
                     Item item = null;
                     try {
-                        item = new Item(itemDescription, assigneeID, itemCount, selectedUnit);
+                        item = new Item(itemDescription, assigneeId, itemCount, selectedUnit);
                     } catch (IllegalDataOperation illegalDataOperation) {
                         illegalDataOperation.printStackTrace();
                     }
@@ -287,10 +288,10 @@ public class EditAssignment extends android.app.Activity {
                         }
                     }
 
-                    if (activityID != null) {
-                        itemListMap.put(activityID, updatedItemList);
+                    if (activityId != null) {
+                        itemListMap.put(activityId, updatedItemList);
                     }else {
-                        itemListMap.put(eventID, updatedItemList);
+                        itemListMap.put(eventId, updatedItemList);
                     }
 
                     updateAssignmentToServer();
@@ -314,22 +315,21 @@ public class EditAssignment extends android.app.Activity {
                         public void run() {
                             Log.i(TAG, "Successfully updated items list to server");
                             List<Item> receivedItemList;
-                            if (activityID != null) {
-                                receivedItemList = stringListMap.get(activityID);
+                            if (activityId != null) {
+                                receivedItemList = stringListMap.get(activityId);
                             }else {
-                                receivedItemList = stringListMap.get(eventID);
+                                receivedItemList = stringListMap.get(eventId);
                             }
                             cloneAssignment.setItems(receivedItemList);
-                            assignmentListHandler.removeAssignmentFromListAndMap(eventID, cloneAssignment.getId(), mContext);
-                            if (activityID != null){
+                            assignmentListHandler.removeAssignmentFromListAndMap(eventId, cloneAssignment.getId(), mContext);
+                            if (activityId != null){
                                 originalActivity.setAssignment(cloneAssignment);
                             }else{
                                 originalEvent.setAssignment(cloneAssignment);
                             }
-                            assignmentListHandler.addAssignmentToListAndMap(eventID, cloneAssignment, activityID, mContext);
-                            AssignmentLandingPageTabsIntent.putExtra("eventID", eventID);
-                            AssignmentLandingPageTabsIntent.putExtra("activityID", activityID);
-                            AssignmentLandingPageTabsIntent.putExtra("assignmentID", assignmentID);
+                            assignmentListHandler.addAssignmentToListAndMap(eventId, cloneAssignment, activityId, mContext);
+                            FaroIntentInfoBuilder.assignmentIntent(AssignmentLandingPageTabsIntent,
+                                    eventId, activityId, assignmentId);
                             startActivity(AssignmentLandingPageTabsIntent);
                             finish();
                         }
@@ -341,14 +341,14 @@ public class EditAssignment extends android.app.Activity {
                 }
 
             }
-        }, eventID, itemListMap);
+        }, eventId, itemListMap);
     }
 
-    public int getAssigneePositionInList(String assigneeID){
+    public int getAssigneePositionInList(String assigneeId){
         int i = 0;
-        for (i = 0; i < eventFriendListHandler.getAcceptedFriendAdapter(eventID, mContext).list.size(); i++){
-            InviteeList.Invitees invitees = eventFriendListHandler.getAcceptedFriendAdapter(eventID, mContext).list.get(i);
-            if (invitees.getEmail().equals(assigneeID)){
+        for (i = 0; i < eventFriendListHandler.getAcceptedFriendAdapter(eventId, mContext).list.size(); i++){
+            InviteeList.Invitees invitees = eventFriendListHandler.getAcceptedFriendAdapter(eventId, mContext).list.get(i);
+            if (invitees.getEmail().equals(assigneeId)){
                 break;
             }
         }
@@ -392,36 +392,35 @@ public class EditAssignment extends android.app.Activity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        AssignmentLandingPageTabsIntent.putExtra("eventID", eventID);
-        AssignmentLandingPageTabsIntent.putExtra("activityID", activityID);
-        AssignmentLandingPageTabsIntent.putExtra("assignmentID", assignmentID);
+        FaroIntentInfoBuilder.assignmentIntent(AssignmentLandingPageTabsIntent, eventId,
+                activityId, assignmentId);
         startActivity(AssignmentLandingPageTabsIntent);
         finish();
     }
 
     @Override
     protected void onResume() {
-// Check if the version is same. It can be different if this page is loaded and a notification
+        // Check if the version is same. It can be different if this page is loaded and a notification
         // is received for this later which updates the global memory but clonedata on this page remains
         // stale.
         Long versionInGlobalMemory = null;
         Long previousVersion = null;
 
-        if (activityID == null){
-            versionInGlobalMemory = eventListHandler.getOriginalEventFromMap(eventID).getVersion();
+        if (activityId == null){
+            versionInGlobalMemory = eventListHandler.getOriginalEventFromMap(eventId).getVersion();
             previousVersion = cloneEvent.getVersion();
         } else {
-            versionInGlobalMemory = activityListHandler.getOriginalActivityFromMap(activityID).getVersion();
+            versionInGlobalMemory = activityListHandler.getOriginalActivityFromMap(activityId).getVersion();
             previousVersion = cloneActivity.getVersion();
         }
 
         if (!previousVersion.equals(versionInGlobalMemory)) {
             Intent editAssignmentPageReloadIntent = new Intent(EditAssignment.this, EditAssignment.class);
-            editAssignmentPageReloadIntent.putExtra("eventID", eventID);
-            editAssignmentPageReloadIntent.putExtra("activityID", activityID);
-            editAssignmentPageReloadIntent.putExtra("assignmentID", assignmentID);
+            FaroIntentInfoBuilder.assignmentIntent(editAssignmentPageReloadIntent, eventId,
+                    activityId, assignmentId);
             finish();
             startActivity(editAssignmentPageReloadIntent);
         }
-        super.onResume();    }
+        super.onResume();
+    }
 }

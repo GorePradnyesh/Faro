@@ -40,12 +40,12 @@ public class AssignmentListHandler {
 
     /*
     * Map of assignments needed to access assignments downloaded from the server in O(1) time. The Key to the
-    * Map is the assignmentID String which returns the Assignment as the value
+    * Map is the assignmentId String which returns the Assignment as the value
     */
     private Map<String, AssignmentParentInfo> assignmentMap = new ConcurrentHashMap<>();
 
-    public Assignment getAssignmentCloneFromMap(String assignmentID){
-        AssignmentParentInfo assignmentParentInfo = assignmentMap.get(assignmentID);
+    public Assignment getAssignmentCloneFromMap(String assignmentId){
+        AssignmentParentInfo assignmentParentInfo = assignmentMap.get(assignmentId);
         Assignment assignment = assignmentParentInfo.getAssignment();
         Gson gson = new Gson();
         String json = gson.toJson(assignment);
@@ -53,52 +53,52 @@ public class AssignmentListHandler {
         return cloneAssignment;
     }
 
-    public Assignment getOriginalAssignmentFromMap(String assignmentID){
-        AssignmentParentInfo assignmentParentInfo = assignmentMap.get(assignmentID);
+    public Assignment getOriginalAssignmentFromMap(String assignmentId){
+        AssignmentParentInfo assignmentParentInfo = assignmentMap.get(assignmentId);
         Assignment assignment = assignmentParentInfo.getAssignment();
         return assignment;
     }
 
-    public AssignmentAdapter getAssignmentAdapter (String eventID, Context context) {
-        AssignmentAdapter assignmentAdapter = assignmentAdapterMap.get(eventID);
+    public AssignmentAdapter getAssignmentAdapter (String eventId, Context context) {
+        AssignmentAdapter assignmentAdapter = assignmentAdapterMap.get(eventId);
         if (assignmentAdapter == null){
             assignmentAdapter = new AssignmentAdapter(context, R.layout.event_row_style);
-            assignmentAdapterMap.put(eventID, assignmentAdapter);
+            assignmentAdapterMap.put(eventId, assignmentAdapter);
         }
         return assignmentAdapter;
     }
 
-    public void addAssignmentToListAndMap(String eventID, Assignment assignment, String activityID, Context context) {
-        removeAssignmentFromListAndMap(eventID, assignment.getId(), context);
+    public void addAssignmentToListAndMap(String eventId, Assignment assignment, String activityId, Context context) {
+        removeAssignmentFromListAndMap(eventId, assignment.getId(), context);
 
-        AssignmentParentInfo assignmentParentInfo = new AssignmentParentInfo(assignment, activityID);
-        addAssignmentToList(eventID, assignmentParentInfo, context);
+        AssignmentParentInfo assignmentParentInfo = new AssignmentParentInfo(assignment, activityId);
+        addAssignmentToList(eventId, assignmentParentInfo, context);
         assignmentMap.put(assignment.getId(), assignmentParentInfo);
     }
 
-    public void addAssignmentToList(String eventID, AssignmentParentInfo assignmentParentInfo, Context context){
-        AssignmentAdapter assignmentAdapter = getAssignmentAdapter(eventID, context);
+    public void addAssignmentToList(String eventId, AssignmentParentInfo assignmentParentInfo, Context context){
+        AssignmentAdapter assignmentAdapter = getAssignmentAdapter(eventId, context);
         assignmentAdapter.insert(assignmentParentInfo, 0);
         assignmentAdapter.notifyDataSetChanged();
     }
 
-    public void removeAssignmentFromList(String eventID, String assignmentID, Context context){
-        AssignmentAdapter assignmentAdapter = getAssignmentAdapter(eventID, context);
+    public void removeAssignmentFromList(String eventId, String assignmentId, Context context){
+        AssignmentAdapter assignmentAdapter = getAssignmentAdapter(eventId, context);
         for (int i = 0; i < assignmentAdapter.list.size(); i++){
             AssignmentParentInfo assignmentParentInfo = assignmentAdapter.list.get(i);
-            if (assignmentParentInfo.getAssignment().getId().equals(assignmentID)){
+            if (assignmentParentInfo.getAssignment().getId().equals(assignmentId)){
                 assignmentAdapter.list.remove(assignmentParentInfo);
             }
         }
     }
 
-    public void removeAssignmentFromListAndMap (String eventID, String assignmentID, Context context){
-        removeAssignmentFromList(eventID, assignmentID, context);
-        assignmentMap.remove(assignmentID);
+    public void removeAssignmentFromListAndMap (String eventId, String assignmentId, Context context){
+        removeAssignmentFromList(eventId, assignmentId, context);
+        assignmentMap.remove(assignmentId);
     }
 
-    public String getActivityIDForAssignmentID(String assignmentID){
-        AssignmentParentInfo assignmentParentInfo = assignmentMap.get(assignmentID);
+    public String getActivityIDForAssignmentID(String assignmentId){
+        AssignmentParentInfo assignmentParentInfo = assignmentMap.get(assignmentId);
         return assignmentParentInfo.getActivityID();
     }
 
@@ -109,8 +109,8 @@ public class AssignmentListHandler {
             assignmentMap.clear();
     }
 
-    /*public void clearAssignmentListAndMap(String eventID, Context context){
-        AssignmentAdapter assignmentAdapter = getAssignmentAdapter(eventID, context);
+    /*public void clearAssignmentListAndMap(String eventId, Context context){
+        AssignmentAdapter assignmentAdapter = getAssignmentAdapter(eventId, context);
         if (assignmentAdapter != null){
             assignmentAdapter.list.clear();
         }

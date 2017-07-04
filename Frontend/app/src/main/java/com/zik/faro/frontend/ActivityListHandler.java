@@ -37,30 +37,30 @@ public class ActivityListHandler {
 
     /*
     * Map of activities needed to access activities downloaded from the server in O(1) time. The Key to the
-    * Map is the activityID String which returns the Activity as the value
+    * Map is the activityId String which returns the Activity as the value
     */
     private Map<String, Activity> activityMap = new ConcurrentHashMap<>();
 
 
-    public Activity getActivityCloneFromMap(String activityID){
-        Activity activity = activityMap.get(activityID);
+    public Activity getActivityCloneFromMap(String activityId){
+        Activity activity = activityMap.get(activityId);
         Gson gson = new Gson();
         String json = gson.toJson(activity);
         Activity cloneActivity = gson.fromJson(json, Activity.class);
         return cloneActivity;
     }
 
-    public Activity getOriginalActivityFromMap (String activityID){
-        Activity activity = activityMap.get(activityID);
+    public Activity getOriginalActivityFromMap (String activityId){
+        Activity activity = activityMap.get(activityId);
         return activity;
     }
 
 
-    public ActivityAdapter getActivityAdapter(String eventID, Context context){
-        ActivityAdapter activityAdapter = activityAdapterMap.get(eventID);
+    public ActivityAdapter getActivityAdapter(String eventId, Context context){
+        ActivityAdapter activityAdapter = activityAdapterMap.get(eventId);
         if (activityAdapter == null){
             activityAdapter = new ActivityAdapter(context, R.layout.activity_row_style);
-            activityAdapterMap.put(eventID, activityAdapter);
+            activityAdapterMap.put(eventId, activityAdapter);
         }
         return activityAdapter;
     }
@@ -74,14 +74,14 @@ public class ActivityListHandler {
     * the above reason then once we return back from the ActivityLanding Page we remove it from the
     * Map.
     */
-    void addActivityToListAndMap(String eventID, Activity activity, Context context) {
-        removeActivityFromListAndMap(eventID, activity.getId(), context);
-        conditionallyAddActivityToList(eventID, activity, context);
+    void addActivityToListAndMap(String eventId, Activity activity, Context context) {
+        removeActivityFromListAndMap(eventId, activity.getId(), context);
+        conditionallyAddActivityToList(eventId, activity, context);
         activityMap.put(activity.getId(), activity);
-        assignmentListHandler.addAssignmentToListAndMap(eventID, activity.getAssignment(), activity.getId(), context);
+        assignmentListHandler.addAssignmentToListAndMap(eventId, activity.getAssignment(), activity.getId(), context);
     }
 
-    private void conditionallyAddActivityToList(String eventID, Activity activity, Context context) {
+    private void conditionallyAddActivityToList(String eventId, Activity activity, Context context) {
         Activity tempActivity;
         Calendar tempCalendar;
         Calendar activityCalendar;
@@ -89,7 +89,7 @@ public class ActivityListHandler {
 
         activityCalendar = activity.getStartDate();
 
-        ActivityAdapter activityAdapter = getActivityAdapter(eventID, context);
+        ActivityAdapter activityAdapter = getActivityAdapter(eventId, context);
         int lastActivityIndex = activityAdapter.list.size() - 1;
         for (index = lastActivityIndex; index >= 0; index--) {
             tempActivity = activityAdapter.list.get(index);
@@ -116,60 +116,60 @@ public class ActivityListHandler {
         }
     }
 
-    public void addDownloadedActivitiesToListAndMap(String eventID, List <Activity> activityList, Context context){
+    public void addDownloadedActivitiesToListAndMap(String eventId, List <Activity> activityList, Context context){
         for (int i = 0; i < activityList.size(); i++){
             Activity activity = activityList.get(i);
-            addActivityToListAndMap(eventID, activity, context);
+            addActivityToListAndMap(eventId, activity, context);
         }
-        ActivityAdapter activityAdapter = getActivityAdapter(eventID, context);
+        ActivityAdapter activityAdapter = getActivityAdapter(eventId, context);
         activityAdapter.notifyDataSetChanged();
     }
 
-    public int getActivityListSize(String eventID, Context context){
-        ActivityAdapter activityAdapter = getActivityAdapter(eventID, context);
+    public int getActivityListSize(String eventId, Context context){
+        ActivityAdapter activityAdapter = getActivityAdapter(eventId, context);
         return activityAdapter.list.size();
     }
 
-    public void removeActivityFromList(String activityID, List<Activity> activityList){
+    public void removeActivityFromList(String activityId, List<Activity> activityList){
         for (int i = 0; i < activityList.size(); i++){
             Activity activity = activityList.get(i);
-            if (activityID.equals(activity.getId())){
+            if (activityId.equals(activity.getId())){
                 activityList.remove(activity);
                 return;
             }
         }
     }
 
-    public void removeActivityFromListAndMap(String eventID, String activityID, Context context){
-        ActivityAdapter activityAdapter = getActivityAdapter(eventID, context);
-        removeActivityFromList(activityID, activityAdapter.list);
+    public void removeActivityFromListAndMap(String eventId, String activityId, Context context){
+        ActivityAdapter activityAdapter = getActivityAdapter(eventId, context);
+        removeActivityFromList(activityId, activityAdapter.list);
         activityAdapter.notifyDataSetChanged();
-        Activity activity = activityMap.get(activityID);
+        Activity activity = activityMap.get(activityId);
         if (activity != null && activity.getAssignment() != null) {
-            assignmentListHandler.removeAssignmentFromListAndMap(eventID,
+            assignmentListHandler.removeAssignmentFromListAndMap(eventId,
                     activity.getAssignment().getId(),
                     context);
         }
-        activityMap.remove(activityID);
+        activityMap.remove(activityId);
 
     }
 
-    /*public void clearActivityListAndMap(String eventID, Context context){
-        ActivityAdapter activityAdapter = getActivityAdapter(eventID, context);
+    /*public void clearActivityListAndMap(String eventId, Context context){
+        ActivityAdapter activityAdapter = getActivityAdapter(eventId, context);
         if (activityAdapter != null){
             activityAdapter.list.clear();
-            activityAdapterMap.remove(eventID);
+            activityAdapterMap.remove(eventId);
         }
         if (activityMap != null){
             activityMap.clear();
         }
     }*/
 
-    private void clearActivityAdapterIfEmpty(String eventID, String activityID, Context context){
-        ActivityAdapter activityAdapter = getActivityAdapter(eventID, context);
+    private void clearActivityAdapterIfEmpty(String eventId, String activityId, Context context){
+        ActivityAdapter activityAdapter = getActivityAdapter(eventId, context);
         if (activityAdapter != null){
             if (activityAdapter.list.isEmpty()){
-                activityAdapterMap.remove(eventID);
+                activityAdapterMap.remove(eventId);
             }
         }
     }

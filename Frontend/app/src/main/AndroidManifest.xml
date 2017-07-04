@@ -118,7 +118,7 @@
             </intent-filter>
         </service>
 
-        <activity android:name=".notification.ReceivedNotficationHandler">
+        <activity android:name=".notification.ReceivedNotificationHandler">
             <intent-filter>
                 <action android:name="DEFAULTACTION" />
                 <category android:name="android.intent.category.DEFAULT" />

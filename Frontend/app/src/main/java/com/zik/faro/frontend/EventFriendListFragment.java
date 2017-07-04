@@ -3,7 +3,6 @@ package com.zik.faro.frontend;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -13,15 +12,15 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.zik.faro.data.InviteeList;
-import com.zik.faro.data.MinUser;
+import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class EventFriendListFragment extends Fragment {
-    private String guestListType;
-    private String eventID;
+    private String listStatus;
+    private String eventId;
     private Context mContext = getActivity();
 
     private EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
@@ -34,8 +33,8 @@ public class EventFriendListFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            guestListType = getArguments().getString("listType");
-            eventID = getArguments().getString("eventID");
+            listStatus = getArguments().getString(FaroIntentConstants.LIST_STATUS);
+            eventId = getArguments().getString(FaroIntentConstants.EVENT_ID);
         }
     }
 
@@ -46,7 +45,7 @@ public class EventFriendListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_event_friend_list, container, false);
         ListView guestList  = (ListView)view.findViewById(R.id.guestList);
         guestList.setBackgroundColor(Color.BLACK);
-        EventFriendAdapter eventFriendAdapter = eventFriendListHandler.getEventFriendAdapter(eventID, guestListType, mContext);
+        EventFriendAdapter eventFriendAdapter = eventFriendListHandler.getEventFriendAdapter(eventId, listStatus, mContext);
         guestList.setTag("EventFriendListFragment");
         guestList.setAdapter(eventFriendAdapter);
 
@@ -55,9 +54,8 @@ public class EventFriendListFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 final Intent UserProfilePageIntent = new Intent(getActivity(), UserProfilePage.class);
                 InviteeList.Invitees invitees = (InviteeList.Invitees)parent.getItemAtPosition(position);
-                UserProfilePageIntent.putExtra("userEmailID", invitees.getEmail());
-                UserProfilePageIntent.putExtra("eventID", eventID);
-                UserProfilePageIntent.putExtra("inviteStatus", guestListType);
+                FaroIntentInfoBuilder.userProfileIntent(UserProfilePageIntent, invitees.getEmail(),
+                        eventId);
                 startActivity(UserProfilePageIntent);
             }
         });

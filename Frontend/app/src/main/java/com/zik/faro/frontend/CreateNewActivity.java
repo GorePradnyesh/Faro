@@ -27,12 +27,13 @@ import com.zik.faro.data.Activity;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
+import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 import static android.widget.Toast.LENGTH_LONG;
 
 public class CreateNewActivity extends android.app.Activity {
 
-    private String eventID = null;
+    private String eventId = null;
     private EventListHandler eventListHandler = EventListHandler.getInstance();
     private ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
     private Event event = null;
@@ -46,8 +47,6 @@ public class CreateNewActivity extends android.app.Activity {
 
     private DateFormat sdf = new SimpleDateFormat("MMM dd yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
-
-    private Intent activityListPage = null;
 
     private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private static String TAG = "CreateNewActivity";
@@ -68,7 +67,7 @@ public class CreateNewActivity extends android.app.Activity {
         endDateButton = (Button) findViewById(R.id.endDateButton);
         endTimeButton = (Button) findViewById(R.id.endTimeButton);
 
-        activityListPage = new Intent(CreateNewActivity.this, ActivityListPage.class);
+
         final Intent activityLanding  = new Intent(CreateNewActivity.this, ActivityLandingPage.class);
 
         final Context mContext = this;
@@ -77,8 +76,8 @@ public class CreateNewActivity extends android.app.Activity {
 
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
-            eventID = extras.getString("eventID");
-            event = eventListHandler.getEventCloneFromMap(eventID);
+            eventId = extras.getString(FaroIntentConstants.EVENT_ID);
+            event = eventListHandler.getEventCloneFromMap(eventId);
         }
 
         activityName.addTextChangedListener(new TextWatcher() {
@@ -122,7 +121,7 @@ public class CreateNewActivity extends android.app.Activity {
                 String activity_Name = activityName.getText().toString();
                 String activity_Desc = activityDescription.getText().toString();
 
-                final Activity eventActivity = new Activity(eventID,
+                final Activity eventActivity = new Activity(eventId,
                         activity_Name,
                         activity_Desc,
                         null,
@@ -144,9 +143,8 @@ public class CreateNewActivity extends android.app.Activity {
                                 public void run() {
                                     //Since update to server successful, adding activity to List and Map below
                                     Log.i(TAG, "Activity Create Response received Successfully");
-                                    activityListHandler.addActivityToListAndMap(eventID, receivedActivity, mContext);
-                                    activityLanding.putExtra("eventID", eventID);
-                                    activityLanding.putExtra("activityID", receivedActivity.getId());
+                                    activityListHandler.addActivityToListAndMap(eventId, receivedActivity, mContext);
+                                    FaroIntentInfoBuilder.activityIntent(activityLanding, eventId, receivedActivity.getId());
                                     startActivity(activityLanding);
                                     finish();
                                 }
@@ -157,7 +155,7 @@ public class CreateNewActivity extends android.app.Activity {
                             Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                         }
                     }
-                }, eventID, eventActivity);
+                }, eventId, eventActivity);
             }
         });
 

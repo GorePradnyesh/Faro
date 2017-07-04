@@ -29,6 +29,7 @@ import com.zik.faro.data.PollOption;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
+import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,8 +41,8 @@ import static android.widget.Toast.LENGTH_LONG;
 
 public class PickPollWinnerPage extends Activity {
 
-    private String eventID = null;
-    private String pollID = null;
+    private String eventId = null;
+    private String pollId = null;
 
     private Poll clonePoll;
 
@@ -94,10 +95,10 @@ public class PickPollWinnerPage extends Activity {
         popupWidth = (int) (dm.widthPixels * 0.8);
         popupHeight = (int) (dm.heightPixels * 0.8);
 
-        eventID = extras.getString("eventID");
-        pollID = extras.getString("pollID");
+        eventId = extras.getString(FaroIntentConstants.EVENT_ID);
+        pollId = extras.getString(FaroIntentConstants.POLL_ID);
 
-        clonePoll = pollListHandler.getPollCloneFromMap(pollID);
+        clonePoll = pollListHandler.getPollCloneFromMap(pollId);
 
         pollOptionsList = clonePoll.getPollOptions();
         pollDesc.setText(clonePoll.getDescription());
@@ -200,10 +201,9 @@ public class PickPollWinnerPage extends Activity {
                         @Override
                         public void run() {
                             Log.i(TAG, "Poll Update Response received Successfully");
-                            pollListHandler.removePollFromListAndMap(eventID, clonePoll, mContext);
-                            pollListHandler.addPollToListAndMap(eventID, receivedPoll, mContext);
-                            PollLandingPageIntent.putExtra("eventID", eventID);
-                            PollLandingPageIntent.putExtra("pollID", pollID);
+                            pollListHandler.removePollFromListAndMap(eventId, clonePoll, mContext);
+                            pollListHandler.addPollToListAndMap(eventId, receivedPoll, mContext);
+                            FaroIntentInfoBuilder.pollIntent(PollLandingPageIntent, eventId, pollId);
                             startActivity(PollLandingPageIntent);
                             finish();
                         }
@@ -214,7 +214,7 @@ public class PickPollWinnerPage extends Activity {
                     Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                 }
             }
-        }, eventID, pollID, map);
+        }, eventId, pollId, map);
     }
 
     private void voterListPopUP(View v) {
@@ -257,8 +257,7 @@ public class PickPollWinnerPage extends Activity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        PollLandingPageIntent.putExtra("eventID", eventID);
-        PollLandingPageIntent.putExtra("pollID", pollID);
+        FaroIntentInfoBuilder.pollIntent(PollLandingPageIntent, eventId, pollId);
         startActivity(PollLandingPageIntent);
         finish();
     }
@@ -268,11 +267,10 @@ public class PickPollWinnerPage extends Activity {
         // Check if the version is same. It can be different if this page is loaded and a notification
         // is received for this later which updates the global memory but clonedata on this page remains
         // stale.
-        Long versionInGlobalMemory = pollListHandler.getOriginalPollFromMap(pollID).getVersion();
+        Long versionInGlobalMemory = pollListHandler.getOriginalPollFromMap(pollId).getVersion();
         if (!clonePoll.getVersion().equals(versionInGlobalMemory)) {
             Intent pickPollWinnerPageReloadIntent = new Intent(PickPollWinnerPage.this, PickPollWinnerPage.class);
-            pickPollWinnerPageReloadIntent.putExtra("eventID", eventID);
-            pickPollWinnerPageReloadIntent.putExtra("pollID", pollID);
+            FaroIntentInfoBuilder.pollIntent(pickPollWinnerPageReloadIntent, eventId, pollId);
             finish();
             startActivity(pickPollWinnerPageReloadIntent);
         }

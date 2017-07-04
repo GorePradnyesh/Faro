@@ -12,11 +12,10 @@ import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 public class UserProfilePage extends AppCompatActivity {
 
     private String userName;
-    private String userEmailID;
+    private String userEmailId;
     private MinUser cloneMinUser;
     private InviteeList.Invitees cloneInvitee;
-    private String eventID = null;
-    private String inviteStatus = null;
+    private String eventId = null;
 
     private UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
     private EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
@@ -31,28 +30,28 @@ public class UserProfilePage extends AppCompatActivity {
 
         ImageView userProfilePicture = (ImageView) findViewById(R.id.userPicture);
         TextView userNameTextView = (TextView) findViewById(R.id.userName);
-        TextView userEmailIDTextView = (TextView) findViewById(R.id.userEmailID);
+        TextView userEmailIdTextView = (TextView) findViewById(R.id.userEmailId);
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            userEmailID = extras.getString("userEmailID");
-            eventID = extras.getString("eventID");
-            inviteStatus = extras.getString("inviteStatus");
-            if (userEmailID.equals(myUserId)){
+            userEmailId = extras.getString(FaroIntentConstants.EMAIL_ID);
+            eventId = extras.getString(FaroIntentConstants.EVENT_ID);
+
+            if (userEmailId.equals(myUserId)){
                 //TOdo: Store my User's Fullname in faroUser context
-                userName = userEmailID;
-            }else if (eventID != null && inviteStatus != null) {
-                cloneInvitee = eventFriendListHandler.getInviteesCloneFromMap(userEmailID);
-                userName = eventFriendListHandler.getFriendFullNameFromID(userEmailID);
+                userName = userEmailId;
+            }else if (eventId != null) {
+                cloneInvitee = eventFriendListHandler.getInviteesCloneFromMap(userEmailId);
+                userName = eventFriendListHandler.getFriendFullNameFromID(userEmailId);
                 userProfilePicture.setImageResource(R.drawable.user_pic);
             }else {
-                cloneMinUser = userFriendListHandler.getMinUserCloneFromMap(userEmailID);
-                userName = userFriendListHandler.getFriendFullNameFromID(userEmailID);
+                cloneMinUser = userFriendListHandler.getMinUserCloneFromMap(userEmailId);
+                userName = userFriendListHandler.getFriendFullNameFromID(userEmailId);
                 userProfilePicture.setImageResource(R.drawable.user_pic);
             }
 
             userNameTextView.setText(userName);
-            userEmailIDTextView.setText("Email: " + userEmailID);
+            userEmailIdTextView.setText("Email: " + userEmailId);
         }
     }
 }

@@ -26,6 +26,7 @@ import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
+import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 import java.io.IOException;
 
@@ -33,8 +34,7 @@ import java.io.IOException;
 public class CreateNewPoll extends Activity {
 
     private PollListHandler pollListHandler = PollListHandler.getInstance();
-    private String eventID = null;
-    private Intent PollListPage = null;
+    private String eventId = null;
 
     private FaroUserContext faroUserContext = FaroUserContext.getInstance();
     private String myUserId = faroUserContext.getEmail();
@@ -63,7 +63,7 @@ public class CreateNewPoll extends Activity {
         Bundle extras = getIntent().getExtras();
         if (extras == null) return;//TODO: How to handle this condition
 
-        eventID = extras.getString("eventID");
+        eventId = extras.getString(FaroIntentConstants.EVENT_ID);
 
         pollDescription = (EditText)findViewById(R.id.pollDescription);
         isMultiChoice = (CheckBox)findViewById(R.id.multiChoiceFlag);
@@ -77,7 +77,6 @@ public class CreateNewPoll extends Activity {
 
         createNewPollOK = (Button) findViewById(R.id.createNewPollOK);
 
-        PollListPage = new Intent(CreateNewPoll.this, PollListPage.class);
         PollLandingPageIntent = new Intent(CreateNewPoll.this, PollLandingPage.class);
 
         pollOptionsAdapter = new PollOptionsAdapter(this, R.layout.poll_option_can_edit_row_style);
@@ -122,7 +121,7 @@ public class CreateNewPoll extends Activity {
                     createNewPollOK.setEnabled(false);
                     return;
                 }
-                Poll poll = new Poll(eventID, myUserId, isMultiChoice.isChecked(),
+                Poll poll = new Poll(eventId, myUserId, isMultiChoice.isChecked(),
                         pollOptionsAdapter.list, myUserId, pollDescription.getText().toString(),
                         ObjectStatus.OPEN);
 
@@ -146,9 +145,9 @@ public class CreateNewPoll extends Activity {
                         @Override
                         public void run() {
                             Log.i(TAG, "Poll Create Response received Successfully");
-                            pollListHandler.addPollToListAndMap(eventID, receivedPoll, mContext);
-                            PollLandingPageIntent.putExtra("eventID", eventID);
-                            PollLandingPageIntent.putExtra("pollID", receivedPoll.getId());
+                            pollListHandler.addPollToListAndMap(eventId, receivedPoll, mContext);
+                            FaroIntentInfoBuilder.pollIntent(PollLandingPageIntent,
+                                    eventId, receivedPoll.getId());
                             startActivity(PollLandingPageIntent);
                             finish();
                         }
@@ -159,6 +158,6 @@ public class CreateNewPoll extends Activity {
                     Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                 }
             }
-        }, eventID, poll);
+        }, eventId, poll);
     }
 }

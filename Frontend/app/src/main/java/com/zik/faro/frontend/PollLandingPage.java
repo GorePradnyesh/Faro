@@ -33,6 +33,7 @@ import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 import com.zik.faro.frontend.notification.NotificationPayloadHandler;
+import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -60,8 +61,8 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
     private RelativeLayout ClosedPollLandingPageRelativeLayout = null;
 
     private Poll clonePoll;
-    private String eventID = null;
-    private String pollID = null;
+    private String eventId = null;
+    private String pollId = null;
 
     private TextView pollDesc = null;
     private ImageButton editButton = null;
@@ -73,7 +74,6 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
     private RelativeLayout popUpRelativeLayout;
     private static final Integer POLL_OPTION_ROW_HEIGHT = 150;
 
-    private Intent PollListPageIntent = null;
     private Intent PickPollWinnerIntent = null;
     private Intent EditPollPageIntent = null;
     private Intent PollLandingPageReloadIntent = null;
@@ -101,7 +101,7 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
 
     private TextView winnerPollOptionTV = null;
 
-    private String isNotification = null;
+    private String bundleType = null;
 
     private Bundle extras = null;
 
@@ -112,7 +112,6 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
-        PollListPageIntent = new Intent(PollLandingPage.this, PollListPage.class);
         PickPollWinnerIntent = new Intent(PollLandingPage.this, PickPollWinnerPage.class);
         EditPollPageIntent = new Intent(PollLandingPage.this, EditPoll.class);
         PollLandingPageReloadIntent = new Intent(PollLandingPage.this, PollLandingPage.class);
@@ -132,7 +131,7 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
 
     private void setupPageDetails() {
 
-        clonePoll = pollListHandler.getPollCloneFromMap(pollID);
+        clonePoll = pollListHandler.getPollCloneFromMap(pollId);
         if (clonePoll == null){
             Toast.makeText(PollLandingPage.this, "No Poll found", LENGTH_LONG).show();
             finish();
@@ -321,9 +320,7 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
             closePoll.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    PickPollWinnerIntent.putExtra("eventID", eventID);
-                    PickPollWinnerIntent.putExtra("pollID", pollID);
-                    PickPollWinnerIntent.putExtra("bundleType", isNotification);
+                    FaroIntentInfoBuilder.pollIntent(PickPollWinnerIntent, eventId, pollId);
                     startActivity(PickPollWinnerIntent);
                     finish();
                 }
@@ -332,9 +329,7 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
             editButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    EditPollPageIntent.putExtra("eventID", eventID);
-                    EditPollPageIntent.putExtra("pollID", pollID);
-                    EditPollPageIntent.putExtra("bundleType", isNotification);
+                    FaroIntentInfoBuilder.pollIntent(EditPollPageIntent, eventId, pollId);
                     startActivity(EditPollPageIntent);
                     finish();
                 }
@@ -399,9 +394,7 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
             changeWinner.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    PickPollWinnerIntent.putExtra("eventID", eventID);
-                    PickPollWinnerIntent.putExtra("pollID", pollID);
-                    PickPollWinnerIntent.putExtra("bundleType", isNotification);
+                    FaroIntentInfoBuilder.pollIntent(PickPollWinnerIntent, eventId, pollId);
                     startActivity(PickPollWinnerIntent);
                     finish();
                 }
@@ -440,11 +433,9 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
                         @Override
                         public void run() {
                             Log.i(TAG, "Poll Update Response received Successfully");
-                            pollListHandler.removePollFromListAndMap(eventID, clonePoll, mContext);
-                            pollListHandler.addPollToListAndMap(eventID, receivedPoll, mContext);
-                            PollLandingPageReloadIntent.putExtra("eventID", eventID);
-                            PollLandingPageReloadIntent.putExtra("pollID", pollID);
-                            PollLandingPageReloadIntent.putExtra("bundleType", isNotification);
+                            pollListHandler.removePollFromListAndMap(eventId, clonePoll, mContext);
+                            pollListHandler.addPollToListAndMap(eventId, receivedPoll, mContext);
+                            FaroIntentInfoBuilder.pollIntent(PollLandingPageReloadIntent, eventId, pollId);
                             startActivity(PollLandingPageReloadIntent);
                             finish();
                         }
@@ -455,7 +446,7 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
                     Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                 }
             }
-        }, eventID, pollID, map);
+        }, eventId, pollId, map);
     }
 
     private void voterListPopUP(View v) {
@@ -498,15 +489,15 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
     public void checkAndHandleNotification() {
         if (extras == null) return; //TODO: How to handle such conditions
 
-        isNotification = extras.getString("bundleType");
+        bundleType = extras.getString(FaroIntentConstants.BUNDLE_TYPE);
 
-        eventID = extras.getString("eventID");
-        pollID = extras.getString("pollID");
+        eventId = extras.getString(FaroIntentConstants.EVENT_ID);
+        pollId = extras.getString(FaroIntentConstants.POLL_ID);
 
-        Log.d(TAG, "******eventID is " + eventID);
-        Log.d(TAG, "******pollID is " + pollID);
+        Log.d(TAG, "******eventId is " + eventId);
+        Log.d(TAG, "******pollId is " + pollId);
 
-        if (isNotification == null) {
+        if (bundleType.equals(FaroIntentConstants.IS_NOT_NOTIFICATION)) {
             setupPageDetails();
         } else {               //Else the bundleType is "notification"
             //API call to get updated poll
@@ -527,11 +518,9 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
                     Runnable myRunnable = new Runnable() {
                         @Override
                         public void run() {
-                            pollListHandler.addPollToListAndMap(eventID, poll, mContext);
+                            pollListHandler.addPollToListAndMap(eventId, poll, mContext);
                             //Reload current activity
-                            PollLandingPageReloadIntent.putExtra("eventID", eventID);
-                            PollLandingPageReloadIntent.putExtra("pollID", pollID);
-                            PollLandingPageReloadIntent.putExtra("bundleType", isNotification);
+                            FaroIntentInfoBuilder.pollIntent(PollLandingPageReloadIntent, eventId, pollId);
                             startActivity(PollLandingPageReloadIntent);
                             finish();
                         }
@@ -542,7 +531,7 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
                     Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                 }
             }
-        }, eventID, pollID, map);
+        }, eventId, pollId, map);
     }
 
     private void getUpdatedPollFromServer(){
@@ -559,7 +548,7 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
                     Runnable myRunnable = new Runnable() {
                         @Override
                         public void run() {
-                            pollListHandler.addPollToListAndMap(eventID, receivedPoll, mContext);
+                            pollListHandler.addPollToListAndMap(eventId, receivedPoll, mContext);
                             setupPageDetails();
                         }
                     };
@@ -571,21 +560,20 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
                 }
 
             }
-        }, eventID, pollID);
+        }, eventId, pollId);
     }
 
     @Override
     protected void onResume() {
-        if (isNotification == null) {
+        if (bundleType.equals(FaroIntentConstants.IS_NOT_NOTIFICATION)) {
             // Check if the version is same. It can be different if this page is loaded and a notification
             // is received for this later which updates the global memory but clonedata on this page remains
             // stale.
             // This check is not necessary when opening this page directly through a notification.
-            Long versionInGlobalMemory = pollListHandler.getOriginalPollFromMap(pollID).getVersion();
+            Long versionInGlobalMemory = pollListHandler.getOriginalPollFromMap(pollId).getVersion();
             if (!clonePoll.getVersion().equals(versionInGlobalMemory)) {
                 Intent pollLandingPageReloadIntent = new Intent(PollLandingPage.this, PollLandingPage.class);
-                pollLandingPageReloadIntent.putExtra("eventID", eventID);
-                pollLandingPageReloadIntent.putExtra("pollID", pollID);
+                FaroIntentInfoBuilder.pollIntent(pollLandingPageReloadIntent, eventId, pollId);
                 finish();
                 startActivity(pollLandingPageReloadIntent);
             }

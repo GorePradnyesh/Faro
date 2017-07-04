@@ -30,6 +30,7 @@ import com.zik.faro.data.Event;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
+import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -39,8 +40,8 @@ import java.util.Calendar;
 import static android.widget.Toast.LENGTH_LONG;
 
 public class EditActivity extends android.app.Activity {
-    private String eventID = null;
-    private String activityID = null;
+    private String eventId = null;
+    private String activityId = null;
     private Event event;
     private Activity cloneActivity;
     private EventListHandler eventListHandler = EventListHandler.getInstance();
@@ -98,11 +99,11 @@ public class EditActivity extends android.app.Activity {
         */
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
-            eventID = extras.getString("eventID");
-            activityID = extras.getString("activityID");
+            eventId = extras.getString(FaroIntentConstants.EVENT_ID);
+            activityId = extras.getString(FaroIntentConstants.ACTIVITY_ID);
 
-            event = eventListHandler.getEventCloneFromMap(eventID);
-            cloneActivity = activityListHandler.getActivityCloneFromMap(activityID);
+            event = eventListHandler.getEventCloneFromMap(eventId);
+            cloneActivity = activityListHandler.getActivityCloneFromMap(activityId);
 
             if (cloneActivity != null) {
 
@@ -429,9 +430,8 @@ public class EditActivity extends android.app.Activity {
                     Runnable myRunnable = new Runnable() {
                         @Override
                         public void run() {
-                            activityListHandler.addActivityToListAndMap(eventID, cloneActivity, mContext);
-                            ActivityLandingPage.putExtra("eventID", eventID);
-                            ActivityLandingPage.putExtra("activityID", cloneActivity.getId());
+                            activityListHandler.addActivityToListAndMap(eventId, cloneActivity, mContext);
+                            FaroIntentInfoBuilder.activityIntent(ActivityLandingPage, eventId, cloneActivity.getId());
                             startActivity(ActivityLandingPage);
                             finish();
                         }
@@ -442,7 +442,7 @@ public class EditActivity extends android.app.Activity {
                     Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                 }
             }
-        }, eventID, activityID, cloneActivity);
+        }, eventId, activityId, cloneActivity);
     }
 
     private void deleteActivityFromServer() {
@@ -458,7 +458,7 @@ public class EditActivity extends android.app.Activity {
                     Runnable myRunnable = new Runnable() {
                         @Override
                         public void run() {
-                            activityListHandler.removeActivityFromListAndMap(eventID, activityID, mContext);
+                            activityListHandler.removeActivityFromListAndMap(eventId, activityId, mContext);
                             popupWindow.dismiss();
                             Toast.makeText(EditActivity.this, cloneActivity.getName() + "is Deleted", LENGTH_LONG).show();
                             finish();
@@ -470,15 +470,14 @@ public class EditActivity extends android.app.Activity {
                     Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                 }
             }
-        }, eventID, activityID);
+        }, eventId, activityId);
     }
 
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        ActivityLandingPage.putExtra("eventID", eventID);
-        ActivityLandingPage.putExtra("activityID", activityID);
+        FaroIntentInfoBuilder.activityIntent(ActivityLandingPage, eventId, activityId);
         startActivity(ActivityLandingPage);
         finish();
     }
@@ -489,11 +488,10 @@ public class EditActivity extends android.app.Activity {
         // Check if the version is same. It can be different if this page is loaded and a notification
         // is received for this later which updates the global memory but clonedata on this page remains
         // stale.
-        Long versionInGlobalMemory = activityListHandler.getOriginalActivityFromMap(activityID).getVersion();
+        Long versionInGlobalMemory = activityListHandler.getOriginalActivityFromMap(activityId).getVersion();
         if (!cloneActivity.getVersion().equals(versionInGlobalMemory)){
             Intent editActivityPageReloadIntent = new Intent(EditActivity.this, EditActivity.class);
-            editActivityPageReloadIntent.putExtra("activityID", activityID);
-            editActivityPageReloadIntent.putExtra("eventID", eventID);
+            FaroIntentInfoBuilder.activityIntent(editActivityPageReloadIntent, eventId, activityId);
             finish();
             startActivity(editActivityPageReloadIntent);
         }

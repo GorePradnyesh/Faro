@@ -27,6 +27,7 @@ import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.notification.NotificationPayloadHandler;
+import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -37,9 +38,9 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
 
     private Event originalEvent;
     private com.zik.faro.data.Activity originalActivity = null;
-    private String activityID = null;
-    private String eventID = null;
-    private String assignmentID = null;
+    private String activityId = null;
+    private String eventId = null;
+    private String assignmentId = null;
     private Assignment cloneAssignment = null;
 
     private EventListHandler eventListHandler = EventListHandler.getInstance();
@@ -54,16 +55,17 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
 
     private Intent AssignmentLandingPageReloadIntent = null;
 
-    private final Context mContext = this.getActivity();
+    private Context mContext;
     private View fragmentView;
     private RelativeLayout assignmentLandingFragmentRelativeLayout = null;
     private LinearLayout linlaHeaderProgress = null;
-    private String isNotification = null;
+    private String bundleType = null;
     private boolean receivedAllActivities = false;
     private boolean receivedEvent = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        mContext = this.getActivity();
         super.onCreate(savedInstanceState);
     }
 
@@ -92,12 +94,12 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
         linlaHeaderProgress.setVisibility(View.GONE);
         assignmentLandingFragmentRelativeLayout.setVisibility(View.VISIBLE);
 
-        cloneAssignment = assignmentListHandler.getAssignmentCloneFromMap(assignmentID);
-        originalEvent = eventListHandler.getOriginalEventFromMap(eventID);
+        cloneAssignment = assignmentListHandler.getAssignmentCloneFromMap(assignmentId);
+        originalEvent = eventListHandler.getOriginalEventFromMap(eventId);
 
         final TextView assignmentDescription = (TextView) fragmentView.findViewById(R.id.assignmentDescription);
-        if (activityID != null) {
-            originalActivity = activityListHandler.getOriginalActivityFromMap(activityID);
+        if (activityId != null) {
+            originalActivity = activityListHandler.getOriginalActivityFromMap(activityId);
             assignmentDescription.setText("Assignment for " + originalActivity.getName());
         } else {
             assignmentDescription.setText("Assignment for " + originalEvent.getEventName());
@@ -129,10 +131,10 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
         updateAssignment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (activityID != null) {
-                    itemListMap.put(activityID, cloneItemsList);
+                if (activityId != null) {
+                    itemListMap.put(activityId, cloneItemsList);
                 }else {
-                    itemListMap.put(eventID, cloneItemsList);
+                    itemListMap.put(eventId, cloneItemsList);
                 }
                 updateAssignmentToServer();
             }
@@ -141,10 +143,8 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EditAssignmentPage.putExtra("eventID", eventID);
-                EditAssignmentPage.putExtra("activityID", activityID);
-                EditAssignmentPage.putExtra("assignmentID", assignmentID);
-                EditAssignmentPage.putExtra("bundleType", isNotification);
+                FaroIntentInfoBuilder.assignmentIntent(EditAssignmentPage,
+                        eventId, activityId, assignmentId);
                 startActivity(EditAssignmentPage);
                 getActivity().finish();
             }
@@ -157,12 +157,12 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
         Bundle extras = getArguments();
         if (extras == null) return; //TODO: How to handle such conditions
 
-        eventID = extras.getString("eventID");
-        activityID = extras.getString("activityID");
-        assignmentID = extras.getString("assignmentID");
-        isNotification = extras.getString("bundleType");
+        eventId = extras.getString(FaroIntentConstants.EVENT_ID);
+        activityId = extras.getString(FaroIntentConstants.ACTIVITY_ID);
+        assignmentId = extras.getString(FaroIntentConstants.ASSIGNMENT_ID);
+        bundleType = extras.getString(FaroIntentConstants.BUNDLE_TYPE);
 
-        if (isNotification == null){
+        if (bundleType.equals(FaroIntentConstants.IS_NOT_NOTIFICATION)){
             receivedAllActivities = true;
             receivedEvent = true;
             setupPageDetails();
@@ -190,7 +190,7 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
                         @Override
                         public void run() {
                             Log.i(TAG, "Successfully received activities from the server!!");
-                            activityListHandler.addDownloadedActivitiesToListAndMap(eventID, activities, mContext);
+                            activityListHandler.addDownloadedActivitiesToListAndMap(eventId, activities, mContext);
                             receivedAllActivities = true;
                             setupPageDetails();
                         }
@@ -201,7 +201,7 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
                     Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                 }
             }
-        }, eventID);
+        }, eventId);
     }
 
     public void updateAssignmentToServer () {
@@ -218,21 +218,20 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
                         @Override
                         public void run() {
                             Log.i(TAG, "Successfully updated items list to server");
-                            final Assignment originalAssignment = assignmentListHandler.getOriginalAssignmentFromMap(assignmentID);
+                            final Assignment originalAssignment = assignmentListHandler.getOriginalAssignmentFromMap(assignmentId);
 
                             List<Item> receivedItemList;
-                            if (activityID != null) {
-                                receivedItemList = stringListMap.get(activityID);
+                            if (activityId != null) {
+                                receivedItemList = stringListMap.get(activityId);
                             }else {
-                                receivedItemList = stringListMap.get(eventID);
+                                receivedItemList = stringListMap.get(eventId);
                             }
 
                             originalAssignment.setItems(receivedItemList);
 
                             //Reload AssignmentLandingFragment
-                            AssignmentLandingPageReloadIntent.putExtra("eventID", eventID);
-                            AssignmentLandingPageReloadIntent.putExtra("activityID", activityID);
-                            AssignmentLandingPageReloadIntent.putExtra("assignmentID", assignmentID);
+                            FaroIntentInfoBuilder.assignmentIntent(AssignmentLandingPageReloadIntent,
+                                    eventId, activityId, assignmentId);
                             getActivity().finish();
                             startActivity(AssignmentLandingPageReloadIntent);
                         }
@@ -243,7 +242,7 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
                     Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                 }
             }
-        }, eventID, itemListMap);
+        }, eventId, itemListMap);
     }
 
 
@@ -265,7 +264,7 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
                             Event event = eventInviteStatusWrapper.getEvent();
                             eventListHandler.addEventToListAndMap(event,
                                     eventInviteStatusWrapper.getInviteStatus());
-                            assignmentListHandler.addAssignmentToListAndMap(eventID, event.getAssignment(), null, mContext);
+                            assignmentListHandler.addAssignmentToListAndMap(eventId, event.getAssignment(), null, mContext);
                             setupPageDetails();
                         }
                     };
@@ -275,6 +274,6 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
                     Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                 }
             }
-        }, eventID);
+        }, eventId);
     }
 }
