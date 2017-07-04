@@ -24,6 +24,7 @@ import com.zik.faro.data.MinUser;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
+import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 import java.io.IOException;
 import java.util.List;
@@ -51,7 +52,7 @@ public class EventListFragment extends Fragment {
 
     private void eventSelectedFromList(AdapterView<?> parent, int position, Intent eventLanding) {
         Event event = (Event) parent.getItemAtPosition(position);
-        eventLanding.putExtra("eventID", event.getId());
+        FaroIntentInfoBuilder.eventIntent(eventLanding, event.getId());
         //TODO: check if startActivityForResult is a better way
         startActivity(eventLanding);
     }
@@ -147,7 +148,7 @@ public class EventListFragment extends Fragment {
                     final int lastItem = firstVisibleItem + visibleItemCount;
                     if (lastItem == totalItemCount) {
                         /*TODO Make call to server to get events after the last event. Send the date
-                        of the last event and also send the eventID to resolve sorting conflicts.
+                        of the last event and also send the eventId to resolve sorting conflicts.
                          */
                         Log.d("Last", "Last");
                     }

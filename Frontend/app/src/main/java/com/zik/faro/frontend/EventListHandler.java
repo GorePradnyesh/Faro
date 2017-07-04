@@ -49,7 +49,7 @@ public class EventListHandler {
 
     /*
     * Map of events needed to access events downloaded from the server in O(1) time. The Key to the
-    * Map is the eventID String which returns the Event as the value
+    * Map is the eventId String which returns the Event as the value
     */
     private Map<String, EventInviteStatusWrapper> eventMap = new ConcurrentHashMap<>();
 
@@ -235,49 +235,57 @@ public class EventListHandler {
         boolean issync = isMapAndListInSync();
     }
 
-    Event getEventCloneFromMap(String eventID){
-        EventInviteStatusWrapper eventInviteStatusWrapper = eventMap.get(eventID);
+    Event getEventCloneFromMap(String eventId){
+        EventInviteStatusWrapper eventInviteStatusWrapper = eventMap.get(eventId);
+        if (eventInviteStatusWrapper == null)
+            return null;
+
         Event event = eventInviteStatusWrapper.getEvent();
         Gson gson = new Gson();
         String json = gson.toJson(event);
         return gson.fromJson(json, Event.class);
     }
 
-    public Event getOriginalEventFromMap (String eventID){
-        EventInviteStatusWrapper eventInviteStatusWrapper = eventMap.get(eventID);
+    public Event getOriginalEventFromMap (String eventId){
+        EventInviteStatusWrapper eventInviteStatusWrapper = eventMap.get(eventId);
+        if (eventInviteStatusWrapper == null)
+            return null;
+
         return eventInviteStatusWrapper.getEvent();
     }
 
     public EventInviteStatus getUserEventStatus(String eventId) {
         EventInviteStatusWrapper eventInviteStatusWrapper = eventMap.get(eventId);
+        if (eventInviteStatusWrapper == null)
+            return null;
         return eventInviteStatusWrapper.getInviteStatus();
     }
 
-    public void removeEventFromList(String eventID, List<Event> eventList){
+    public void removeEventFromList(String eventId, List<Event> eventList){
         for (int i = 0; i < eventList.size(); i++){
             Event event = eventList.get(i);
-            if (event.getId().equals(eventID)){
+            if (event.getId().equals(eventId)){
                 eventList.remove(event);
                 return;
             }
         }
     }
 
-    public void removeEventFromListAndMap(String eventID){
-        EventInviteStatusWrapper eventInviteStatusWrapper = eventMap.get(eventID);
+    public void removeEventFromListAndMap(String eventId){
+        EventInviteStatusWrapper eventInviteStatusWrapper = eventMap.get(eventId);
         if (eventInviteStatusWrapper == null){
             return;
         }
 
-        EventInviteStatus eventInviteStatus = getUserEventStatus(eventID);
+        EventInviteStatus eventInviteStatus = getUserEventStatus(eventId);
 
         EventAdapter eventAdapter;
         eventAdapter = getEventAdapter(eventInviteStatus);
         if (eventAdapter != null) {
-            removeEventFromList(eventID, eventAdapter.list);
+            removeEventFromList(eventId, eventAdapter.list);
             eventAdapter.notifyDataSetChanged();
         }
-        eventMap.remove(eventID);
+        eventMap.remove(eventId);
     }
 
     public int getAcceptedEventListSize(){

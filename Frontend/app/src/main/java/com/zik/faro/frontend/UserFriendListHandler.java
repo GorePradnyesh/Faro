@@ -57,14 +57,14 @@ public class UserFriendListHandler {
         }
     }
 
-    public void removeFriendFromListAndMap(String emailID) {
-        MinUser minUser = friendMap.get(emailID);
-        if (minUser == null) {
+    public void removeFriendFromListAndMap(String emailId) {
+        MinUser minUser = friendMap.get(emailId);
+        if (minUser == null){
             return;
         }
         userFriendAdapter.getMinUsers().remove(minUser);
         userFriendAdapter.notifyDataSetChanged();
-        friendMap.remove(emailID);
+        friendMap.remove(emailId);
     }
 
     public void clearFriendListAndMap() {
@@ -78,7 +78,7 @@ public class UserFriendListHandler {
         }
     }
 
-    public String getFriendFullNameFromID(String emailID) {
+    public String getFriendFullNameFromID(String emailId) {
         String friendFirstName = null;
         String friendLastName = null;
         String friendFullName = null;
@@ -87,11 +87,11 @@ public class UserFriendListHandler {
         String myUserId = faroUserContext.getEmail();
 
         //TODO Cache my info and then retrieve FirstName and Last Name from there
-        if (emailID.equals(myUserId)) {
-            return emailID;
+        if (emailId.equals(myUserId)) {
+            return emailId;
         }
 
-        MinUser minUser = friendMap.get(emailID);
+        MinUser minUser = friendMap.get(emailId);
         if (minUser != null) {
             friendFirstName = minUser.getFirstName();
             friendLastName = minUser.getLastName();
@@ -104,8 +104,8 @@ public class UserFriendListHandler {
         return friendFullName;
     }
 
-    public MinUser getMinUserCloneFromMap(String emailID) {
-        MinUser minUser = friendMap.get(emailID);
+    public MinUser getMinUserCloneFromMap(String emailId) {
+        MinUser minUser = friendMap.get(emailId);
         Gson gson = new Gson();
         String json = gson.toJson(minUser);
         MinUser cloneMinUser = gson.fromJson(json, MinUser.class);

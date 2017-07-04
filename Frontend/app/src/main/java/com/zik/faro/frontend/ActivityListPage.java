@@ -16,6 +16,7 @@ import android.widget.RelativeLayout;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Event;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
+import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 /*
  * This is the page where all the activities are listed in chronological order.
@@ -27,7 +28,7 @@ import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 public class ActivityListPage extends android.app.Activity {
     private ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
 
-    private String eventID;
+    private String eventId;
 
     private Intent activityLandingPage = null;
     private Intent createNewActivityPage = null;
@@ -50,11 +51,11 @@ public class ActivityListPage extends android.app.Activity {
         Bundle extras = getIntent().getExtras();
         if (extras == null) return; //TODO: How to handle this condition?
 
-        eventID = extras.getString("eventID");
+        eventId = extras.getString(FaroIntentConstants.EVENT_ID);
 
         activityList  = (ListView)findViewById(R.id.activityList);
         activityList.setBackgroundColor(Color.BLACK);
-        activityList.setAdapter(activityListHandler.getActivityAdapter(eventID, mContext));
+        activityList.setAdapter(activityListHandler.getActivityAdapter(eventId, mContext));
 
         addActivity = (ImageButton)findViewById(R.id.addNewActivityButton);
         addActivity.setImageResource(R.drawable.plus);
@@ -67,8 +68,7 @@ public class ActivityListPage extends android.app.Activity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Activity activity = (Activity) parent.getItemAtPosition(position);
-                activityLandingPage.putExtra("activityID", activity.getId());
-                activityLandingPage.putExtra("eventID", eventID);
+                FaroIntentInfoBuilder.activityIntent(activityLandingPage, eventId, activity.getId());
                 //TODO: check if startActivityForResult is a better way
                 startActivity(activityLandingPage);
             }
@@ -82,11 +82,11 @@ public class ActivityListPage extends android.app.Activity {
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                if(activityListHandler.getActivityListSize(eventID, mContext) > ActivityListHandler.MAX_ACTIVITIES_PAGE_SIZE) {
+                if(activityListHandler.getActivityListSize(eventId, mContext) > ActivityListHandler.MAX_ACTIVITIES_PAGE_SIZE) {
                     final int lastItem = firstVisibleItem + visibleItemCount;
                     if (lastItem == totalItemCount) {
                         /*TODO Make call to server to get activities after the last activity. Send the date
-                        of the last activity and also send the activityID to resolve sorting conflicts.
+                        of the last activity and also send the activityId to resolve sorting conflicts.
                          */
                         Log.d("Last", "Last");
                     }
@@ -100,7 +100,7 @@ public class ActivityListPage extends android.app.Activity {
         addActivity.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                createNewActivityPage.putExtra("eventID", eventID);
+                FaroIntentInfoBuilder.eventIntent(createNewActivityPage, eventId);
                 startActivity(createNewActivityPage);
             }
         });

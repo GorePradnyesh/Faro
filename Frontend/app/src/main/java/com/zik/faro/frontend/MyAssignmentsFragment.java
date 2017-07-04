@@ -24,6 +24,7 @@ import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
+import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -40,12 +41,12 @@ public class MyAssignmentsFragment extends Fragment{
     private ListView itemList;
     private Map<String, List<Item>> activityToItemListMap = new HashMap<>();
 
-    private String eventID = null;
-    private String passedActivityID = null;
-    private String passedAssignmentID = null;
+    private String eventId = null;
+    private String passedActivityId = null;
+    private String passedAssignmentId = null;
 
     private FaroUserContext faroUserContext = FaroUserContext.getInstance();
-    private String myUserID = faroUserContext.getEmail();
+    private String myUserId = faroUserContext.getEmail();
 
     private static String TAG = "MyAssignmentsFragment";
 
@@ -62,9 +63,9 @@ public class MyAssignmentsFragment extends Fragment{
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(getActivity()));
 
-        eventID = getArguments().getString("eventID");
-        passedActivityID = getArguments().getString("activityID");
-        passedAssignmentID = getArguments().getString("assignmentID");
+        eventId = getArguments().getString(FaroIntentConstants.EVENT_ID);
+        passedActivityId = getArguments().getString(FaroIntentConstants.ACTIVITY_ID);
+        passedAssignmentId = getArguments().getString(FaroIntentConstants.ASSIGNMENT_ID);
 
         final Context mContext = this.getActivity();
 
@@ -82,7 +83,7 @@ public class MyAssignmentsFragment extends Fragment{
 
 
         //Walk all items in all assignments and add my cloned Items to the myItemsAdapter
-        AssignmentAdapter assignmentAdapter = assignmentListHandler.getAssignmentAdapter(eventID, mContext);
+        AssignmentAdapter assignmentAdapter = assignmentListHandler.getAssignmentAdapter(eventId, mContext);
         for (int i = 0; i < assignmentAdapter.list.size(); i++){
             AssignmentParentInfo assignmentParentInfo = assignmentAdapter.list.get(i);
             Assignment assignment = assignmentParentInfo.getAssignment();
@@ -92,7 +93,7 @@ public class MyAssignmentsFragment extends Fragment{
             for (int j = 0; j < cloneAssignment.getItems().size(); j++){
                 Item cloneItem = cloneAssignment.getItems().get(j);
 
-                if (cloneItem.getAssigneeId().equals(myUserID)){
+                if (cloneItem.getAssigneeId().equals(myUserId)){
                     if (cloneItem.getStatus().equals(ActionStatus.COMPLETE)) {
                         myItemsAdapter.insertAtEnd(cloneItem);
                     } else {
@@ -103,7 +104,7 @@ public class MyAssignmentsFragment extends Fragment{
             if (assignmentParentInfo.getActivityID() != null) {
                 activityToItemListMap.put(assignmentParentInfo.getActivityID(), cloneAssignment.getItems());
             }else{
-                activityToItemListMap.put(eventID, cloneAssignment.getItems());
+                activityToItemListMap.put(eventId, cloneAssignment.getItems());
             }
         }
 
@@ -123,14 +124,14 @@ public class MyAssignmentsFragment extends Fragment{
                                 @Override
                                 public void run() {
                                     for(Map.Entry<String, List<Item>> entry: stringListMap.entrySet()){
-                                        String activityID = entry.getKey();
+                                        String activityId = entry.getKey();
                                         Assignment originalAssignment;
-                                        if (activityID.equals(eventID)){
-                                            Event originalEvent = eventListHandler.getOriginalEventFromMap(eventID);
+                                        if (activityId.equals(eventId)){
+                                            Event originalEvent = eventListHandler.getOriginalEventFromMap(eventId);
                                             originalAssignment = originalEvent.getAssignment();
                                             originalAssignment.setItems(entry.getValue());
                                         }else {
-                                            Activity originalActivity = activityListHandler.getOriginalActivityFromMap(activityID);
+                                            Activity originalActivity = activityListHandler.getOriginalActivityFromMap(activityId);
                                             originalAssignment = originalActivity.getAssignment();
                                             originalAssignment.setItems(entry.getValue());
                                         }
@@ -138,9 +139,8 @@ public class MyAssignmentsFragment extends Fragment{
                                     Log.i(TAG, "Successfully updated items list to server");
 
                                     //Reload AssignmentLandingFragment
-                                    AssignmentLandingPageReloadIntent.putExtra("eventID", eventID);
-                                    AssignmentLandingPageReloadIntent.putExtra("activityID", passedActivityID);
-                                    AssignmentLandingPageReloadIntent.putExtra("assignmentID", passedAssignmentID);
+                                    FaroIntentInfoBuilder.assignmentIntent(AssignmentLandingPageReloadIntent,
+                                            eventId, passedActivityId, passedAssignmentId);
                                     getActivity().finish();
                                     startActivity(AssignmentLandingPageReloadIntent);
                                 }
@@ -151,7 +151,7 @@ public class MyAssignmentsFragment extends Fragment{
                             Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                         }
                     }
-                }, eventID, activityToItemListMap);
+                }, eventId, activityToItemListMap);
             }
         });
 

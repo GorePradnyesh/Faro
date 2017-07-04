@@ -13,6 +13,7 @@ import android.widget.GridView;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.squareup.okhttp.Request;
+import com.zik.faro.data.Event;
 import com.zik.faro.data.FaroImageBase;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
@@ -29,15 +30,17 @@ import java.util.List;
 public class ImageGridViewActivity extends AppCompatActivity {
     private static final String TAG = "ImageGridViewActivity";
     private final Context context = this;
-
+    private Event cloneEvent = null;
+    private EventListHandler eventListHandler = EventListHandler.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_grid_view);
 
-        final String eventName = getIntent().getStringExtra("eventName");
-        String eventId = getIntent().getStringExtra("eventId");
+        String eventId = getIntent().getStringExtra(FaroIntentConstants.EVENT_ID);
+        cloneEvent = eventListHandler.getEventCloneFromMap(eventId);
+        final String eventName = cloneEvent.getEventName();
         Log.i(TAG, "eventName = " + eventName);
 
         // Set the title to the event name

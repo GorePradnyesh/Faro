@@ -29,6 +29,7 @@ import com.zik.faro.data.PollOption;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
+import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -42,8 +43,8 @@ public class EditPoll extends Activity {
     private PollListHandler pollListHandler = PollListHandler.getInstance();
     private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
-    private String eventID = null;
-    private String pollID;
+    private String eventId = null;
+    private String pollId;
     private Poll clonePoll;
     private Intent PollLandingPageIntent;
 
@@ -75,9 +76,9 @@ public class EditPoll extends Activity {
         Bundle extras = getIntent().getExtras();
         if (extras == null) return; //TODO How to handle this case?
 
-        eventID = extras.getString("eventID");
-        pollID = extras.getString("pollID");
-        clonePoll = pollListHandler.getPollCloneFromMap(pollID);
+        eventId = extras.getString(FaroIntentConstants.EVENT_ID);
+        pollId = extras.getString(FaroIntentConstants.POLL_ID);
+        clonePoll = pollListHandler.getPollCloneFromMap(pollId);
 
         pollDescription = (TextView) findViewById(R.id.pollDescription);
         isMultiChoice = (CheckBox)findViewById(R.id.multiChoiceFlag);
@@ -170,9 +171,8 @@ public class EditPoll extends Activity {
                         @Override
                         public void run() {
                             Log.i(TAG, "Poll Update Response received Successfully");
-                            pollListHandler.addPollToListAndMap(eventID, poll, mContext);
-                            PollLandingPageIntent.putExtra("eventID", eventID);
-                            PollLandingPageIntent.putExtra("pollID", pollID);
+                            pollListHandler.addPollToListAndMap(eventId, poll, mContext);
+                            FaroIntentInfoBuilder.pollIntent(PollLandingPageIntent, eventId, pollId);
                             startActivity(PollLandingPageIntent);
                             finish();
                         }
@@ -183,7 +183,7 @@ public class EditPoll extends Activity {
                     Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                 }
             }
-        }, eventID, pollID, map);
+        }, eventId, pollId, map);
     }
 
     private void deletePollFromServer () {
@@ -199,7 +199,7 @@ public class EditPoll extends Activity {
                     Runnable myRunnable = new Runnable() {
                         @Override
                         public void run() {
-                            pollListHandler.removePollFromListAndMap(eventID, clonePoll, mContext);
+                            pollListHandler.removePollFromListAndMap(eventId, clonePoll, mContext);
                             popupWindow.dismiss();
                             Toast.makeText(EditPoll.this, clonePoll.getDescription() + "is Deleted", LENGTH_LONG).show();
                             finish();
@@ -211,7 +211,7 @@ public class EditPoll extends Activity {
                     Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                 }
             }
-        }, eventID, pollID);
+        }, eventId, pollId);
     }
 
     private void confirmPollDeletePopUP(View v) {
@@ -253,8 +253,7 @@ public class EditPoll extends Activity {
 
     @Override
     public void onBackPressed() {
-        PollLandingPageIntent.putExtra("eventID", eventID);
-        PollLandingPageIntent.putExtra("pollID", pollID);
+        FaroIntentInfoBuilder.pollIntent(PollLandingPageIntent, eventId, pollId);
         startActivity(PollLandingPageIntent);
         finish();
         super.onBackPressed();
@@ -265,11 +264,10 @@ public class EditPoll extends Activity {
         // Check if the version is same. It can be different if this page is loaded and a notification
         // is received for this later which updates the global memory but clonedata on this page remains
         // stale.
-        Long versionInGlobalMemory = pollListHandler.getOriginalPollFromMap(pollID).getVersion();
+        Long versionInGlobalMemory = pollListHandler.getOriginalPollFromMap(pollId).getVersion();
         if (!clonePoll.getVersion().equals(versionInGlobalMemory)) {
             Intent editPollReloadIntent = new Intent(EditPoll.this, EditPoll.class);
-            editPollReloadIntent.putExtra("eventID", eventID);
-            editPollReloadIntent.putExtra("pollID", pollID);
+            FaroIntentInfoBuilder.pollIntent(editPollReloadIntent, eventId, pollId);
             finish();
             startActivity(editPollReloadIntent);
         }

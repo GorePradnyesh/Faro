@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -20,6 +19,7 @@ import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.notification.NotificationPayloadHandler;
+import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -35,8 +35,8 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
     private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
     private EventListHandler eventListHandler = EventListHandler.getInstance();
-    private String eventID = null;
-    private String activityID = null;
+    private String eventId = null;
+    private String activityId = null;
     private ImageButton editButton = null;
     private ImageButton activityAssignmentButton = null;
     private Intent EditActivityPage = null;
@@ -50,7 +50,7 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
     private LinearLayout linlaHeaderProgress = null;
     private RelativeLayout activityLandingPageRelativeLayout = null;
     private Context mContext = this;
-    private String isNotification = null;
+    private String bundleType = null;
 
     private boolean receivedEvent = false;
     private boolean receivedAllActivities = false;
@@ -73,20 +73,20 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
         checkAndHandleNotification();
     }
 
-    private void setupPageDetails () {
+    private void setupPageDetails() {
 
         if (!receivedEvent || !receivedAllActivities)
             return;
 
-        cloneActivity = activityListHandler.getActivityCloneFromMap(activityID);
+        cloneActivity = activityListHandler.getActivityCloneFromMap(activityId);
 
         linlaHeaderProgress.setVisibility(View.GONE);
         activityLandingPageRelativeLayout.setVisibility(View.VISIBLE);
 
-        editButton = (ImageButton)findViewById(R.id.editButton);
+        editButton = (ImageButton) findViewById(R.id.editButton);
         editButton.setImageResource(R.drawable.edit);
 
-        activityAssignmentButton = (ImageButton)findViewById(R.id.activityAssignmentImageButton);
+        activityAssignmentButton = (ImageButton) findViewById(R.id.activityAssignmentImageButton);
         activityAssignmentButton.setImageResource(R.drawable.assignment_icon);
 
         activityName = (TextView) findViewById(R.id.activityNameText);
@@ -95,19 +95,18 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
         activityDescription = (TextView) findViewById(R.id.activityDescriptionTextView);
         activityDescription.setText(cloneActivity.getDescription());
 
-        startDateAndTime = (TextView)findViewById(R.id.startDateAndTimeDisplay);
+        startDateAndTime = (TextView) findViewById(R.id.startDateAndTimeDisplay);
         startDateAndTime.setText(sdf.format(cloneActivity.getStartDate().getTime()) + " at " +
                 stf.format(cloneActivity.getStartDate().getTime()));
 
-        endDateAndTime = (TextView)findViewById(R.id.endDateAndTimeDisplay);
+        endDateAndTime = (TextView) findViewById(R.id.endDateAndTimeDisplay);
         endDateAndTime.setText(sdf.format(cloneActivity.getEndDate().getTime()) + " at " +
                 stf.format(cloneActivity.getEndDate().getTime()));
 
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EditActivityPage.putExtra("eventID", eventID);
-                EditActivityPage.putExtra("activityID", activityID);
+                FaroIntentInfoBuilder.activityIntent(EditActivityPage, eventId, activityId);
                 startActivity(EditActivityPage);
                 finish();
             }
@@ -116,9 +115,8 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
         activityAssignmentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AssignmentLandingPageIntent.putExtra("eventID", eventID);
-                AssignmentLandingPageIntent.putExtra("activityID", activityID);
-                AssignmentLandingPageIntent.putExtra("assignmentID", cloneActivity.getAssignment().getId());
+                FaroIntentInfoBuilder.assignmentIntent(AssignmentLandingPageIntent, eventId,
+                        activityId, cloneActivity.getAssignment().getId());
                 startActivity(AssignmentLandingPageIntent);
             }
         });
@@ -127,16 +125,16 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
     @Override
     public void checkAndHandleNotification() {
         extras = getIntent().getExtras();
-        if(extras == null) return; //TODO How to handle this case?
+        if (extras == null) return; //TODO How to handle this case?
 
-        eventID = extras.getString("eventID");
-        activityID = extras.getString("activityID");
-        isNotification = extras.getString("bundleType");
+        eventId = extras.getString(FaroIntentConstants.EVENT_ID);
+        activityId = extras.getString(FaroIntentConstants.ACTIVITY_ID);
+        bundleType = extras.getString(FaroIntentConstants.BUNDLE_TYPE);
 
-        Log.d(TAG, "******eventID is " + eventID);
-        Log.d(TAG, "******activityID is " + activityID);
+        Log.d(TAG, "******eventId is " + eventId);
+        Log.d(TAG, "******activityId is " + activityId);
 
-        if (isNotification == null){
+        if (bundleType.equals(FaroIntentConstants.IS_NOT_NOTIFICATION)) {
             receivedAllActivities = true;
             receivedEvent = true;
             setupPageDetails();
@@ -151,7 +149,7 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
         }
     }
 
-    public void getEventActivitiesFromServer(){
+    public void getEventActivitiesFromServer() {
         serviceHandler.getActivityHandler().getActivities(new BaseFaroRequestCallback<List<Activity>>() {
             @Override
             public void onFailure(Request request, IOException ex) {
@@ -166,7 +164,7 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
                         public void run() {
                             receivedAllActivities = true;
                             Log.i(TAG, "Successfully received activities from the server!!");
-                            activityListHandler.addDownloadedActivitiesToListAndMap(eventID, activities, mContext);
+                            activityListHandler.addDownloadedActivitiesToListAndMap(eventId, activities, mContext);
                             setupPageDetails();
                         }
                     };
@@ -176,10 +174,10 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
                     Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                 }
             }
-        }, eventID);
+        }, eventId);
     }
 
-    public void getEventFromServer () {
+    public void getEventFromServer() {
         serviceHandler.getEventHandler().getEvent(new BaseFaroRequestCallback<EventInviteStatusWrapper>() {
             @Override
             public void onFailure(Request request, IOException ex) {
@@ -188,7 +186,7 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
 
             @Override
             public void onResponse(final EventInviteStatusWrapper eventInviteStatusWrapper, HttpError error) {
-                if (error == null ) {
+                if (error == null) {
                     Runnable myRunnable = new Runnable() {
                         @Override
                         public void run() {
@@ -197,31 +195,30 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
                             Event event = eventInviteStatusWrapper.getEvent();
                             eventListHandler.addEventToListAndMap(event,
                                     eventInviteStatusWrapper.getInviteStatus());
-                            assignmentListHandler.addAssignmentToListAndMap(eventID, event.getAssignment(), null, mContext);
+                            assignmentListHandler.addAssignmentToListAndMap(eventId, event.getAssignment(), null, mContext);
                             setupPageDetails();
                         }
                     };
                     Handler mainHandler = new Handler(mContext.getMainLooper());
                     mainHandler.post(myRunnable);
-                }else {
+                } else {
                     Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                 }
             }
-        }, eventID);
+        }, eventId);
     }
 
     @Override
     protected void onResume() {
-        if (isNotification == null) {
+        if (bundleType.equals(FaroIntentConstants.IS_NOT_NOTIFICATION)) {
             // Check if the version is same. It can be different if this page is loaded and a notification
             // is received for this later which updates the global memory but clonedata on this page remains
             // stale.
             // This check is not necessary when opening this page directly through a notification.
-            Long versionInGlobalMemory = activityListHandler.getOriginalActivityFromMap(activityID).getVersion();
+            Long versionInGlobalMemory = activityListHandler.getOriginalActivityFromMap(activityId).getVersion();
             if (!cloneActivity.getVersion().equals(versionInGlobalMemory)) {
                 Intent activityLandingPageReloadIntent = new Intent(ActivityLandingPage.this, ActivityLandingPage.class);
-                activityLandingPageReloadIntent.putExtra("activityID", activityID);
-                activityLandingPageReloadIntent.putExtra("eventID", eventID);
+                FaroIntentInfoBuilder.activityIntent(activityLandingPageReloadIntent, eventId, activityId);
                 finish();
                 startActivity(activityLandingPageReloadIntent);
             }

@@ -40,20 +40,20 @@ public class PollListHandler {
 
     /*
     * Map of Polls needed to access polls downloaded from the server in O(1) time. The Key to the
-    * Map is the pollID String which returns the Poll as the value
+    * Map is the pollId String which returns the Poll as the value
     */
     private Map<String, Poll> pollMap = new ConcurrentHashMap<>();
 
-    public Poll getPollCloneFromMap(String pollID){
-        Poll poll = pollMap.get(pollID);
+    public Poll getPollCloneFromMap(String pollId){
+        Poll poll = pollMap.get(pollId);
         Gson gson = new Gson();
         String json = gson.toJson(poll);
         Poll clonePoll = gson.fromJson(json, Poll.class);
         return clonePoll;
     }
 
-    public Poll getOriginalPollFromMap(String pollID){
-        Poll poll = pollMap.get(pollID);
+    public Poll getOriginalPollFromMap(String pollId){
+        Poll poll = pollMap.get(pollId);
         return poll;
     }
 
@@ -62,81 +62,81 @@ public class PollListHandler {
     // lot of polls. Have a Max limit on number of polls we will cache else will use up a lot of
     // memory and battery. Use MAX_TOTAL_POLLS_IN_CACHE to set the max polls we will cache
 
-    public PollAdapter getOpenPollAdapter(String eventID, Context context){
-        PollAdapter openPollAdapter = openPollsAdapterMap.get(eventID);
+    public PollAdapter getOpenPollAdapter(String eventId, Context context){
+        PollAdapter openPollAdapter = openPollsAdapterMap.get(eventId);
         if (openPollAdapter == null){
             openPollAdapter = new PollAdapter(context, R.layout.poll_list_page_row_style);
-            openPollsAdapterMap.put(eventID, openPollAdapter);
+            openPollsAdapterMap.put(eventId, openPollAdapter);
         }
         return openPollAdapter;
     }
 
-    public PollAdapter getClosedPollAdapter(String eventID, Context context){
-        PollAdapter closedPollAdapter = closedPollsAdapterMap.get(eventID);
+    public PollAdapter getClosedPollAdapter(String eventId, Context context){
+        PollAdapter closedPollAdapter = closedPollsAdapterMap.get(eventId);
         if (closedPollAdapter == null){
             closedPollAdapter = new PollAdapter(context, R.layout.poll_list_page_row_style);
-            closedPollsAdapterMap.put(eventID, closedPollAdapter);
+            closedPollsAdapterMap.put(eventId, closedPollAdapter);
         }
         return closedPollAdapter;
     }
 
 
-    public void addPollToListAndMap(String eventID, Poll poll, Context context){
-        removePollFromListAndMap(eventID, poll, context);
-        conditionallyAddNewPollToList(eventID, poll, context);
+    public void addPollToListAndMap(String eventId, Poll poll, Context context){
+        removePollFromListAndMap(eventId, poll, context);
+        conditionallyAddNewPollToList(eventId, poll, context);
         pollMap.put(poll.getId(), poll);
     }
 
-    private void conditionallyAddNewPollToList(String eventID, Poll poll, Context context) {
+    private void conditionallyAddNewPollToList(String eventId, Poll poll, Context context) {
         PollAdapter pollAdapter;
-        pollAdapter = getPollAdapter(eventID, poll, context);
+        pollAdapter = getPollAdapter(eventId, poll, context);
         if(pollAdapter != null) {
             pollAdapter.insert(poll, 0);
             pollAdapter.notifyDataSetChanged();
         }
     }
 
-    public void addDownloadedPollsToListAndMap(String eventID, List<Poll> pollList, Context context){
+    public void addDownloadedPollsToListAndMap(String eventId, List<Poll> pollList, Context context){
         for (int i = 0; i < pollList.size(); i++){
             Poll poll = pollList.get(i);
-            addPollToListAndMap(eventID, poll, context);
+            addPollToListAndMap(eventId, poll, context);
         }
-        PollAdapter openPollsAdapter = getOpenPollAdapter(eventID, context);
-        PollAdapter closedPollsAdapter = getClosedPollAdapter(eventID, context);
+        PollAdapter openPollsAdapter = getOpenPollAdapter(eventId, context);
+        PollAdapter closedPollsAdapter = getClosedPollAdapter(eventId, context);
         openPollsAdapter.notifyDataSetChanged();
         closedPollsAdapter.notifyDataSetChanged();
     }
 
-    public int getCombinedListSize(String eventID, Context context){
-        PollAdapter openPollsAdapter = getOpenPollAdapter(eventID, context);
-        PollAdapter closedPollsAdapter = getClosedPollAdapter(eventID, context);
+    public int getCombinedListSize(String eventId, Context context){
+        PollAdapter openPollsAdapter = getOpenPollAdapter(eventId, context);
+        PollAdapter closedPollsAdapter = getClosedPollAdapter(eventId, context);
         return openPollsAdapter.list.size()+ closedPollsAdapter.list.size();
     }
 
-    private PollAdapter getPollAdapter(String eventID, Poll poll, Context context){
+    private PollAdapter getPollAdapter(String eventId, Poll poll, Context context){
         switch(poll.getStatus()){
             case OPEN:
-                return getOpenPollAdapter(eventID, context);
+                return getOpenPollAdapter(eventId, context);
             case CLOSED:
-                return getClosedPollAdapter(eventID, context);
+                return getClosedPollAdapter(eventId, context);
             default:
-                return getClosedPollAdapter(eventID, context);
+                return getClosedPollAdapter(eventId, context);
         }
     }
 
-    public void removePollFromList(String pollID, List <Poll> pollList){
+    public void removePollFromList(String pollId, List <Poll> pollList){
         for (int i = 0; i < pollList.size(); i++){
             Poll poll = pollList.get(i);
-            if (poll.getId().equals(pollID)){
+            if (poll.getId().equals(pollId)){
                 pollList.remove(poll);
                 return;
             }
         }
     }
 
-    public void removePollFromListAndMap(String eventID, Poll poll, Context context){
+    public void removePollFromListAndMap(String eventId, Poll poll, Context context){
         PollAdapter pollAdapter;
-        pollAdapter = getPollAdapter(eventID, poll, context);
+        pollAdapter = getPollAdapter(eventId, poll, context);
         if(pollAdapter != null) {
             removePollFromList(poll.getId(), pollAdapter.list);
             pollAdapter.notifyDataSetChanged();
@@ -153,33 +153,33 @@ public class PollListHandler {
             pollMap.clear();
     }
 
-    /*public void clearPollListsAndMap(String eventID, Context context){
-        PollAdapter openPollsAdapter = getOpenPollAdapter(eventID, context);
-        PollAdapter closedPollsAdapter = getClosedPollAdapter(eventID, context);
+    /*public void clearPollListsAndMap(String eventId, Context context){
+        PollAdapter openPollsAdapter = getOpenPollAdapter(eventId, context);
+        PollAdapter closedPollsAdapter = getClosedPollAdapter(eventId, context);
         if (openPollsAdapter != null) {
             openPollsAdapter.list.clear();
-            openPollsAdapterMap.remove(eventID);
+            openPollsAdapterMap.remove(eventId);
         }
         if (closedPollsAdapter != null) {
             closedPollsAdapter.list.clear();
-            closedPollsAdapterMap.remove(eventID);
+            closedPollsAdapterMap.remove(eventId);
         }
         if (pollMap != null) {
             pollMap.clear();
         }
     }*/
 
-    private void clearPollAdaptersIfEmpty(String eventID, Poll poll, Context context){
-        PollAdapter openPollsAdapter = getOpenPollAdapter(eventID, context);
-        PollAdapter closedPollsAdapter = getClosedPollAdapter(eventID, context);
+    private void clearPollAdaptersIfEmpty(String eventId, Poll poll, Context context){
+        PollAdapter openPollsAdapter = getOpenPollAdapter(eventId, context);
+        PollAdapter closedPollsAdapter = getClosedPollAdapter(eventId, context);
         if (openPollsAdapter != null) {
             if (openPollsAdapter.list.isEmpty()) {
-                openPollsAdapterMap.remove(eventID);
+                openPollsAdapterMap.remove(eventId);
             }
         }
         if (closedPollsAdapter != null) {
             if (closedPollsAdapter.list.isEmpty()) {
-                closedPollsAdapterMap.remove(eventID);
+                closedPollsAdapterMap.remove(eventId);
             }
         }
     }

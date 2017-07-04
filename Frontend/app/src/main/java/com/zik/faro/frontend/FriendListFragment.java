@@ -33,6 +33,7 @@ import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
+import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,8 +44,8 @@ import java.text.MessageFormat;
 import java.util.List;
 
 public class FriendListFragment extends Fragment {
-    private static UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
-    private static FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
+    private UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
+    private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
     private RelativeLayout popUpRelativeLayout;
     private FaroUserContext faroUserContext = FaroUserContext.getInstance();
@@ -76,7 +77,7 @@ public class FriendListFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 final Intent userProfilePageIntent = new Intent(getActivity(), UserProfilePage.class);
                 MinUser minUser = (MinUser)parent.getItemAtPosition(position);
-                userProfilePageIntent.putExtra("userEmailID", minUser.getEmail());
+                FaroIntentInfoBuilder.userProfileIntent(userProfilePageIntent, minUser.getEmail(), null);
                 startActivity(userProfilePageIntent);
             }
         });

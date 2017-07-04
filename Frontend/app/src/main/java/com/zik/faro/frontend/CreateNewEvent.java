@@ -39,6 +39,7 @@ import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
+import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 import static android.widget.Toast.LENGTH_LONG;
 
@@ -210,7 +211,7 @@ public class CreateNewEvent extends Activity {
                                     //Since update to server successful, adding event to List and Map below
                                     Log.i(TAG, "Event Create Response received Successfully");
                                     eventListHandler.addEventToListAndMap(receivedEvent, EventInviteStatus.ACCEPTED);
-                                    EventLanding.putExtra("eventID", receivedEvent.getId());
+                                    FaroIntentInfoBuilder.eventIntent(EventLanding, receivedEvent.getId());
                                     startActivity(EventLanding);
                                     finish();
                                 }

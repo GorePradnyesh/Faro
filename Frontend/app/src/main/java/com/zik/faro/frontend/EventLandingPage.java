@@ -53,6 +53,7 @@ import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.notification.NotificationPayloadHandler;
+import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 import java.io.File;
 import java.io.IOException;
@@ -97,7 +98,7 @@ public class EventLandingPage extends FragmentActivity
     private ImageButton mapMarker = null;
     private ImageView transparentImageView = null;
 
-    private String eventID;
+    private String eventId;
     private Context mContext = this;
     private Intent eventLandingPageReload;
 
@@ -141,7 +142,7 @@ public class EventLandingPage extends FragmentActivity
 
     private RelativeLayout EventLandingPageRelativeLayout = null;
     private LinearLayout photosStuffLinearLayout = null;
-    private String isNotification = null;
+    private String bundleType = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -181,19 +182,19 @@ public class EventLandingPage extends FragmentActivity
                                 case ACCEPTED:
                                     eventListHandler.addEventToListAndMap(cloneEvent, EventInviteStatus.ACCEPTED);
                                     //Reload EventLandingPage
-                                    eventLandingPageReload.putExtra("eventID", eventID);
+                                    FaroIntentInfoBuilder.eventIntent(eventLandingPageReload, eventId);
                                     finish();
                                     startActivity(eventLandingPageReload);
                                     break;
                                 case MAYBE:
                                     eventListHandler.addEventToListAndMap(cloneEvent, EventInviteStatus.MAYBE);
                                     //Reload EventLandingPage
-                                    eventLandingPageReload.putExtra("eventID", eventID);
+                                    FaroIntentInfoBuilder.eventIntent(eventLandingPageReload, eventId);
                                     finish();
                                     startActivity(eventLandingPageReload);
                                     break;
                                 case DECLINED:
-                                    eventListHandler.removeEventFromListAndMap(eventID);
+                                    eventListHandler.removeEventFromListAndMap(eventId);
                                     finish();
                                     break;
                             }
@@ -205,12 +206,12 @@ public class EventLandingPage extends FragmentActivity
                     Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                 }
             }
-        }, eventID, eventInviteStatus);
+        }, eventId, eventInviteStatus);
     }
 
     private void eventStateBasedView(Event event){
 
-        EventInviteStatus inviteStatus = eventListHandler.getUserEventStatus(eventID);
+        EventInviteStatus inviteStatus = eventListHandler.getUserEventStatus(eventId);
 
         if (inviteStatus == EventInviteStatus.ACCEPTED){
             statusYes.setVisibility(View.GONE);
@@ -276,12 +277,12 @@ public class EventLandingPage extends FragmentActivity
 
     @Override
     public void checkAndHandleNotification() {
-        isNotification = extras.getString("bundleType");
-        eventID = extras.getString("eventID");
+        bundleType = extras.getString(FaroIntentConstants.BUNDLE_TYPE);
+        eventId = extras.getString(FaroIntentConstants.EVENT_ID);
 
-        Log.d(TAG, "******eventID is " + eventID);
+        Log.d(TAG, "******eventId is " + eventId);
 
-        if (isNotification == null){
+        if (bundleType.equals(FaroIntentConstants.IS_NOT_NOTIFICATION)){
             setupPageDetails();
             return;
         }
@@ -292,7 +293,7 @@ public class EventLandingPage extends FragmentActivity
 
     private void setupPageDetails(){
 
-        cloneEvent = eventListHandler.getEventCloneFromMap(eventID);
+        cloneEvent = eventListHandler.getEventCloneFromMap(eventId);
         if (cloneEvent == null){
             return; //TODO How to handle such a case?
         }
@@ -369,7 +370,7 @@ public class EventLandingPage extends FragmentActivity
         pollButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PollListPage.putExtra("eventID", eventID);
+                FaroIntentInfoBuilder.eventIntent(PollListPage, eventId);
                 startActivity(PollListPage);
             }
         });
@@ -377,8 +378,8 @@ public class EventLandingPage extends FragmentActivity
         eventAssignmentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AssignmentLandingPageTabsIntent.putExtra("eventID", eventID);
-                AssignmentLandingPageTabsIntent.putExtra("assignmentID", cloneEvent.getAssignment().getId());
+                FaroIntentInfoBuilder.assignmentIntent(AssignmentLandingPageTabsIntent, eventId,
+                        null, cloneEvent.getAssignment().getId());
                 startActivity(AssignmentLandingPageTabsIntent);
             }
         });
@@ -386,7 +387,7 @@ public class EventLandingPage extends FragmentActivity
         activityButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ActivityListPage.putExtra("eventID", eventID);
+                FaroIntentInfoBuilder.eventIntent(ActivityListPage, eventId);
                 startActivity(ActivityListPage);
             }
         });
@@ -394,7 +395,7 @@ public class EventLandingPage extends FragmentActivity
         guestListImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EventFriendListLandingPageIntent.putExtra("eventID", eventID);
+                FaroIntentInfoBuilder.eventIntent(EventFriendListLandingPageIntent, eventId);
                 startActivity(EventFriendListLandingPageIntent);
                 //finish();
             }
@@ -403,7 +404,7 @@ public class EventLandingPage extends FragmentActivity
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EditEvent.putExtra("eventID", eventID);
+                FaroIntentInfoBuilder.eventIntent(EditEvent, eventId);
                 startActivity(EditEvent);
                 finish();
             }
@@ -413,8 +414,7 @@ public class EventLandingPage extends FragmentActivity
             @Override
             public void onClick(View v) {
                 Intent imagesViewIntent = new Intent(EventLandingPage.this, ImageGridViewActivity.class);
-                imagesViewIntent.putExtra("eventId", cloneEvent.getId());
-                imagesViewIntent.putExtra("eventName", cloneEvent.getEventName());
+                FaroIntentInfoBuilder.eventIntent(imagesViewIntent, eventId);
                 startActivity(imagesViewIntent);
             }
         });
@@ -544,8 +544,8 @@ public class EventLandingPage extends FragmentActivity
         getEventInviteesFromServer();
 
         //Add event's assignment to the Assignment Handler
-        Event originalEvent = eventListHandler.getOriginalEventFromMap(eventID);
-        assignmentListHandler.addAssignmentToListAndMap(eventID, originalEvent.getAssignment(), null, mContext);
+        Event originalEvent = eventListHandler.getOriginalEventFromMap(eventId);
+        assignmentListHandler.addAssignmentToListAndMap(eventId, originalEvent.getAssignment(), null, mContext);
 
         //Make API call to get all activities for this event
         getEventActivitiesFromServer();
@@ -659,7 +659,7 @@ public class EventLandingPage extends FragmentActivity
                     Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                 }
             }
-        }, eventID);
+        }, eventId);
     }
 
     public void getEventActivitiesFromServer(){
@@ -676,7 +676,7 @@ public class EventLandingPage extends FragmentActivity
                         @Override
                         public void run() {
                             Log.i(TAG, "Successfully received activities from the server!!");
-                            activityListHandler.addDownloadedActivitiesToListAndMap(eventID, activities, mContext);
+                            activityListHandler.addDownloadedActivitiesToListAndMap(eventId, activities, mContext);
                         }
                     };
                     Handler mainHandler = new Handler(mContext.getMainLooper());
@@ -685,7 +685,7 @@ public class EventLandingPage extends FragmentActivity
                     Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                 }
             }
-        }, eventID);
+        }, eventId);
     }
 
     private boolean checkPermissionsForUploadingPhotos() {
@@ -773,7 +773,7 @@ public class EventLandingPage extends FragmentActivity
                         "com.zik.faro.fileprovider",
                         photoFile);*/
                 Uri photoURI = Uri.fromFile(photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                FaroIntentInfoBuilder.pictureIntent(takePictureIntent, photoURI);
                 startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
             }
         }
@@ -869,7 +869,7 @@ public class EventLandingPage extends FragmentActivity
                         @Override
                         public void run() {
                             Log.i(TAG, "Successfully received Invitee List for the cloneEvent");
-                            eventFriendListHandler.addDownloadedFriendsToListAndMap(eventID, inviteeList, mContext);
+                            eventFriendListHandler.addDownloadedFriendsToListAndMap(eventId, inviteeList, mContext);
                         }
                     };
                     Handler mainHandler = new Handler(mContext.getMainLooper());
@@ -878,20 +878,20 @@ public class EventLandingPage extends FragmentActivity
                     Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                 }
             }
-        }, eventID);
+        }, eventId);
     }
 
     @Override
     protected void onResume() {
-        if (isNotification == null) {
+        if (bundleType.equals(FaroIntentConstants.IS_NOT_NOTIFICATION)) {
             // Check if the version is same. It can be different if this page is loaded and a notification
             // is received for this later which updates the global memory but clonedata on this page remains
             // stale.
             // This check is not necessary when opening this page directly through a notification.
-            Long versionInGlobalMemory = eventListHandler.getOriginalEventFromMap(eventID).getVersion();
+            Long versionInGlobalMemory = eventListHandler.getOriginalEventFromMap(eventId).getVersion();
             if (!cloneEvent.getVersion().equals(versionInGlobalMemory)) {
                 Intent eventLandingPageReloadIntent = new Intent(EventLandingPage.this, EventLandingPage.class);
-                eventLandingPageReloadIntent.putExtra("eventID", eventID);
+                FaroIntentInfoBuilder.eventIntent(eventLandingPageReloadIntent, eventId);
                 finish();
                 startActivity(eventLandingPageReloadIntent);
             }

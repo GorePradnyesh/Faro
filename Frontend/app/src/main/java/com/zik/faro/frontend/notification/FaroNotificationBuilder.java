@@ -9,8 +9,9 @@ import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.zik.faro.frontend.AppLandingPage;
+import com.zik.faro.frontend.FaroIntentConstants;
 import com.zik.faro.frontend.R;
+import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,10 +20,10 @@ public class FaroNotificationBuilder {
     private static final String TAG = "FaroNotificationBuilder";
 
 
-    public static NotificationCompat.Builder getNotficationBuilder(Context context, String title,
-                                                            String  messageBody,
-                                                            String notificationType,
-                                                            JSONObject data){
+    public static NotificationCompat.Builder getNotificationBuilder(Context context, String title,
+                                                                    String  messageBody,
+                                                                    String notificationType,
+                                                                    JSONObject data){
 
         Intent intent = null;
         PendingIntent pendingIntent = null;
@@ -30,24 +31,32 @@ public class FaroNotificationBuilder {
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context);
 
         switch (notificationType){
-            case "RECEIVEDNOTIFICATIONHANDLER":
-                intent = new Intent(context, ReceivedNotficationHandler.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                intent.putExtra("bundleType", "foregroundNotification");
-                intent.putExtra("dataStr", data.toString());
+            case "DEFAULTACTION":
+                intent = new Intent(context, ReceivedNotificationHandler.class);
+                //intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                FaroIntentInfoBuilder.notificationHandlerIntent(intent,
+                        FaroIntentConstants.FOREGROUND_NOTIFICATION, data.toString());
                 pendingIntent = PendingIntent.getActivity(context, 0 /* Request code */, intent,
                         PendingIntent.FLAG_ONE_SHOT);
                 Log.d(TAG, "In RECEIVEDNOTIFICATIONHANDLER case when building builder ====");
                 break;
             default:
-                intent = new Intent(context, ReceivedNotficationHandler.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                intent.putExtra("bundleType", "foregroundNotification");
-                intent.putExtra("dataStr", data.toString());
+                intent = new Intent(context, ReceivedNotificationHandler.class);
+                //intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                FaroIntentInfoBuilder.notificationHandlerIntent(intent,
+                        FaroIntentConstants.FOREGROUND_NOTIFICATION, data.toString());
                 pendingIntent = PendingIntent.getActivity(context, 0 /* Request code */, intent,
                         PendingIntent.FLAG_ONE_SHOT);
                 Log.d(TAG, "In default case when building builder ====");
                 break;
+        }
+
+        ForegroundNotificationSilentHandler foregroundNotificationSilentHandler =
+                new ForegroundNotificationSilentHandler();
+        try {
+            foregroundNotificationSilentHandler.updateGlobalMemoryIfPresent(context, data);
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
 
         Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);

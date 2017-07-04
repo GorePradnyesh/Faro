@@ -12,13 +12,14 @@ import android.widget.TextView;
 
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Event;
+import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 public class AssignmentLandingPage extends FragmentActivity {
     private FragmentTabHost mTabHost;
-    private String activityID = null;
-    private String eventID = null;
-    private String assignmentID = null;
-    private String isNotification = null;
+    private String activityId = null;
+    private String eventId = null;
+    private String assignmentId = null;
+    private String bundleType = null;
     private AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
     private EventListHandler eventListHandler = EventListHandler.getInstance();
     private ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
@@ -32,22 +33,22 @@ public class AssignmentLandingPage extends FragmentActivity {
 
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
-            eventID = extras.getString("eventID");
-            activityID = extras.getString("activityID");
-            assignmentID = extras.getString("assignmentID");
-            isNotification = extras.getString("bundleType");
+            eventId = extras.getString(FaroIntentConstants.EVENT_ID);
+            activityId = extras.getString(FaroIntentConstants.ACTIVITY_ID);
+            assignmentId = extras.getString(FaroIntentConstants.ASSIGNMENT_ID);
+            bundleType = extras.getString(FaroIntentConstants.BUNDLE_TYPE);
 
-            if (activityID == null){
-                cloneEvent = eventListHandler.getEventCloneFromMap(eventID);
+            if (activityId == null){
+                cloneEvent = eventListHandler.getEventCloneFromMap(eventId);
             } else {
-                cloneActivity = activityListHandler.getActivityCloneFromMap(activityID);
+                cloneActivity = activityListHandler.getActivityCloneFromMap(activityId);
             }
 
             Bundle bundle = new Bundle();
-            bundle.putString("eventID", eventID);
-            bundle.putString("activityID", activityID);
-            bundle.putString("assignmentID", assignmentID);
-            bundle.putString("bundleType", isNotification);
+            bundle.putString(FaroIntentConstants.EVENT_ID, eventId);
+            bundle.putString(FaroIntentConstants.ACTIVITY_ID, activityId);
+            bundle.putString(FaroIntentConstants.ASSIGNMENT_ID, assignmentId);
+            bundle.putString(FaroIntentConstants.BUNDLE_TYPE, bundleType);
 
             Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
             mTabHost = (FragmentTabHost) findViewById(android.R.id.tabhost);
@@ -70,7 +71,7 @@ public class AssignmentLandingPage extends FragmentActivity {
 
     @Override
     protected void onResume() {
-        if (isNotification == null) {
+        if (bundleType.equals(FaroIntentConstants.IS_NOT_NOTIFICATION)) {
             // Check if the version is same. It can be different if this page is loaded and a notification
             // is received for this later which updates the global memory but clonedata on this page remains
             // stale.
@@ -78,19 +79,18 @@ public class AssignmentLandingPage extends FragmentActivity {
             Long versionInGlobalMemory = null;
             Long previousVersion = null;
 
-            if (activityID == null) {
-                versionInGlobalMemory = eventListHandler.getOriginalEventFromMap(eventID).getVersion();
+            if (activityId == null) {
+                versionInGlobalMemory = eventListHandler.getOriginalEventFromMap(eventId).getVersion();
                 previousVersion = cloneEvent.getVersion();
             } else {
-                versionInGlobalMemory = activityListHandler.getOriginalActivityFromMap(activityID).getVersion();
+                versionInGlobalMemory = activityListHandler.getOriginalActivityFromMap(activityId).getVersion();
                 previousVersion = cloneActivity.getVersion();
             }
 
             if (!previousVersion.equals(versionInGlobalMemory)) {
                 Intent assignmentLandingPageReloadIntent = new Intent(AssignmentLandingPage.this, AssignmentLandingPage.class);
-                assignmentLandingPageReloadIntent.putExtra("eventID", eventID);
-                assignmentLandingPageReloadIntent.putExtra("activityID", activityID);
-                assignmentLandingPageReloadIntent.putExtra("assignmentID", assignmentID);
+                FaroIntentInfoBuilder.assignmentIntent(assignmentLandingPageReloadIntent, eventId,
+                        activityId, assignmentId);
                 finish();
                 startActivity(assignmentLandingPageReloadIntent);
             }

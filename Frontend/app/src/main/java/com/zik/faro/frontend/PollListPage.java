@@ -22,6 +22,7 @@ import com.zik.faro.data.Poll;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
+import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 import java.io.IOException;
 import java.util.List;
@@ -29,7 +30,7 @@ import java.util.List;
 public class PollListPage extends Activity {
     private Intent PollLandingPageIntent = null;
     private PollListHandler pollListHandler = PollListHandler.getInstance();
-    private String eventID = null;
+    private String eventId = null;
     private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private Intent CreateNewPoll = null;
     private Bundle extras = null;
@@ -60,7 +61,7 @@ public class PollListPage extends Activity {
         pollListPageRelativeLayout = (RelativeLayout) findViewById(R.id.pollListPageRelativeLayout);
         pollListPageRelativeLayout.setVisibility(View.GONE);
 
-        eventID = extras.getString("eventID");
+        eventId = extras.getString(FaroIntentConstants.EVENT_ID);
 
         getPollsFromServer();
     }
@@ -91,8 +92,8 @@ public class PollListPage extends Activity {
         closedPollsListView  = (ListView)findViewById(R.id.closedPollsList);
         closedPollsListView.setBackgroundColor(Color.BLACK);
 
-        openPollsListView.setAdapter(pollListHandler.getOpenPollAdapter(eventID, this));
-        closedPollsListView.setAdapter(pollListHandler.getClosedPollAdapter(eventID, this));
+        openPollsListView.setAdapter(pollListHandler.getOpenPollAdapter(eventId, this));
+        closedPollsListView.setAdapter(pollListHandler.getClosedPollAdapter(eventId, this));
 
         createNewPoll = (ImageButton)findViewById(R.id.add_new_poll);
         createNewPoll.setImageResource(R.drawable.plus);
@@ -116,10 +117,10 @@ public class PollListPage extends Activity {
         createNewPoll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(pollListHandler.getCombinedListSize(eventID, mContext) == PollListHandler.MAX_TOTAL_POLLS_PER_EVENT) {
+                if(pollListHandler.getCombinedListSize(eventId, mContext) == PollListHandler.MAX_TOTAL_POLLS_PER_EVENT) {
                     //DO NOT ALLOW NEW POLL CREATION
                 }else {
-                    CreateNewPoll.putExtra("eventID", eventID);
+                    FaroIntentInfoBuilder.eventIntent(CreateNewPoll, eventId);
                     startActivity(CreateNewPoll);
                 }
             }
@@ -127,7 +128,7 @@ public class PollListPage extends Activity {
     }
 
     private void getPollsFromServer (){
-        //Based on eventID make API call to get Polls for this cloneEvent
+        //Based on eventId make API call to get Polls for this cloneEvent
         serviceHandler.getPollHandler().getPolls(new BaseFaroRequestCallback<List<com.zik.faro.data.Poll>>() {
             @Override
             public void onFailure(Request request, IOException ex) {
@@ -141,7 +142,7 @@ public class PollListPage extends Activity {
                         @Override
                         public void run() {
                             Log.i(TAG, "Successfully received polls from the server!!");
-                            pollListHandler.addDownloadedPollsToListAndMap(eventID, polls, mContext);
+                            pollListHandler.addDownloadedPollsToListAndMap(eventId, polls, mContext);
                             setupPageDetails();
                         }
                     };
@@ -151,13 +152,12 @@ public class PollListPage extends Activity {
                     Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
                 }
             }
-        }, eventID);
+        }, eventId);
     }
 
     private void pollSelectedFromList(AdapterView<?> parent, int position, Intent intent) {
         Poll poll = (Poll) parent.getItemAtPosition(position);
-        intent.putExtra("eventID", eventID);
-        intent.putExtra("pollID", poll.getId());
+        FaroIntentInfoBuilder.pollIntent(intent, eventId, poll.getId());
         startActivity(intent);
     }
 
