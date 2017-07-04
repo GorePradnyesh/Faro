@@ -6,8 +6,6 @@ import com.zik.faro.frontend.faroservice.okHttp.OkHttpResponse;
 
 import java.io.IOException;
 
-import static com.zik.faro.frontend.EventListHandler.serviceHandler;
-
 /**
  * Created by gaurav on 7/2/17.
  */
@@ -19,7 +17,7 @@ public class FacebookLoginJob extends FacebookBaseSignInJob {
 
     @Override
     public OkHttpResponse<String> faroSignIn(FirebaseUser firebaseUser, String firebaseAuthToken) throws IOException {
-        return serviceHandler.getFirebaseLoginHandler().login(firebaseUser.getEmail(), null, firebaseAuthToken, true);
+        return faroServiceHandler.getFirebaseLoginHandler().login(firebaseUser.getEmail(), null, firebaseAuthToken, true);
     }
 
 }

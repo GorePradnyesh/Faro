@@ -7,8 +7,6 @@ import com.zik.faro.frontend.faroservice.okHttp.OkHttpResponse;
 
 import java.io.IOException;
 
-import static com.zik.faro.frontend.EventListHandler.serviceHandler;
-
 /**
  * Created by gaurav on 7/1/17.
  */
@@ -23,6 +21,6 @@ public class FacebookSignupJob extends FacebookBaseSignInJob implements Facebook
         FaroUser newFaroUser = new FaroUser(firebaseUser.getEmail(), firebaseUser.getDisplayName(), null,
                 null, null, null, null);
 
-        return serviceHandler.getSignupHandler().signup(newFaroUser, null, firebaseAuthToken, true);
+        return faroServiceHandler.getSignupHandler().signup(newFaroUser, null, firebaseAuthToken, true);
     }
 }
