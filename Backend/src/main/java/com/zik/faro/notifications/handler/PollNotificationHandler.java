@@ -53,6 +53,7 @@ public class PollNotificationHandler extends BaseNotificationHandler{
 		dataPayload.addKVPair(Constants.NOTIFICATION_TYPE_CONST, type);
 		dataPayload.addKVPair(Constants.NOTIFICATION_EVENTID_CONST, poll.getEventId());
 		dataPayload.addKVPair(Constants.NOTIFICATION_POLLID_CONST, poll.getId());
+		dataPayload.addKVPair(Constants.NOTIFICATION_VERSION_CONST, poll.getVersion().toString());
 		try {
 			FirebaseHTTPRequest request = createDataAndNotificationMessage(
 					Constants.FARO_EVENT_TOPIC_CONST+poll.getEventId(), notificationPayload, dataPayload);

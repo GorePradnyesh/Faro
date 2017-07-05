@@ -1,16 +1,20 @@
 package com.zik.faro.persistence.datastore;
 
-import com.zik.faro.data.MinUser;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.data.IllegalDataOperation;
+import com.zik.faro.data.MinUser;
 import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 import com.zik.faro.persistence.datastore.data.user.FriendRelationDo;
 
-import java.util.List;
-
 public class FriendRelationDatastoreImpl {
-
-    private static final String FROM_USER_FIELD_NAME = "fromId";
+	private static Logger logger = LoggerFactory.getLogger(FriendRelationDatastoreImpl.class);
+	
+	private static final String FROM_USER_FIELD_NAME = "fromId";
 
     public static void storeFriendRelation(MinUser bob, MinUser alice) throws IllegalDataOperation {
         /* Using Bob and Alice for more readability than user1/user2 or fromUser/toUser */
@@ -27,15 +31,17 @@ public class FriendRelationDatastoreImpl {
         FriendRelationDo friendRelation = new FriendRelationDo(bob.getEmail(), alice.getEmail(),
                                                 alice.getFirstName(), alice.getLastName(), alice.getExpenseUserId());
         DatastoreObjectifyDAL.storeObject(friendRelation);
-
+        logger.info("FriendRelation stored");
         friendRelation = new FriendRelationDo(alice.getEmail(), bob.getEmail(),
                                                 bob.getFirstName(), bob.getLastName(), bob.getExpenseUserId());
         DatastoreObjectifyDAL.storeObject(friendRelation);
+        logger.info("FriendRelation stored");
     }
 
     public static List<FriendRelationDo> loadFriendsForUserId(final String faroUserId){
         List<FriendRelationDo> friendRelationList =
                 DatastoreObjectifyDAL.loadObjectsByAncestorRef(FaroUserDo.class, faroUserId, FriendRelationDo.class);
+        logger.info("Total friends fetched:"+(friendRelationList == null ? 0 : friendRelationList.size()));
         return friendRelationList;
     }
 
@@ -47,6 +53,7 @@ public class FriendRelationDatastoreImpl {
                                                                 faroUserId1,
                                                                 FriendRelationDo.class,
                                                                 faroUserId2);
+        logger.info("FriendRelation loaded");
         return relation;
     }
     
@@ -56,9 +63,10 @@ public class FriendRelationDatastoreImpl {
     	FriendRelationDo friendRelation = new FriendRelationDo(faroUser1.getId(), faroUser2.getId(),
                 faroUser2.getFirstName(), faroUser2.getLastName(), faroUser2.getExternalExpenseID());
     	DatastoreObjectifyDAL.deleteEntity(friendRelation);
-
+    	logger.info("FriendRelation deleted");
     	friendRelation = new FriendRelationDo(faroUser2.getId(), faroUser1.getId(),
                 faroUser1.getFirstName(), faroUser1.getLastName(), faroUser1.getExternalExpenseID());
     	DatastoreObjectifyDAL.deleteEntity(friendRelation);
+    	logger.info("FriendRelation deleted");
     }
 }

@@ -1,6 +1,11 @@
 package com.zik.faro.persistence.datastore;
 
 
+import java.text.MessageFormat;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.googlecode.objectify.Work;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
@@ -9,8 +14,11 @@ import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.persistence.datastore.data.EventDo;
 
 public class EventDatastoreImpl {       
-    public static void storeEvent(final String userId, final EventDo event){
+	private static Logger logger = LoggerFactory.getLogger(EventDatastoreImpl.class);
+    
+	public static void storeEvent(final String userId, final EventDo event){
     	DatastoreObjectifyDAL.storeObject(event);
+    	logger.info("Event stored");
     	// Creating event user relation if event creation succeeds. Owner will be userId too and since owner created event, he has by default accepted it
     	EventUserDatastoreImpl.storeEventUser(event.getId(), userId, userId, EventInviteStatus.ACCEPTED);
     }
@@ -18,10 +26,12 @@ public class EventDatastoreImpl {
     // For use cases where we do not need to store eventuser relation
     public static void storeEventOnly(final EventDo event){
     	DatastoreObjectifyDAL.storeObject(event);
+    	logger.info("Event stored");
     }
 
     public static EventDo loadEventByID(final String eventId) throws DataNotFoundException{
         EventDo event = DatastoreObjectifyDAL.loadObjectById(eventId, EventDo.class);
+        logger.info("Event loaded");
         return event;
     }
     
@@ -33,6 +43,7 @@ public class EventDatastoreImpl {
 				EventDo event;
 				try {
 					event = DatastoreObjectifyDAL.loadObjectById(eventId, EventDo.class);
+					logger.info("Event loaded");
 				} catch (DataNotFoundException e) {
 					return new TransactionResult<EventDo>(null, TransactionStatus.DATANOTFOUND);
 				}
@@ -70,11 +81,13 @@ public class EventDatastoreImpl {
 		};
         TransactionResult<EventDo> result = DatastoreObjectifyDAL.update(w);
         DatastoreUtil.processResult(result);
+        logger.info("Event updated");
         return result.getEntity();
     }
 
     public static void deleteEvent(final String eventId) {
         DatastoreObjectifyDAL.delelteObjectById(eventId, EventDo.class);
+        logger.info("Event deleted");
     }
 
 //    public static List<Event> getEventsOfFaroUser(final String faroUserId){

@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.googlecode.objectify.Work;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
@@ -16,7 +19,8 @@ import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.data.Item;
 
 public class AssignmentDatastoreImpl {
-	
+	private static Logger logger = LoggerFactory.getLogger(AssignmentDatastoreImpl.class);
+    
 	// Returning Map<Identifier,Assignment>
 	// where identifier is activityId for all activity assignments
 	// and identifier is eventId for event assignment
@@ -94,6 +98,7 @@ public class AssignmentDatastoreImpl {
 		};
 		TransactionResult<ActivityDo> result = DatastoreObjectifyDAL.update(w);
 		DatastoreUtil.processResult(result);
+		logger.info("Activity assignment updated");
 		return result.getEntity();
 	}
 	
@@ -120,6 +125,7 @@ public class AssignmentDatastoreImpl {
 		};
 		TransactionResult<EventDo> result = DatastoreObjectifyDAL.update(w);
 		DatastoreUtil.processResult(result);
+		logger.info("Event assignment updated");
 		return result.getEntity();
 	}
 	

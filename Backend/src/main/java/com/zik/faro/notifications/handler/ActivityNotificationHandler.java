@@ -47,6 +47,7 @@ public class ActivityNotificationHandler extends BaseNotificationHandler {
 		dataPayload.addKVPair(Constants.NOTIFICATION_TYPE_CONST, type);
 		dataPayload.addKVPair(Constants.NOTIFICATION_EVENTID_CONST, activity.getEventId());
 		dataPayload.addKVPair(Constants.NOTIFICATION_ACTIVITYID_CONST, activity.getId());
+		dataPayload.addKVPair(Constants.NOTIFICATION_VERSION_CONST, activity.getVersion().toString());
 		try {
 			FirebaseHTTPRequest request = createDataAndNotificationMessage(
 					Constants.FARO_EVENT_TOPIC_CONST+activity.getEventId(), notificationPayload, dataPayload);

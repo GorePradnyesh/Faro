@@ -1,5 +1,8 @@
 package com.zik.faro.commons;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by pgore on 11/4/14.
  */
@@ -127,6 +130,7 @@ public final class Constants {
     public static final String NOTIFICATION_EVENTID_CONST						= "eventId";
     public static final String NOTIFICATION_POLLID_CONST						= "pollId";
     public static final String NOTIFICATION_ACTIVITYID_CONST					= "activityId";
+    public static final String NOTIFICATION_VERSION_CONST						= "version";
 
     // -- Authentication path constants -- //
     public static final String AUTH_PATH_CONST                                  = "/nativeLogin";
@@ -143,5 +147,5 @@ public final class Constants {
 
     // -- Test -- //
     public static final String TESTS_API_PATH_CONST                             = "/test";
-
+   
 }

@@ -90,11 +90,13 @@ public class TestHelper {
     public static URL getExternalTargetEndpoint() throws MalformedURLException {
         String hostname = System.getProperty(HOSTNAME_PROPERTY);
         if(hostname == null){
-            hostname = "127.0.0.1";
+            //hostname = "faro-appserver.appspot.com";
+        	hostname = "localhost";
         }
         String port = System.getProperty(PORT_PROPERTY);
         if(port == null){
-            port = "8888";
+            //port = "80";
+        	port = "8888";
         }
         return new URL("http://" + hostname + ":" + port);
     }

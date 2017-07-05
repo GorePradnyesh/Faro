@@ -43,6 +43,7 @@ public class EventNotificationHandler extends BaseNotificationHandler{
 		DataPayload dataPayload = new DataPayload();
 		dataPayload.addKVPair(Constants.NOTIFICATION_TYPE_CONST, type);
 		dataPayload.addKVPair(Constants.NOTIFICATION_EVENTID_CONST, event.getId());
+		dataPayload.addKVPair(Constants.NOTIFICATION_VERSION_CONST, event.getVersion().toString());
 		try {
 			FirebaseHTTPRequest request = createDataAndNotificationMessage(
 					Constants.FARO_EVENT_TOPIC_CONST+event.getId(), notificationPayload, dataPayload);
@@ -61,7 +62,7 @@ public class EventNotificationHandler extends BaseNotificationHandler{
 		DataPayload dataPayload = new DataPayload();
 		dataPayload.addKVPair(Constants.NOTIFICATION_TYPE_CONST, Constants.NOTIFICATION_TYPE_EVENT_INVITE);
 		dataPayload.addKVPair(Constants.NOTIFICATION_EVENTID_CONST, event.getId());
-		
+		dataPayload.addKVPair(Constants.NOTIFICATION_VERSION_CONST, event.getVersion().toString());
 		FirebaseHTTPRequest request = createDataAndNotificationMessage(
 				Constants.FARO_EVENT_TOPIC_CONST+faroUser.getId(), notificationPayload, dataPayload);
 		try {
