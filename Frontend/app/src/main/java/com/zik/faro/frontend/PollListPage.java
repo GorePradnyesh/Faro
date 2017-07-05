@@ -40,7 +40,7 @@ public class PollListPage extends Activity {
     private ListView closedPollsListView = null;
     private ImageButton createNewPoll = null;
     private String TAG = "PollListPage";
-    private Context mContext = this;
+    private Context mContext;
     private RelativeLayout pollListPageRelativeLayout = null;
     private LinearLayout linlaHeaderProgress = null;
 
@@ -48,6 +48,8 @@ public class PollListPage extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_poll_list_page);
+
+        mContext = this;
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 

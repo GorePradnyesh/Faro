@@ -1,5 +1,7 @@
 package com.zik.faro.frontend;
 
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -36,6 +38,8 @@ public class MoreOptionsPage extends Fragment {
 
     private static final int FIREBASE_DELETE_RETRY_TIMEOUT = 10;
 
+    private Context mContext = null;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,6 +54,7 @@ public class MoreOptionsPage extends Fragment {
         moreOptionsLayout = (LinearLayout) moreOptionsPageView.findViewById(R.id.moreOptionsPageLayout);
 
         progressBarLayout.setVisibility(View.GONE);
+        mContext = getActivity();
 
         final Button logout = (Button)moreOptionsPageView.findViewById(R.id.logout);
         TextView textView = (TextView) moreOptionsPageView.findViewById(R.id.text);
@@ -166,8 +171,12 @@ public class MoreOptionsPage extends Fragment {
         TokenCache.getTokenCache().deleteToken();
 
         // Clear all App related info here
-        eventListHandler.clearListAndMapOnLogout();
+        eventListHandler.clearListAndMap();
         userFriendListHandler.clearFriendListAndMap();
+
+        NotificationManager notificationManager =
+                (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancelAll();
 
         // Go to LoginActivity page
         Intent loginActivity = new Intent(getActivity(), LoginActivity.class);

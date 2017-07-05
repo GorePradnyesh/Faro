@@ -67,7 +67,7 @@ public class PickPollWinnerPage extends Activity {
     private String TAG = "PollPickWinnerPage";
     private Bundle extras = null;
 
-    private Context mContext = this;
+    private Context mContext;
     private TextView pollDesc = null;
     private Button selectWinner = null;
     private DisplayMetrics dm = null;
@@ -79,6 +79,8 @@ public class PickPollWinnerPage extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pick_poll_winner);
+
+        mContext = this;
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 

@@ -34,7 +34,7 @@ public class ActivityListPage extends android.app.Activity {
     private Intent createNewActivityPage = null;
 
     private static String TAG = "ActivityListPage";
-    private Context mContext = this;
+    private Context mContext;
 
     private ListView activityList;
     private ImageButton addActivity;

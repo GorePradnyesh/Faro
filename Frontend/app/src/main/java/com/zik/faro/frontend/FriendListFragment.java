@@ -41,9 +41,11 @@ public class FriendListFragment extends Fragment {
     private RelativeLayout popUpRelativeLayout;
     private FaroUserContext faroUserContext = FaroUserContext.getInstance();
     private String myUserId = faroUserContext.getEmail();
+    private Context mContext;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        mContext = this.getActivity();
         super.onCreate(savedInstanceState);
     }
 
@@ -57,8 +59,6 @@ public class FriendListFragment extends Fragment {
         ListView friendListView  = (ListView)view.findViewById(R.id.friendList);
         friendListView.setBackgroundColor(Color.BLACK);
         friendListView.setAdapter(userFriendListHandler.userFriendAdapter);
-
-        final Context mContext = this.getActivity();
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(getActivity()));
 

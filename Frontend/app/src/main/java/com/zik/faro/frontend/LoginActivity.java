@@ -121,6 +121,7 @@ public class LoginActivity extends Activity {
             ((FaroApplication)getApplication()).overRideAppServerIp(serverIpAddress);
         }
 
+
         Log.i(TAG, "serverIP = " + ((FaroApplication)getApplication()).getAppServerIp());
 
         // Create Faro service handler

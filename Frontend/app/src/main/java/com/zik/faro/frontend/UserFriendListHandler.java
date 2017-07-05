@@ -6,6 +6,7 @@ import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.MinUser;
 import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,10 +55,20 @@ public class UserFriendListHandler {
     }
 
     public void addDownloadedFriendsToListAndMap(List<MinUser> minUserList){
-        for (int i = 0; i < minUserList.size(); i++){
-            MinUser minUser = minUserList.get(i);
+        removeAllUsersFriendsFromListAndMap();
+
+        for (MinUser minUser : minUserList) {
             addFriendToListAndMap(minUser);
         }
+    }
+
+    public void removeAllUsersFriendsFromListAndMap () {
+        for (Iterator<MinUser> iterator = userFriendAdapter.list.iterator(); iterator.hasNext();) {
+            MinUser minUser = iterator.next();
+            friendMap.remove(minUser.getEmail());
+            iterator.remove();
+        }
+        userFriendAdapter.notifyDataSetChanged();
     }
 
     public void removeFriendFromListAndMap(String emailId){

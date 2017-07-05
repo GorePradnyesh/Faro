@@ -21,7 +21,7 @@ import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 public class EventFriendListFragment extends Fragment {
     private String listStatus;
     private String eventId;
-    private Context mContext = getActivity();
+    private Context mContext;
 
     private EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
 
@@ -32,6 +32,7 @@ public class EventFriendListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mContext = getActivity();
         if (getArguments() != null) {
             listStatus = getArguments().getString(FaroIntentConstants.LIST_STATUS);
             eventId = getArguments().getString(FaroIntentConstants.EVENT_ID);

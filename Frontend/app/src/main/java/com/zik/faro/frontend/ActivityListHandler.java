@@ -6,6 +6,7 @@ import android.content.Context;
 import com.google.gson.Gson;
 import com.zik.faro.data.Activity;
 import java.util.Calendar;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -74,7 +75,7 @@ public class ActivityListHandler {
     * the above reason then once we return back from the ActivityLanding Page we remove it from the
     * Map.
     */
-    void addActivityToListAndMap(String eventId, Activity activity, Context context) {
+    public void addActivityToListAndMap(String eventId, Activity activity, Context context) {
         removeActivityFromListAndMap(eventId, activity.getId(), context);
         conditionallyAddActivityToList(eventId, activity, context);
         activityMap.put(activity.getId(), activity);
@@ -117,11 +118,27 @@ public class ActivityListHandler {
     }
 
     public void addDownloadedActivitiesToListAndMap(String eventId, List <Activity> activityList, Context context){
-        for (int i = 0; i < activityList.size(); i++){
-            Activity activity = activityList.get(i);
+        removeAllActivitiesFromListAndMapForEvent(eventId, context);
+
+        for (Activity activity: activityList){
             addActivityToListAndMap(eventId, activity, context);
         }
         ActivityAdapter activityAdapter = getActivityAdapter(eventId, context);
+        activityAdapter.notifyDataSetChanged();
+    }
+
+    public void removeAllActivitiesFromListAndMapForEvent (String eventId, Context context) {
+        ActivityAdapter activityAdapter = getActivityAdapter(eventId, context);
+        for (Iterator<Activity> iterator = activityAdapter.list.iterator(); iterator.hasNext();) {
+            Activity activity = iterator.next();
+            if (activity.getAssignment() != null) {
+                assignmentListHandler.removeAssignmentFromListAndMap(eventId,
+                        activity.getAssignment().getId(),
+                        context);
+            }
+            activityMap.remove(activity.getId());
+            iterator.remove();
+        }
         activityAdapter.notifyDataSetChanged();
     }
 
@@ -131,10 +148,10 @@ public class ActivityListHandler {
     }
 
     public void removeActivityFromList(String activityId, List<Activity> activityList){
-        for (int i = 0; i < activityList.size(); i++){
-            Activity activity = activityList.get(i);
+        for (Iterator<Activity> iterator = activityList.iterator(); iterator.hasNext();) {
+            Activity activity = iterator.next();
             if (activityId.equals(activity.getId())){
-                activityList.remove(activity);
+                iterator.remove();
                 return;
             }
         }

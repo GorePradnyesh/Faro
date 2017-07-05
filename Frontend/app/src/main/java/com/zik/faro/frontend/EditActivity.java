@@ -65,7 +65,7 @@ public class EditActivity extends android.app.Activity {
 
     private Intent ActivityLandingPage;
 
-    private final Context mContext = this;
+    private Context mContext;
 
     private PopupWindow popupWindow;
 
@@ -73,6 +73,8 @@ public class EditActivity extends android.app.Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_activity);
+
+        mContext = this;
 
         startDateButton = (Button) findViewById(R.id.startDateButton);
         startTimeButton = (Button) findViewById(R.id.startTimeButton);

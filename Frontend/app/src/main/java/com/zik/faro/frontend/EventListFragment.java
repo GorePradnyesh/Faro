@@ -41,12 +41,13 @@ public class EventListFragment extends Fragment {
     private RelativeLayout eventListFragmentRelativeLayout = null;
     private LinearLayout linlaHeaderProgress = null;
 
-    private Context mContext = null;
+    private Context mContext;
 
     private View fragmentView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        mContext = this.getActivity();
         super.onCreate(savedInstanceState);
     }
 
@@ -66,8 +67,6 @@ public class EventListFragment extends Fragment {
 
         receivedEvents = false;
         receivedFriends = false;
-
-        mContext = this.getActivity();
 
         linlaHeaderProgress = (LinearLayout)fragmentView.findViewById(R.id.linlaHeaderProgress);
         eventListFragmentRelativeLayout = (RelativeLayout) fragmentView.findViewById(R.id.eventListFragmentRelativeLayout);
@@ -183,6 +182,7 @@ public class EventListFragment extends Fragment {
                         @Override
                         public void run() {
                             Log.i(TAG, "Successfully received events from the server!!");
+                            eventListHandler.clearListAndMap();
                             eventListHandler.addDownloadedEventsToListAndMap(eventInviteStatusWrappers);
                             receivedEvents = true;
                             setupPageDetails(fragmentView);

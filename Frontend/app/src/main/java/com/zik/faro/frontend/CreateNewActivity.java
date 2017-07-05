@@ -51,6 +51,8 @@ public class CreateNewActivity extends android.app.Activity {
     private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private static String TAG = "CreateNewActivity";
 
+    private Context mContext;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,7 +72,7 @@ public class CreateNewActivity extends android.app.Activity {
 
         final Intent activityLanding  = new Intent(CreateNewActivity.this, ActivityLandingPage.class);
 
-        final Context mContext = this;
+        mContext = this;
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 

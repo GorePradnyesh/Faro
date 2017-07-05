@@ -51,7 +51,7 @@ public class CreateNewPoll extends Activity {
     private PollOptionsAdapter pollOptionsAdapter = null;
     private Intent PollLandingPageIntent = null;
 
-    private Context mContext = this;
+    private Context mContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +59,8 @@ public class CreateNewPoll extends Activity {
         setContentView(R.layout.activity_create_new_poll);
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
+
+        mContext = this;
 
         Bundle extras = getIntent().getExtras();
         if (extras == null) return;//TODO: How to handle this condition

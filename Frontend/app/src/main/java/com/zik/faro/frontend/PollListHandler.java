@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.Poll;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -97,14 +98,28 @@ public class PollListHandler {
     }
 
     public void addDownloadedPollsToListAndMap(String eventId, List<Poll> pollList, Context context){
-        for (int i = 0; i < pollList.size(); i++){
-            Poll poll = pollList.get(i);
+        removeAllPollsFromListAndMapForEvent(eventId, context);
+
+        for (Poll poll : pollList){
             addPollToListAndMap(eventId, poll, context);
         }
-        PollAdapter openPollsAdapter = getOpenPollAdapter(eventId, context);
-        PollAdapter closedPollsAdapter = getClosedPollAdapter(eventId, context);
-        openPollsAdapter.notifyDataSetChanged();
-        closedPollsAdapter.notifyDataSetChanged();
+
+        getOpenPollAdapter(eventId, context).notifyDataSetChanged();
+        getClosedPollAdapter(eventId, context).notifyDataSetChanged();
+    }
+
+    public void removeAllFromListAndMap (PollAdapter pollAdapter) {
+        for (Iterator<Poll> iterator = pollAdapter.list.iterator(); iterator.hasNext();){
+            Poll poll = iterator.next();
+            pollMap.remove(poll.getId());
+            iterator.remove();
+        }
+        pollAdapter.notifyDataSetChanged();
+    }
+
+    public void removeAllPollsFromListAndMapForEvent (String eventId, Context context) {
+        removeAllFromListAndMap(getOpenPollAdapter(eventId, context));
+        removeAllFromListAndMap(getClosedPollAdapter(eventId, context));
     }
 
     public int getCombinedListSize(String eventId, Context context){
@@ -125,10 +140,10 @@ public class PollListHandler {
     }
 
     public void removePollFromList(String pollId, List <Poll> pollList){
-        for (int i = 0; i < pollList.size(); i++){
-            Poll poll = pollList.get(i);
+        for (Iterator<Poll> iterator = pollList.iterator(); iterator.hasNext();){
+            Poll poll = iterator.next();
             if (poll.getId().equals(pollId)){
-                pollList.remove(poll);
+                iterator.remove();
                 return;
             }
         }

@@ -52,7 +52,7 @@ public class EditPoll extends Activity {
 
     private RelativeLayout popUpRelativeLayout;
     private final List <PollOption> newPollOptionList = new LinkedList<>();
-    private Context mContext = this;
+    private Context mContext;
     private TextView pollDescription = null;
     private CheckBox isMultiChoice = null;
     private EditText optionText = null;
@@ -68,6 +68,8 @@ public class EditPoll extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_poll);
+
+        mContext = this;
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 

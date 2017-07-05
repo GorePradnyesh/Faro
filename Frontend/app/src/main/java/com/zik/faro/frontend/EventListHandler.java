@@ -13,6 +13,7 @@ import com.zik.faro.frontend.faroservice.HttpError;
 
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -98,7 +99,7 @@ public class EventListHandler {
         return ErrorCodes.SUCCESS;
     }
 
-    public void clearListAndMapOnLogout(){
+    public void clearListAndMap(){
         if (acceptedEventAdapter != null){
             acceptedEventAdapter.list.clear();
         }
@@ -122,8 +123,9 @@ public class EventListHandler {
     }
 
     public void addDownloadedEventsToListAndMap(List<EventInviteStatusWrapper> eventInviteStatusWrappers){
-        for (int i = 0; i < eventInviteStatusWrappers.size(); i++) {
-            EventInviteStatusWrapper eventInviteStatusWrapper = eventInviteStatusWrappers.get(i);
+        removeAllEventsFromListAndMap();
+
+        for (EventInviteStatusWrapper eventInviteStatusWrapper : eventInviteStatusWrappers) {
 
             //Ideally the server should never send us events with status as DECLINED
             EventInviteStatus eventInviteStatus = eventInviteStatusWrapper.getInviteStatus();
@@ -135,6 +137,20 @@ public class EventListHandler {
         }
         acceptedEventAdapter.notifyDataSetChanged();
         notAcceptedEventAdapter.notifyDataSetChanged();
+    }
+
+    public void removeAllFromListAndMap (EventAdapter eventAdapter) {
+        for (Iterator<Event> iterator = eventAdapter.list.iterator(); iterator.hasNext();){
+            Event event = iterator.next();
+            eventMap.remove(event.getId());
+            iterator.remove();
+        }
+        eventAdapter.notifyDataSetChanged();
+    }
+
+    public void removeAllEventsFromListAndMap () {
+        removeAllFromListAndMap(acceptedEventAdapter);
+        removeAllFromListAndMap(notAcceptedEventAdapter);
     }
 
     private void conditionallyAddEventToList(Event event, EventInviteStatus eventInviteStatus) {
@@ -189,6 +205,7 @@ public class EventListHandler {
                 return acceptedEventAdapter;
             case INVITED:
             case MAYBE:
+            case DECLINED:
                 return notAcceptedEventAdapter;
             default:
                 return notAcceptedEventAdapter;
@@ -262,10 +279,10 @@ public class EventListHandler {
     }
 
     public void removeEventFromList(String eventId, List<Event> eventList){
-        for (int i = 0; i < eventList.size(); i++){
-            Event event = eventList.get(i);
+        for (Iterator<Event> iterator = eventList.iterator(); iterator.hasNext();){
+            Event event = iterator.next();
             if (event.getId().equals(eventId)){
-                eventList.remove(event);
+                iterator.remove();
                 return;
             }
         }

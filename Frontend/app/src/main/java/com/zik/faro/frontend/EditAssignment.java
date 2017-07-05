@@ -83,7 +83,7 @@ public class EditAssignment extends android.app.Activity {
     private int editItemPosition = -1;
     private boolean addEditedItem = false;
 
-    private final Context mContext = this;
+    private Context mContext;
 
     private RelativeLayout popUpRelativeLayout = null;
 
@@ -93,6 +93,8 @@ public class EditAssignment extends android.app.Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_assignment);
+
+        mContext = this;
 
         popUpRelativeLayout = (RelativeLayout) findViewById(R.id.editAssignmentRelativeLayout);
 

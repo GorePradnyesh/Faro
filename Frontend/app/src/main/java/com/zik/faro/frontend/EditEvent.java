@@ -84,7 +84,7 @@ public class EditEvent extends Activity {
 
     private int PLACE_PICKER_REQUEST = 1;
 
-    private final Context mContext = this;
+    private Context mContext;
     private Activity mActivity = this;
 
     private Location location = null;
@@ -93,6 +93,8 @@ public class EditEvent extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_event);
+
+        mContext = this;
 
         startDateButton = (Button) findViewById(R.id.startDateButton);
         startTimeButton = (Button) findViewById(R.id.startTimeButton);

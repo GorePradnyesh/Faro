@@ -99,7 +99,7 @@ public class EventLandingPage extends FragmentActivity
     private ImageView transparentImageView = null;
 
     private String eventId;
-    private Context mContext = this;
+    private Context mContext;
     private Intent eventLandingPageReload;
 
     private static final int REQUEST_TAKE_PHOTO = 1;
@@ -148,6 +148,8 @@ public class EventLandingPage extends FragmentActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_landing_page);
+
+        mContext = this;
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 

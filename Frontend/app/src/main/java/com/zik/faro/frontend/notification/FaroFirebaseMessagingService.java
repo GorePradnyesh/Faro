@@ -18,7 +18,7 @@ public class FaroFirebaseMessagingService extends FirebaseMessagingService {
     public void onMessageReceived(RemoteMessage remoteMessage) {
         String title = null;
         String body = null;
-        String notificationType = null;
+        String clickAction = null;
         JSONObject data = null;
 
 
@@ -29,12 +29,12 @@ public class FaroFirebaseMessagingService extends FirebaseMessagingService {
         if (remoteMessage.getNotification() != null){
             title = remoteMessage.getNotification().getTitle();
             body = remoteMessage.getNotification().getBody();
-            notificationType = remoteMessage.getNotification().getClickAction();
+            clickAction = remoteMessage.getNotification().getClickAction();
             Log.d(TAG, "title is " + title);
             Log.d(TAG, "body is" + body);
-            Log.d(TAG, "notification type is " + notificationType);
+            Log.d(TAG, "clickAction type is " + clickAction);
         }
-        sendNotification(title, body, notificationType, data);
+        sendNotification(title, body, clickAction, data);
     }
 
     private void sendNotification(String title, String messageBody, String notificationType, JSONObject data) {

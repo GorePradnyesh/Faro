@@ -24,12 +24,14 @@ public class EventFriendListLandingPage extends FragmentActivity {
     FaroUserContext faroUserContext = FaroUserContext.getInstance();
     String myUserId = faroUserContext.getEmail();
 
-    private Context mContext = this;
+    private Context mContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_friend_list_landing_page);
+
+        mContext = this;
 
         TextView guestListTextView = (TextView)findViewById(R.id.guestListTitle);
         ImageButton addFriendsImageButton = (ImageButton) findViewById(R.id.addFriendsImageButton);

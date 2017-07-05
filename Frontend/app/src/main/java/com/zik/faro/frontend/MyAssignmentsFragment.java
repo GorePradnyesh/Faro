@@ -50,8 +50,11 @@ public class MyAssignmentsFragment extends Fragment{
 
     private static String TAG = "MyAssignmentsFragment";
 
+    private Context mContext;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        mContext = this.getActivity();
         super.onCreate(savedInstanceState);
     }
 
@@ -67,7 +70,7 @@ public class MyAssignmentsFragment extends Fragment{
         passedActivityId = getArguments().getString(FaroIntentConstants.ACTIVITY_ID);
         passedAssignmentId = getArguments().getString(FaroIntentConstants.ASSIGNMENT_ID);
 
-        final Context mContext = this.getActivity();
+
 
         final TextView assignmentDescription = (TextView) view.findViewById(R.id.assignmentDescription);
         assignmentDescription.setText("My Items");

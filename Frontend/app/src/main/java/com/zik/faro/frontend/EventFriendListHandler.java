@@ -8,6 +8,8 @@ import com.zik.faro.data.InviteeList;
 import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -142,8 +144,25 @@ public class EventFriendListHandler {
         friendMap.put(invitees.getEmail(), invitees);
     }
 
+    public void removeAllFromListAndMap (EventFriendAdapter eventFriendAdapter) {
+        for (Iterator<InviteeList.Invitees> iterator = eventFriendAdapter.list.iterator(); iterator.hasNext();){
+            InviteeList.Invitees invitees = iterator.next();
+            friendMap.remove(invitees.getEmail());
+            iterator.remove();
+        }
+        eventFriendAdapter.notifyDataSetChanged();
+    }
+
+    public void removeAllFriendsFromListAndMapForEvent (String eventId, Context context) {
+        removeAllFromListAndMap(getAcceptedFriendAdapter(eventId, context));
+        removeAllFromListAndMap(getMayBeFriendAdapter(eventId, context));
+        removeAllFromListAndMap(getInvitedFriendAdapter(eventId, context));
+        removeAllFromListAndMap(getDeclinedFriendAdapter(eventId, context));
+    }
+
 
     public void addDownloadedFriendsToListAndMap(String eventId, InviteeList inviteeList, Context context){
+        removeAllFriendsFromListAndMapForEvent(eventId, context);
         for(Map.Entry<String, InviteeList.Invitees> entry: inviteeList.getUserStatusMap().entrySet()){
             addFriendToListAndMap(eventId, entry.getValue(), context);
         }

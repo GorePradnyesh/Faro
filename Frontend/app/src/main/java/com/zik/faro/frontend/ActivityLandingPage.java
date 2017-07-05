@@ -60,6 +60,8 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_activity_landing_page);
 
+        mContext = this;
+
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
         linlaHeaderProgress = (LinearLayout) findViewById(R.id.linlaHeaderProgress);

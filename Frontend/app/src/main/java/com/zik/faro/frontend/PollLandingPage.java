@@ -97,7 +97,7 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
 
     private Map<String, Object> map = null;
 
-    private final Context mContext = this;
+    private Context mContext;
 
     private TextView winnerPollOptionTV = null;
 
@@ -109,6 +109,8 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_poll_landing_page);
+
+        mContext = this;
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
