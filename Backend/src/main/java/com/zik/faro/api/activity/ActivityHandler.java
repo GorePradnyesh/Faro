@@ -21,8 +21,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.jersey.api.JResponse;
 import com.zik.faro.data.Activity;
+import com.zik.faro.api.authentication.SignupHandler;
 import com.zik.faro.applogic.ActivityManagement;
 import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
@@ -34,7 +38,9 @@ public class ActivityHandler {
 	@Context
 	SecurityContext context;
 	
-    @Path(ACTIVITY_ID_PATH_PARAM_STRING)
+	private static Logger logger = LoggerFactory.getLogger(ActivityHandler.class);
+	
+	@Path(ACTIVITY_ID_PATH_PARAM_STRING)
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public JResponse<Activity> getActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
@@ -115,8 +121,17 @@ public class ActivityHandler {
     @DELETE
     public JResponse<String> deleteActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                  @PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId){
-       ActivityManagement.deleteActivity(eventId, activityId);
-       return JResponse.ok(Constants.HTTP_OK).build();
+       try{
+    	   ActivityManagement.deleteActivity(eventId, activityId);
+           return JResponse.ok(Constants.HTTP_OK).build();
+       } catch (DataNotFoundException e) {
+       	
+           Response response = Response.status(Response.Status.NOT_FOUND)
+                   .entity(e.getMessage())
+                   .build();
+           throw new WebApplicationException(response);
+       }
+       
     }
     
 }

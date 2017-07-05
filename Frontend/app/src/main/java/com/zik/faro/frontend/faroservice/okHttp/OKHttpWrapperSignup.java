@@ -24,25 +24,35 @@ public class OKHttpWrapperSignup extends BaseFaroOKHttpWrapper implements Signup
 
     @Override
     public void signup(BaseFaroRequestCallback<String> callback, final FaroUser faroUser, final String password) {
-        this.signup(callback, faroUser, password, true);
+        signup(callback, faroUser, password, true);
     }
 
     @Override
     public void signup(BaseFaroRequestCallback<String> callback, FaroUser faroUser, String password, boolean addToCache) {
-        FaroSignupDetails signupDetails = new FaroSignupDetails(faroUser, password);
-        final String eventPostBody = mapper.toJson(signupDetails);
-        Request request = new Request.Builder()
-                .url(baseHandlerURL.toString())
-                .post(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), eventPostBody))
-                .build();
+        signup(callback, faroUser, password, null, addToCache);
+    }
 
+    @Override
+    public void signup(BaseFaroRequestCallback<String> callback, FaroUser faroUser, String password, String firebaseIdToken) {
+        signup(callback, faroUser, password, firebaseIdToken, true);
+    }
+
+    @Override
+    public void signup(BaseFaroRequestCallback<String> callback, FaroUser faroUser,
+                       String password, String firebaseIdToken, boolean addToCache) {
+        Request request = createSignupRequest(faroUser, password, firebaseIdToken);
         SignupHandlerCallback signupHandlerCallback = new SignupHandlerCallback(callback, addToCache, faroUser.getId());
         this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<String>(signupHandlerCallback, String.class));
     }
 
     @Override
     public OkHttpResponse<String> signup(FaroUser faroUser, String password, boolean addToCache) throws IOException {
-        Request request = createSignupRequest(faroUser, password);
+        return signup(faroUser, password, null, addToCache);
+    }
+
+    @Override
+    public OkHttpResponse<String> signup(FaroUser faroUser, String password, String firebaseIdToken, boolean addToCache) throws IOException {
+        Request request = createSignupRequest(faroUser, password, firebaseIdToken);
 
         Response response = this.httpClient.newCall(request).execute();
 
@@ -53,16 +63,21 @@ public class OKHttpWrapperSignup extends BaseFaroOKHttpWrapper implements Signup
             String token = response.body().string();
             saveTokenAndUserContext(token, faroUser.getId());
 
-            return new OkHttpResponse<String>(token, null);
+            return new OkHttpResponse<>(token, null);
         }
 
-        return new OkHttpResponse<String>(null, new HttpError(response.code(), response.message()));
+        return new OkHttpResponse<>(null, new HttpError(response.code(), response.message()));
     }
 
     private Request createSignupRequest(FaroUser faroUser, String password) {
+        return createSignupRequest(faroUser, password, null);
+    }
+
+    private Request createSignupRequest(FaroUser faroUser, String password, String firebaseToken) {
         return new Request.Builder()
                 .url(baseHandlerURL.toString())
-                .post(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), mapper.toJson(new FaroSignupDetails(faroUser, password))))
+                .post(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE),
+                        mapper.toJson(new FaroSignupDetails(faroUser, password, firebaseToken))))
                 .build();
     }
 

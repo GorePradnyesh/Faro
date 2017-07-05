@@ -1,6 +1,9 @@
 package com.zik.faro.auth;
 
 import com.google.common.base.Strings;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseToken;
+import com.google.firebase.tasks.OnSuccessListener;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
 import com.zik.faro.auth.jwt.FaroJwtClaims;
@@ -20,6 +23,10 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.security.SignatureException;
+import java.text.MessageFormat;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by granganathan on 1/28/15.
@@ -48,6 +55,7 @@ public class AuthFilter implements ContainerRequestFilter {
         logger.info("---- Auth filter invoked. ----");
 
         String nativeLoginPath = Constants.AUTH_PATH_CONST + Constants.AUTH_LOGIN_PATH_CONST + "/";
+        String firebaseLoginPath = Constants.FIREBASE_AUTH_CONST + Constants.AUTH_LOGIN_PATH_CONST + "/";
         String nativeSignupPath = Constants.AUTH_PATH_CONST + Constants.AUTH_SIGN_UP_PATH_CONST + "/";
         String forgotPasswordPath = Constants.AUTH_PATH_CONST + Constants.AUTH_PASSWORD_PATH_CONST
                                     + Constants.AUTH_FORGOT_PASSWORD_PATH_CONST;
@@ -65,6 +73,7 @@ public class AuthFilter implements ContainerRequestFilter {
 
         // No authentication required for login/signup requests
         if (requestPath.equals(nativeLoginPath) ||
+                requestPath.equals(firebaseLoginPath) ||
                 requestPath.equals(nativeSignupPath) ||
                 requestPath.equals(forgotPasswordPath) ||
                 requestPath.equals(forgotPasswordFormPath)) {
@@ -84,10 +93,9 @@ public class AuthFilter implements ContainerRequestFilter {
             // Validate the JWT token and obtain JWT claims
             // TODO: Create maven "production" and "test" profiles and
             // do complete JWT token validation only for "production" maven profile and
-            // not in "test" profile
-            //final FaroJwtClaims jwtClaims = FaroJwtTokenManager.obtainClaimsWithNoChecks(authHeaderValue);
+            // not in "test" profile;
 
-            final FaroJwtClaims jwtClaims = FaroJwtTokenManager.validateToken(authHeaderValue);
+            FaroJwtClaims jwtClaims = FaroJwtTokenManager.validateToken(authHeaderValue);
             logger.info("jwtClaims : " + jwtClaims);
 
             // For new password API, check if the token has valid JWT id
@@ -99,11 +107,12 @@ public class AuthFilter implements ContainerRequestFilter {
                 }
             }
 
+            final FaroJwtClaims faroJwtClaims = jwtClaims;
             // Pass the JWT claims up to the resource classes through the SecurityContext object
             containerRequest.setSecurityContext(new SecurityContext() {
                 @Override
                 public Principal getUserPrincipal() {
-                    return jwtClaims;
+                    return faroJwtClaims;
                 }
 
 

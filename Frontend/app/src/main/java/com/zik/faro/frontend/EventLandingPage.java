@@ -71,7 +71,6 @@ public class EventLandingPage extends FragmentActivity
         GoogleApiClient.OnConnectionFailedListener,
         NotificationPayloadHandler{
 
-    public static final int NO_CHANGES = 0;
     private DateFormat sdf = new SimpleDateFormat(" EEE, MMM d, yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
     private EventListHandler eventListHandler = EventListHandler.getInstance();
@@ -712,15 +711,42 @@ public class EventLandingPage extends FragmentActivity
         return true;
     }
 
+    private void requestPublishPrivileges() {
+        // Initiate FB login
+        Log.i(TAG, "initiate login again to get additional permissions");
+        LoginManager.getInstance().logInWithPublishPermissions(fbLoginFragment, Lists.newArrayList("publish_actions"));
+    }
+
+    private void requestUserPhotosPrivileges() {
+        // Initiate FB login
+        Log.i(TAG, "initiate login again to get additional permissions");
+        LoginManager.getInstance().logInWithReadPermissions(fbLoginFragment, Lists.newArrayList("user_photos"));
+    }
+
+    private void initiateFbLogin() {
+        LoginManager.getInstance().logInWithReadPermissions(fbLoginFragment, Lists.newArrayList("public_profile", "email", "user_photos"));
+    }
+
+    private void uploadPhoto(List<String> photoPaths, Event event) {
+        try {
+            FbGraphApiService fbGraphApiService = new FbGraphApiService();
+            fbGraphApiService.uploadPhotos(photoPaths, event, this);
+        } catch (Exception e) {
+            Log.e(TAG, MessageFormat.format("could not upload photos : {0}", photoPaths), e);
+        }
+    }
+
     private void startPhotosUploadWorkflow() {
         // Get FB access token
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
 
         if (accessToken == null || accessToken.isExpired()) {
-            // Initiate FB login
+            // Initiate FB login and get user photos privileges
             initiateFbLogin();
+        } else if (!accessToken.getPermissions().contains("user_photos")) {
+            requestUserPhotosPrivileges();
         } else if (!accessToken.getPermissions().contains("publish_actions")) {
-            requestAdditionalPrivileges();
+            requestPublishPrivileges();
         } else {
             startActivityForResult(new Intent(EventLandingPage.this, ImagePickerActivity.class), REQUEST_PICK_PHOTOS);
         }
@@ -790,7 +816,7 @@ public class EventLandingPage extends FragmentActivity
                 if (accessToken == null || accessToken.isExpired()) {
                     initiateFbLogin();
                 } else if (!accessToken.getPermissions().contains("publish_actions")) {
-                    requestAdditionalPrivileges();
+                    requestPublishPrivileges();
                 } else {
                     uploadPhoto(Lists.newArrayList(cameraTakenPhotoPath), cloneEvent);
                 }
@@ -805,31 +831,12 @@ public class EventLandingPage extends FragmentActivity
                 if (accessToken == null || accessToken.isExpired()) {
                     initiateFbLogin();
                 } else if (!accessToken.getPermissions().contains("publish_actions")) {
-                    requestAdditionalPrivileges();
+                    requestPublishPrivileges();
                 } else {
                     Log.d(TAG, MessageFormat.format("Uploading images to album {0} ", cloneEvent.getEventName()));
                     uploadPhoto(filePaths, cloneEvent);
                 }
             }
-        }
-    }
-
-    private void requestAdditionalPrivileges() {
-        // Initiate FB login
-        Log.i(TAG, "initiate login again to get additional permissions");
-        LoginManager.getInstance().logInWithPublishPermissions(fbLoginFragment, Lists.newArrayList("publish_actions"));
-    }
-
-    private void initiateFbLogin() {
-        LoginManager.getInstance().logInWithReadPermissions(fbLoginFragment, Lists.newArrayList("user_photos"));
-    }
-
-    private void uploadPhoto(List<String> photoPaths, Event event) {
-        try {
-            FbGraphApiService fbGraphApiService = new FbGraphApiService();
-            fbGraphApiService.uploadPhotos(photoPaths, event, this);
-        } catch (Exception e) {
-            Log.e(TAG, MessageFormat.format("could not upload photos : {0}", photoPaths), e);
         }
     }
 

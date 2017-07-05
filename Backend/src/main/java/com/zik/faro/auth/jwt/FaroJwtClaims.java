@@ -34,6 +34,36 @@ public class FaroJwtClaims implements JwtClaims, Principal {
 
     public FaroJwtClaims() {}
 
+    public FaroJwtClaims withIssuer(String issuer) {
+        this.issuer = issuer;
+        return this;
+    }
+
+    public FaroJwtClaims withIssuedAt(long issuedAt) {
+        this.issuedAt = issuedAt;
+        return this;
+    }
+
+    public FaroJwtClaims withExpiration(long expiration) {
+        this.expiration = expiration;
+        return this;
+    }
+
+    public FaroJwtClaims withUsername(String username) {
+        this.username = username;
+        return this;
+    }
+
+    public FaroJwtClaims withEmail(String email) {
+        this.email = email;
+        return this;
+    }
+
+    public FaroJwtClaims withJwtId(String jwtId) {
+        this.jwtId = jwtId;
+        return this;
+    }
+
     @Override
     public String getIssuer() {
         return issuer;

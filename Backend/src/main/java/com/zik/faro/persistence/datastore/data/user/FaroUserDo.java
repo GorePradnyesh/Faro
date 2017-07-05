@@ -22,11 +22,13 @@ public class FaroUserDo extends BaseEntityDo{
     private String             middleName;
     private String             lastName;
     private String             externalExpenseID;
-    private String             telephone;   
+    private String             telephone;
     private Address 			address;
     private AppInviteStatus 	inviteStatus = AppInviteStatus.INVITED;
     private List<String> 		tokens = new ArrayList<String>();
     private String 				userTopic;
+    private LargeProfileImageDo largeProfileImage;
+    private SmallProfileImageDo smallProfileImage;
 
     // To be used for creating users who are invited by other faro users
     // Due to lack of info available, using only email
@@ -73,9 +75,9 @@ public class FaroUserDo extends BaseEntityDo{
     }
 
     public void setIfNullExternalExpenseID(final String externalExpenseID) throws IllegalDataOperation {
-        if(this.externalExpenseID == null) {
+        if (this.externalExpenseID == null) {
             this.externalExpenseID = externalExpenseID;
-        }else{
+        } else {
             throw new IllegalDataOperation("Attempting to set a nonNull externalExpenseID");
         }
     }
@@ -84,7 +86,7 @@ public class FaroUserDo extends BaseEntityDo{
     public FaroUserDo(){
 
     }
-    
+
     public String getFirstName() {
         return firstName;
     }
@@ -133,44 +135,61 @@ public class FaroUserDo extends BaseEntityDo{
         this.address = address;
     }
 
-   @Override
-    public String toString() {
-
-       return MoreObjects.toStringHelper(this).add("email", getId())
-               .add("firstName", getFirstName())
-               .add("middleName", getMiddleName())
-               .add("lastName", getLastName())
-               .add("externalExpenseID", getExternalExpenseID())
-               .add("telephone", getTelephone())
-               .add("address", getAddress())
-               .toString();
+    public AppInviteStatus getInviteStatus() {
+        return inviteStatus;
     }
 
-	public AppInviteStatus getInviteStatus() {
-		return inviteStatus;
-	}
-	
-	public void setInviteStatus(AppInviteStatus inviteStatus) {
-		this.inviteStatus = inviteStatus;
-	}
-	
-	public List<String> getTokens() {
-		return tokens;
-	}
-	
-	public void setTokens(List<String> tokens) {
-		this.tokens = tokens;
-	}
-	
-	public void addToken(String token){
-		this.tokens.add(token);
-	}
-	
-	public String getUserTopic() {
-		return userTopic;
-	}
-	
-	public void setUserTopic(String userTopic) {
-		this.userTopic = userTopic;
-	}
+    public void setInviteStatus(AppInviteStatus inviteStatus) {
+        this.inviteStatus = inviteStatus;
+    }
+
+    public LargeProfileImageDo getLargeProfileImage() {
+        return largeProfileImage;
+    }
+
+    public void setLargeProfileImage(LargeProfileImageDo largeProfileImage) {
+        this.largeProfileImage = largeProfileImage;
+    }
+
+    public SmallProfileImageDo getSmallProfileImage() {
+        return smallProfileImage;
+    }
+
+    public void setSmallProfileImage(SmallProfileImageDo smallProfileImage) {
+        this.smallProfileImage = smallProfileImage;
+    }
+
+    public List<String> getTokens() {
+        return tokens;
+    }
+
+    public void setTokens(List<String> tokens) {
+        this.tokens = tokens;
+    }
+
+    public void addToken(String token){
+        this.tokens.add(token);
+    }
+
+    public String getUserTopic() {
+        return userTopic;
+    }
+
+    public void setUserTopic(String userTopic) {
+        this.userTopic = userTopic;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this).add("email", getId())
+                .add("firstName", getFirstName())
+                .add("middleName", getMiddleName())
+                .add("lastName", getLastName())
+                .add("externalExpenseID", getExternalExpenseID())
+                .add("telephone", getTelephone())
+                .add("address", getAddress())
+                .add("profileImageUrl", getLargeProfileImage().getPublicUrl())
+                .add("smallProfileImageUrl", getSmallProfileImage().getPublicUrl())
+                .toString();
+    }
 }

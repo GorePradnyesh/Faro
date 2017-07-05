@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 
+import com.bumptech.glide.Glide;
 import com.zik.faro.data.MinUser;
 
 import java.util.Collections;
@@ -17,57 +18,74 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
-public class UserFriendAdapter extends ArrayAdapter {
-    public List<MinUser> list = new LinkedList<>();
+public class UserFriendAdapter extends ArrayAdapter<MinUser> {
+    private List<MinUser> minUsers = new LinkedList<>();
 
     public UserFriendAdapter(Context context, int resource) {
         super(context, resource);
     }
 
-    public List<MinUser> getList() {
-        return list;
+    public List<MinUser> getMinUsers() {
+        return minUsers;
     }
 
+    @Override
     public int getCount() {
-        return this.list.size();
+        return minUsers.size();
     }
 
+    @Override
     public void insert(MinUser minUser, int index) {
-        list.add(index, minUser);
-        Collections.sort(list, new Comparator<MinUser>() {
+        minUsers.add(index, minUser);
+        Collections.sort(minUsers, new Comparator<MinUser>() {
             @Override
             public int compare(MinUser lhs, MinUser rhs) {
                 String name1 = null;
                 String name2 = null;
+
                 if (lhs.getFirstName() != null) {
                     name1 = lhs.getFirstName();
-                }else {
+                } else {
                     name1 = lhs.getEmail();
                 }
+
                 if (rhs.getFirstName() != null){
                     name2 = rhs.getFirstName();
-                }else{
+                } else {
                     name2 = rhs.getEmail();
                 }
+
                 return name1.compareTo(name2);
             }
         });
     }
 
     @Override
-    public Object getItem(int position) {
-        return this.list.get(position);
+    public MinUser getItem(int position) {
+        return minUsers.get(position);
     }
 
-    static class ImgHolder{
-        ImageView userPicture;
-        TextView friendName;
+    static class ImgHolder {
+        private ImageView userPictureImageView;
+        private TextView friendNameTextView;
+
+        public ImgHolder(View rowInListView) {
+            this.userPictureImageView = (ImageView)rowInListView.findViewById(R.id.userPicture);
+            this.friendNameTextView = (TextView)rowInListView.findViewById(R.id.friendName);
+        }
+
+        public void setFriendName(String friendName) {
+            friendNameTextView.setText(friendName);
+        }
+
+        public ImageView getImageView() {
+            return userPictureImageView;
+        }
     }
 
 
     @Override
-    public boolean isEnabled(int position)
-    {
+    public boolean isEnabled(int position) {
         return true;
     }
 
@@ -75,26 +93,32 @@ public class UserFriendAdapter extends ArrayAdapter {
     @Override
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         View row = convertView;
-        UserFriendAdapter.ImgHolder holder = new UserFriendAdapter.ImgHolder();
+        UserFriendAdapter.ImgHolder holder;
 
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             row = inflater.inflate(R.layout.friend_row_style, parent, false);
-            holder.userPicture = (ImageView)row.findViewById(R.id.userPicture);
-            holder.friendName = (TextView)row.findViewById(R.id.friendName);
+            holder = new ImgHolder(row);
             row.setTag(holder);
-        }else{
+        } else {
             holder = (ImgHolder) row.getTag();
         }
+
         MinUser minUser = (MinUser)getItem(position);
         if (minUser != null) {
             if (minUser.getFirstName() != null) {
-                holder.friendName.setText(minUser.getFirstName());
-            }else{
-                holder.friendName.setText(minUser.getEmail());
+                holder.setFriendName(minUser.getFirstName());
+            } else {
+                holder.setFriendName(minUser.getEmail());
             }
         }
-        holder.userPicture.setImageResource(R.drawable.user_pic);
+
+        // Load the user profile picture if available otherwise load the default pic
+        Glide.with(getContext())
+                .load((minUser.getThumbProfileImageUrl() != null) ? minUser.getThumbProfileImageUrl() : R.drawable.user_pic)
+                .placeholder(R.drawable.user_pic)
+                .into(holder.getImageView());
+
         return row;
     }
 }

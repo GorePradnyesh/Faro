@@ -47,7 +47,13 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>18.0</version>
+            <version>20.0</version>
+        </dependency>
+        <!-- Firebase Admin SDK -->
+        <dependency>
+            <groupId>com.google.firebase</groupId>
+            <artifactId>firebase-admin</artifactId>
+            <version>5.0.0</version>
         </dependency>
 
         <!-- Javax servlet -->
@@ -62,7 +68,6 @@
             <artifactId>jstl</artifactId>
             <version>1.2</version>
         </dependency>
-        
 
         <!-- For JAX-RS, jsr311 -->
         <dependency>
@@ -76,6 +81,7 @@
             <version>2.0.1</version>
             <scope>test</scope>
         </dependency>
+
         <!-- Jersey -->
         <dependency>
             <groupId>com.sun.jersey</groupId>
@@ -208,9 +214,9 @@
                     <port>8080</port>
                     <!-- Comment in the below snippet to enable local debugging with a remove debugger
                          like those included with Eclipse or IntelliJ -->
-                    <!-- jvmFlags>
+                    <jvmFlags>
                       <jvmFlag>-agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend=n</jvmFlag>
-                    </jvmFlags -->
+                    </jvmFlags>
                 </configuration>
             </plugin>
 

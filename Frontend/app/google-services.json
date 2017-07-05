@@ -48,15 +48,15 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "480570287743-9ksotsqd53e8fd12cusmnm6nsunun5lj.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
               "client_id": "480570287743-h1qohi5ag32q36idju8qgvh3ttf58uhm.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
                 "bundle_id": "com.zik.Faro.Ios"
               }
+            },
+            {
+              "client_id": "480570287743-9ksotsqd53e8fd12cusmnm6nsunun5lj.apps.googleusercontent.com",
+              "client_type": 3
             }
           ]
         },
@@ -73,6 +73,14 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "480570287743-4fq5okrc554sbtg8nc23n4egoasrh38n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zik.faro.frontend",
+            "certificate_hash": "0b47964abcac85bef9fa378b0124530cec338eec"
+          }
+        },
         {
           "client_id": "480570287743-a1dk732b6g0euat6tpm5ie2e8qneco4u.apps.googleusercontent.com",
           "client_type": 1,
@@ -99,15 +107,15 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "480570287743-9ksotsqd53e8fd12cusmnm6nsunun5lj.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
               "client_id": "480570287743-h1qohi5ag32q36idju8qgvh3ttf58uhm.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
                 "bundle_id": "com.zik.Faro.Ios"
               }
+            },
+            {
+              "client_id": "480570287743-9ksotsqd53e8fd12cusmnm6nsunun5lj.apps.googleusercontent.com",
+              "client_type": 3
             }
           ]
         },

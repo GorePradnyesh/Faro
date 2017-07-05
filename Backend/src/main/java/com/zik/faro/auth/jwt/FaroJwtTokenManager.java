@@ -4,16 +4,31 @@ import com.auth0.jwt.FaroJwtVerifier;
 import com.auth0.jwt.JWTSigner;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.JWTVerifyException;
+import com.google.api.client.util.ArrayMap;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.FirebaseToken;
+import com.google.firebase.tasks.Task;
+import com.google.firebase.tasks.Tasks;
+import com.zik.faro.commons.FaroResponseStatus;
+import com.zik.faro.commons.exceptions.FaroWebAppException;
+import com.zik.faro.persistence.datastore.data.user.AuthProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.CheckForNull;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
+import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 
 /**
  * Created by granganathan on 2/6/15.
@@ -74,6 +89,17 @@ public class FaroJwtTokenManager {
         }
     }
 
+    public static Map<String, Object> obtainClaimsMapWithNoChecks(String token) throws JwtTokenValidationException {
+        FaroJwtVerifier verifier = new FaroJwtVerifier(JWT_SIGNATURE_SECRET, null, FARO_JWT_ISSUER_VALUE);
+        try {
+            return verifier.obtainJwtClaimsWithoutValidations(token);
+        } catch (IOException e) {
+            logger.error("JWT token is invalid.", e);
+            throw new JwtTokenValidationException(e.getMessage());
+        }
+    }
+
+
     /**
      * Create the JWT token using the claims passed in
      * @param jwtClaims
@@ -130,5 +156,73 @@ public class FaroJwtTokenManager {
                 .setJwtId(claimsMap.get(JwtClaimConstants.JWT_KEY) != null ? claimsMap.get(JwtClaimConstants.JWT_KEY).toString() : null);
 
         return faroJwtClaims;
+    }
+
+    public static FirebaseToken verifyFirebaseToken(String token) {
+        Task<FirebaseToken> task = FirebaseAuth.getInstance().verifyIdToken(token);
+
+        try {
+            Tasks.await(task, 30, TimeUnit.SECONDS);
+
+            FirebaseToken firebaseToken = task.getResult();
+            logger.info(MessageFormat.format("firebaseToken uid = {0}, email = {1}, issuer = {2}, claims = {3}, name = {4}",
+                    firebaseToken.getUid(), firebaseToken.getEmail(), firebaseToken.getIssuer(),
+                    firebaseToken.getClaims(), firebaseToken.getName()));
+
+            return firebaseToken;
+
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof FirebaseAuthException) {
+                logger.error("Invalid firebase token", e);
+                throw new FaroWebAppException(FaroResponseStatus.UNAUTHORIZED, "invalid token");
+            } else {
+                throw new FaroWebAppException(FaroResponseStatus.UNEXPECTED_ERROR, "error in signing up user");
+            }
+        } catch (InterruptedException | TimeoutException e) {
+            logger.error("Failed to verify firebase token ", e);
+            throw new FaroWebAppException(FaroResponseStatus.UNEXPECTED_ERROR, "error in signing up user");
+        }
+    }
+
+    /**
+     * Get the auth provider from the given firebase token
+     * @param firebaseToken
+     * @return AuthProvider
+     */
+    @CheckForNull
+    public static AuthProvider getAuthProvider(FirebaseToken firebaseToken) {
+        String signInProvider = (String) ((ArrayMap<String, Object>) firebaseToken.getClaims().get("firebase")).get("sign_in_provider");
+        if (signInProvider != null) {
+            switch (signInProvider) {
+                case "facebook.com" :
+                    return AuthProvider.FACEBOOK;
+
+                case "google.com" :
+                    return  AuthProvider.GOOGLE;
+
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the authprovider given user id from the given firebase token and AuthProvider
+     * @param authProvider
+     * @param firebaseToken
+     * @return
+     */
+    @CheckForNull
+    public static String getAuthProviderUserId(AuthProvider authProvider, FirebaseToken firebaseToken) {
+        ArrayMap<String, Object> firebaseClaims = (ArrayMap<String, Object>) firebaseToken.getClaims().get("firebase");
+        ArrayMap<String, Object> identities = (ArrayMap<String, Object>) firebaseClaims.get("identities");
+
+        String userId = null;
+        if (AuthProvider.FACEBOOK.equals(authProvider)) {
+            List<String> identitiesList = (List<String>) identities.get("facebook.com");
+            userId = identitiesList.get(0);
+        }
+
+        return userId;
     }
 }

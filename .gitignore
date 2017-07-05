@@ -1,10 +1,22 @@
+# Ignore all build results
 **/target*
-*.idea
-**.iml
-logs/*
 *.classpath
+
+# Ignore IDE project settings
 *.project
 *.settings
-.DS_Store
-Frontend/app/src/main/java/com/zik/faro/data
+*.idea
+**.iml
 **/.metadata*
+
+# Ignore log files
+logs/*
+
+# Mac file
+.DS_Store
+
+# These files have been symlinked to the ones in Backend. So ignore these
+Frontend/app/src/main/java/com/zik/faro/data
+
+# Exclude firebase admin key
+**/faro-56043-firebase-adminsdk-out3y-192c0b32ad.json

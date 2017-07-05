@@ -5,6 +5,9 @@ import static com.googlecode.objectify.ObjectifyService.ofy;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.Work;
 import com.googlecode.objectify.cmd.Query;
@@ -18,13 +21,15 @@ import com.zik.faro.persistence.datastore.data.EventUserDo;
 import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 
 public class EventUserDatastoreImpl {
-
+	private static Logger logger = LoggerFactory.getLogger(EventUserDatastoreImpl.class);
+    
     public static final String EVENT_REF_FIELD_NAME = "eventRef";
     public static final String FARO_USER_REF_FIELD_NAME = "faroUserRef";
 
     public static void storeEventUser(final String eventId, final String faroUserId){
         EventUserDo eventUserRelation = new EventUserDo(eventId, faroUserId);
         DatastoreObjectifyDAL.storeObject(eventUserRelation);
+        logger.info("EventUser stored");
     }
     
     // overloaded method to store ownerId in the the relation.
@@ -33,6 +38,7 @@ public class EventUserDatastoreImpl {
     public static void storeEventUser(final String eventId, final String faroUserId, String ownerId, EventInviteStatus inviteStatus){
     	EventUserDo eventUserRelation = new EventUserDo(eventId, faroUserId, ownerId, inviteStatus);
     	DatastoreObjectifyDAL.storeObject(eventUserRelation);
+    	logger.info("EventUser stored");
     }
 
 	public static EventUserDo loadEventUser(final String eventId, final String faroUserId){
@@ -43,7 +49,9 @@ public class EventUserDatastoreImpl {
         eventUserQuery = eventUserQuery.filter(EVENT_REF_FIELD_NAME, eventRef);
         eventUserQuery = eventUserQuery.filter(FARO_USER_REF_FIELD_NAME, faroUserRef);
         // Return the first result since there should be another record with same key.
-        return eventUserQuery.first().now();
+        EventUserDo eventUserDo = eventUserQuery.first().now();
+        logger.info("EventUser loaded");
+        return eventUserDo;
      }
     
     
@@ -54,6 +62,7 @@ public class EventUserDatastoreImpl {
                         EventDo.class,
                         eventId,
                         EventUserDo.class);
+        logger.info("Total eventUsers fetched given eventId:"+(eventUserList == null ? 0 : eventUserList.size()));
         return eventUserList;
     }
 
@@ -62,6 +71,7 @@ public class EventUserDatastoreImpl {
                 EventDo.class,
                 eventId,
                 EventUserDo.class);
+        logger.info("EventUser deleted given eventId");
     }
 
 
@@ -71,12 +81,14 @@ public class EventUserDatastoreImpl {
                         FaroUserDo.class,
                         faroUserId,
                         EventUserDo.class);
+        logger.info("Total eventUsers fetched given faroUserId:"+(eventUserList == null ? 0 : eventUserList.size()));
         return eventUserList;
     }
     
     public static void deleteEventUser(final String eventId, final String faroUserId){
     	EventUserDo user = new EventUserDo(eventId, faroUserId);
     	DatastoreObjectifyDAL.delelteObjectById(user.getId(), EventUserDo.class);
+    	logger.info("EventUser deleted given faroUserId");
     }
     
     public static EventUserDo updateActivity(final EventUserDo eventUserDo) throws DataNotFoundException, DatastoreException, UpdateVersionException{
@@ -86,6 +98,7 @@ public class EventUserDatastoreImpl {
 	        	EventUserDo eventUserFromDatastore = null;
 				try {
 					eventUserFromDatastore = DatastoreObjectifyDAL.loadObjectById(eventUserDo.getId(), EventUserDo.class);
+					logger.info("EventUser loaded");
 				} catch (DataNotFoundException e) {
 					return new TransactionResult<EventUserDo>(null,TransactionStatus.DATANOTFOUND);
 				}
@@ -108,6 +121,7 @@ public class EventUserDatastoreImpl {
 	    
     	TransactionResult<EventUserDo> result = DatastoreObjectifyDAL.update(w);
     	DatastoreUtil.processResult(result);
+    	logger.info("EventUser updated");
     	return result.getEntity();
     }
 }

@@ -1,18 +1,19 @@
-package com.zik.faro.frontend.faroservice;
+package com.zik.faro.frontend.faroservice.auth;
 
 import android.app.Activity;
 import android.os.Handler;
 import android.util.Log;
 
 import com.google.common.base.Strings;
+import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.zik.faro.frontend.FaroCache;
-import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
-import com.zik.faro.frontend.faroservice.auth.TokenCache;
+import com.zik.faro.frontend.faroservice.FaroServiceHandler;
+import com.zik.faro.frontend.faroservice.auth.facebook.FacebookLoginJob;
+import com.zik.faro.frontend.faroservice.auth.facebook.FacebookSignupJob;
 import com.zik.faro.frontend.faroservice.okHttp.OkHttpResponse;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.text.MessageFormat;
 
 /**
@@ -22,18 +23,25 @@ import java.text.MessageFormat;
 public abstract class FaroBaseSignInJob implements FaroSignInJob {
     private String TAG = "FaroBaseSignInJob";
     private Activity activity;
-    private SignupJobResultHandler resultHandler;
+    private SignInJobResultHandler resultHandler;
     protected String email;
-    protected String password;
     protected FaroServiceHandler faroServiceHandler;
 
-    public FaroBaseSignInJob(String email, String password) {
+    public FaroBaseSignInJob(String email) {
         this.email = email;
-        this.password = password;
         faroServiceHandler = FaroServiceHandler.getFaroServiceHandler();
     }
 
-    public FaroBaseSignInJob addResultHandler(Activity activity, SignupJobResultHandler resultHandler) {
+    public FaroBaseSignInJob() {
+        faroServiceHandler = FaroServiceHandler.getFaroServiceHandler();
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    @Override
+    public FaroBaseSignInJob addResultHandler(Activity activity, SignInJobResultHandler resultHandler) {
         this.activity = activity;
         this.resultHandler = resultHandler;
         return this;
@@ -45,16 +53,22 @@ public abstract class FaroBaseSignInJob implements FaroSignInJob {
 
         if (Strings.isNullOrEmpty(firebaseNotificationToken)) {
             Log.e(TAG, "firebase notification token is not present. Cant allow user to proceed.");
-            handleResultOnUi(new OkHttpResponse<String>(null, null));
+
+            if (this instanceof FacebookLoginJob || this instanceof FacebookSignupJob) {
+
+            }
+
+            handleResultOnUi(new SignInJobResult(email, new Exception("firebase notification token is not present")));
             return;
         }
 
         try {
+            // Sign in the user. This could be logging in or signing up the user
             OkHttpResponse<String> signInResponse = signIn();
 
             if (signInResponse.isSuccessful()) {
                 String token = signInResponse.getResponseObject();
-                Log.i(TAG, "token from signInResponse = " + token);
+                Log.i(TAG, MessageFormat.format("Token from signInResponse = {0}", token));
 
                 // Update the firebase notification token on the app server
                 try {
@@ -63,38 +77,33 @@ public abstract class FaroBaseSignInJob implements FaroSignInJob {
 
                     if (response.isSuccessful()) {
                         Log.i(TAG, MessageFormat.format("Added firebase token {0} to faro app server", firebaseNotificationToken));
-                        handleResultOnUi(new OkHttpResponse<String>(token, null));
+                        handleResultOnUi(new SignInJobResult(email, token));
                     } else {
                         Log.i(TAG, MessageFormat.format("Failed to add firebase token {0} on faro app server. httpErrpr = {1}",
                                 firebaseNotificationToken, response.getHttpError()));
                         undoSignIn();
-                        handleResultOnUi(new OkHttpResponse<String>(null, null));
+                        handleResultOnUi(new SignInJobResult(email, response.getHttpError()));
                     }
                 } catch (IOException ex) {
                     Log.e(TAG, "Failed to issue request to add token to faro app server", ex);
                     undoSignIn();
-                    handleResultOnUi(new OkHttpResponse<String>(null, null));
+                    handleResultOnUi(new SignInJobResult(email, ex));
                 }
             } else {
-                HttpError httpError = signInResponse.getHttpError();
-                Log.i(TAG, "code = " + httpError.getCode() + ", message = " + httpError.getCode());
-
-                if (httpError.getCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                    // Invalid login
-                    Log.i(TAG, "username/password not valid");
-                }
-
-                handleResultOnUi(new OkHttpResponse<String>(null, httpError));
+                handleResultOnUi(new SignInJobResult(email, signInResponse.getHttpError()));
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.e(TAG, "failed to send sign in request", e);
-            handleResultOnUi(new OkHttpResponse<String>(null, null));
+            if (e instanceof FirebaseAuthException) {
+                handleResultOnUi(new SignInJobResult(email, (FirebaseAuthException) e));
+            } else {
+                handleResultOnUi(new SignInJobResult(email, e));
+            }
         }
     }
 
-    private void handleResultOnUi(final OkHttpResponse<String> response) {
+    protected void handleResultOnUi(final SignInJobResult response) {
         if (resultHandler != null) {
-
             new Handler(activity.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {

@@ -15,11 +15,14 @@ public class FaroUser extends BaseEntity{
     private String             	externalExpenseID;
     private String          	telephone;
     private Address 			address;
-    private AppInviteStatus 	inviteStatus = AppInviteStatus.INVITED; 
+    private AppInviteStatus 	inviteStatus = AppInviteStatus.INVITED;
     // List(because user can have multiple devices) of all registration tokens for a user for notification
     private List<String> 		tokens = new ArrayList<String>();
     // User's private topic to be used to multicast notifications to all his devices
     private String 				userTopic;
+    private LargeProfileImage   largeProfileImage;
+    private SmallProfileImage   smallProfileImage;
+
 
 // Ideally this should be utilized on server side only. Commenting out until absolutely required
 // Assumption is user will be forced to give basic details along with email
@@ -40,7 +43,7 @@ public class FaroUser extends BaseEntity{
             throw new IllegalArgumentException("Email is null/empty");
         }
 
-        
+
         this.firstName = firstName;
         this.lastName = lastName;
         this.middleName = middleName;
@@ -53,9 +56,9 @@ public class FaroUser extends BaseEntity{
     }
 
     public void setIfNullExternalExpenseID(final String externalExpenseID) throws IllegalDataOperation {
-        if(this.externalExpenseID == null) {
+        if (this.externalExpenseID == null) {
             this.externalExpenseID = externalExpenseID;
-        }else{
+        } else{
             throw new IllegalDataOperation("Attempting to set a nonNull externalExpenseID");
         }
     }
@@ -113,6 +116,50 @@ public class FaroUser extends BaseEntity{
         this.address = address;
     }
 
+	public AppInviteStatus getInviteStatus() {
+		return inviteStatus;
+	}
+
+	public void setInviteStatus(AppInviteStatus inviteStatus) {
+		this.inviteStatus = inviteStatus;
+	}
+
+    public List<String> getTokens() {
+        return tokens;
+    }
+
+    public void setTokens(List<String> tokens) {
+        this.tokens = tokens;
+    }
+
+    public void addToken(String token){
+        this.tokens.add(token);
+    }
+
+    public String getUserTopic() {
+        return userTopic;
+    }
+
+    public void setUserTopic(String userTopic) {
+        this.userTopic = userTopic;
+    }
+
+    public LargeProfileImage getLargeProfileImage() {
+        return largeProfileImage;
+    }
+
+    public void setLargeProfileImage(LargeProfileImage largeProfileImage) {
+        this.largeProfileImage = largeProfileImage;
+    }
+
+    public SmallProfileImage getSmallProfileImage() {
+        return smallProfileImage;
+    }
+
+    public void setSmallProfileImage(SmallProfileImage smallProfileImage) {
+        this.smallProfileImage = smallProfileImage;
+    }
+
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this).add("email", getId())
@@ -122,34 +169,8 @@ public class FaroUser extends BaseEntity{
                 .add("externalExpenseID", getExternalExpenseID())
                 .add("telephone", getTelephone())
                 .add("address", getAddress())
+                .add("profileImageUrl", getLargeProfileImage())
+                .add("thumbProfileImageUrl", getSmallProfileImage())
                 .toString();
     }
-
-	public AppInviteStatus getInviteStatus() {
-		return inviteStatus;
-	}
-
-	public void setInviteStatus(AppInviteStatus inviteStatus) {
-		this.inviteStatus = inviteStatus;
-	}
-
-	public List<String> getTokens() {
-		return tokens;
-	}
-
-	public void setTokens(List<String> tokens) {
-		this.tokens = tokens;
-	}
-	
-	public void addToken(String token){
-		this.tokens.add(token);
-	}
-
-	public String getUserTopic() {
-		return userTopic;
-	}
-
-	public void setUserTopic(String userTopic) {
-		this.userTopic = userTopic;
-	}
 }

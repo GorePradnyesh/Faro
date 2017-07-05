@@ -6,11 +6,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.zik.faro.data.InviteeList;
+import com.bumptech.glide.Glide;
 import com.zik.faro.data.MinUser;
 import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 
 public class UserProfilePage extends AppCompatActivity {
-
     private String userName;
     private String userEmailId;
     private MinUser cloneMinUser;
@@ -37,18 +37,23 @@ public class UserProfilePage extends AppCompatActivity {
             userEmailId = extras.getString(FaroIntentConstants.EMAIL_ID);
             eventId = extras.getString(FaroIntentConstants.EVENT_ID);
 
-            if (userEmailId.equals(myUserId)){
+            if (userEmailId.equals(myUserId)) {
                 //TOdo: Store my User's Fullname in faroUser context
                 userName = userEmailId;
-            }else if (eventId != null) {
+            } else if (eventId != null) {
                 cloneInvitee = eventFriendListHandler.getInviteesCloneFromMap(userEmailId);
                 userName = eventFriendListHandler.getFriendFullNameFromID(userEmailId);
                 userProfilePicture.setImageResource(R.drawable.user_pic);
-            }else {
+            } else {
                 cloneMinUser = userFriendListHandler.getMinUserCloneFromMap(userEmailId);
                 userName = userFriendListHandler.getFriendFullNameFromID(userEmailId);
                 userProfilePicture.setImageResource(R.drawable.user_pic);
             }
+
+            // Load the user's profile picture
+            Glide.with(getApplicationContext())
+                    .load((cloneMinUser.getProfileImageUrl() != null) ? cloneMinUser.getProfileImageUrl() : R.drawable.user_pic)
+                    .into((userProfilePicture));
 
             userNameTextView.setText(userName);
             userEmailIdTextView.setText("Email: " + userEmailId);

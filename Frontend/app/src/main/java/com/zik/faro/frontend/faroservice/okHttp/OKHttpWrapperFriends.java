@@ -15,7 +15,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OKHttpWrapperFriends extends BaseFaroOKHttpWrapper implements FriendsHandler{
+public class OKHttpWrapperFriends extends BaseFaroOKHttpWrapper implements FriendsHandler {
     public OKHttpWrapperFriends(URL baseUrl) {
         super(baseUrl, "friends");
     }
@@ -23,7 +23,7 @@ public class OKHttpWrapperFriends extends BaseFaroOKHttpWrapper implements Frien
     @Override
     public void inviteFriend(BaseFaroRequestCallback<String> callback, String userId) {
         String token = TokenCache.getTokenCache().getToken();
-        if(token != null){
+        if (token != null) {
             Request request = new Request.Builder()
                     .url(this.baseHandlerURL.toString() + "invite/")
                     .post(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), userId))
@@ -31,7 +31,24 @@ public class OKHttpWrapperFriends extends BaseFaroOKHttpWrapper implements Frien
                     .addHeader("Accept",DEFAULT_CONTENT_TYPE)
                     .build();
             this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<>(callback, String.class));
-        }else{
+        } else {
+            callback.onFailure(null, new IOException("Could not fetch auth token"));
+        }
+    }
+
+    @Override
+    public void inviteFacebookFriends(BaseFaroRequestCallback<List<MinUser>> callback, List<String> fbUserIds) {
+        String token = TokenCache.getTokenCache().getToken();
+        if (token != null) {
+            Request request = new Request.Builder()
+                    .url(this.baseHandlerURL.toString() + "fbFriendsInvite/")
+                    .post(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), mapper.toJson(fbUserIds)))
+                    .addHeader(authHeaderName, token)
+                    .addHeader("Accept",DEFAULT_CONTENT_TYPE)
+                    .build();
+            Type fbUserIdsList = new TypeToken<ArrayList<MinUser>>(){}.getType();
+            this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<>(callback, fbUserIdsList));
+        } else {
             callback.onFailure(null, new IOException("Could not fetch auth token"));
         }
     }
@@ -39,7 +56,7 @@ public class OKHttpWrapperFriends extends BaseFaroOKHttpWrapper implements Frien
     @Override
     public void getFriends(BaseFaroRequestCallback<List<MinUser>> callback) {
         String token = TokenCache.getTokenCache().getToken();
-        if(token != null){
+        if (token != null) {
             Request request = new Request.Builder()
                     .url(this.baseHandlerURL.toString())
                     .addHeader(authHeaderName, token)
@@ -47,7 +64,7 @@ public class OKHttpWrapperFriends extends BaseFaroOKHttpWrapper implements Frien
                     .build();
             Type minUserList = new TypeToken<ArrayList<MinUser>>(){}.getType();
             this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<>(callback, minUserList));
-        }else{
+        } else {
             callback.onFailure(null, new IOException("Could not fetch auth token"));
         }
     }
@@ -55,7 +72,7 @@ public class OKHttpWrapperFriends extends BaseFaroOKHttpWrapper implements Frien
     @Override
     public void unFriend(BaseFaroRequestCallback<String> callback, String userId) {
         String token = TokenCache.getTokenCache().getToken();
-        if(token != null){
+        if (token != null) {
             Request request = new Request.Builder()
                     .url(this.baseHandlerURL.toString() + "remove?userId=" + userId)
                     .post(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), userId))
@@ -63,7 +80,7 @@ public class OKHttpWrapperFriends extends BaseFaroOKHttpWrapper implements Frien
                     .addHeader("Accept",DEFAULT_CONTENT_TYPE)
                     .build();
             this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<>(callback, String.class));
-        }else{
+        } else {
             callback.onFailure(null, new IOException("Could not fetch auth token"));
         }
     }

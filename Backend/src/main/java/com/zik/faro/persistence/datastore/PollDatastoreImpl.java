@@ -3,6 +3,9 @@ package com.zik.faro.persistence.datastore;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.googlecode.objectify.Work;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
@@ -12,27 +15,33 @@ import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.persistence.datastore.data.PollDo;
 
 public class PollDatastoreImpl {
-    private static final String EVENTID_FIELD_NAME = "eventId";
+	private static Logger logger = LoggerFactory.getLogger(PollDatastoreImpl.class);
+    
+	private static final String EVENTID_FIELD_NAME = "eventId";
 
     public static void storePoll(final PollDo pollDo) throws DataNotFoundException{
         // Load event. If not present it will throw Exception and hence will not proceed
     	// to create poll for absent event
     	EventDatastoreImpl.loadEventByID(pollDo.getEventId());
     	DatastoreObjectifyDAL.storeObject(pollDo);
+    	logger.info("Poll created");
     }
 
     public static PollDo loadPollById(final String pollId, final String eventId) throws DataNotFoundException{
         PollDo poll = DatastoreObjectifyDAL.loadObjectWithParentId(EventDo.class, eventId, PollDo.class, pollId);
+        logger.info("Poll loaded by pollId");
         return poll;
     }
 
     public static List<PollDo> loadPollsByEventId(final String eventId){
         List<PollDo> pollList = DatastoreObjectifyDAL.loadObjectsByAncestorRef(EventDo.class, eventId, PollDo.class);
+        logger.info("Total polls fetched given eventId:"+(pollList == null ? 0 : pollList.size()));
         return pollList;
     }
     
     public static int getCountofUnvotedPolls(final String eventId, final String userId){
     	List<PollDo> polls = loadPollsByEventId(eventId);
+    	logger.info("Total polls fetched given eventId:"+(polls == null ? 0 : polls.size()));
     	int count = 0;
     	for(PollDo p : polls){
     		List<PollOption> options = p.getPollOptions();
@@ -49,6 +58,7 @@ public class PollDatastoreImpl {
     			count++;
     		}
     	}
+    	logger.info("Total count of unvoted polls:"+count);
     	return count;
     }
     
@@ -116,12 +126,14 @@ public class PollDatastoreImpl {
 		};
         TransactionResult<PollDo> result = DatastoreObjectifyDAL.update(w);
         DatastoreUtil.processResult(result);
+        logger.info("Poll updated");
         return result.getEntity();
     }
     
     public static void deletePoll(final String eventId, final String pollId){
     	DatastoreObjectifyDAL.deleteObjectByIdWithParentId(pollId, PollDo.class,
     			eventId, EventDo.class);
+    	logger.info("Poll deleted");
     }
     
 }

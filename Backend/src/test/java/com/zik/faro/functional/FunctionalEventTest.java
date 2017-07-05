@@ -1,6 +1,5 @@
 package com.zik.faro.functional;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -19,12 +18,13 @@ import com.zik.faro.TestHelper;
 import com.zik.faro.data.AddFriendRequest;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.EventInviteStatusWrapper;
-import com.zik.faro.data.InviteeList;
-import com.zik.faro.data.Location;
 import com.zik.faro.data.GeoPosition;
+import com.zik.faro.data.InviteeList;
 import com.zik.faro.data.InviteeList.Invitees;
+import com.zik.faro.data.Location;
 import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.user.EventInviteStatus;
+import com.zik.faro.data.user.FaroUser;
 
 public class FunctionalEventTest {
     private static URL endpoint;
@@ -36,6 +36,9 @@ public class FunctionalEventTest {
     public static void init() throws Exception {
         endpoint = TestHelper.getExternalTargetEndpoint();
         token = TestHelper.createUserAndGetToken(callerEmail);
+        FaroUser faroUser = new FaroUser(callerEmail, "Kaivan", "Vijay", "Sanghvi", "testId", "1234456", null);
+        faroUser.addToken("dnrr9xc1D6g:APA91bGJLMMHbtfVFw1FjfLmZq_pDx53UIbd-iKDDuIWllHVh05BcifGGvtFW_x5OyiqxPrOUUYTVoLyDS7IPfJVO3YvMjh3ECIlaP3WC4OdDl5QGIjzU7SRDt1fYt3Tkk8XfwOAWUML");
+    	ClientResponse upsertResp = TestHelper.doPUT(endpoint.toString(), "v1/profile/upsert", token, faroUser);
         //token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE0Njg1ODkwNzMsInVzZXJuYW1lIjoiNzY0ZmZlYjAtZGViMi00MTdhLTkyNzYtZWRkZmRiZGFkNzUwQGdtYWlsLmNvbSIsImVtYWlsIjoiNzY0ZmZlYjAtZGViMi00MTdhLTkyNzYtZWRkZmRiZGFkNzUwQGdtYWlsLmNvbSIsImlzcyI6ImZhcm8iLCJpYXQiOjE0NjM0MDUwNzN9.Ktv4YbXV8BrJsYSHdBikpEwINNF-q8iTLUBhzr9cVZA";
          }
     
@@ -264,10 +267,10 @@ public class FunctionalEventTest {
     @Test
     public void allTest() throws Exception{
     	System.out.println(token);
-    	createEventTest();
-    	getEventDetails();
-    	getEvents();
-    	getEventInvitees();
+//    	createEventTest();
+//    	getEventDetails();
+//    	getEvents();
+//    	getEventInvitees();
     	updateEvent();
     }
 

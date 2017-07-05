@@ -15,16 +15,7 @@ public class ImageManagement {
     private static final Logger logger = Logger.getLogger(ImageManagement.class);
 
     public static FaroImageBase createImage(FaroImageBase faroImage) {
-        FaroImageDo faroImageDo = new FaroImageDo()
-                .withImageName(faroImage.getImageName())
-                .withEventId(faroImage.getEventId())
-                .withFaroUserId(faroImage.getFaroUserId())
-                .withAlbumName(faroImage.getAlbumName())
-                .withPublicUrl(faroImage.getPublicUrl())
-                .withHeight(faroImage.getHeight())
-                .withWidth(faroImage.getWidth())
-                .withImageProvider(faroImage.getImageProvider())
-                .withCreatedTime(faroImage.getCreatedTime());
+        FaroImageDo faroImageDo = ConversionUtils.toDo(faroImage);
 
         logger.info("Storing faroImageDo to db faroImageDo : " + faroImageDo);
 

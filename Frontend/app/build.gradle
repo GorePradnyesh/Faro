@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 23
+    compileSdkVersion 25
     buildToolsVersion '25.0.0'
 
     defaultConfig {
@@ -47,21 +47,30 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:23.4.0'
-    compile 'com.android.support:support-annotations:23.4.0'
-    compile 'com.android.support:design:23.4.0'
-    compile 'com.squareup.okhttp:okhttp:2.5.0'
+    compile 'com.android.support:appcompat-v7:25.2.0'
+    compile 'com.android.support:support-annotations:25.2.0'
+    compile 'com.android.support:design:25.2.0'
+    compile 'com.android.support:support-v4:25.2.0'
+    compile 'com.android.support.constraint:constraint-layout:1.0.0-beta5'
+
+    compile 'com.google.android.gms:play-services-gcm:10.2.6'
+    compile 'com.google.android.gms:play-services:10.2.6'
+
+    compile 'com.google.firebase:firebase-core:10.2.6'
+    compile 'com.google.firebase:firebase-auth:10.2.6'
+    compile 'com.google.firebase:firebase-messaging:10.2.6'
+
     compile 'com.google.code.gson:gson:2.4'
     compile 'com.google.guava:guava:18.0'
-    compile 'com.github.bumptech.glide:glide:3.7.0'
-    compile 'com.google.android.gms:play-services-gcm:10.2.0'
-    compile 'com.google.android.gms:play-services:10.2.0'
-    compile 'com.android.support.constraint:constraint-layout:1.0.0-beta5'
-    compile 'com.android.support:support-v4:23.4.0'
-    compile 'com.google.firebase:firebase-messaging:10.0.1'
-    testCompile 'com.auth0:java-jwt:2.1.0'
-    compile 'com.facebook.android:facebook-android-sdk:4.8.+'
+
+    compile 'com.squareup.okhttp:okhttp:2.5.0'
+
+    compile 'com.github.bumptech.glide:glide:3.8.0'
+
+    compile 'com.facebook.android:facebook-android-sdk:4.24.0'
     compile 'com.auth0:java-jwt:2.1.0'
+
+    testCompile 'com.auth0:java-jwt:2.1.0'
 }
 
 apply plugin: 'com.google.gms.google-services' //Added for Firebase

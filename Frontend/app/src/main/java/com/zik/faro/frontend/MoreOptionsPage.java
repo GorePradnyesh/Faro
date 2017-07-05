@@ -125,7 +125,7 @@ public class MoreOptionsPage extends Fragment {
                 }
 
                 // proceed with logging out of the app even if token is not removed from app server.
-                // App server will realize later on its own that the token is invalid when it uses it
+                // App server will realize later, on its own, that the token is invalid when it uses it
                 handleLogoutSuccessOnUi();
             } else {
                 // Dont proceed with logout

@@ -1,6 +1,4 @@
-package com.zik.faro.frontend.faroservice;
-
-import android.app.Activity;
+package com.zik.faro.frontend.faroservice.auth;
 
 import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.frontend.faroservice.okHttp.OkHttpResponse;
@@ -13,10 +11,12 @@ import java.io.IOException;
 
 public class FaroSignupJob extends FaroBaseSignInJob {
     private FaroUser newFaroUser;
+    private String password;
 
     public FaroSignupJob(FaroUser newFaroUser, String password) {
-        super(newFaroUser.getId(), password);
+        super(newFaroUser.getId());
         this.newFaroUser = newFaroUser;
+        this.password = password;
     }
 
     @Override

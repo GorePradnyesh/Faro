@@ -17,7 +17,7 @@ import java.util.Calendar;
 public class DeserializerHttpResponseHandler<T> implements Callback {
     private BaseFaroRequestCallback callback;
     private Class<T> responseClass;
-    public static final Gson mapper = gsonBuilder();
+    private static final Gson mapper = gsonBuilder();
     private Type type;
 
     DeserializerHttpResponseHandler(final BaseFaroRequestCallback<T> callback, final Class<T> clazz) {

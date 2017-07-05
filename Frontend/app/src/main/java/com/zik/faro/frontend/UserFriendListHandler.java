@@ -1,8 +1,6 @@
 package com.zik.faro.frontend;
 
 import com.google.gson.Gson;
-import com.zik.faro.data.Event;
-import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.MinUser;
 import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 
@@ -13,38 +11,37 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class UserFriendListHandler {
     private static UserFriendListHandler userFriendListHandler = null;
+    public UserFriendAdapter userFriendAdapter;
 
-    public static UserFriendListHandler getInstance(){
-        if (userFriendListHandler != null){
+    /*
+    * Map of friends needed to access friends downloaded from the server in O(1) time. The Key to the
+    * Map is the emailID  which returns the MinUser as the value.
+    */
+    private Map<String, MinUser> friendMap = new ConcurrentHashMap<>();
+
+    private static String TAG = "UserFriendListHandler";
+
+    private UserFriendListHandler(){}
+
+    public static UserFriendListHandler getInstance() {
+        if (userFriendListHandler != null) {
             return userFriendListHandler;
         }
 
         synchronized (UserFriendListHandler.class) {
-            if (userFriendListHandler == null){
+            if (userFriendListHandler == null) {
                 userFriendListHandler = new UserFriendListHandler();
             }
             return userFriendListHandler;
         }
     }
 
-    private UserFriendListHandler(){}
-
-    public UserFriendAdapter userFriendAdapter;
-
-    /*
-    * Map of friends needed to access friends downloaded from the server in O(1) time. The Key to the
-    * Map is the emailId  which returns the MinUser as the value.
-    */
-    private Map<String, MinUser> friendMap = new ConcurrentHashMap<>();
-
-    private static String TAG = "UserFriendListHandler";
-
-    private void addFriendToList(MinUser minUser){
+    private void addFriendToList(MinUser minUser) {
         userFriendAdapter.insert(minUser, 0);
         userFriendAdapter.notifyDataSetChanged();
     }
 
-    public void addFriendToListAndMap(MinUser minUser){
+    public void addFriendToListAndMap(MinUser minUser) {
         /*
          * If the received minUser is already present in the local database, then we need to delete that and
          * update it with the newly received minUser.
@@ -63,7 +60,7 @@ public class UserFriendListHandler {
     }
 
     public void removeAllUsersFriendsFromListAndMap () {
-        for (Iterator<MinUser> iterator = userFriendAdapter.list.iterator(); iterator.hasNext();) {
+        for (Iterator<MinUser> iterator = userFriendAdapter.getMinUsers().iterator(); iterator.hasNext();) {
             MinUser minUser = iterator.next();
             friendMap.remove(minUser.getEmail());
             iterator.remove();
@@ -76,17 +73,18 @@ public class UserFriendListHandler {
         if (minUser == null){
             return;
         }
-        userFriendAdapter.list.remove(minUser);
+        userFriendAdapter.getMinUsers().remove(minUser);
         userFriendAdapter.notifyDataSetChanged();
         friendMap.remove(emailId);
     }
 
-    public void clearFriendListAndMap(){
-        if (userFriendAdapter != null){
-            userFriendAdapter.list.clear();
+    public void clearFriendListAndMap() {
+        if (userFriendAdapter != null) {
+            userFriendAdapter.getMinUsers().clear();
             userFriendAdapter.notifyDataSetChanged();
         }
-        if (friendMap != null){
+
+        if (friendMap != null) {
             friendMap.clear();
         }
     }
@@ -100,23 +98,24 @@ public class UserFriendListHandler {
         String myUserId = faroUserContext.getEmail();
 
         //TODO Cache my info and then retrieve FirstName and Last Name from there
-        if (emailId.equals(myUserId)){
+        if (emailId.equals(myUserId)) {
             return emailId;
         }
+
         MinUser minUser = friendMap.get(emailId);
         if (minUser != null) {
             friendFirstName = minUser.getFirstName();
             friendLastName = minUser.getLastName();
             if (friendLastName != null) {
                 friendFullName = friendFirstName + " " + friendLastName;
-            }else{
+            } else {
                 friendFullName = friendFirstName;
             }
         }
         return friendFullName;
     }
 
-    public MinUser getMinUserCloneFromMap(String emailId){
+    public MinUser getMinUserCloneFromMap(String emailId) {
         MinUser minUser = friendMap.get(emailId);
         Gson gson = new Gson();
         String json = gson.toJson(minUser);

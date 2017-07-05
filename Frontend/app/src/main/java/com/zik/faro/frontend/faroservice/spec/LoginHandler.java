@@ -14,4 +14,5 @@ public interface LoginHandler {
     void login(final BaseFaroRequestCallback<String> callback, final String email, final String password, boolean addToCache);
 
     OkHttpResponse<String> login(final String email, final String password, boolean addToCache) throws IOException;
+    OkHttpResponse<String> login(final String email, final String password, final String firebaseIdToken, boolean addToCache) throws IOException;
 }

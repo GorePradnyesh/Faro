@@ -5,66 +5,93 @@
     android:orientation="vertical"
     tools:context=".LoginActivity">
 
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Email"
-        android:id="@+id/textView2"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true" />
-
-    <EditText
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/TFEmail"
-        android:layout_below="@+id/textView2"
-        android:layout_alignParentEnd="true" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Password"
-        android:id="@+id/textView3"
-        android:layout_below="@+id/TFEmail"
-        android:layout_alignParentStart="true" />
-
-    <EditText
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:inputType="textPassword"
-        android:ems="10"
-        android:id="@+id/TFPassword"
-        android:layout_below="@+id/textView3"
-        android:layout_alignParentStart="true" />
-
-    <EditText
+    <LinearLayout
+        android:id="@+id/loginActivityProgressBarLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/ipAddress"
-        android:hint="Enter IP Address"
-        android:layout_below="@+id/TFPassword"/>
+        android:layout_height="match_parent"
+        android:gravity="center" >
+        <ProgressBar
+            android:id="@+id/loginActivityProgressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+        </ProgressBar>
+    </LinearLayout>
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Login"
-        android:id="@+id/BLogin"
-        android:layout_marginTop="47dp"
-        android:onClick="onLoginClick"
-        android:layout_below="@+id/ipAddress"
-        android:layout_alignEnd="@+id/textView3" />
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/loginActivityDetailsLayout"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Sign Up"
-        android:id="@+id/BSignUp"
-        android:onClick="onSignupClick"
-        android:layout_alignTop="@+id/BLogin"
-        android:layout_centerHorizontal="true" />
+        <com.facebook.login.widget.LoginButton
+            android:id="@+id/fb_login_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_below="@+id/BLogin"
+            android:layout_alignStart="@+id/BLogin"
+            android:layout_marginTop="33dp" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Email"
+            android:id="@+id/textView2"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true" />
+
+        <EditText
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/TFEmail"
+            android:layout_below="@+id/textView2"
+            android:layout_alignParentEnd="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Password"
+            android:id="@+id/textView3"
+            android:layout_below="@+id/TFEmail"
+            android:layout_alignParentStart="true" />
+
+        <EditText
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword"
+            android:ems="10"
+            android:id="@+id/TFPassword"
+            android:layout_below="@+id/textView3"
+            android:layout_alignParentStart="true" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/ipAddress"
+            android:hint="Enter IP Address"
+            android:layout_below="@+id/TFPassword"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Login"
+            android:id="@+id/BLogin"
+            android:layout_marginTop="47dp"
+            android:onClick="onLoginClick"
+            android:layout_below="@+id/ipAddress"
+            android:layout_alignEnd="@+id/textView3" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sign Up"
+            android:id="@+id/BSignUp"
+            android:onClick="onSignupClick"
+            android:layout_alignTop="@+id/BLogin"
+            android:layout_centerHorizontal="true" />
+    </RelativeLayout>
 
 </RelativeLayout>

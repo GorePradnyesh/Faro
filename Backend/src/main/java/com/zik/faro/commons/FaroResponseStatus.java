@@ -10,7 +10,8 @@ public enum FaroResponseStatus {
     ENTITY_EXISTS(Response.Status.CONFLICT, 2001, "Entity already exists"),
     INVALID_LOGIN(Response.Status.UNAUTHORIZED, 3001, "Invalid login credentials"),
     UNAUTHORIZED(Response.Status.UNAUTHORIZED, 3002, "Not authorized to proceed with the operation"),
-    NOT_FOUND(Response.Status.NOT_FOUND, 4001, "Not found element/data");
+    NOT_FOUND(Response.Status.NOT_FOUND, 4001, "Not found element/data"),
+    UNEXPECTED_ERROR(Response.Status.INTERNAL_SERVER_ERROR, 5001, "unhandled error");
 
     private Response.Status restResponseStatus;
     private FaroResponseEntity faroResponseEntity;

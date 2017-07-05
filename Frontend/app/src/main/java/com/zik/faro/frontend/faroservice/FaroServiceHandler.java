@@ -7,6 +7,7 @@ import com.zik.faro.frontend.faroservice.okHttp.OKHttpWrapperLogin;
 import com.zik.faro.frontend.faroservice.okHttp.OKHttpWrapperPoll;
 import com.zik.faro.frontend.faroservice.okHttp.OKHttpWrapperSignup;
 import com.zik.faro.frontend.faroservice.okHttp.OkHttpWrapperAssignment;
+import com.zik.faro.frontend.faroservice.okHttp.OkHttpWrapperFirebaseLogin;
 import com.zik.faro.frontend.faroservice.okHttp.OkHttpWrapperImage;
 import com.zik.faro.frontend.faroservice.okHttp.OkHttpWrapperProfile;
 import com.zik.faro.frontend.faroservice.spec.ActivityHandler;
@@ -27,6 +28,7 @@ public class FaroServiceHandler {
     private ProfileHandler      profileHandler;
     private SignupHandler       signupHandler;
     private LoginHandler        loginHandler;
+    private LoginHandler        firebaseLoginHandler;
     private ActivityHandler     activityHandler;
     private PollHandler         pollHandler;
     private FriendsHandler      friendsHandler;
@@ -34,13 +36,17 @@ public class FaroServiceHandler {
     private ImagesHandler       imagesHandler;
 
     private FaroServiceHandler(URL baseUrl) {
-        eventHandler = new OKHttpWrapperEvent(baseUrl);
-        profileHandler = new OkHttpWrapperProfile(baseUrl);
         signupHandler = new OKHttpWrapperSignup(baseUrl);
         loginHandler = new OKHttpWrapperLogin(baseUrl);
+        firebaseLoginHandler = new OkHttpWrapperFirebaseLogin(baseUrl);
+
+        profileHandler = new OkHttpWrapperProfile(baseUrl);
+
+        friendsHandler = new OKHttpWrapperFriends(baseUrl);
+
+        eventHandler = new OKHttpWrapperEvent(baseUrl);
         pollHandler = new OKHttpWrapperPoll(baseUrl);
         activityHandler = new OKHttpWrapperActivity(baseUrl);
-        friendsHandler = new OKHttpWrapperFriends(baseUrl);
         assignmentHandler = new OkHttpWrapperAssignment(baseUrl);
         imagesHandler = new OkHttpWrapperImage(baseUrl);
     }
@@ -68,6 +74,10 @@ public class FaroServiceHandler {
 
     public LoginHandler getLoginHandler() {
         return loginHandler;
+    }
+
+    public LoginHandler getFirebaseLoginHandler() {
+        return firebaseLoginHandler;
     }
     
     public PollHandler getPollHandler() {
