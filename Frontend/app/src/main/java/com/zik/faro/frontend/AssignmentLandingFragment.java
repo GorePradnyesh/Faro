@@ -53,8 +53,6 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
     private ListView itemList;
     private Map<String, List<Item>> itemListMap = new HashMap<String, List<Item>>();
 
-    private Intent AssignmentLandingPageReloadIntent = null;
-
     private Context mContext;
     private View fragmentView;
     private RelativeLayout assignmentLandingFragmentRelativeLayout = null;
@@ -62,6 +60,8 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
     private String bundleType = null;
     private boolean receivedAllActivities = false;
     private boolean receivedEvent = false;
+    private Activity cloneActivity = null;
+    private Event cloneEvent = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -86,7 +86,7 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
         return fragmentView;
     }
 
-    public void setupPageDetails(){
+    private void setupPageDetails(){
 
         if (!receivedEvent || !receivedAllActivities)
             return;
@@ -111,7 +111,6 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
         Button updateAssignment = (Button) fragmentView.findViewById(R.id.updateAssignment);
 
         final Intent EditAssignmentPage = new Intent(getActivity(), EditAssignment.class);
-        AssignmentLandingPageReloadIntent = new Intent(getActivity(), AssignmentLandingPage.class);
 
         itemList = (ListView) fragmentView.findViewById(R.id.itemList);
         itemList.setTag("AssignmentLandingPageFragment");
@@ -161,6 +160,12 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
         activityId = extras.getString(FaroIntentConstants.ACTIVITY_ID);
         assignmentId = extras.getString(FaroIntentConstants.ASSIGNMENT_ID);
         bundleType = extras.getString(FaroIntentConstants.BUNDLE_TYPE);
+
+        if (activityId == null){
+            cloneEvent = eventListHandler.getEventCloneFromMap(eventId);
+        } else {
+            cloneActivity = activityListHandler.getActivityCloneFromMap(activityId);
+        }
 
         if (bundleType.equals(FaroIntentConstants.IS_NOT_NOTIFICATION)){
             receivedAllActivities = true;
@@ -229,11 +234,7 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
 
                             originalAssignment.setItems(receivedItemList);
 
-                            //Reload AssignmentLandingFragment
-                            FaroIntentInfoBuilder.assignmentIntent(AssignmentLandingPageReloadIntent,
-                                    eventId, activityId, assignmentId);
-                            getActivity().finish();
-                            startActivity(AssignmentLandingPageReloadIntent);
+                            setupPageDetails();
                         }
                     };
                     Handler mainHandler = new Handler(mContext.getMainLooper());
@@ -275,5 +276,31 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
                 }
             }
         }, eventId);
+    }
+
+    @Override
+    public void onResume() {
+        if (bundleType.equals(FaroIntentConstants.IS_NOT_NOTIFICATION)) {
+            // Check if the version is same. It can be different if this page is loaded and a notification
+            // is received for this later which updates the global memory but clonedata on this page remains
+            // stale.
+            // This check is not necessary when opening this page directly through a notification.
+            Long versionInGlobalMemory = null;
+            Long previousVersion = null;
+
+            if (activityId == null) {
+                versionInGlobalMemory = eventListHandler.getOriginalEventFromMap(eventId).getVersion();
+                previousVersion = cloneEvent.getVersion();
+            } else {
+                versionInGlobalMemory = activityListHandler.getOriginalActivityFromMap(activityId).getVersion();
+                previousVersion = cloneActivity.getVersion();
+            }
+
+            if (!previousVersion.equals(versionInGlobalMemory)) {
+                setupPageDetails();
+            }
+
+        }
+        super.onResume();
     }
 }

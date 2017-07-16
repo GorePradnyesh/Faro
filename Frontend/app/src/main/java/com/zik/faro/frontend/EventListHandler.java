@@ -122,6 +122,26 @@ public class EventListHandler {
         eventMap.put(receivedEvent.getId(), eventInviteStatusWrapper);
     }
 
+    public int getAcceptedFutureEventsStartingPosition() {
+        int position = 0;
+        for (Event event: acceptedEventAdapter.list) {
+            if (event.getStartDate().after(Calendar.getInstance()))
+                break;
+            position++;
+        }
+        return position;
+    }
+
+    public int getNotAcceptedFutureEventsStartingPosition() {
+        int position = 0;
+        for (Event event: notAcceptedEventAdapter.list) {
+            if (event.getStartDate().after(Calendar.getInstance()))
+                break;
+            position++;
+        }
+        return position;
+    }
+
     public void addDownloadedEventsToListAndMap(List<EventInviteStatusWrapper> eventInviteStatusWrappers){
         removeAllEventsFromListAndMap();
 

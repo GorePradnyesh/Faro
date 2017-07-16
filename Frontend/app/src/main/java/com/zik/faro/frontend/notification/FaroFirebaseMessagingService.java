@@ -37,10 +37,13 @@ public class FaroFirebaseMessagingService extends FirebaseMessagingService {
         sendNotification(title, body, clickAction, data);
     }
 
-    private void sendNotification(String title, String messageBody, String notificationType, JSONObject data) {
+    private void sendNotification(String title, String messageBody, String clickAction, JSONObject data) {
         NotificationCompat.Builder notificationBuilder =
                 FaroNotificationBuilder.getNotificationBuilder(this, title,
-                        messageBody, notificationType, data);
+                        messageBody, clickAction, data);
+
+        if (notificationBuilder == null)
+            return;
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);

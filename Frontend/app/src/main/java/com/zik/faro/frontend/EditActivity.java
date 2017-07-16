@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v7.app.ActionBarActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -18,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -69,12 +69,41 @@ public class EditActivity extends android.app.Activity {
 
     private PopupWindow popupWindow;
 
+    private LinearLayout linlaHeaderProgress = null;
+    private RelativeLayout editActivityRelativeLayout = null;
+
+    private Bundle extras = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_activity);
 
         mContext = this;
+
+        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
+
+        linlaHeaderProgress = (LinearLayout) findViewById(R.id.linlaHeaderProgress);
+
+        editActivityRelativeLayout = (RelativeLayout) findViewById(R.id.editActivityRelativeLayout);
+        editActivityRelativeLayout.setVisibility(View.GONE);
+
+        extras = getIntent().getExtras();
+        if (extras == null)return; //TODO: How to handle such conditions
+
+        setupPageDetails();
+    }
+
+    private void setupPageDetails () {
+
+        linlaHeaderProgress.setVisibility(View.GONE);
+        editActivityRelativeLayout.setVisibility(View.VISIBLE);
+
+        eventId = extras.getString(FaroIntentConstants.EVENT_ID);
+        activityId = extras.getString(FaroIntentConstants.ACTIVITY_ID);
+
+        event = eventListHandler.getEventCloneFromMap(eventId);
+        cloneActivity = activityListHandler.getActivityCloneFromMap(activityId);
 
         startDateButton = (Button) findViewById(R.id.startDateButton);
         startTimeButton = (Button) findViewById(R.id.startTimeButton);
@@ -84,8 +113,6 @@ public class EditActivity extends android.app.Activity {
         Button editActivityOK = (Button) findViewById(R.id.editActivityOK);
         Button deleteActivity = (Button) findViewById(R.id.deleteActivity);
 
-        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
-
         popUpRelativeLayout = (RelativeLayout) findViewById(R.id.editActivity);
 
         ActivityLandingPage = new Intent(EditActivity.this, ActivityLandingPage.class);
@@ -93,31 +120,21 @@ public class EditActivity extends android.app.Activity {
         final EditText activityDescription = (EditText) findViewById(R.id.activityDescriptionEditText);;
 
         /*
-        * Do not remove the cloneactivity from the list and the map in the activityListHandler below.
-        * Make a clone of the cloneactivity and make changes to that.
-        * When the OK button is clicked, only then remove the cloneactivity and insert the clone.
+        * Do not remove the activity from the list and the map in the activityListHandler below.
+        * Make a clone of the activity and make changes to that.
+        * When the OK button is clicked, only then remove the activity and insert the clone.
         * This way if the user makes some changes but then clicks back without clicking OK button,
-        * the original cloneactivity is not affected.
+        * the original activity is not affected.
         */
-        Bundle extras = getIntent().getExtras();
-        if(extras != null) {
-            eventId = extras.getString(FaroIntentConstants.EVENT_ID);
-            activityId = extras.getString(FaroIntentConstants.ACTIVITY_ID);
 
-            event = eventListHandler.getEventCloneFromMap(eventId);
-            cloneActivity = activityListHandler.getActivityCloneFromMap(activityId);
+        if (cloneActivity != null) {
 
-            if (cloneActivity != null) {
+            TextView activityName = (TextView) findViewById(R.id.activityName);
+            activityName.setText(cloneActivity.getName());
 
-                TextView activityName = (TextView) findViewById(R.id.activityName);
-                activityName.setText(cloneActivity.getName());
-                
-                activityDescription.setText(cloneActivity.getDescription());
-                setBothTimeAndDateToActivityDates();
-            }
+            activityDescription.setText(cloneActivity.getDescription());
+            setBothTimeAndDateToActivityDates();
         }
-
-
 
         activityDescription.addTextChangedListener(new TextWatcher() {
             @Override
@@ -184,7 +201,6 @@ public class EditActivity extends android.app.Activity {
             }
         });
     }
-
 
     private void confirmActivityDeletePopUP(View v) {
         LayoutInflater layoutInflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -492,10 +508,7 @@ public class EditActivity extends android.app.Activity {
         // stale.
         Long versionInGlobalMemory = activityListHandler.getOriginalActivityFromMap(activityId).getVersion();
         if (!cloneActivity.getVersion().equals(versionInGlobalMemory)){
-            Intent editActivityPageReloadIntent = new Intent(EditActivity.this, EditActivity.class);
-            FaroIntentInfoBuilder.activityIntent(editActivityPageReloadIntent, eventId, activityId);
-            finish();
-            startActivity(editActivityPageReloadIntent);
+            setupPageDetails();
         }
         super.onResume();
     }

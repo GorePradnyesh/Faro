@@ -76,7 +76,6 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
 
     private Intent PickPollWinnerIntent = null;
     private Intent EditPollPageIntent = null;
-    private Intent PollLandingPageReloadIntent = null;
 
     private List<PollOption> pollOptionsList;
 
@@ -116,7 +115,6 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
 
         PickPollWinnerIntent = new Intent(PollLandingPage.this, PickPollWinnerPage.class);
         EditPollPageIntent = new Intent(PollLandingPage.this, EditPoll.class);
-        PollLandingPageReloadIntent = new Intent(PollLandingPage.this, PollLandingPage.class);
 
         linlaHeaderProgress = (LinearLayout) findViewById(R.id.linlaHeaderProgress);
 
@@ -128,6 +126,8 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
 
 
         extras = getIntent().getExtras();
+        if (extras == null) return; // TODO: how to handle this case?
+
         checkAndHandleNotification();
     }
 
@@ -437,9 +437,7 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
                             Log.i(TAG, "Poll Update Response received Successfully");
                             pollListHandler.removePollFromListAndMap(eventId, clonePoll, mContext);
                             pollListHandler.addPollToListAndMap(eventId, receivedPoll, mContext);
-                            FaroIntentInfoBuilder.pollIntent(PollLandingPageReloadIntent, eventId, pollId);
-                            startActivity(PollLandingPageReloadIntent);
-                            finish();
+                           setupPageDetails();
                         }
                     };
                     Handler mainHandler = new Handler(mContext.getMainLooper());
@@ -521,10 +519,7 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
                         @Override
                         public void run() {
                             pollListHandler.addPollToListAndMap(eventId, poll, mContext);
-                            //Reload current activity
-                            FaroIntentInfoBuilder.pollIntent(PollLandingPageReloadIntent, eventId, pollId);
-                            startActivity(PollLandingPageReloadIntent);
-                            finish();
+                            setupPageDetails();
                         }
                     };
                     Handler mainHandler = new Handler(mContext.getMainLooper());
@@ -574,10 +569,7 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
             // This check is not necessary when opening this page directly through a notification.
             Long versionInGlobalMemory = pollListHandler.getOriginalPollFromMap(pollId).getVersion();
             if (!clonePoll.getVersion().equals(versionInGlobalMemory)) {
-                Intent pollLandingPageReloadIntent = new Intent(PollLandingPage.this, PollLandingPage.class);
-                FaroIntentInfoBuilder.pollIntent(pollLandingPageReloadIntent, eventId, pollId);
-                finish();
-                startActivity(pollLandingPageReloadIntent);
+                setupPageDetails();
             }
         }
 

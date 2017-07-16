@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
@@ -50,7 +51,6 @@ public class EditPoll extends Activity {
 
     private static String TAG = "EditPoll";
 
-    private RelativeLayout popUpRelativeLayout;
     private final List <PollOption> newPollOptionList = new LinkedList<>();
     private Context mContext;
     private TextView pollDescription = null;
@@ -64,6 +64,10 @@ public class EditPoll extends Activity {
     private Map<String, Object> map = null;
     private PopupWindow popupWindow = null;
 
+    private LinearLayout linlaHeaderProgress = null;
+    private RelativeLayout editPollRelativeLayout = null;
+    private Bundle extras = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,13 +77,26 @@ public class EditPoll extends Activity {
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
-        PollLandingPageIntent = new Intent(EditPoll.this, PollLandingPage.class);
+        linlaHeaderProgress = (LinearLayout) findViewById(R.id.linlaHeaderProgress);
 
-        Bundle extras = getIntent().getExtras();
-        if (extras == null) return; //TODO How to handle this case?
+        editPollRelativeLayout = (RelativeLayout) findViewById(R.id.editPollRelativeLayout);
+        editPollRelativeLayout.setVisibility(View.GONE);
 
+        extras = getIntent().getExtras();
+        if (extras == null)return; //TODO: How to handle such conditions
+
+        setupPageDetails();
+    }
+
+    private void setupPageDetails () {
+
+        linlaHeaderProgress.setVisibility(View.GONE);
+        editPollRelativeLayout.setVisibility(View.VISIBLE);
         eventId = extras.getString(FaroIntentConstants.EVENT_ID);
         pollId = extras.getString(FaroIntentConstants.POLL_ID);
+
+        PollLandingPageIntent = new Intent(EditPoll.this, PollLandingPage.class);
+
         clonePoll = pollListHandler.getPollCloneFromMap(pollId);
 
         pollDescription = (TextView) findViewById(R.id.pollDescription);
@@ -95,8 +112,6 @@ public class EditPoll extends Activity {
         editPollOK = (Button) findViewById(R.id.editPollOK);
         editPollOK.setEnabled(true);
         deletePoll = (Button)findViewById(R.id.deletePoll);
-
-        popUpRelativeLayout = (RelativeLayout) findViewById(R.id.editPollPage);
 
         editPollOptionsAdapter = new PollOptionsAdapter(this, R.layout.poll_option_can_edit_row_style);
         editPollOptionsListView.setAdapter(editPollOptionsAdapter);
@@ -227,7 +242,7 @@ public class EditPoll extends Activity {
         Button delete = (Button)container.findViewById(R.id.popUpDeleteButton);
         Button cancel = (Button)container.findViewById(R.id.popUpCancelButton);
 
-        popupWindow.showAtLocation(popUpRelativeLayout, Gravity.CENTER, 0, 0);
+        popupWindow.showAtLocation(editPollRelativeLayout, Gravity.CENTER, 0, 0);
 
         container.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -268,10 +283,7 @@ public class EditPoll extends Activity {
         // stale.
         Long versionInGlobalMemory = pollListHandler.getOriginalPollFromMap(pollId).getVersion();
         if (!clonePoll.getVersion().equals(versionInGlobalMemory)) {
-            Intent editPollReloadIntent = new Intent(EditPoll.this, EditPoll.class);
-            FaroIntentInfoBuilder.pollIntent(editPollReloadIntent, eventId, pollId);
-            finish();
-            startActivity(editPollReloadIntent);
+           setupPageDetails();
         }
         super.onResume();
     }

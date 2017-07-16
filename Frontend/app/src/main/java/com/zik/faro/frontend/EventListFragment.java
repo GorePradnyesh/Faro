@@ -107,10 +107,14 @@ public class EventListFragment extends Fragment {
         ListView theAcceptedListView  = (ListView)view.findViewById(R.id.acceptedList);
         theAcceptedListView.setBackgroundColor(Color.BLACK);
         theAcceptedListView.setAdapter(eventListHandler.acceptedEventAdapter);
+        theAcceptedListView.setSelectionFromTop(
+                eventListHandler.getAcceptedFutureEventsStartingPosition(), 0);
 
         ListView theNotAcceptedListView  = (ListView)view.findViewById(R.id.notAcceptedList);
         theNotAcceptedListView.setBackgroundColor(Color.BLACK);
         theNotAcceptedListView.setAdapter(eventListHandler.notAcceptedEventAdapter);
+        theNotAcceptedListView.setSelectionFromTop(
+                eventListHandler.getNotAcceptedFutureEventsStartingPosition(), 0);
 
         //ImageButton calendar_view = (ImageButton)view.findViewById(R.id.calendarViewButton);
         //calendar_view.setImageResource(R.drawable.calendar);

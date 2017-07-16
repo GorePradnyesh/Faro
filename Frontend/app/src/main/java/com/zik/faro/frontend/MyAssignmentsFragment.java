@@ -10,7 +10,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.squareup.okhttp.Request;
@@ -24,6 +26,7 @@ import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
+import com.zik.faro.frontend.notification.NotificationPayloadHandler;
 import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 import java.io.IOException;
@@ -31,7 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MyAssignmentsFragment extends Fragment{
+public class MyAssignmentsFragment extends Fragment implements NotificationPayloadHandler {
 
     private AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
     private EventListHandler eventListHandler = EventListHandler.getInstance();
@@ -42,15 +45,21 @@ public class MyAssignmentsFragment extends Fragment{
     private Map<String, List<Item>> activityToItemListMap = new HashMap<>();
 
     private String eventId = null;
-    private String passedActivityId = null;
-    private String passedAssignmentId = null;
+    private String activityId = null;
+    private String assignmentId = null;
 
     private FaroUserContext faroUserContext = FaroUserContext.getInstance();
     private String myUserId = faroUserContext.getEmail();
 
     private static String TAG = "MyAssignmentsFragment";
-
+    private String bundleType = null;
     private Context mContext;
+    private Activity cloneActivity = null;
+    private Event cloneEvent = null;
+    private View fragmentView;
+
+    private LinearLayout linlaHeaderProgress = null;
+    private RelativeLayout myAssignmentLandingFragmentRelativeLayout = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -61,25 +70,30 @@ public class MyAssignmentsFragment extends Fragment{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.my_assignments_fragment, container, false);
+        fragmentView = inflater.inflate(R.layout.my_assignments_fragment, container, false);
         super.onCreate(savedInstanceState);
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(getActivity()));
 
-        eventId = getArguments().getString(FaroIntentConstants.EVENT_ID);
-        passedActivityId = getArguments().getString(FaroIntentConstants.ACTIVITY_ID);
-        passedAssignmentId = getArguments().getString(FaroIntentConstants.ASSIGNMENT_ID);
+        linlaHeaderProgress = (LinearLayout)fragmentView.findViewById(R.id.linlaHeaderProgress);
+        myAssignmentLandingFragmentRelativeLayout = (RelativeLayout) fragmentView.findViewById(R.id.myAssignmentLandingFragmentRelativeLayout);
+        myAssignmentLandingFragmentRelativeLayout.setVisibility(View.GONE);
 
+        checkAndHandleNotification();
 
+        return fragmentView;
+    }
 
-        final TextView assignmentDescription = (TextView) view.findViewById(R.id.assignmentDescription);
+    private void setupPageDetails () {
+        linlaHeaderProgress.setVisibility(View.GONE);
+        myAssignmentLandingFragmentRelativeLayout.setVisibility(View.VISIBLE);
+
+        final TextView assignmentDescription = (TextView) fragmentView.findViewById(R.id.assignmentDescription);
         assignmentDescription.setText("My Items");
 
-        Button updateAssignment = (Button) view.findViewById(R.id.updateAssignment);
+        Button updateAssignment = (Button) fragmentView.findViewById(R.id.updateAssignment);
 
-        final Intent AssignmentLandingPageReloadIntent = new Intent(getActivity(), AssignmentLandingPage.class);
-
-        itemList = (ListView) view.findViewById(R.id.itemList);
+        itemList = (ListView) fragmentView.findViewById(R.id.itemList);
         itemList.setTag("MyAssignmentsFragment");
         final ItemsAdapter myItemsAdapter = new ItemsAdapter(getActivity(), R.layout.assignment_update_item_row_style);
         itemList.setAdapter(myItemsAdapter);
@@ -141,11 +155,7 @@ public class MyAssignmentsFragment extends Fragment{
                                     }
                                     Log.i(TAG, "Successfully updated items list to server");
 
-                                    //Reload AssignmentLandingFragment
-                                    FaroIntentInfoBuilder.assignmentIntent(AssignmentLandingPageReloadIntent,
-                                            eventId, passedActivityId, passedAssignmentId);
-                                    getActivity().finish();
-                                    startActivity(AssignmentLandingPageReloadIntent);
+                                    setupPageDetails();
                                 }
                             };
                             Handler mainHandler = new Handler(mContext.getMainLooper());
@@ -157,7 +167,50 @@ public class MyAssignmentsFragment extends Fragment{
                 }, eventId, activityToItemListMap);
             }
         });
+    }
 
-        return view;
+
+    @Override
+    public void checkAndHandleNotification() {
+        Bundle extras = getArguments();
+        if (extras == null) return; //TODO: How to handle such conditions
+
+        eventId = extras.getString(FaroIntentConstants.EVENT_ID);
+        activityId = extras.getString(FaroIntentConstants.ACTIVITY_ID);
+        assignmentId = extras.getString(FaroIntentConstants.ASSIGNMENT_ID);
+        bundleType = extras.getString(FaroIntentConstants.BUNDLE_TYPE);
+
+        if (activityId == null){
+            cloneEvent = eventListHandler.getEventCloneFromMap(eventId);
+        } else {
+            cloneActivity = activityListHandler.getActivityCloneFromMap(activityId);
+        }
+
+        setupPageDetails();
+    }
+
+    @Override
+    public void onResume() {
+        if (bundleType.equals(FaroIntentConstants.IS_NOT_NOTIFICATION)) {
+            // Check if the version is same. It can be different if this page is loaded and a notification
+            // is received for this later which updates the global memory but clonedata on this page remains
+            // stale.
+            // This check is not necessary when opening this page directly through a notification.
+            Long versionInGlobalMemory = null;
+            Long previousVersion = null;
+
+            if (activityId == null) {
+                versionInGlobalMemory = eventListHandler.getOriginalEventFromMap(eventId).getVersion();
+                previousVersion = cloneEvent.getVersion();
+            } else {
+                versionInGlobalMemory = activityListHandler.getOriginalActivityFromMap(activityId).getVersion();
+                previousVersion = cloneActivity.getVersion();
+            }
+
+            if (!previousVersion.equals(versionInGlobalMemory)) {
+                setupPageDetails();
+            }
+        }
+        super.onResume();
     }
 }

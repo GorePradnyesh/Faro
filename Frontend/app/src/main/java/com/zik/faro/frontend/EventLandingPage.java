@@ -99,7 +99,6 @@ public class EventLandingPage extends FragmentActivity
 
     private String eventId;
     private Context mContext;
-    private Intent eventLandingPageReload;
 
     private static final int REQUEST_TAKE_PHOTO = 1;
     private static final int REQUEST_PICK_PHOTOS = 2;
@@ -150,6 +149,20 @@ public class EventLandingPage extends FragmentActivity
 
         mContext = this;
 
+        // Build the Play services client for use by the Fused Location Provider and the Places API.
+        // Use the addApi() method to request the Google Places API and the Fused Location Provider.
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this /* FragmentActivity */,
+                        this /* OnConnectionFailedListener */)
+                .addConnectionCallbacks(this)
+                .addApi(LocationServices.API)
+                .addApi(Places.GEO_DATA_API)
+                .addApi(Places.PLACE_DETECTION_API)
+                .build();
+
+        mGoogleApiClient.connect();
+
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
         linlaHeaderProgress = (LinearLayout) findViewById(R.id.linlaHeaderProgress);
@@ -182,19 +195,14 @@ public class EventLandingPage extends FragmentActivity
                             switch (eventInviteStatus){
                                 case ACCEPTED:
                                     eventListHandler.addEventToListAndMap(cloneEvent, EventInviteStatus.ACCEPTED);
-                                    //Reload EventLandingPage
-                                    FaroIntentInfoBuilder.eventIntent(eventLandingPageReload, eventId);
-                                    finish();
-                                    startActivity(eventLandingPageReload);
+                                    setupPageDetails();
                                     break;
                                 case MAYBE:
                                     eventListHandler.addEventToListAndMap(cloneEvent, EventInviteStatus.MAYBE);
-                                    //Reload EventLandingPage
-                                    FaroIntentInfoBuilder.eventIntent(eventLandingPageReload, eventId);
-                                    finish();
-                                    startActivity(eventLandingPageReload);
+                                    setupPageDetails();
                                     break;
                                 case DECLINED:
+                                    //TODO: change this to not do the below but just change the state and keep it in the list and Map
                                     eventListHandler.removeEventFromListAndMap(eventId);
                                     finish();
                                     break;
@@ -340,7 +348,6 @@ public class EventLandingPage extends FragmentActivity
         final Intent ActivityListPage = new Intent(EventLandingPage.this, ActivityListPage.class);
         final Intent EventFriendListLandingPageIntent = new Intent(EventLandingPage.this, EventFriendListLandingPage.class);
         final Intent AssignmentLandingPageTabsIntent = new Intent(EventLandingPage.this, AssignmentLandingPage.class);
-        eventLandingPageReload = new Intent(EventLandingPage.this, EventLandingPage.class);
 
         linlaHeaderProgress = (LinearLayout) findViewById(R.id.linlaHeaderProgress);
 
@@ -439,18 +446,6 @@ public class EventLandingPage extends FragmentActivity
                 }
             }
         });
-
-        // Build the Play services client for use by the Fused Location Provider and the Places API.
-        // Use the addApi() method to request the Google Places API and the Fused Location Provider.
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this /* FragmentActivity */,
-                        this /* OnConnectionFailedListener */)
-                .addConnectionCallbacks(this)
-                .addApi(LocationServices.API)
-                .addApi(Places.GEO_DATA_API)
-                .addApi(Places.PLACE_DETECTION_API)
-                .build();
-        mGoogleApiClient.connect();
 
         eventStateBasedView(cloneEvent);
 
@@ -891,10 +886,7 @@ public class EventLandingPage extends FragmentActivity
             // This check is not necessary when opening this page directly through a notification.
             Long versionInGlobalMemory = eventListHandler.getOriginalEventFromMap(eventId).getVersion();
             if (!cloneEvent.getVersion().equals(versionInGlobalMemory)) {
-                Intent eventLandingPageReloadIntent = new Intent(EventLandingPage.this, EventLandingPage.class);
-                FaroIntentInfoBuilder.eventIntent(eventLandingPageReloadIntent, eventId);
-                finish();
-                startActivity(eventLandingPageReloadIntent);
+                setupPageDetails();
             }
         }
         super.onResume();

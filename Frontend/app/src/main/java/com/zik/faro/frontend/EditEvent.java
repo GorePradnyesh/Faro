@@ -21,6 +21,7 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -89,12 +90,45 @@ public class EditEvent extends Activity {
 
     private Location location = null;
 
+    private LinearLayout linlaHeaderProgress = null;
+    private RelativeLayout editEventRelativeLayout = null;
+    private Bundle extras = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_event);
 
         mContext = this;
+
+        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
+
+        linlaHeaderProgress = (LinearLayout) findViewById(R.id.linlaHeaderProgress);
+
+        editEventRelativeLayout = (RelativeLayout) findViewById(R.id.editEventRelativeLayout);
+        editEventRelativeLayout.setVisibility(View.GONE);
+
+        extras = getIntent().getExtras();
+        if (extras == null)return; //TODO: How to handle such conditions
+
+        setupPageDetails();
+    }
+
+    private void setupPageDetails () {
+
+        linlaHeaderProgress.setVisibility(View.GONE);
+        editEventRelativeLayout.setVisibility(View.VISIBLE);
+
+        eventId = extras.getString(FaroIntentConstants.EVENT_ID);
+
+        /*
+        * Do not remove the event from the list and the map in the eventListHandler below.
+        * Make a clone of the event and make changes to that.
+        * When the OK button is clicked, only then remove the event and insert the clone.
+        * This way if the user makes some changes but then clicks back without clicking OK button,
+        * the original event is not affected.
+        */
+        cloneEvent = eventListHandler.getEventCloneFromMap(eventId);
 
         startDateButton = (Button) findViewById(R.id.startDateButton);
         startTimeButton = (Button) findViewById(R.id.startTimeButton);
@@ -115,26 +149,10 @@ public class EditEvent extends Activity {
 
         EventLanding = new Intent(EditEvent.this, EventLandingPage.class);
 
-        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
-
-        /*
-        * Do not remove the event from the list and the map in the eventListHandler below.
-        * Make a clone of the event and make changes to that.
-        * When the OK button is clicked, only then remove the event and insert the clone.
-        * This way if the user makes some changes but then clicks back without clicking OK button,
-        * the original event is not affected.
-        */
-        Bundle extras = getIntent().getExtras();
-        if(extras != null) {
-            eventId = extras.getString(FaroIntentConstants.EVENT_ID);
-            cloneEvent = eventListHandler.getEventCloneFromMap(eventId);
-            if (cloneEvent != null) {
-                String ev_name = cloneEvent.getEventName();
-                eventName.setText(ev_name);
-                eventDescription.setText(cloneEvent.getEventDescription());
-                setBothTimeAndDateToEventDates();
-            }
-        }
+        String ev_name = cloneEvent.getEventName();
+        eventName.setText(ev_name);
+        eventDescription.setText(cloneEvent.getEventDescription());
+        setBothTimeAndDateToEventDates();
 
         //TODO: User should warned that this can lead to mismatch with previously created activities which might not lie in the event's new time period.
         startDateButton.setOnClickListener(new View.OnClickListener() {
@@ -552,10 +570,7 @@ public class EditEvent extends Activity {
         // stale.
         Long versionInGlobalMemory = eventListHandler.getOriginalEventFromMap(eventId).getVersion();
         if (!cloneEvent.getVersion().equals(versionInGlobalMemory)){
-            Intent editEventPageReloadIntent = new Intent(EditEvent.this, EditEvent.class);
-            FaroIntentInfoBuilder.eventIntent(editEventPageReloadIntent, eventId);
-            finish();
-            startActivity(editEventPageReloadIntent);
+           setupPageDetails();
         }
         super.onResume();
     }

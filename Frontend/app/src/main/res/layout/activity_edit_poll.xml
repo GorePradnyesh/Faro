@@ -3,69 +3,84 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.zik.faro.frontend.EditPoll"
-    android:id="@+id/editPollPage">
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/pollDescription"
-        android:layout_alignParentTop="true"/>
-    <CheckBox
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/multiChoiceFlag"
-        android:clickable="false"
-        android:layout_below="@+id/pollDescription"
-        android:text="Multi-Choice?" />
-    <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/multiChoiceFlag"
-        android:id="@+id/pollOptionRelativeLayout">
-        <EditText
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/pollOptionEditText"
-            android:hint="Poll Option"
-            android:layout_toStartOf="@+id/add_new_option" />
-        <ImageButton
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:id="@+id/add_new_option"
-            android:clickable="true"
-            android:layout_alignParentEnd="true"
-            android:paddingLeft="0dp"
-            android:paddingTop="0dp"
-            android:paddingRight="0dp"
-            android:paddingBottom="0dp"/>
-    </RelativeLayout>
-    <ListView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/editPollOptionsList"
-        android:layout_below="@+id/pollOptionRelativeLayout"/>
+    tools:context="com.zik.faro.frontend.EditPoll">
     <LinearLayout
+        android:id="@+id/linlaHeaderProgress"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerInParent="true"
-        android:background="@android:color/black"
-        android:id="@+id/bottomLayout">
-        <Button
-            style="?android:attr/buttonStyleSmall"
-            android:clickable="true"
-            android:layout_width="0px"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/OK"
-            android:id="@+id/editPollOK"
-            android:enabled="false" />
-        <Button
-            android:layout_width="0px"
-            android:layout_height="wrap_content"
-            android:id="@+id/deletePoll"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:text="@string/delete"/>
+        android:layout_height="match_parent"
+        android:gravity="center">
+        <ProgressBar
+            android:id="@+id/pbHeaderProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"></ProgressBar>
     </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/editPollRelativeLayout">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/pollDescription"
+            android:layout_alignParentTop="true"/>
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/multiChoiceFlag"
+            android:clickable="false"
+            android:layout_below="@+id/pollDescription"
+            android:text="Multi-Choice?" />
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/multiChoiceFlag"
+            android:id="@+id/pollOptionRelativeLayout">
+            <EditText
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/pollOptionEditText"
+                android:hint="Poll Option"
+                android:layout_toStartOf="@+id/add_new_option" />
+            <ImageButton
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:id="@+id/add_new_option"
+                android:clickable="true"
+                android:layout_alignParentEnd="true"
+                android:paddingLeft="0dp"
+                android:paddingTop="0dp"
+                android:paddingRight="0dp"
+                android:paddingBottom="0dp"/>
+        </RelativeLayout>
+        <ListView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/editPollOptionsList"
+            android:layout_below="@+id/pollOptionRelativeLayout"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerInParent="true"
+            android:background="@android:color/black"
+            android:id="@+id/bottomLayout">
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:clickable="true"
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/OK"
+                android:id="@+id/editPollOK"
+                android:enabled="false" />
+            <Button
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:id="@+id/deletePoll"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:text="@string/delete"/>
+        </LinearLayout>
+    </RelativeLayout>
 </RelativeLayout>

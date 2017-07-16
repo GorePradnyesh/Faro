@@ -2,63 +2,78 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.zik.faro.frontend.PickPollWinnerPage"
-    android:id="@+id/pickPollWinner">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:id="@+id/pollDescription"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
-
-    <ScrollView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_above="@+id/statusButtons"
-        android:layout_below="@+id/pollDescription"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
-        android:id="@+id/pollOptionsScrollView">
-        <RelativeLayout
-            android:id="@+id/pollOptionsRelativeView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/votersListLinearLayout"
-                android:orientation="vertical"
-                android:layout_alignParentEnd="true" />
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:id="@+id/pollOptionsListLinearLayout"
-                android:orientation="vertical"
-                android:layout_toStartOf="@id/votersListLinearLayout"/>
-        </RelativeLayout>
-    </ScrollView>
+    tools:context="com.zik.faro.frontend.PickPollWinnerPage">
 
     <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:id="@+id/statusButtons"
-        android:layout_centerInParent="true">
-        <Button
-            android:layout_width="0px"
-            android:layout_height="wrap_content"
-            android:id="@+id/selectWinner"
-            android:clickable="true"
-            android:layout_weight="1"
-            android:text="@string/winner"
-            android:paddingLeft="0dp"
-            android:paddingTop="0dp"
-            android:paddingRight="0dp"
-            android:paddingBottom="0dp"/>
+        android:id="@+id/linlaHeaderProgress"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center">
+        <ProgressBar
+            android:id="@+id/pbHeaderProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"></ProgressBar>
     </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/pickPollWinnerRelativeLayout">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:id="@+id/pollDescription"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true" />
+
+        <ScrollView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@+id/statusButtons"
+            android:layout_below="@+id/pollDescription"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
+            android:id="@+id/pollOptionsScrollView">
+            <RelativeLayout
+                android:id="@+id/pollOptionsRelativeView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/votersListLinearLayout"
+                    android:orientation="vertical"
+                    android:layout_alignParentEnd="true" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:id="@+id/pollOptionsListLinearLayout"
+                    android:orientation="vertical"
+                    android:layout_toStartOf="@id/votersListLinearLayout"/>
+            </RelativeLayout>
+        </ScrollView>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:id="@+id/statusButtons"
+            android:layout_centerInParent="true">
+            <Button
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:id="@+id/selectWinner"
+                android:clickable="true"
+                android:layout_weight="1"
+                android:text="@string/winner"
+                android:paddingLeft="0dp"
+                android:paddingTop="0dp"
+                android:paddingRight="0dp"
+                android:paddingBottom="0dp"/>
+        </LinearLayout>
+    </RelativeLayout>
 </RelativeLayout>

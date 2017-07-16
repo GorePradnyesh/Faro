@@ -20,5 +20,8 @@ public class FaroIntentConstants {
     public static final String NOTIFICATION_DATA = "notificationData";
     public static final String PAYLOAD_NOTIFICATION_TYPE = "type";
     public static final String FARO_NOTIFICATION_DATA = "faroData";
+    public static final String CLICK_ACTION = "clickAction";
+    public static final String TITLE = "title";
+    public static final String TEXT = "text";
 
 }

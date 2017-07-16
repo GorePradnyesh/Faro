@@ -219,10 +219,7 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
             // This check is not necessary when opening this page directly through a notification.
             Long versionInGlobalMemory = activityListHandler.getOriginalActivityFromMap(activityId).getVersion();
             if (!cloneActivity.getVersion().equals(versionInGlobalMemory)) {
-                Intent activityLandingPageReloadIntent = new Intent(ActivityLandingPage.this, ActivityLandingPage.class);
-                FaroIntentInfoBuilder.activityIntent(activityLandingPageReloadIntent, eventId, activityId);
-                finish();
-                startActivity(activityLandingPageReloadIntent);
+               setupPageDetails();
             }
         }
         super.onResume();

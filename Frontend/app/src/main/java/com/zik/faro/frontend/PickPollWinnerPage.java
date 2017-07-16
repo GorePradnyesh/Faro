@@ -59,13 +59,11 @@ public class PickPollWinnerPage extends Activity {
 
     private static int popupWidth;
     private static int popupHeight;
-    private RelativeLayout popUpRelativeLayout;
     private static final Integer POLL_OPTION_ROW_HEIGHT = 150;
 
     private Intent PollLandingPageIntent = null;
 
     private String TAG = "PollPickWinnerPage";
-    private Bundle extras = null;
 
     private Context mContext;
     private TextView pollDesc = null;
@@ -74,6 +72,10 @@ public class PickPollWinnerPage extends Activity {
     private LinearLayout pollOptionsListLinearLayout = null;
     private LinearLayout voterButtonLinearLayout = null;
     private Map<String, Object> map = null;
+
+    private LinearLayout linlaHeaderProgress = null;
+    private RelativeLayout pickPollWinnerRelativeLayout = null;
+    private Bundle extras = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,8 +86,25 @@ public class PickPollWinnerPage extends Activity {
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
+        linlaHeaderProgress = (LinearLayout) findViewById(R.id.linlaHeaderProgress);
+
+        pickPollWinnerRelativeLayout = (RelativeLayout) findViewById(R.id.pickPollWinnerRelativeLayout);
+        pickPollWinnerRelativeLayout.setVisibility(View.GONE);
+
         extras = getIntent().getExtras();
         if (extras == null) return; //TODO How to handle this case?
+
+        setupPageDetails();
+    }
+
+    private void setupPageDetails () {
+
+        linlaHeaderProgress.setVisibility(View.GONE);
+        pickPollWinnerRelativeLayout.setVisibility(View.VISIBLE);
+
+        eventId = extras.getString(FaroIntentConstants.EVENT_ID);
+        pollId = extras.getString(FaroIntentConstants.POLL_ID);
+        clonePoll = pollListHandler.getPollCloneFromMap(pollId);
 
         pollDesc = (TextView)findViewById(R.id.pollDescription);
         selectWinner = (Button) findViewById(R.id.selectWinner);
@@ -97,19 +116,11 @@ public class PickPollWinnerPage extends Activity {
         popupWidth = (int) (dm.widthPixels * 0.8);
         popupHeight = (int) (dm.heightPixels * 0.8);
 
-        eventId = extras.getString(FaroIntentConstants.EVENT_ID);
-        pollId = extras.getString(FaroIntentConstants.POLL_ID);
-
-        clonePoll = pollListHandler.getPollCloneFromMap(pollId);
-
         pollOptionsList = clonePoll.getPollOptions();
         pollDesc.setText(clonePoll.getDescription());
 
         pollOptionsListLinearLayout  = (LinearLayout) findViewById(R.id.pollOptionsListLinearLayout);
         voterButtonLinearLayout = (LinearLayout) findViewById(R.id.votersListLinearLayout);
-
-        popUpRelativeLayout = (RelativeLayout) findViewById(R.id.pickPollWinner);
-
 
         for (Integer i = 0; i < pollOptionsList.size(); i++) {
             PollOption pollOption = pollOptionsList.get(i);
@@ -186,7 +197,6 @@ public class PickPollWinnerPage extends Activity {
                 }
             }
         });
-
     }
 
     private void updatePollToServer () {
@@ -245,7 +255,7 @@ public class PickPollWinnerPage extends Activity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         voterList.setAdapter(adapter);
 
-        popupWindow.showAtLocation(popUpRelativeLayout, Gravity.CENTER, 0, 0);
+        popupWindow.showAtLocation(pickPollWinnerRelativeLayout, Gravity.CENTER, 0, 0);
 
         container.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -271,10 +281,7 @@ public class PickPollWinnerPage extends Activity {
         // stale.
         Long versionInGlobalMemory = pollListHandler.getOriginalPollFromMap(pollId).getVersion();
         if (!clonePoll.getVersion().equals(versionInGlobalMemory)) {
-            Intent pickPollWinnerPageReloadIntent = new Intent(PickPollWinnerPage.this, PickPollWinnerPage.class);
-            FaroIntentInfoBuilder.pollIntent(pickPollWinnerPageReloadIntent, eventId, pollId);
-            finish();
-            startActivity(pickPollWinnerPageReloadIntent);
+           setupPageDetails();
         }
         super.onResume();
     }

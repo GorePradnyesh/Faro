@@ -17,6 +17,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
@@ -85,9 +86,11 @@ public class EditAssignment extends android.app.Activity {
 
     private Context mContext;
 
-    private RelativeLayout popUpRelativeLayout = null;
+    private LinearLayout linlaHeaderProgress = null;
+    private RelativeLayout editAssignmentRelativeLayout = null;
 
     private Map<String, List<Item>> itemListMap = new HashMap<String, List<Item>>();
+    private Bundle extras = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,210 +99,221 @@ public class EditAssignment extends android.app.Activity {
 
         mContext = this;
 
-        popUpRelativeLayout = (RelativeLayout) findViewById(R.id.editAssignmentRelativeLayout);
-
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
-        Bundle extras = getIntent().getExtras();
-        if(extras != null) {
-            eventId = extras.getString(FaroIntentConstants.EVENT_ID);
-            activityId = extras.getString(FaroIntentConstants.ACTIVITY_ID);
-            assignmentId = extras.getString(FaroIntentConstants.ASSIGNMENT_ID);
+        linlaHeaderProgress = (LinearLayout) findViewById(R.id.linlaHeaderProgress);
 
-            originalEvent = eventListHandler.getOriginalEventFromMap(eventId);
-            cloneEvent = eventListHandler.getEventCloneFromMap(eventId);
+        editAssignmentRelativeLayout = (RelativeLayout) findViewById(R.id.editAssignmentRelativeLayout);
+        editAssignmentRelativeLayout.setVisibility(View.GONE);
 
-            if (activityId != null) {
-                originalActivity = activityListHandler.getOriginalActivityFromMap(activityId);
-                cloneActivity = activityListHandler.getActivityCloneFromMap(activityId);
-            }
-            cloneAssignment = assignmentListHandler.getAssignmentCloneFromMap(assignmentId);
+        extras = getIntent().getExtras();
+        if (extras == null)return; //TODO: How to handle such conditions
 
-            TextView assignmentDescription = (TextView)findViewById(R.id.assignmentDescription);
-            if (activityId != null) {
-                assignmentDescription.setText("Assignment for " + originalActivity.getName());
-            }else {
-                assignmentDescription.setText("Assignment for " + originalEvent.getEventName());
-            }
+        setupPageDetails();
+    }
 
-            final EditText itemNameEditText = (EditText)findViewById(R.id.itemNameEditText);
-            final EditText itemCountEditText = (EditText)findViewById(R.id.itemCount);
-            itemCountEditText.setText("0");
+    private void setupPageDetails () {
 
-            final Spinner inviteeSpinner = (Spinner) findViewById(R.id.inviteeSpinner);
-            final Spinner itemUnitSpinner = (Spinner) findViewById(R.id.itemUnitSpinner);
+        linlaHeaderProgress.setVisibility(View.GONE);
+        editAssignmentRelativeLayout.setVisibility(View.VISIBLE);
 
-            inviteeSpinner.setTag("EditAssignment");
-            inviteeSpinner.setAdapter(eventFriendListHandler.getAcceptedFriendAdapter(eventId, mContext));
+        eventId = extras.getString(FaroIntentConstants.EVENT_ID);
+        activityId = extras.getString(FaroIntentConstants.ACTIVITY_ID);
+        assignmentId = extras.getString(FaroIntentConstants.ASSIGNMENT_ID);
 
+        originalEvent = eventListHandler.getOriginalEventFromMap(eventId);
+        cloneEvent = eventListHandler.getEventCloneFromMap(eventId);
 
-            for (Unit unit : Unit.values()){
-                itemUnitArray.add(unit.toString());
-            }
-            ArrayAdapter<String> itemUnitListAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, itemUnitArray);
-            itemUnitListAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            itemUnitSpinner.setAdapter(itemUnitListAdapter);
+        if (activityId != null) {
+            originalActivity = activityListHandler.getOriginalActivityFromMap(activityId);
+            cloneActivity = activityListHandler.getActivityCloneFromMap(activityId);
+        }
+        cloneAssignment = assignmentListHandler.getAssignmentCloneFromMap(assignmentId);
 
-            final ImageButton addNewItemButton = (ImageButton)findViewById(R.id.addNewItemButton);
-            addNewItemButton.setImageResource(R.drawable.plus);
-            addNewItemButton.setEnabled(false);
+        TextView assignmentDescription = (TextView)findViewById(R.id.assignmentDescription);
+        if (activityId != null) {
+            assignmentDescription.setText("Assignment for " + originalActivity.getName());
+        }else {
+            assignmentDescription.setText("Assignment for " + originalEvent.getEventName());
+        }
 
-            final ListView itemList = (ListView)findViewById(R.id.itemList);
-            itemList.setTag("EditAssignment");
-            final ItemsAdapter itemsAdapter = new ItemsAdapter(this, R.layout.item_cant_edit_row_style);
-            itemList.setAdapter(itemsAdapter);
+        final EditText itemNameEditText = (EditText)findViewById(R.id.itemNameEditText);
+        final EditText itemCountEditText = (EditText)findViewById(R.id.itemCount);
+        itemCountEditText.setText("0");
+
+        final Spinner inviteeSpinner = (Spinner) findViewById(R.id.inviteeSpinner);
+        final Spinner itemUnitSpinner = (Spinner) findViewById(R.id.itemUnitSpinner);
+
+        inviteeSpinner.setTag("EditAssignment");
+        inviteeSpinner.setAdapter(eventFriendListHandler.getAcceptedFriendAdapter(eventId, mContext));
 
 
-            itemList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Item item = (Item) parent.getItemAtPosition(position);
-                    if (item.getStatus().equals(ActionStatus.INCOMPLETE)){
-                        itemNameEditText.setText(item.getName());
-                        itemCountEditText.setText(Integer.toString(item.getCount()));
-                        inviteeSpinner.setSelection(getAssigneePositionInList(item.getAssigneeId()));
-                        itemUnitSpinner.setSelection(getUnitPositionInList(item.getUnit()));
-                        itemsAdapter.removeFromPosition(position);
-                        editItemPosition = position;
-                        addEditedItem = true;
-                    }
+        for (Unit unit : Unit.values()){
+            itemUnitArray.add(unit.toString());
+        }
+        ArrayAdapter<String> itemUnitListAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, itemUnitArray);
+        itemUnitListAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        itemUnitSpinner.setAdapter(itemUnitListAdapter);
+
+        final ImageButton addNewItemButton = (ImageButton)findViewById(R.id.addNewItemButton);
+        addNewItemButton.setImageResource(R.drawable.plus);
+        addNewItemButton.setEnabled(false);
+
+        final ListView itemList = (ListView)findViewById(R.id.itemList);
+        itemList.setTag("EditAssignment");
+        final ItemsAdapter itemsAdapter = new ItemsAdapter(this, R.layout.item_cant_edit_row_style);
+        itemList.setAdapter(itemsAdapter);
+
+
+        itemList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Item item = (Item) parent.getItemAtPosition(position);
+                if (item.getStatus().equals(ActionStatus.INCOMPLETE)){
+                    itemNameEditText.setText(item.getName());
+                    itemCountEditText.setText(Integer.toString(item.getCount()));
+                    inviteeSpinner.setSelection(getAssigneePositionInList(item.getAssigneeId()));
+                    itemUnitSpinner.setSelection(getUnitPositionInList(item.getUnit()));
+                    itemsAdapter.removeFromPosition(position);
+                    editItemPosition = position;
+                    addEditedItem = true;
                 }
-            });
+            }
+        });
 
-            for (Integer i = cloneAssignment.getItems().size() - 1; i >= 0; i--) {
-                Item item = cloneAssignment.getItems().get(i);
-                if (item.getStatus() == ActionStatus.COMPLETE) {
-                    itemsAdapter.insertAtEnd(item);
-                } else {
+        for (Integer i = cloneAssignment.getItems().size() - 1; i >= 0; i--) {
+            Item item = cloneAssignment.getItems().get(i);
+            if (item.getStatus() == ActionStatus.COMPLETE) {
+                itemsAdapter.insertAtEnd(item);
+            } else {
+                itemsAdapter.insertAtBeginning(item);
+            }
+            originalItemSet.add(item);
+        }
+
+        final Button createNewAssignmentOK = (Button) findViewById(R.id.createNewAssignmentOK);
+        if (itemsAdapter.getCount() >= 1){
+            createNewAssignmentOK.setEnabled(true);
+        }
+
+        AssignmentLandingPageTabsIntent = new Intent(EditAssignment.this, AssignmentLandingPage.class);
+
+        //Enable the addNewItem only after Users enters an item
+        itemNameEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                boolean buttonStatus = !(itemNameEditText.getText().toString().trim().isEmpty());
+                addNewItemButton.setEnabled(buttonStatus);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
+        inviteeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                InviteeList.Invitees invitees = (InviteeList.Invitees) parent.getItemAtPosition(position);
+                assigneeId = invitees.getEmail();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        itemUnitSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selectedUnitString = (String) parent.getItemAtPosition(position);
+                selectedUnit = Unit.valueOf(selectedUnitString);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        addNewItemButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String itemDescription = itemNameEditText.getText().toString();
+                int itemCount = 0;
+                try {
+                    itemCount = Integer.parseInt(itemCountEditText.getText().toString());
+                } catch (NumberFormatException e){
+                    itemCountEditText.setText("0");
+                    errorMsgPopUp("Number passed is too big");
+                    return;
+                }
+
+
+                Item item = null;
+                try {
+                    item = new Item(itemDescription, assigneeId, itemCount, selectedUnit);
+                } catch (IllegalDataOperation illegalDataOperation) {
+                    illegalDataOperation.printStackTrace();
+                }
+
+                if (addEditedItem){
+                    addEditedItem = false;
+                    itemsAdapter.insertAtPosition(item, editItemPosition);
+                    editItemPosition = -1;
+                }else {
                     itemsAdapter.insertAtBeginning(item);
                 }
-                originalItemSet.add(item);
+                itemsAdapter.notifyDataSetChanged();
+                itemNameEditText.setText("");
+                itemCountEditText.setText("0");
+                if (itemsAdapter.getCount() == 1){
+                    createNewAssignmentOK.setEnabled(true);
+                }
             }
+        });
 
-            final Button createNewAssignmentOK = (Button) findViewById(R.id.createNewAssignmentOK);
-            if (itemsAdapter.getCount() >= 1){
-                createNewAssignmentOK.setEnabled(true);
-            }
 
-            AssignmentLandingPageTabsIntent = new Intent(EditAssignment.this, AssignmentLandingPage.class);
+        createNewAssignmentOK.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
-            //Enable the addNewItem only after Users enters an item
-            itemNameEditText.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                if (itemsAdapter.getCount() == 0 && originalItemSet.size() == 0){
+                    Toast.makeText(EditAssignment.this, "Add atleast one item to create an Assignment", LENGTH_LONG).show();
+                    createNewAssignmentOK.setEnabled(false);
+                    return;
                 }
 
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    boolean buttonStatus = !(itemNameEditText.getText().toString().trim().isEmpty());
-                    addNewItemButton.setEnabled(buttonStatus);
-                }
+                final List<Item> updatedItemList = new LinkedList<>();
+                if (itemsAdapter.getCount() == 0){
+                    Toast.makeText(EditAssignment.this, "Deleting all the previous assignments", LENGTH_LONG).show();
+                }else {
+                    for (int i = 0; i < itemsAdapter.list.size(); i++) {
+                        updatedItemList.add(itemsAdapter.list.get(i));
+                        newItemSet.add(itemsAdapter.list.get(i));
+                    }
 
-                @Override
-                public void afterTextChanged(Editable s) {
-                }
-            });
-
-            inviteeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    InviteeList.Invitees invitees = (InviteeList.Invitees) parent.getItemAtPosition(position);
-                    assigneeId = invitees.getEmail();
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-
-                }
-            });
-
-            itemUnitSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    String selectedUnitString = (String) parent.getItemAtPosition(position);
-                    selectedUnit = Unit.valueOf(selectedUnitString);
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-
-                }
-            });
-
-            addNewItemButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    String itemDescription = itemNameEditText.getText().toString();
-                    int itemCount = 0;
-                    try {
-                        itemCount = Integer.parseInt(itemCountEditText.getText().toString());
-                    } catch (NumberFormatException e){
-                        itemCountEditText.setText("0");
-                        errorMsgPopUp("Number passed is too big");
+                    if (originalItemSet.equals(newItemSet)){
+                        Toast.makeText(EditAssignment.this, "No change made to assignment List", LENGTH_LONG).show();
+                        newItemSet.clear();
                         return;
                     }
-
-
-                    Item item = null;
-                    try {
-                        item = new Item(itemDescription, assigneeId, itemCount, selectedUnit);
-                    } catch (IllegalDataOperation illegalDataOperation) {
-                        illegalDataOperation.printStackTrace();
-                    }
-
-                    if (addEditedItem){
-                        addEditedItem = false;
-                        itemsAdapter.insertAtPosition(item, editItemPosition);
-                        editItemPosition = -1;
-                    }else {
-                        itemsAdapter.insertAtBeginning(item);
-                    }
-                    itemsAdapter.notifyDataSetChanged();
-                    itemNameEditText.setText("");
-                    itemCountEditText.setText("0");
-                    if (itemsAdapter.getCount() == 1){
-                        createNewAssignmentOK.setEnabled(true);
-                    }
                 }
-            });
 
-
-            createNewAssignmentOK.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                    if (itemsAdapter.getCount() == 0 && originalItemSet.size() == 0){
-                        Toast.makeText(EditAssignment.this, "Add atleast one item to create an Assignment", LENGTH_LONG).show();
-                        createNewAssignmentOK.setEnabled(false);
-                        return;
-                    }
-
-                    final List<Item> updatedItemList = new LinkedList<>();
-                    if (itemsAdapter.getCount() == 0){
-                        Toast.makeText(EditAssignment.this, "Deleting all the previous assignments", LENGTH_LONG).show();
-                    }else {
-                        for (int i = 0; i < itemsAdapter.list.size(); i++) {
-                            updatedItemList.add(itemsAdapter.list.get(i));
-                            newItemSet.add(itemsAdapter.list.get(i));
-                        }
-
-                        if (originalItemSet.equals(newItemSet)){
-                            Toast.makeText(EditAssignment.this, "No change made to assignment List", LENGTH_LONG).show();
-                            newItemSet.clear();
-                            return;
-                        }
-                    }
-
-                    if (activityId != null) {
-                        itemListMap.put(activityId, updatedItemList);
-                    }else {
-                        itemListMap.put(eventId, updatedItemList);
-                    }
-
-                    updateAssignmentToServer();
+                if (activityId != null) {
+                    itemListMap.put(activityId, updatedItemList);
+                }else {
+                    itemListMap.put(eventId, updatedItemList);
                 }
-            });
-        }
+
+                updateAssignmentToServer();
+            }
+        });
     }
 
     public void updateAssignmentToServer () {
@@ -380,7 +394,7 @@ public class EditAssignment extends android.app.Activity {
         errorMsgTextView.setText(errorMsg);
 
 
-        popupWindow.showAtLocation(popUpRelativeLayout, Gravity.CENTER, 0, 0);
+        popupWindow.showAtLocation(editAssignmentRelativeLayout, Gravity.CENTER, 0, 0);
 
         container.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -417,11 +431,7 @@ public class EditAssignment extends android.app.Activity {
         }
 
         if (!previousVersion.equals(versionInGlobalMemory)) {
-            Intent editAssignmentPageReloadIntent = new Intent(EditAssignment.this, EditAssignment.class);
-            FaroIntentInfoBuilder.assignmentIntent(editAssignmentPageReloadIntent, eventId,
-                    activityId, assignmentId);
-            finish();
-            startActivity(editAssignmentPageReloadIntent);
+            setupPageDetails();
         }
         super.onResume();
     }

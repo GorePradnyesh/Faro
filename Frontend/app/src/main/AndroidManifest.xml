@@ -32,7 +32,7 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"></meta-data>
+                android:resource="@xml/file_paths"/>
         </provider>
 
         <activity
@@ -97,9 +97,6 @@
             android:label="AssignmentLandingPageTabs" />
         <activity android:name=".EventFriendListLandingPage" />
         <activity android:name=".UserProfilePage" />
-
-        <activity android:name=".InviteFriendsActivity"
-            android:label=".InviteFriendsActivity" />
 
         <meta-data
             android:name="com.google.android.gms.version"
