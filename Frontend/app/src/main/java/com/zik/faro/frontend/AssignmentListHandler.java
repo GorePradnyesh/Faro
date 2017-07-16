@@ -55,7 +55,9 @@ public class AssignmentListHandler {
 
     public Assignment getOriginalAssignmentFromMap(String assignmentId){
         AssignmentParentInfo assignmentParentInfo = assignmentMap.get(assignmentId);
+        if (assignmentParentInfo == null) return null;
         Assignment assignment = assignmentParentInfo.getAssignment();
+        if (assignment == null) return null;
         return assignment;
     }
 

@@ -125,7 +125,8 @@ public class EventLandingPage extends FragmentActivity
     private LatLng mEventLocation;
     private LatLng mDefaultLocation = new LatLng(0, 0);
     private SupportMapFragment mapFragment;
-    private ScrollView mainScrollView = null;
+    private ScrollView eventLandingPageScrollView = null;
+    private RelativeLayout eventLandingPageRelativeLayout = null;
     private LinearLayout linlaHeaderProgress = null;
 
     private TextView event_name = null;
@@ -138,7 +139,6 @@ public class EventLandingPage extends FragmentActivity
 
     private Bundle extras = null;
 
-    private RelativeLayout EventLandingPageRelativeLayout = null;
     private LinearLayout photosStuffLinearLayout = null;
     private String bundleType = null;
 
@@ -148,6 +148,8 @@ public class EventLandingPage extends FragmentActivity
         setContentView(R.layout.activity_event_landing_page);
 
         mContext = this;
+
+        mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
 
         // Build the Play services client for use by the Fused Location Provider and the Places API.
         // Use the addApi() method to request the Google Places API and the Fused Location Provider.
@@ -167,8 +169,10 @@ public class EventLandingPage extends FragmentActivity
 
         linlaHeaderProgress = (LinearLayout) findViewById(R.id.linlaHeaderProgress);
 
-        EventLandingPageRelativeLayout = (RelativeLayout) findViewById(R.id.eventLandingPageRelativeLayout);
-        EventLandingPageRelativeLayout.setVisibility(View.GONE);
+        eventLandingPageScrollView = (ScrollView) findViewById(R.id.eventLandingPageScrollView);
+
+        eventLandingPageRelativeLayout = (RelativeLayout) findViewById(R.id.eventLandingPageRelativeLayout);
+        eventLandingPageRelativeLayout.setVisibility(View.GONE);
 
         extras = getIntent().getExtras();
         if (extras == null)return; //TODO: How to handle such conditions
@@ -308,7 +312,7 @@ public class EventLandingPage extends FragmentActivity
         }
 
         linlaHeaderProgress.setVisibility(View.GONE);
-        EventLandingPageRelativeLayout.setVisibility(View.VISIBLE);
+        eventLandingPageRelativeLayout.setVisibility(View.VISIBLE);
 
         event_name = (TextView) findViewById(R.id.eventNameText);
         eventDescription = (TextView) findViewById(R.id.eventDescriptionTextView);
@@ -335,9 +339,8 @@ public class EventLandingPage extends FragmentActivity
         mapMarker = (ImageButton) findViewById(R.id.mapMarker);
         mapMarker.setImageResource(R.drawable.map_marker);
 
-        mainScrollView = (ScrollView) findViewById(R.id.mainScrollView);
         transparentImageView = (ImageView) findViewById(R.id.transparentImageOnMap);
-        mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+
 
         statusYes = (Button) findViewById(R.id.statusYes);
         statusNo = (Button) findViewById(R.id.statusNo);
@@ -516,17 +519,17 @@ public class EventLandingPage extends FragmentActivity
                 switch (action) {
                     case MotionEvent.ACTION_DOWN:
                         // Disallow ScrollView to intercept touch events.
-                        mainScrollView.requestDisallowInterceptTouchEvent(true);
+                        eventLandingPageScrollView.requestDisallowInterceptTouchEvent(true);
                         // Disable touch on transparent view
                         return false;
 
                     case MotionEvent.ACTION_UP:
                         // Allow ScrollView to intercept touch events.
-                        mainScrollView.requestDisallowInterceptTouchEvent(false);
+                        eventLandingPageScrollView.requestDisallowInterceptTouchEvent(false);
                         return true;
 
                     case MotionEvent.ACTION_MOVE:
-                        mainScrollView.requestDisallowInterceptTouchEvent(true);
+                        eventLandingPageScrollView.requestDisallowInterceptTouchEvent(true);
                         return false;
 
                     default:
