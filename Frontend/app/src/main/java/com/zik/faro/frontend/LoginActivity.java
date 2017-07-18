@@ -85,9 +85,6 @@ public class LoginActivity extends Activity {
         // Intent for transitioning to AppLanding page after a successful login
         appLandingPageIntent = new Intent(LoginActivity.this, AppLandingPage.class);
 
-        // Setup token cache
-        TokenCache tokenCache = TokenCache.getOrCreateTokenCache(LoginActivity.this);
-
         // Setup Faro Cache
         faroCache = FaroCache.getOrCreateFaroUserContextCache(LoginActivity.this);
 
@@ -134,7 +131,8 @@ public class LoginActivity extends Activity {
         }
 
         try {
-            String token = tokenCache.getToken();
+            // Setup token cache
+            String token = TokenCache.getOrCreateTokenCache(LoginActivity.this).getToken();
 
             // Check if user is already signed in
             // TODO: Validate the token
@@ -157,6 +155,13 @@ public class LoginActivity extends Activity {
         }
 
         // If we reach here, it means the user is not signed in.
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // Check if facebook access token is present and initiate faro login process
         if (AccessToken.getCurrentAccessToken() != null) {
             showLoginProgressLayout();
             loginUsingFacebook();
