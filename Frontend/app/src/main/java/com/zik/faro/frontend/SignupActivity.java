@@ -235,7 +235,7 @@ public class SignupActivity extends Activity {
 
         // Get the activity_signup data and validate
         String name = nameTextBox.getText().toString();
-        String email = emailTextBox.getText().toString();
+        String email = emailTextBox.getText().toString().toLowerCase();
         String password = passwordTextBox.getText().toString();
         String confirmPassword = confirmPasswordBox.getText().toString();
 

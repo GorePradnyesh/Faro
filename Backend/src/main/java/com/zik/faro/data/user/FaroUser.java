@@ -8,7 +8,7 @@ import com.google.common.base.Strings;
 import com.zik.faro.data.BaseEntity;
 import com.zik.faro.data.IllegalDataOperation;
 
-public class FaroUser extends BaseEntity{
+public class FaroUser extends BaseEntity {
     private String             	firstName;
     private String             	middleName;
     private String             	lastName;
@@ -23,13 +23,6 @@ public class FaroUser extends BaseEntity{
     private LargeProfileImage   largeProfileImage;
     private SmallProfileImage   smallProfileImage;
 
-
-// Ideally this should be utilized on server side only. Commenting out until absolutely required
-// Assumption is user will be forced to give basic details along with email
-//    public FaroUser(final String email) {
-//        this(email, null, null, null, null, null, null);
-//    }
-
     public FaroUser(final String email,
                       final String firstName,
                       final String middleName,
@@ -37,12 +30,11 @@ public class FaroUser extends BaseEntity{
                       final String externalExpenseID,
                       final String telephone,
                       final Address address) {
-        super(email,1L);
+        super(email.toLowerCase(),1L);
     	// Ensure Email is a valid value as it is a mandatory field
         if (Strings.isNullOrEmpty(email)) {
             throw new IllegalArgumentException("Email is null/empty");
         }
-
 
         this.firstName = firstName;
         this.lastName = lastName;

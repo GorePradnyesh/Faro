@@ -285,7 +285,7 @@ public class LoginActivity extends Activity {
         Log.i(TAG, "login button clicked");
 
         // Get login creds
-        final String email = emailTextBox.getText().toString();
+        final String email = emailTextBox.getText().toString().toLowerCase();
         final String password = passwordTextBox.getText().toString();
 
         // server IP

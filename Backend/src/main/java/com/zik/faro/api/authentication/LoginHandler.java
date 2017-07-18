@@ -45,12 +45,14 @@ public class LoginHandler {
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public String login(@QueryParam(LOGIN_USERNAME_PARAM) final String username,
+    public String login(@QueryParam(LOGIN_USERNAME_PARAM) String username,
                         final String password) {
         ParamValidation.genericParamValidations(username, LOGIN_USERNAME_PARAM);
         ParamValidation.genericParamValidations(password, "password");
 
-        logger.info("username : " + username);
+        // Convert username to lower case
+        username = username.toLowerCase();
+        logger.info(MessageFormat.format("username : {0}", username));
 
         try {
             // Authenticate the user
