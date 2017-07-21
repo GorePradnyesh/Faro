@@ -59,6 +59,9 @@ public class SignupHandler {
         // Check username and password/firebase token are valid strings
         validateFaroUserCredentials(faroSignupDetails);
 
+        // Convert username to lower case and remove leading and trailing spaces
+        faroSignupDetails.getFaroUser().setId(faroSignupDetails.getFaroUser().getId().toLowerCase().trim());
+
         FaroUser newFaroUser = faroSignupDetails.getFaroUser();
         String password = faroSignupDetails.getPassword();
         String firebaseTokenString = faroSignupDetails.getFirebaseToken();
@@ -134,6 +137,7 @@ public class SignupHandler {
         if (Strings.isNullOrEmpty(faroSignupDetails.getPassword()) && Strings.isNullOrEmpty(faroSignupDetails.getFirebaseToken())) {
             throw new FaroWebAppException(FaroResponseStatus.BAD_REQUEST, "User password/firebaseToken not specifed.");
         }
+
     }
 
     private void validateFaroUserDetails(FaroUser newFaroUser) {

@@ -84,13 +84,16 @@ public class SignupApiTest {
         String password = "password@#$89";
         createNewUser(user, password);
 
+        boolean entityExists = false;
         try {
             createNewUser(user, password);
         } catch (Exception e) {
             Assert.assertTrue(e instanceof FaroWebAppException);
-            FaroWebAppException faroWebAppException = (FaroWebAppException)e;
-            Assert.assertEquals(FaroResponseStatus.ENTITY_EXISTS, faroWebAppException.getFaroResponseStatus());
+            Assert.assertEquals(FaroResponseStatus.ENTITY_EXISTS, ((FaroWebAppException)e).getFaroResponseStatus());
+            entityExists = true;
         }
+
+        Assert.assertTrue(entityExists);
     }
 
     @Test

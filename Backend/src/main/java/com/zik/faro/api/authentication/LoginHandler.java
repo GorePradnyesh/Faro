@@ -50,8 +50,8 @@ public class LoginHandler {
         ParamValidation.genericParamValidations(username, LOGIN_USERNAME_PARAM);
         ParamValidation.genericParamValidations(password, "password");
 
-        // Convert username to lower case
-        username = username.toLowerCase();
+        // Convert username to lower case and remove leading and trailing spaces
+        username = username.toLowerCase().trim();
         logger.info(MessageFormat.format("username : {0}", username));
 
         try {
