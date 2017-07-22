@@ -32,7 +32,6 @@ import java.util.List;
 import static android.widget.Toast.LENGTH_LONG;
 
 public class InviteFriendToEventPage extends Activity {
-
     private UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
     private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
@@ -150,12 +149,10 @@ public class InviteFriendToEventPage extends Activity {
     * https://www.youtube.com/watch?v=l6EAOIXy0JA
     */
     private void searchFriendInList(String textToSearch){
-
         LinearLayout pickFriendsCheckboxList = (LinearLayout) findViewById(R.id.pickFriendsCheckboxList);
         pickFriendsCheckboxList.removeAllViews();
 
         for (int i = 0; i < friendList.size(); i++) {
-
             MinUser minUser = friendList.get(i);
 
             if (!((minUser.getFirstName() != null && minUser.getFirstName().toLowerCase().contains(textToSearch)) ||

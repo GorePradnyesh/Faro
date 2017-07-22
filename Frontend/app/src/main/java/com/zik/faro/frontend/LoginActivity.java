@@ -129,6 +129,11 @@ public class LoginActivity extends Activity {
             emailTextBox.setError("You already have an account with this email. Login by entering the password");
             return;
         }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
 
         try {
             // Setup token cache
@@ -137,6 +142,8 @@ public class LoginActivity extends Activity {
             // Check if user is already signed in
             // TODO: Validate the token
             if (token != null) {
+                Log.d(TAG, "token = " + token);
+
                 String email = faroCache.loadFaroCacheFromDisk("email");
                 if (email != null) {
                     faroUserContext.setEmail(email);
@@ -147,25 +154,18 @@ public class LoginActivity extends Activity {
                 }
             } else {
                 Log.i(TAG, "Token not found");
+                // If we reach here, it means the user is not signed in.
+                // Check if facebook access token is present and initiate faro login process
+                if (AccessToken.getCurrentAccessToken() != null) {
+                    showLoginProgressLayout();
+                    loginUsingFacebook();
+                }
             }
 
-            Log.d(TAG, "token = " + token);
         } catch (Exception e) {
             Log.i(TAG, "Could not obtain valid token");
         }
 
-        // If we reach here, it means the user is not signed in.
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        // Check if facebook access token is present and initiate faro login process
-        if (AccessToken.getCurrentAccessToken() != null) {
-            showLoginProgressLayout();
-            loginUsingFacebook();
-        }
     }
 
     private void loginUsingFacebook() {
@@ -285,7 +285,7 @@ public class LoginActivity extends Activity {
         Log.i(TAG, "login button clicked");
 
         // Get login creds
-        final String email = emailTextBox.getText().toString().toLowerCase();
+        final String email = emailTextBox.getText().toString().toLowerCase().trim();
         final String password = passwordTextBox.getText().toString();
 
         // server IP
