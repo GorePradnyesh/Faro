@@ -19,38 +19,35 @@ public class ActivityNotificationHandler extends BaseNotificationHandler {
 		return notificationClient;
 	}
 	
-	public void createActivityNotification(ActivityDo activity, EventDo eventDo){
+	public void createActivityNotification(ActivityDo activity, EventDo eventDo, String userId){
 		String messageBody = getActivityName(activity)+" Activity just got added! Click to view details";
-		sendActivityNotification(activity, eventDo, messageBody, Constants.NOTIFICATION_TYPE_ACTIVITY_CREATED);
+		sendActivityNotification(activity, eventDo, messageBody, Constants.NOTIFICATION_TYPE_ACTIVITY_CREATED, userId);
 	}
 	
-	public void updateActivityNotification(ActivityDo activity, EventDo eventDo){
+	public void updateActivityNotification(ActivityDo activity, EventDo eventDo, String userId){
 		String messageBody = getActivityName(activity)+" activity details have changed - Click to view updated details";
-		sendActivityNotification(activity, eventDo, messageBody, Constants.NOTIFICATION_TYPE_ACTIVITY_GENERIC);
+		sendActivityNotification(activity, eventDo, messageBody, Constants.NOTIFICATION_TYPE_ACTIVITY_GENERIC, userId);
 	}
 	
-	public void deleteActivityNotification(ActivityDo activity, EventDo eventDo){
+	public void deleteActivityNotification(ActivityDo activity, EventDo eventDo, String userId){
 		String messageBody = "Uh-Oh ! "+getActivityName(activity)+" Activity was cancelled" ;
-		sendActivityNotification(activity, eventDo, messageBody, Constants.NOTIFICATION_TYPE_ACTIVITY_DELETED);
+		sendActivityNotification(activity, eventDo, messageBody, Constants.NOTIFICATION_TYPE_ACTIVITY_DELETED, userId);
 	}
 	
 	private String getActivityName(ActivityDo activity){
 		return (activity.getName() != null && !activity.getName().isEmpty()) ? activity.getName() : "";
 	}
 	
-	private void sendActivityNotification(ActivityDo activity, EventDo eventDo, String body, String type){
-		NotificationPayload notificationPayload = new NotificationPayload();
-		notificationPayload.setTitle(eventDo.getEventName());
-		notificationPayload.setBody(body);
-		notificationPayload.setClick_action(Constants.CLICK_ACTION_DEFAULT);
-		DataPayload dataPayload = new DataPayload();
+	private void sendActivityNotification(ActivityDo activity, EventDo eventDo, String body, String type, String userId){
+		DataPayload dataPayload = new DataPayload(eventDo.getEventName(), body, Constants.CLICK_ACTION_DEFAULT);
 		dataPayload.addKVPair(Constants.NOTIFICATION_TYPE_CONST, type);
 		dataPayload.addKVPair(Constants.NOTIFICATION_EVENTID_CONST, activity.getEventId());
 		dataPayload.addKVPair(Constants.NOTIFICATION_ACTIVITYID_CONST, activity.getId());
 		dataPayload.addKVPair(Constants.NOTIFICATION_VERSION_CONST, activity.getVersion().toString());
+		dataPayload.addKVPair(Constants.NOTIFICATION_USER_CONST, userId);
 		try {
-			FirebaseHTTPRequest request = createDataAndNotificationMessage(
-					Constants.FARO_EVENT_TOPIC_CONST+activity.getEventId(), notificationPayload, dataPayload);
+			FirebaseHTTPRequest request = createDataMessage(
+					Constants.FARO_EVENT_TOPIC_CONST+activity.getEventId(), dataPayload);
 			notificationClient.send(request);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

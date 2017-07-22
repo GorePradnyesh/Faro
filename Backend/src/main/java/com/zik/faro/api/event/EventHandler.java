@@ -74,9 +74,10 @@ public class EventHandler {
     @DELETE
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public JResponse<String> deleteEvent(@PathParam(EVENT_ID_PATH_PARAM) final String eventId) {
-        try{
-    	EventManagement.deleteEvent(eventId);
-        EventUserManagement.deleteRelationForEvent(eventId);
+    	String userId = context.getUserPrincipal().getName();
+    	try{
+	    	EventManagement.deleteEvent(eventId, userId);
+	        EventUserManagement.deleteRelationForEvent(eventId);
         } catch (DataNotFoundException e) {
 			Response response = Response.status(Response.Status.NOT_FOUND)
 					.entity(e.getMessage())
@@ -119,7 +120,7 @@ public class EventHandler {
         // TODO: Validation to make sure only event owner can update
     	String userId = context.getUserPrincipal().getName();
         try {
-        	return JResponse.ok(EventManagement.updateEvent(updateObj, eventId)).build();
+        	return JResponse.ok(EventManagement.updateEvent(updateObj, eventId, userId)).build();
         } catch (DataNotFoundException e) {
             Response response = Response.status(Response.Status.NOT_FOUND)
                     .entity(e.getMessage())

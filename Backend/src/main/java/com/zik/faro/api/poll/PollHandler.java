@@ -74,8 +74,9 @@ public class PollHandler {
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public JResponse<Poll> createPoll(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                              Poll poll){
-        try {
-        	 return JResponse.ok(PollManagement.createPoll(poll)).build();
+        String userId = context.getUserPrincipal().getName();
+    	try {
+        	 return JResponse.ok(PollManagement.createPoll(poll, userId)).build();
 		} catch (DataNotFoundException e) {
 			// If event not present exception thrown.
 			Response response = Response.status(Response.Status.NOT_FOUND)
@@ -135,31 +136,21 @@ public class PollHandler {
         
         return JResponse.ok(Constants.HTTP_OK).build();
     }
-    
-    @Path(POLL_ID_PATH_PARAM_STRING + "/test")
-    @POST
-    public JResponse<String> testUpdate(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
-                            @PathParam(POLL_ID_PATH_PARAM) final String pollId, Map<String,Object> post) throws JsonParseException, JsonMappingException, IOException, JSONException{
-        
-        System.out.println(post);
-        Long l = Long.valueOf(post.get("version").toString());
-        System.out.println(post.get("voteOption"));
-        String obj = post.get("poll").toString();
-        System.out.println(obj);
-        JSONObject jobj = new JSONObject(obj);
-        
-        System.out.println(jobj.toString());
-        Poll p = mapper.readValue(jobj.toString(), Poll.class);
-        // List<String> s = (List<String>) post.get("voteOption");
-        Set<String> s = new HashSet<String>((List<String>) post.get("voteOption"));
-        return JResponse.ok(Constants.HTTP_OK).build();
-    }
+   
 
     @Path(POLL_ID_PATH_PARAM_STRING)
     @DELETE
     public JResponse<String> deletePoll(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                              @PathParam(POLL_ID_PATH_PARAM) final String pollId){
-        PollManagement.deletePoll(eventId, pollId);
+        String userId = context.getUserPrincipal().getName();
+    	try {
+			PollManagement.deletePoll(eventId, pollId, userId);
+		} catch (DataNotFoundException e) {
+			Response response = Response.status(Response.Status.NOT_FOUND)
+					.entity(e.getMessage())
+					.build();
+            throw new WebApplicationException(response);
+		}
         return JResponse.ok(Constants.HTTP_OK).build();
     }
 }

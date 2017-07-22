@@ -25,28 +25,25 @@ public class EventNotificationHandler extends BaseNotificationHandler{
 		return Constants.FARO_EVENT_TOPIC_CONST+eventId;
 	}
 	
-	public void updateEventNotificationGeneric(EventDo updatedEvent)throws FirebaseNotificationException{
+	public void updateEventNotificationGeneric(EventDo updatedEvent, String userId)throws FirebaseNotificationException{
 		sendEventNotification(updatedEvent, "Event details have changed - Click to view updated details",
-				Constants.NOTIFICATION_TYPE_EVENT_GENERIC);
+				Constants.NOTIFICATION_TYPE_EVENT_GENERIC, userId);
 	}
 	
-	public void deleteEventNotification(EventDo updatedEvent)throws FirebaseNotificationException{
+	public void deleteEventNotification(EventDo updatedEvent, String userId)throws FirebaseNotificationException{
 		sendEventNotification(updatedEvent, "Event details have changed - Click to view updated details",
-				Constants.NOTIFICATION_TYPE_EVENT_DELETED);
+				Constants.NOTIFICATION_TYPE_EVENT_DELETED, userId);
 	}
 	
-	public void sendEventNotification(EventDo event, String body, String type){
-		NotificationPayload notificationPayload = new NotificationPayload();
-		notificationPayload.setTitle(event.getEventName());
-		notificationPayload.setBody(body);
-		notificationPayload.setClick_action(Constants.CLICK_ACTION_DEFAULT);
-		DataPayload dataPayload = new DataPayload();
+	public void sendEventNotification(EventDo event, String body, String type, String userId){
+		DataPayload dataPayload = new DataPayload(event.getEventName(), body, Constants.CLICK_ACTION_DEFAULT);
 		dataPayload.addKVPair(Constants.NOTIFICATION_TYPE_CONST, type);
 		dataPayload.addKVPair(Constants.NOTIFICATION_EVENTID_CONST, event.getId());
 		dataPayload.addKVPair(Constants.NOTIFICATION_VERSION_CONST, event.getVersion().toString());
+		dataPayload.addKVPair(Constants.NOTIFICATION_USER_CONST, userId);
 		try {
-			FirebaseHTTPRequest request = createDataAndNotificationMessage(
-					Constants.FARO_EVENT_TOPIC_CONST+event.getId(), notificationPayload, dataPayload);
+			FirebaseHTTPRequest request = createDataMessage(
+					Constants.FARO_EVENT_TOPIC_CONST+event.getId(), dataPayload);
 			notificationClient.send(request);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -55,16 +52,12 @@ public class EventNotificationHandler extends BaseNotificationHandler{
 	}
 	
 	public void inviteFriendToEventNotification(Event event, FaroUser faroUser) throws FirebaseNotificationException{
-		NotificationPayload notificationPayload = new NotificationPayload();
-		notificationPayload.setTitle(event.getEventName());
-		notificationPayload.setBody("You are invited to "+ event.getEventName());
-		notificationPayload.setClick_action(Constants.CLICK_ACTION_DEFAULT);
-		DataPayload dataPayload = new DataPayload();
+		DataPayload dataPayload = new DataPayload(event.getEventName(),"You are invited to "+ event.getEventName(), Constants.CLICK_ACTION_DEFAULT);
 		dataPayload.addKVPair(Constants.NOTIFICATION_TYPE_CONST, Constants.NOTIFICATION_TYPE_EVENT_INVITE);
 		dataPayload.addKVPair(Constants.NOTIFICATION_EVENTID_CONST, event.getId());
 		dataPayload.addKVPair(Constants.NOTIFICATION_VERSION_CONST, event.getVersion().toString());
-		FirebaseHTTPRequest request = createDataAndNotificationMessage(
-				Constants.FARO_EVENT_TOPIC_CONST+faroUser.getId(), notificationPayload, dataPayload);
+		FirebaseHTTPRequest request = createDataMessage(
+				Constants.FARO_EVENT_TOPIC_CONST+faroUser.getId(), dataPayload);
 		try {
 			notificationClient.send(request);
 		} catch (Exception e) {

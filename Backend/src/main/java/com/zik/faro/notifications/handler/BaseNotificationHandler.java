@@ -59,9 +59,9 @@ public abstract class BaseNotificationHandler {
 	}
 	
 	protected FirebaseHTTPRequest createDataMessage(String to, 
-			NotificationPayload notificationPayload) throws FirebaseNotificationException{
+			DataPayload dataPayload) throws FirebaseNotificationException{
 		FirebaseHTTPRequest request = new FirebaseHTTPRequestDataOnly(to);
-		request.setNotificationPayload(notificationPayload);
+		request.setDataPayload(dataPayload);
 		return request;
 	}
 	

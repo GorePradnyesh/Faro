@@ -51,17 +51,13 @@ public class UserNotificationHandler extends BaseNotificationHandler{
 	}
 	
 	public void sendNotification(EventDo event, FaroUserDo faroUser, String body, String type){
-		NotificationPayload notificationPayload = new NotificationPayload();
-		notificationPayload.setTitle(event.getEventName());
-		notificationPayload.setBody(body);
-		notificationPayload.setClick_action(Constants.CLICK_ACTION_DEFAULT);
-		DataPayload dataPayload = new DataPayload();
+		DataPayload dataPayload = new DataPayload(event.getEventName(), body, Constants.CLICK_ACTION_DEFAULT);
 		dataPayload.addKVPair(Constants.NOTIFICATION_TYPE_CONST, type);
 		dataPayload.addKVPair(Constants.NOTIFICATION_EVENTID_CONST, event.getId());
 		dataPayload.addKVPair(Constants.NOTIFICATION_VERSION_CONST, event.getVersion().toString());
 		try {
-			FirebaseHTTPRequest request = createDataAndNotificationMessage(
-					Constants.FARO_EVENT_TOPIC_CONST+faroUser.getId(), notificationPayload, dataPayload);
+			FirebaseHTTPRequest request = createDataMessage(
+					Constants.FARO_EVENT_TOPIC_CONST+faroUser.getId(), dataPayload);
 			notificationClient.send(request);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

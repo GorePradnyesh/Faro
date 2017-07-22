@@ -37,21 +37,20 @@ public class EventManagement {
         		ev.getEventDescription(), ev.getControlFlag(), ev.getExpenseGroup(), 
         		ev.getLocation(), ObjectStatus.OPEN, new Assignment(), userId);
         EventDatastoreImpl.storeEvent(userId, ConversionUtils.toDo(event));
-        EventNotificationHandler handler = new EventNotificationHandler();
         try{
         	List<String> faroUserTokens = UserDatastoreImpl.loadFaroUserById(userId).getTokens();
-        	eventNotificationHandler.subscribeToTopic(handler.getTopicName(event.getId()), faroUserTokens.toArray(new String[0]));
+        	eventNotificationHandler.subscribeToTopic(eventNotificationHandler.getTopicName(event.getId()), faroUserTokens.toArray(new String[0]));
         }catch(Exception e){
         	e.printStackTrace();
         }
         return event;
     }
 
-    public static void deleteEvent(final String eventId) throws DataNotFoundException {
+    public static void deleteEvent(final String eventId, final String userId) throws DataNotFoundException {
         EventDo eventDo = EventDatastoreImpl.loadEventByID(eventId);
     	EventDatastoreImpl.deleteEvent(eventId);
         try {
-			eventNotificationHandler.deleteEventNotification(eventDo);
+			eventNotificationHandler.deleteEventNotification(eventDo, userId);
 		} catch (FirebaseNotificationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -63,14 +62,14 @@ public class EventManagement {
         return new EventInviteStatusWrapper(ConversionUtils.fromDo(eventUserDo.getEvent()), eventUserDo.getInviteStatus());
     }
     
-    public static Event updateEvent(final Event updateObj, final String eventId) throws DataNotFoundException, DatastoreException, UpdateVersionException {
+    public static Event updateEvent(final Event updateObj, final String eventId, final String userId) throws DataNotFoundException, DatastoreException, UpdateVersionException {
         //TODO: Validate that the user has permissions to modify event, from the EventUser table
     	//TODO: Validate if the user is the owner of the event
     	EventDo eventDo = ConversionUtils.toDo(updateObj);
     	EventDo updatedEvent = EventDatastoreImpl.updateEvent(eventId, eventDo);
     	try {
     		// TODO: For now keeping it generic. Need to filter based on properties updated
-    		eventNotificationHandler.updateEventNotificationGeneric(eventDo);
+    		eventNotificationHandler.updateEventNotificationGeneric(eventDo, userId);
 		} catch (FirebaseNotificationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

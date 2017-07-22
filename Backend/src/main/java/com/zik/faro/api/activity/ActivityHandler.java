@@ -71,7 +71,8 @@ public class ActivityHandler {
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public JResponse<Activity> createActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                  Activity activity){
-    	return JResponse.ok(ActivityManagement.createActivity(activity)).build();
+    	String userId = context.getUserPrincipal().getName();
+    	return JResponse.ok(ActivityManagement.createActivity(activity, userId)).build();
     }
 
     /*
@@ -94,10 +95,11 @@ public class ActivityHandler {
     public JResponse<Activity> updateActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                @PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId,
                                Activity activityUpdateData){
-        activityUpdateData.setId(activityId);
+    	String userId = context.getUserPrincipal().getName();
+    	activityUpdateData.setId(activityId);
         activityUpdateData.setEventId(eventId);
         try {
-        	return JResponse.ok(ActivityManagement.updateActivity(activityUpdateData, eventId)).build();
+        	return JResponse.ok(ActivityManagement.updateActivity(activityUpdateData, eventId, userId)).build();
 		} catch (DataNotFoundException e) {
 			Response response = Response.status(Response.Status.NOT_FOUND)
                     .entity(e.getMessage())
@@ -121,15 +123,16 @@ public class ActivityHandler {
     @DELETE
     public JResponse<String> deleteActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                  @PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId){
-       try{
-    	   ActivityManagement.deleteActivity(eventId, activityId);
-           return JResponse.ok(Constants.HTTP_OK).build();
-       } catch (DataNotFoundException e) {
+    	String userId = context.getUserPrincipal().getName();
+    	try{
+    		ActivityManagement.deleteActivity(eventId, activityId, userId);
+    		return JResponse.ok(Constants.HTTP_OK).build();
+    	} catch (DataNotFoundException e) {
        	
-           Response response = Response.status(Response.Status.NOT_FOUND)
+    		Response response = Response.status(Response.Status.NOT_FOUND)
                    .entity(e.getMessage())
                    .build();
-           throw new WebApplicationException(response);
+    		throw new WebApplicationException(response);
        }
        
     }
