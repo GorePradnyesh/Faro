@@ -1,5 +1,6 @@
 package com.zik.faro.applogic;
 
+import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -80,7 +81,7 @@ public class AssignmentManagement {
 			if(assigneeId != null && !assigneeId.isEmpty()){
 				faroUserIds.add(item.getAssigneeId());
 			}else{
-				logger.info("FaroUserId is null/empty. TODO ItemId: "+ item.getId());
+				logger.info(MessageFormat.format("FaroUserId is null/empty. TODO ItemId: {0}", item.getId()));
 			}
 		}
 		for(String faroUserId : faroUserIds){
