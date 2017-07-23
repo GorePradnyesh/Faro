@@ -31,7 +31,7 @@ public class EventNotificationHandler extends BaseNotificationHandler{
 	}
 	
 	public void deleteEventNotification(EventDo updatedEvent, String userId)throws FirebaseNotificationException{
-		sendEventNotification(updatedEvent, "Event details have changed - Click to view updated details",
+		sendEventNotification(updatedEvent, "Darn! Event has been cancelled",
 				Constants.NOTIFICATION_TYPE_EVENT_DELETED, userId);
 	}
 	

@@ -7,8 +7,11 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import com.zik.faro.commons.ConfigPropertiesUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.zik.faro.auth.AuthFilter;
+import com.zik.faro.commons.ConfigPropertiesUtil;
 import com.google.gson.Gson;
 import com.zik.faro.commons.Constants;
 import com.zik.faro.notifications.NotificationClient;
@@ -16,7 +19,8 @@ import com.zik.faro.notifications.NotificationClient;
 public class FirebaseNotificationClient implements NotificationClient<FirebaseHTTPRequest,FirebaseHTTPResponse>{
 	private Gson gson = new Gson();
 	private static String authHeaderValue;
-
+	private  static final Logger logger = LoggerFactory.getLogger(FirebaseNotificationClient.class);
+	
 	public FirebaseNotificationClient() {
 		authHeaderValue = ConfigPropertiesUtil.getFirebaseAuthorizationKey();
 	}
@@ -47,7 +51,9 @@ public class FirebaseNotificationClient implements NotificationClient<FirebaseHT
 	}
 	
 	private HttpURLConnection doPost(String payload, String endpoint) throws Exception{
-		
+		logger.info("Invoking firebase");
+		logger.info("Payload: "+ payload);
+		logger.info("Endpoint: "+ endpoint);
 		URL url = new URL(endpoint);
 	    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 	    conn.setDoOutput(true);
@@ -69,7 +75,8 @@ public class FirebaseNotificationClient implements NotificationClient<FirebaseHT
 	private FirebaseHTTPResponse getResponseObject(HttpURLConnection conn) throws Exception {
 		int respCode = conn.getResponseCode();
 	    String response = getResponseString(conn);
-	    System.out.println(response);
+	    logger.info("ResponseCode: "+respCode);
+	    logger.info("Response: "+response);
 	    FirebaseHTTPResponse resp = gson.fromJson(response, FirebaseHTTPResponse.class);
 	    resp.setStatusCode(respCode);
 	    return resp;
