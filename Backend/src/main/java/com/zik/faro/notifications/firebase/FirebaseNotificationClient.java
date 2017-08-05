@@ -30,8 +30,7 @@ public class FirebaseNotificationClient implements NotificationClient<FirebaseHT
 	public FirebaseHTTPResponse send(FirebaseHTTPRequest t) throws Exception {
 		String payload = gson.toJson(t);
 		HttpURLConnection conn = doPost(payload, Constants.FCM_ENDPOINT+Constants.SEND_NOTIFICATION_PATH_CONST);
-		String response = getResponseString(conn);
-	    FirebaseHTTPResponse resp = gson.fromJson(response, FirebaseHTTPResponse.class);
+		FirebaseHTTPResponse resp = getResponseObject(conn);
 	    return resp;	
 	}
 

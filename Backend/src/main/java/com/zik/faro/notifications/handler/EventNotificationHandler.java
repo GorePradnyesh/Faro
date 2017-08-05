@@ -1,5 +1,10 @@
 package com.zik.faro.notifications.handler;
 
+import java.io.UnsupportedEncodingException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.exceptions.FirebaseNotificationException;
 import com.zik.faro.data.Event;
@@ -9,20 +14,22 @@ import com.zik.faro.notifications.NotificationClientFactory;
 import com.zik.faro.notifications.firebase.DataPayload;
 import com.zik.faro.notifications.firebase.FirebaseHTTPRequest;
 import com.zik.faro.notifications.firebase.FirebaseHTTPResponse;
+import com.zik.faro.notifications.firebase.FirebaseNotificationClient;
 import com.zik.faro.notifications.firebase.NotificationPayload;
 import com.zik.faro.persistence.datastore.data.EventDo;
 
 public class EventNotificationHandler extends BaseNotificationHandler{
 	private NotificationClient<FirebaseHTTPRequest,FirebaseHTTPResponse> notificationClient = 
 			NotificationClientFactory.getInstance().getNotificationClient();
-
+	private  static final Logger logger = LoggerFactory.getLogger(EventNotificationHandler.class);
+	
 	@Override
 	protected NotificationClient<FirebaseHTTPRequest, FirebaseHTTPResponse> getNotificationClient() {
 		return notificationClient;
 	}
 	
-	public String getTopicName(String eventId){
-		return Constants.FARO_EVENT_TOPIC_CONST+eventId;
+	public String getTopicName(String eventId) throws UnsupportedEncodingException{
+		return Constants.FARO_EVENT_TOPIC_CONST+encodeTo(eventId);
 	}
 	
 	public void updateEventNotificationGeneric(EventDo updatedEvent, String userId)throws FirebaseNotificationException{
@@ -46,23 +53,22 @@ public class EventNotificationHandler extends BaseNotificationHandler{
 					Constants.FARO_EVENT_TOPIC_CONST+event.getId(), dataPayload);
 			notificationClient.send(request);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Notification Failure", e);
 		}
 	}
 	
-	public void inviteFriendToEventNotification(Event event, FaroUser faroUser) throws FirebaseNotificationException{
+	public void inviteFriendToEventNotification(Event event, String recipientUserId, String triggererUserId) throws FirebaseNotificationException{
 		DataPayload dataPayload = new DataPayload(event.getEventName(),"You are invited to "+ event.getEventName(), Constants.CLICK_ACTION_DEFAULT);
 		dataPayload.addKVPair(Constants.NOTIFICATION_TYPE_CONST, Constants.NOTIFICATION_TYPE_EVENT_INVITE);
 		dataPayload.addKVPair(Constants.NOTIFICATION_EVENTID_CONST, event.getId());
 		dataPayload.addKVPair(Constants.NOTIFICATION_VERSION_CONST, event.getVersion().toString());
-		FirebaseHTTPRequest request = createDataMessage(
-				Constants.FARO_EVENT_TOPIC_CONST+faroUser.getId(), dataPayload);
+		dataPayload.addKVPair(Constants.NOTIFICATION_USER_CONST, triggererUserId);
 		try {
+			FirebaseHTTPRequest request = createDataMessage(
+					Constants.FARO_EVENT_TOPIC_CONST+encodeTo(recipientUserId), dataPayload);
 			notificationClient.send(request);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Notification Failure", e);
 		}
 	}
 	

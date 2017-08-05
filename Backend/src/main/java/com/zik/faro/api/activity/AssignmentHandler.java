@@ -23,8 +23,10 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.sun.jersey.api.JResponse;
@@ -40,6 +42,8 @@ import com.zik.faro.data.Item;
 
 @Path(EVENT_PATH_CONST + EVENT_ID_PATH_PARAM_STRING + ASSIGNMENT_PATH_CONST)
 public class AssignmentHandler {
+	@Context
+	SecurityContext context;
 	
     @Path(ASSIGNMENT_ID_PATH_PARAM_STRING)
     @GET
@@ -103,17 +107,18 @@ public class AssignmentHandler {
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public JResponse<Map<String,List<Item>>> updateAssignment(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
     		final Map<String,List<Item>> items){
+    	String userId = context.getUserPrincipal().getName();
     	Map<String, List<Item>> responseMap = new HashMap<String,List<Item>>();
 		try {
 			// Check if map contains eventLevel todo:
 			if(items.containsKey(eventId)){
-				Event updatedEvent = AssignmentManagement.updateEventItems(eventId, items.get(eventId));
+				Event updatedEvent = AssignmentManagement.updateEventItems(eventId, items.get(eventId), userId);
 				responseMap.put(eventId, updatedEvent.getAssignment().getItems());
 			}
 			for(String activityId: items.keySet()){
 				// Skip event id's todo list processed above
 				if(!activityId.equals(eventId)){
-					Activity updatedActivity = AssignmentManagement.updateActivityItems(eventId, activityId, items.get(activityId));
+					Activity updatedActivity = AssignmentManagement.updateActivityItems(eventId, activityId, items.get(activityId), userId);
 					responseMap.put(activityId, updatedActivity.getAssignment().getItems());
 				}
 			}

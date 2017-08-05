@@ -1,5 +1,8 @@
 package com.zik.faro.notifications.handler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.zik.faro.commons.Constants;
 import com.zik.faro.notifications.NotificationClient;
 import com.zik.faro.notifications.NotificationClientFactory;
@@ -14,7 +17,9 @@ import com.zik.faro.persistence.datastore.data.PollDo;
 public class PollNotificationHandler extends BaseNotificationHandler{
 	private NotificationClient<FirebaseHTTPRequest,FirebaseHTTPResponse> notificationClient = 
 			NotificationClientFactory.getInstance().getNotificationClient();
-
+	private  static final Logger logger = LoggerFactory.getLogger(PollNotificationHandler.class);
+	
+	
 	@Override
 	protected NotificationClient<FirebaseHTTPRequest, FirebaseHTTPResponse> getNotificationClient() {
 		return notificationClient;
@@ -56,8 +61,7 @@ public class PollNotificationHandler extends BaseNotificationHandler{
 					Constants.FARO_EVENT_TOPIC_CONST+poll.getEventId(), dataPayload);
 			notificationClient.send(request);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Notification Failure", e);
 		}
 	}
 }

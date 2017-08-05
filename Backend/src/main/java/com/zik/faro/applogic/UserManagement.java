@@ -1,6 +1,7 @@
 package com.zik.faro.applogic;
 
 
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,8 +66,7 @@ public class UserManagement {
 		user.getTokens().add(registrationToken);
 		UserDatastoreImpl.updateFaroUser(faroUserId, user);
 		try {
-			userNotificationHandler.subscribeToTopic(Constants.FARO_EVENT_TOPIC_CONST+faroUserId, 
-					user.getTokens().toArray(new String[0]));
+			userNotificationHandler.subscribeToTopic(faroUserId, user.getTokens().toArray(new String[0]));
 		} catch (FirebaseNotificationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
