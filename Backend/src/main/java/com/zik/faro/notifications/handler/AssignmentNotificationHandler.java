@@ -39,7 +39,7 @@ public class AssignmentNotificationHandler extends BaseNotificationHandler{
 			, String notificationTriggererUserId){
 		DataPayload dataPayload = new DataPayload(eventDo.getEventName(), body, Constants.CLICK_ACTION_DEFAULT);
 		dataPayload.addKVPair(Constants.NOTIFICATION_TYPE_CONST, type);
-		dataPayload.addKVPair(Constants.NOTIFICATION_EVENTID_CONST, activity.getEventId());
+		dataPayload.addKVPair(Constants.NOTIFICATION_EVENTID_CONST, eventDo.getId());
 		if(activity == null){
 			dataPayload.addKVPair(Constants.NOTIFICATION_ACTIVITYID_CONST, null);
 			dataPayload.addKVPair(Constants.NOTIFICATION_ASSIGNMENTID_CONST, eventDo.getAssignment().getId());

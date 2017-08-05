@@ -137,6 +137,7 @@ public final class Constants {
     public static final String NOTIFICATION_ACTIVITYID_CONST					= "activityId";
     public static final String NOTIFICATION_ASSIGNMENTID_CONST					= "assignmentId";
     public static final String NOTIFICATION_VERSION_CONST						= "version";
+    public static final String NOTIFICATION_ID_CONST						 	= "notificationId";
     
 
     // -- Authentication path constants -- //
