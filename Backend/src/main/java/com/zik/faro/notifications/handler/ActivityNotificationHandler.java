@@ -1,19 +1,22 @@
 package com.zik.faro.notifications.handler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.zik.faro.commons.Constants;
 import com.zik.faro.notifications.NotificationClient;
 import com.zik.faro.notifications.NotificationClientFactory;
 import com.zik.faro.notifications.firebase.DataPayload;
 import com.zik.faro.notifications.firebase.FirebaseHTTPRequest;
 import com.zik.faro.notifications.firebase.FirebaseHTTPResponse;
-import com.zik.faro.notifications.firebase.NotificationPayload;
 import com.zik.faro.persistence.datastore.data.ActivityDo;
 import com.zik.faro.persistence.datastore.data.EventDo;
 
 public class ActivityNotificationHandler extends BaseNotificationHandler {
 	private NotificationClient<FirebaseHTTPRequest,FirebaseHTTPResponse> notificationClient = 
 			NotificationClientFactory.getInstance().getNotificationClient();
-
+	private  static final Logger logger = LoggerFactory.getLogger(ActivityNotificationHandler.class);
+	
 	@Override
 	protected NotificationClient<FirebaseHTTPRequest, FirebaseHTTPResponse> getNotificationClient() {
 		return notificationClient;
@@ -50,8 +53,7 @@ public class ActivityNotificationHandler extends BaseNotificationHandler {
 					Constants.FARO_EVENT_TOPIC_CONST+activity.getEventId(), dataPayload);
 			notificationClient.send(request);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Notification Failure", e);
 		}
 	}
 	

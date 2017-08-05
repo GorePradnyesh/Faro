@@ -17,10 +17,9 @@ import com.zik.faro.data.Assignment;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.Identifier;
 import com.zik.faro.data.Item;
-import com.zik.faro.notifications.handler.UserNotificationHandler;
+import com.zik.faro.notifications.handler.AssignmentNotificationHandler;
 import com.zik.faro.persistence.datastore.AssignmentDatastoreImpl;
 import com.zik.faro.persistence.datastore.EventDatastoreImpl;
-import com.zik.faro.persistence.datastore.UserDatastoreImpl;
 import com.zik.faro.persistence.datastore.data.ActivityDo;
 import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
@@ -28,7 +27,7 @@ import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 public class AssignmentManagement {
 	
 	private  static final Logger logger = LoggerFactory.getLogger(AssignmentManagement.class);
-	private static UserNotificationHandler userNotificationHandler = new UserNotificationHandler();
+	private static AssignmentNotificationHandler assignmentNotificationHandler = new AssignmentNotificationHandler();
 	
 	public static int getPendingAssignmentCount(final String eventId) throws DataNotFoundException{
 		return AssignmentDatastoreImpl.getCountOfPendingAssignments(eventId);
@@ -46,17 +45,18 @@ public class AssignmentManagement {
 		return AssignmentDatastoreImpl.getAllAssignments(eventId);
 	}
 	
-	public static Activity updateActivityItems(final String eventId, final String activityId, final List<Item> items) throws DataNotFoundException, DatastoreException, UpdateVersionException{
+	public static Activity updateActivityItems(final String eventId, final String activityId, final List<Item> items, String userId) throws DataNotFoundException, DatastoreException, UpdateVersionException{
 		createItemIds(items);
 		ActivityDo activityDo = AssignmentDatastoreImpl.updateItemsForActivityAssignment(eventId, activityId, items);
-		sendBatchNotifications(items, eventId);
+		EventDo eventDo = EventDatastoreImpl.loadEventByID(eventId);
+		sendBatchNotifications(items, eventDo, activityDo, userId);
 		return ConversionUtils.fromDo(activityDo);
 	}
 	
-	public static Event updateEventItems(final String eventId, final List<Item> items) throws DataNotFoundException, DatastoreException, UpdateVersionException{
+	public static Event updateEventItems(final String eventId, final List<Item> items, String userId) throws DataNotFoundException, DatastoreException, UpdateVersionException{
 		createItemIds(items);
 		EventDo eventDo = AssignmentDatastoreImpl.updateItemsForEventAssignment(eventId, items);
-		sendBatchNotifications(items, eventId);
+		sendBatchNotifications(items, eventDo, null, userId);
 		return ConversionUtils.fromDo(eventDo);
 	}
 	
@@ -71,9 +71,7 @@ public class AssignmentManagement {
 		}
 	}
 	
-	public static void sendBatchNotifications(final List<Item> items, String eventId) throws DataNotFoundException{
-		// For new items, create ids
-		EventDo eventDo = EventDatastoreImpl.loadEventByID(eventId);
+	public static void sendBatchNotifications(final List<Item> items, EventDo eventDo, ActivityDo activityDo, String notificationTriggererUserId) throws DataNotFoundException{
 		Set<String> faroUserIds = new HashSet<String>();
 		// Find all users who need to be notified. Set will ensure batching for a user
 		for(Item item : items){
@@ -85,8 +83,7 @@ public class AssignmentManagement {
 			}
 		}
 		for(String faroUserId : faroUserIds){
-			// Conscious decison to not load faroUserDo from datastore since downstream only needs the emailId which is already available here
-			userNotificationHandler.assignmentCreatedNotification(eventDo, new FaroUserDo(faroUserId));
+			assignmentNotificationHandler.assignmentCreatedNotification(eventDo, activityDo, faroUserId, notificationTriggererUserId);
 		}
 	}
 }
