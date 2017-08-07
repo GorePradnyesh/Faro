@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import com.zik.faro.commons.Constants;
 
@@ -12,6 +13,7 @@ public class DataPayload {
 	
 	public DataPayload(){
 		faroData = new HashMap<String,String>();
+		faroData.put(Constants.NOTIFICATION_ID_CONST, UUID.randomUUID().toString());
 	}
 	
 	public DataPayload(String title, String body, String clickAction){
@@ -19,6 +21,7 @@ public class DataPayload {
 		faroData.put(Constants.NOTIFICATION_TITLE_CONST, title);
 		faroData.put(Constants.NOTIFICATION_BODY_CONST, body);
 		faroData.put(Constants.NOTIFICATION_CLICK_ACTION_CONST, clickAction);
+		faroData.put(Constants.NOTIFICATION_ID_CONST, UUID.randomUUID().toString());
 	}
 	
 	public Map<String,String> getMap(){
