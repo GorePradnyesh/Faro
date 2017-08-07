@@ -1,12 +1,13 @@
 package com.zik.faro.frontend;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -16,50 +17,32 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.provider.ContactsContract.Contacts;
+import android.provider.ContactsContract.CommonDataKinds;
+import android.widget.CheckBox;
+import android.widget.CursorAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.google.common.base.Strings;
+import com.zik.faro.data.MinUser;
+
+import java.text.MessageFormat;
 
 /**
  * Created by gaurav on 7/5/17.
  */
 
-public class AddPhoneContactsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, AdapterView.OnItemClickListener {
+public class AddPhoneContactsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private ListView contactsFriendsList;
 
-    private final static String[] FROM_COLUMNS = {
-            Contacts.DISPLAY_NAME_PRIMARY
-    };
-
-    /*
-     * Defines an array that contains resource ids for the layout views
-     * that get the Cursor column contents. The id is pre-defined in
-     * the Android framework, so it is prefaced with "android.R.id"
-     */
-    private final static int[] TO_IDS = {
-            R.id.friendName
-    };
-
-    // Define variables for the contact the user selects
-    // The contact's _ID value
-    private long contactId;
-
-    // The contact's LOOKUP_KEY
-    private String contactKey;
-
-    // A content URI for the selected contact
-    private Uri contactUri;
-
     // An adapter that binds the result Cursor to the ListView
-    private SimpleCursorAdapter cursorAdapter;
+    private CursorAdapter cursorAdapter;
 
     // Define a projection
-    private static final String[] PROJECTION = {Contacts._ID, Contacts.LOOKUP_KEY, Contacts.DISPLAY_NAME_PRIMARY};
-
-    // Column indexes in the cursor. Indexes are the same as the order of the column names in the projection
-    private static final int CONTACT_ID_INDEX = 0;
-    private static final int LOOKUP_KEY_INDEX = 1;
+    private static final String[] PROJECTION = {Contacts._ID, Contacts.DISPLAY_NAME_PRIMARY, Contacts.PHOTO_THUMBNAIL_URI, CommonDataKinds.Email.DATA};
 
     // Defines the text expression
     private static final String SELECTION = Contacts.DISPLAY_NAME_PRIMARY + " LIKE ?" ;
@@ -80,7 +63,7 @@ public class AddPhoneContactsFragment extends Fragment implements LoaderManager.
         // Starts the query
         return new CursorLoader(
                 getActivity(),
-                Contacts.CONTENT_URI,
+                CommonDataKinds.Email.CONTENT_URI,
                 PROJECTION,
                 SELECTION,
                 mSelectionArgs,
@@ -103,14 +86,37 @@ public class AddPhoneContactsFragment extends Fragment implements LoaderManager.
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(getActivity()));
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        ((AddFriendsActivity) getActivity()).removeAllSelectedFriends();
+        ((AddFriendsActivity) getActivity()).setCurrentTabId("Contacts");
+
         // Inflate the fragment layout
         return inflater.inflate(R.layout.fragment_contacts_list, container, false);
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        contactsFriendsList = (ListView) getActivity().findViewById(R.id.contactsFriendsList);
+        contactsFriendsList.setBackgroundColor(Color.BLUE);
+
+        // Get a CursorAdapter
+        cursorAdapter =  new PhoneContactsAdapter(getActivity(), null, 0);
+
+        // Set the adapter for the ListView
+        contactsFriendsList.setAdapter(cursorAdapter);
+
+        if (checkContactsPermission()) {
+            // Initialize the loader
+            getLoaderManager().initLoader(0, null, this);
+        }
     }
 
     private boolean checkContactsPermission() {
@@ -135,31 +141,64 @@ public class AddPhoneContactsFragment extends Fragment implements LoaderManager.
         return true;
     }
 
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    private class PhoneContactsAdapter extends CursorAdapter {
+        private LayoutInflater layoutInflater;
 
-        contactsFriendsList = (ListView) getActivity().findViewById(R.id.contactsFriendsList);
-        contactsFriendsList.setBackgroundColor(Color.BLACK);
+        public PhoneContactsAdapter(Context context, Cursor cursor, int flags) {
+            super(context,cursor, flags);
+            layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        }
 
-        // Get a CursorAdapter
-        cursorAdapter = new SimpleCursorAdapter(
-                getActivity(),  // context
-                R.layout.friend_row_style, // layout
-                null,  // cursor
-                FROM_COLUMNS, // from
-                TO_IDS, // to
-                0); // flags
+        @Override
+        public View newView(Context context, Cursor cursor, ViewGroup parent) {
+            return layoutInflater.inflate(R.layout.add_friends_row_style, parent, false);
+        }
 
-        // Set the adapter for the ListView
-        contactsFriendsList.setAdapter(cursorAdapter);
+        @Override
+        public void bindView(View view, Context context, final Cursor cursor) {
+            TextView contactNameTextView = (TextView) view.findViewById(R.id.contactFriendName);
+            String friendName = cursor.getString(cursor.getColumnIndex(Contacts.DISPLAY_NAME_PRIMARY));
+            Log.i(TAG, "friendName = " + friendName);
 
-        // Set the item click listener to be the current fragment.
-        // contactsFriendsList.setOnItemClickListener(this);
+            if (!Strings.isNullOrEmpty(friendName)) {
+                contactNameTextView.setText(friendName);
+            }
 
-        if (checkContactsPermission()) {
-            // Initialize the loader
-            getLoaderManager().initLoader(0, null, this);
+            String photoUri = cursor.getString(cursor.getColumnIndex(Contacts.PHOTO_THUMBNAIL_URI));
+            Log.i(TAG, "photoUri = " + photoUri);
+
+            ImageView contactPhotoImageView = (ImageView) view.findViewById(R.id.contactFriendPicture);
+
+            // Load the user profile picture if available, otherwise load the default pic
+            Glide.with(getContext())
+                    .load((photoUri != null) ? photoUri : R.drawable.user_pic)
+                    .placeholder(R.drawable.user_pic)
+                    .into(contactPhotoImageView);
+
+            CheckBox contactFriendSelectionCheckBox = (CheckBox) view.findViewById(R.id.contactFriendSelection);
+            contactFriendSelectionCheckBox.setTag(cursor.getPosition());
+            contactFriendSelectionCheckBox.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Log.i(TAG, "onItemClick");
+
+                    CheckBox selectedCheckbox = (CheckBox) view;
+                    cursor.moveToPosition((Integer) selectedCheckbox.getTag());
+                    String contactEmail = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.ADDRESS));
+                    AddFriendsActivity addFriendsActivity = ((AddFriendsActivity) getActivity());
+
+                    if (selectedCheckbox.isChecked()) {
+                        String firstName = cursor.getString(cursor.getColumnIndex(Contacts.DISPLAY_NAME_PRIMARY));
+
+                        Log.i(TAG, MessageFormat.format("email = {0}, firstName = {1}", contactEmail, firstName));
+
+                        addFriendsActivity.addSelectedFriend(new MinUser().withEmail(contactEmail)
+                                .withFirstName(firstName));
+                    } else {
+                        addFriendsActivity.removeSelectedFriend(new MinUser().withEmail(contactEmail));
+                    }
+                }
+            });
         }
     }
 }

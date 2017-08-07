@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -22,15 +23,10 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.share.model.AppInviteContent;
 import com.facebook.share.widget.AppInviteDialog;
-import com.google.common.collect.Lists;
 import com.zik.faro.data.MinUser;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.zik.faro.frontend.data.FacebookMinUser;
 
 import java.text.MessageFormat;
-import java.util.List;
 
 /**
  * Created by gaurav on 7/15/17.
@@ -42,25 +38,26 @@ public class AddFacebookFriendsFragment extends Fragment {
     private View fragmentView;
 
     // App Link for what should be opened when the recipient clicks on the install/play button on the app invite page.
-    private static final String APP_LINK_URL = "https://fb.me/722765844577264";
+    private static final String FACEBOOK_FARO_APP_LINK_URL = "https://fb.me/722765844577264";
     // A URL to an image to be used in the invite.
-    private static final String APP_PREVIEW_IMAGE_URL = "";
+    private static final String FACEBOOK_FARO_APP_PREVIEW_IMAGE_URL = "";
 
     private TextView inviteFacebookFriends;
     private ListView facebookFriendsList;
     private FacebookFriendsListAdapter fbFriendsListAdapter;
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(getActivity()));
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        ((AddFriendsActivity) getActivity()).removeAllSelectedFriends();
+        ((AddFriendsActivity) getActivity()).setCurrentTabId("Facebook");
 
-        Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(getActivity()));
         fragmentView = inflater.inflate(R.layout.fragment_facebookfriends_list, container, false);
         return fragmentView;
     }
@@ -78,8 +75,8 @@ public class AddFacebookFriendsFragment extends Fragment {
 
                 if (AppInviteDialog.canShow()) {
                     AppInviteContent content = new AppInviteContent.Builder()
-                            .setApplinkUrl(APP_LINK_URL)
-                            .setPreviewImageUrl(APP_PREVIEW_IMAGE_URL)
+                            .setApplinkUrl(FACEBOOK_FARO_APP_LINK_URL)
+                            .setPreviewImageUrl(FACEBOOK_FARO_APP_PREVIEW_IMAGE_URL)
                             .build();
                     AppInviteDialog.show(getActivity(), content);
                 } else {
@@ -91,7 +88,7 @@ public class AddFacebookFriendsFragment extends Fragment {
         fbFriendsListAdapter = new FacebookFriendsListAdapter(getActivity(), R.layout.friend_row_style);
         facebookFriendsList = (ListView) getActivity().findViewById(R.id.facebookFriendsList);
         facebookFriendsList.setAdapter(fbFriendsListAdapter);
-        facebookFriendsList.setBackgroundColor(Color.BLACK);
+        facebookFriendsList.setBackgroundColor(Color.BLUE);
 
         loadFacebookFriendsIntoView();
     }
@@ -110,8 +107,8 @@ public class AddFacebookFriendsFragment extends Fragment {
 
             if (convertView == null) {
                 LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                row = inflater.inflate(R.layout.friend_row_style, parent, false);
-                holder = new FbFriendHolder(row);
+                row = inflater.inflate(R.layout.add_friends_row_style, parent, false);
+                holder = new FbFriendHolder(row, position);
                 row.setTag(holder);
             } else {
                 holder = (FbFriendHolder) row.getTag();
@@ -134,70 +131,59 @@ public class AddFacebookFriendsFragment extends Fragment {
 
             return row;
         }
-
     }
 
     private void loadFacebookFriendsIntoView() {
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        Log.i(TAG, MessageFormat.format("accessToken = {0}", accessToken));
 
         if (accessToken != null) {
-            Bundle params = new Bundle();
-            params.putString("fields", "email, id, first_name, last_name, picture");
-
-            FbGraphApiService fbGraphApiService = new FbGraphApiService();
+            final FbGraphApiService fbGraphApiService = new FbGraphApiService();
             fbGraphApiService.findFacebookFriends(new GraphRequest.Callback() {
-                public void onCompleted(GraphResponse response) {
+                public void onCompleted(final GraphResponse response) {
                     // handle the result
-                    if (response.getError() == null) {
-                        JSONObject jsonObject = response.getJSONObject();
-                        Log.i(TAG, MessageFormat.format("jsonObject = {0}", jsonObject));
-                        try {
-                            JSONArray friendsArray = jsonObject.getJSONArray("data");
-                            final List<MinUser> fbFriendsList = Lists.newArrayList();
-                            if (friendsArray != null) {
-                                for (int i = 0; i < friendsArray.length(); i++) {
-                                    JSONObject friend = friendsArray.getJSONObject(i);
-                                    String firstName = friend.getString("first_name");
-                                    String lastName = friend.getString("last_name");
-                                    String id = friend.getString("id");
-                                    JSONObject pictureData = friend.getJSONObject("picture").getJSONObject("data");
-                                    String pictureUrl = pictureData.getString("url");
-
-                                    // TODO : Exchange the fb user id with email
-
-                                    Log.i(TAG, MessageFormat.format("friendName = {0}, last_name = {1}, id = {2}",
-                                            firstName, lastName, id));
-
-                                    MinUser minUser = new MinUser(firstName, lastName, id);
-                                    minUser.setThumbProfileImageUrl(pictureUrl);
-                                    fbFriendsList.add(minUser);
-                                }
-
-                                Handler mainHandler = new Handler(context.getMainLooper());
-                                mainHandler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        fbFriendsListAdapter.addAll(fbFriendsList);
-                                    }
-                                });
-                            }
-                        } catch (JSONException e) {
-                            Log.e(TAG, "Error processing response for friends list", e);
+                    Handler mainHandler = new Handler(context.getMainLooper());
+                    mainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            fbFriendsListAdapter.addAll(fbGraphApiService.getFriendsFromGraphResponse(response));
                         }
-                    }
+                    });
                 }
             });
         }
     }
 
-    private static class FbFriendHolder {
-        private ImageView userPictureImageView;
+    private class FbFriendHolder {
+        private ImageView friendPictureImageView;
         private TextView friendNameTextView;
+        private CheckBox friendSelectionCheckBox;
 
-        public FbFriendHolder(View rowInListView) {
-            this.userPictureImageView = (ImageView)rowInListView.findViewById(R.id.userPicture);
-            this.friendNameTextView = (TextView)rowInListView.findViewById(R.id.friendName);
+        public FbFriendHolder(View rowInListView, int position) {
+            friendPictureImageView = (ImageView)rowInListView.findViewById(R.id.contactFriendPicture);
+            friendNameTextView = (TextView)rowInListView.findViewById(R.id.contactFriendName);
+            friendSelectionCheckBox = (CheckBox)rowInListView.findViewById(R.id.contactFriendSelection);
+            friendSelectionCheckBox.setTag(position);
+            friendSelectionCheckBox.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Log.i(TAG, "onItemClick");
+
+                    CheckBox selectedCheckbox = (CheckBox) view;
+                    FacebookMinUser facebookMinUser = (FacebookMinUser) fbFriendsListAdapter.getItem((Integer) selectedCheckbox.getTag());
+                    AddFriendsActivity addFriendsActivity = ((AddFriendsActivity) getActivity());
+
+                    if (selectedCheckbox.isChecked()) {
+                        Log.i(TAG, MessageFormat.format("Selected facebook friend id = {0} firstName = {1}", facebookMinUser.getFacebookUserId(),
+                                facebookMinUser.getFirstName()));
+
+                        addFriendsActivity.addSelectedFriend(facebookMinUser);
+                    } else {
+                        Log.i(TAG, MessageFormat.format("Unselected facebook friend id = {0} firstName = {1}", facebookMinUser.getFacebookUserId(),
+                                facebookMinUser.getFirstName()));
+                        addFriendsActivity.removeSelectedFriend(facebookMinUser);
+                    }
+                }
+            });
         }
 
         public void setFriendName(String friendName) {
@@ -205,7 +191,7 @@ public class AddFacebookFriendsFragment extends Fragment {
         }
 
         public ImageView getImageView() {
-            return userPictureImageView;
+            return friendPictureImageView;
         }
     }
 }
