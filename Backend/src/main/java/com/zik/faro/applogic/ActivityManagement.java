@@ -17,13 +17,13 @@ import com.zik.faro.persistence.datastore.data.EventDo;
 public class ActivityManagement {
 	public static ActivityNotificationHandler activityNotificationHandler = new ActivityNotificationHandler();
 	
-	public static Activity createActivity(final Activity activity){
+	public static Activity createActivity(final Activity activity, String userId){
 		ActivityDo activityDo = new ActivityDo(activity.getEventId(), 
 				activity.getName(), activity.getDescription(), activity.getLocation(), 
 				activity.getStartDate(), activity.getEndDate(), new Assignment());
 		ActivityDatastoreImpl.storeActivity(activityDo);
 		EventDo eventDo = activityDo.getEventRef().get();
-		activityNotificationHandler.createActivityNotification(activityDo, eventDo);
+		activityNotificationHandler.createActivityNotification(activityDo, eventDo, userId);
 		return ConversionUtils.fromDo(activityDo);
 	}
 	
@@ -42,17 +42,17 @@ public class ActivityManagement {
 		return ConversionUtils.fromDo(ActivityDatastoreImpl.loadActivityById(activityId, eventId));
 	}
 	
-	public static void deleteActivity(String eventId, String activityId) throws DataNotFoundException{
+	public static void deleteActivity(String eventId, String activityId, String userId) throws DataNotFoundException{
 		ActivityDo activityDo = ActivityDatastoreImpl.loadActivityById(activityId, eventId);
 		ActivityDatastoreImpl.deleteActivityById(activityId, eventId);
-		activityNotificationHandler.deleteActivityNotification(activityDo, activityDo.getEventRef().get());
+		activityNotificationHandler.deleteActivityNotification(activityDo, activityDo.getEventRef().get(), userId);
 	}
 	
-	public static Activity updateActivity(Activity updateActivity, String eventId) throws DataNotFoundException, DatastoreException, UpdateVersionException{
+	public static Activity updateActivity(Activity updateActivity, String eventId, String userId) throws DataNotFoundException, DatastoreException, UpdateVersionException{
 		ActivityDo updateActivityDo = ConversionUtils.toDo(updateActivity);
 		ActivityDo updated = ActivityDatastoreImpl.updateActivity(updateActivityDo, eventId);
 		EventDo eventDo = updated.getEventRef().get();
-		activityNotificationHandler.updateActivityNotification(updateActivityDo, eventDo);
+		activityNotificationHandler.updateActivityNotification(updateActivityDo, eventDo, userId);
 		return ConversionUtils.fromDo(updated);
 	}
 	

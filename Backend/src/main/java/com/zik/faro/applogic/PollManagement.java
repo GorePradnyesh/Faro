@@ -1,6 +1,5 @@
 package com.zik.faro.applogic;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -8,12 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.ws.rs.WebApplicationException;
-
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import com.zik.faro.commons.FaroResponseStatus;
@@ -23,18 +17,23 @@ import com.zik.faro.commons.exceptions.FaroWebAppException;
 import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.PollOption;
+import com.zik.faro.notifications.handler.PollNotificationHandler;
 import com.zik.faro.persistence.datastore.PollDatastoreImpl;
+import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.persistence.datastore.data.PollDo;
 
 public class PollManagement {
 	private static ObjectMapper mapper = new ObjectMapper();
+	public static PollNotificationHandler pollNotificationHandler = new PollNotificationHandler();
 	
-	public static Poll createPoll(final Poll poll) throws DataNotFoundException{
+	public static Poll createPoll(final Poll poll, final String userId) throws DataNotFoundException{
 		// Create option ids during poll creation
 		generatePollIds(poll.getPollOptions());
 		PollDo pollDo = new PollDo(poll.getEventId(), poll.getCreatorId(), poll.getPollOptions(), poll.getWinnerId(), 
 				poll.getOwner(), poll.getDescription(), poll.getStatus(), poll.getDeadline(), poll.getMultiChoice());
 		PollDatastoreImpl.storePoll(pollDo);
+		EventDo eventDo = pollDo.getEventRef().get();
+		pollNotificationHandler.createPollNotification(pollDo, eventDo, userId);
 		return ConversionUtils.fromDo(pollDo);
 	}
 	
@@ -61,7 +60,9 @@ public class PollManagement {
 		Set<String> voteOptions = extractVoteOptionsUpdateObject(updateObj);
 		generatePollIds(poll.getPollOptions());
 		PollDo pollDo = ConversionUtils.toDo(poll);
-		return ConversionUtils.fromDo(PollDatastoreImpl.updatePoll(eventId, pollId, pollDo, userId, voteOptions));
+		pollDo = PollDatastoreImpl.updatePoll(eventId, pollId, pollDo, userId, voteOptions);
+		pollNotificationHandler.updatePollNotification(pollDo, pollDo.getEventRef().get(), userId);
+		return ConversionUtils.fromDo(pollDo);
 	}
 	
 	public static Poll extractPollUpdateObject(Map<String, Object> updateObj){
@@ -84,8 +85,10 @@ public class PollManagement {
 		return null;
 	}
 	
-	public static void deletePoll(final String eventId, final String pollId){
+	public static void deletePoll(final String eventId, final String pollId, final String userId) throws DataNotFoundException{
+		PollDo pollDo = PollDatastoreImpl.loadPollById(pollId, eventId);
 		PollDatastoreImpl.deletePoll(eventId, pollId);
+		pollNotificationHandler.deletePollNotification(pollDo, pollDo.getEventRef().get(), userId);
 	}
 	
 	private static void generatePollIds(List<PollOption> pollOptions){
