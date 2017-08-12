@@ -117,7 +117,7 @@ public class AddFacebookFriendsFragment extends Fragment {
             MinUser minUser = getItem(position);
             if (minUser != null) {
                 if (minUser.getFirstName() != null) {
-                    holder.setFriendName(minUser.getFirstName());
+                    holder.setFriendName((minUser.getLastName() != null) ? MessageFormat.format("{0} {1}", minUser.getFirstName(), minUser.getLastName()) : minUser.getFirstName());
                 } else {
                     holder.setFriendName(minUser.getEmail());
                 }

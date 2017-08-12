@@ -15,16 +15,12 @@ import com.zik.faro.data.Event;
 import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.IllegalDataOperation;
 import com.zik.faro.data.ObjectStatus;
-import com.zik.faro.data.user.FaroUser;
-import com.zik.faro.notifications.NotificationClient;
-import com.zik.faro.notifications.NotificationClientFactory;
 import com.zik.faro.notifications.handler.EventNotificationHandler;
 import com.zik.faro.persistence.datastore.EventDatastoreImpl;
 import com.zik.faro.persistence.datastore.EventUserDatastoreImpl;
 import com.zik.faro.persistence.datastore.UserDatastoreImpl;
 import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.persistence.datastore.data.EventUserDo;
-import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 
 public class EventManagement {
 	
@@ -34,7 +30,7 @@ public class EventManagement {
         // clientEvent object created with client constructor needs to be passed through
 		// server constructor to generate eventId and other defaults invisible to client
 		Event event = new Event(ev.getEventName(), ev.getStartDate(), ev.getEndDate(),
-        		ev.getEventDescription(), ev.getControlFlag(), ev.getExpenseGroup(), 
+        		ev.getEventDescription(), ev.getControlFlag(), ev.getExpenseGroup(),
         		ev.getLocation(), ObjectStatus.OPEN, new Assignment(), userId);
         EventDatastoreImpl.storeEvent(userId, ConversionUtils.toDo(event));
         try{
