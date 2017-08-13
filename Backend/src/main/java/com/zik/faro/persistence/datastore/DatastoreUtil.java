@@ -2,6 +2,7 @@ package com.zik.faro.persistence.datastore;
 
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateException;
 import com.zik.faro.commons.exceptions.UpdateVersionException;
 
 public class DatastoreUtil {
@@ -15,15 +16,22 @@ public class DatastoreUtil {
 		return result;
 	}
 	
-	public static void processResult(TransactionResult result) throws DatastoreException, DataNotFoundException, UpdateVersionException{
+	public static void processResult(TransactionResult result) throws DatastoreException, DataNotFoundException, 
+		UpdateVersionException, UpdateException{
 		if(result == null){
 			throw new DatastoreException("Transactional operation failed. Returned null response");
 		}
-		if(result.getStatus().equals(TransactionStatus.DATANOTFOUND)){
-			throw new DataNotFoundException("Data not found");
-		}
-		if(result.getStatus().equals(TransactionStatus.VERSIONMISSMATCH)){
-			throw new UpdateVersionException(result.getMessage());
+		
+		switch (result.getStatus()) {
+			case DATANOTFOUND:
+				throw new DataNotFoundException("Data not found");
+			case VERSIONMISSMATCH:
+				throw new UpdateVersionException(result.getMessage());
+			case UPDATEEXCEPTION:
+				throw new UpdateException(result.getMessage());
+			default:
+				break;
 		}
 	}
+	
 }

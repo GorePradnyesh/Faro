@@ -1,14 +1,18 @@
 package com.zik.faro.persistence.datastore;
 
 
-import java.text.MessageFormat;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Set;
 
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.beanutils.PropertyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.googlecode.objectify.Work;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateException;
 import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.persistence.datastore.data.EventDo;
@@ -35,7 +39,7 @@ public class EventDatastoreImpl {
         return event;
     }
     
-    public static EventDo updateEvent(final String eventId, final EventDo updateObj) throws DataNotFoundException, DatastoreException, UpdateVersionException{
+    public static EventDo updateEvent(final String eventId, final EventDo updateObj, final Set<String> updatedFields) throws DataNotFoundException, DatastoreException, UpdateVersionException, UpdateException{
         Work w = new Work<TransactionResult<EventDo>>() {
 			
 			@Override
@@ -50,30 +54,13 @@ public class EventDatastoreImpl {
 				if(!BaseDatastoreImpl.isVersionOk(updateObj, event)){
 					return new TransactionResult<EventDo>(null, TransactionStatus.VERSIONMISSMATCH, "Incorrect entity version. Current version:"+event.getVersion().toString());
 				}
-				if(updateObj.getEndDate() != null){
-					event.setEndDate(updateObj.getEndDate());
-				}
-				if(updateObj.getStartDate() != null){
-					event.setStartDate(updateObj.getStartDate());
-				}
-				if(updateObj.getEventDescription() != null){
-					event.setEventDescription(updateObj.getEventDescription());
-				}
-				if(updateObj.getEventName() != null){
-					event.setEventName(updateObj.getEventName());
-				}
-				if(updateObj.getLocation() != null){
-					event.setLocation(updateObj.getLocation());
-				}
-				if(updateObj.getStatus() != null){
-					event.setStatus(updateObj.getStatus());
-				}
-				if(updateObj.getExpenseGroup() != null){
-					event.setExpenseGroup(updateObj.getExpenseGroup());
-				}
-				if(updateObj.isControlFlag()){
-					event.setControlFlag(true);
-				}
+				
+				try {
+					BaseDatastoreImpl.updateModifiedFields(event, updateObj, updatedFields);
+				} catch (Exception e) {
+					return new TransactionResult<EventDo>(null, TransactionStatus.UPDATEEXCEPTION, "Cannot apply update delta");
+				} 
+				
 				BaseDatastoreImpl.versionIncrement(updateObj, event);
                 DatastoreObjectifyDAL.storeObject(event);
                 return new TransactionResult<EventDo>(event, TransactionStatus.SUCCESS);
@@ -84,7 +71,9 @@ public class EventDatastoreImpl {
         logger.info("Event updated");
         return result.getEntity();
     }
-
+    
+    
+    
     public static void deleteEvent(final String eventId) {
         DatastoreObjectifyDAL.delelteObjectById(eventId, EventDo.class);
         logger.info("Event deleted");

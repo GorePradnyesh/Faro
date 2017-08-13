@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.googlecode.objectify.Work;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateException;
 import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.ActionStatus;
 import com.zik.faro.persistence.datastore.data.ActivityDo;
@@ -97,7 +98,12 @@ public class AssignmentDatastoreImpl {
 	        }
 		};
 		TransactionResult<ActivityDo> result = DatastoreObjectifyDAL.update(w);
-		DatastoreUtil.processResult(result);
+		try {
+			DatastoreUtil.processResult(result);
+		} catch (UpdateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		logger.info("Activity assignment updated");
 		return result.getEntity();
 	}
@@ -124,7 +130,12 @@ public class AssignmentDatastoreImpl {
 			}
 		};
 		TransactionResult<EventDo> result = DatastoreObjectifyDAL.update(w);
-		DatastoreUtil.processResult(result);
+		try {
+			DatastoreUtil.processResult(result);
+		} catch (UpdateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		logger.info("Event assignment updated");
 		return result.getEntity();
 	}

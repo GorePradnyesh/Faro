@@ -11,21 +11,29 @@ public enum FaroResponseStatus {
     INVALID_LOGIN(Response.Status.UNAUTHORIZED, 3001, "Invalid login credentials"),
     UNAUTHORIZED(Response.Status.UNAUTHORIZED, 3002, "Not authorized to proceed with the operation"),
     NOT_FOUND(Response.Status.NOT_FOUND, 4001, "Not found element/data"),
-    UNEXPECTED_ERROR(Response.Status.INTERNAL_SERVER_ERROR, 5001, "unhandled error");
+    UPDATE_VERSION_MISMATCH(Response.Status.CONFLICT, 2002, "Update entity version mismatch"),
+    UNEXPECTED_ERROR(Response.Status.INTERNAL_SERVER_ERROR, 5001, "unhandled error"),
+    OK(Response.Status.OK, 0, "Success");
 
     private Response.Status restResponseStatus;
-    private FaroResponseEntity faroResponseEntity;
-
-    private FaroResponseStatus(Response.Status restResponseStatus, int faroStatusCode, String faroStatusMessage) {
+    private int faroStatusCode;
+    private String faroStatusMessage;
+    
+    FaroResponseStatus(Response.Status restResponseStatus, int faroStatusCode, String faroStatusMessage) {
         this.restResponseStatus = restResponseStatus;
-        this.faroResponseEntity = new FaroResponseEntity(faroStatusCode, faroStatusMessage);
+        this.faroStatusCode = faroStatusCode;
+        this.faroStatusMessage = faroStatusMessage;
     }
-
+    
     public Response.Status getRestResponseStatus() {
         return restResponseStatus;
     }
+    
+    public int getFaroStatusCode() {
+        return faroStatusCode;
+    }
 
-    public FaroResponseEntity getFaroResponseEntity() {
-        return faroResponseEntity;
+    public String getFaroStatusMessage() {
+        return faroStatusMessage;
     }
 }

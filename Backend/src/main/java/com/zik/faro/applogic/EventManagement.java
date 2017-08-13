@@ -2,12 +2,14 @@ package com.zik.faro.applogic;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
 import com.zik.faro.commons.exceptions.FirebaseNotificationException;
+import com.zik.faro.commons.exceptions.UpdateException;
 import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.AddFriendRequest;
 import com.zik.faro.data.Assignment;
@@ -15,16 +17,12 @@ import com.zik.faro.data.Event;
 import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.IllegalDataOperation;
 import com.zik.faro.data.ObjectStatus;
-import com.zik.faro.data.user.FaroUser;
-import com.zik.faro.notifications.NotificationClient;
-import com.zik.faro.notifications.NotificationClientFactory;
 import com.zik.faro.notifications.handler.EventNotificationHandler;
 import com.zik.faro.persistence.datastore.EventDatastoreImpl;
 import com.zik.faro.persistence.datastore.EventUserDatastoreImpl;
 import com.zik.faro.persistence.datastore.UserDatastoreImpl;
 import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.persistence.datastore.data.EventUserDo;
-import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 
 public class EventManagement {
 	
@@ -62,11 +60,12 @@ public class EventManagement {
         return new EventInviteStatusWrapper(ConversionUtils.fromDo(eventUserDo.getEvent()), eventUserDo.getInviteStatus());
     }
     
-    public static Event updateEvent(final Event updateObj, final String eventId, final String userId) throws DataNotFoundException, DatastoreException, UpdateVersionException {
+    public static Event updateEvent(final Event updateObj, final String eventId, final String userId, final Set<String> updatedFields) throws DataNotFoundException, DatastoreException, 
+    UpdateVersionException, UpdateException {
         //TODO: Validate that the user has permissions to modify event, from the EventUser table
     	//TODO: Validate if the user is the owner of the event
     	EventDo eventDo = ConversionUtils.toDo(updateObj);
-    	EventDo updatedEvent = EventDatastoreImpl.updateEvent(eventId, eventDo);
+    	EventDo updatedEvent = EventDatastoreImpl.updateEvent(eventId, eventDo, updatedFields);
     	try {
     		// TODO: For now keeping it generic. Need to filter based on properties updated
     		eventNotificationHandler.updateEventNotificationGeneric(eventDo, userId);

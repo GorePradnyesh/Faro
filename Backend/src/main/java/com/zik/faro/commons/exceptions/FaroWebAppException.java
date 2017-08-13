@@ -18,7 +18,7 @@ public class FaroWebAppException extends WebApplicationException {
 
     public FaroWebAppException(FaroResponseStatus faroResponseStatus, String message) {
         super(Response.status(faroResponseStatus.getRestResponseStatus())
-                .entity(faroResponseStatus.getFaroResponseEntity()).type(MediaType.APPLICATION_JSON_TYPE).build());
+                .entity(faroResponseStatus).type(MediaType.APPLICATION_JSON_TYPE).build());
         this.faroResponseStatus = faroResponseStatus;
     }
 

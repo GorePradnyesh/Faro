@@ -11,6 +11,8 @@ import static com.zik.faro.commons.Constants.EVENT_REMOVE_ATTENDEE_PATH_CONST;
 import static com.zik.faro.commons.Constants.EVENT_UPDATE_PATH_CONST;
 import static com.zik.faro.commons.Constants.UPDATE_INVITE_STATUS_PATH_CONST;
 
+import java.util.Map;
+
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -24,18 +26,26 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
+import org.codehaus.jackson.map.ObjectMapper;
+
 import com.sun.jersey.api.JResponse;
 import com.zik.faro.applogic.EventManagement;
 import com.zik.faro.applogic.EventUserManagement;
 import com.zik.faro.commons.Constants;
+import com.zik.faro.commons.FaroResponse;
+import com.zik.faro.commons.FaroResponseStatus;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.FaroWebAppException;
+import com.zik.faro.commons.exceptions.UpdateException;
 import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.AddFriendRequest;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.IllegalDataOperation;
 import com.zik.faro.data.InviteeList;
+import com.zik.faro.data.Location;
+import com.zik.faro.data.UpdateRequest;
 import com.zik.faro.data.user.EventInviteStatus;
 
 
@@ -113,29 +123,27 @@ public class EventHandler {
     	return JResponse.ok(Constants.HTTP_OK).build();
     }
 
+    
     @Path(EVENT_UPDATE_PATH_CONST)
     @POST
 	@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public JResponse<Event> updateEvent(@PathParam(EVENT_ID_PATH_PARAM) final String eventId, final Event updateObj){
+    public JResponse<FaroResponse<Event>> updateEvent(@PathParam(EVENT_ID_PATH_PARAM) final String eventId, final UpdateRequest<Event> updateObj){
         // TODO: Validation to make sure only event owner can update
     	String userId = context.getUserPrincipal().getName();
         try {
-        	return JResponse.ok(EventManagement.updateEvent(updateObj, eventId, userId)).build();
+        	Event updatedEvent = EventManagement.updateEvent(updateObj.getUpdate(), eventId, 
+        			userId, updateObj.getUpdatedFields());
+        	FaroResponseStatus updateStatus = FaroResponseStatus.OK;
+        	FaroResponse<Event> response = new FaroResponse<Event>(updatedEvent, updateStatus);
+        	return JResponse.ok(response).status(response.getFaroResponseStatus().getRestResponseStatus()).build();
         } catch (DataNotFoundException e) {
-            Response response = Response.status(Response.Status.NOT_FOUND)
-                    .entity(e.getMessage())
-                    .build();
-            throw new WebApplicationException(response);
+        	throw new FaroWebAppException(FaroResponseStatus.NOT_FOUND, "Data Not Found");
         } catch (DatastoreException e) {
-        	Response response = Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                     .entity(e.getMessage())
-                     .build();
-            throw new WebApplicationException(response);
+        	throw new FaroWebAppException(FaroResponseStatus.UNEXPECTED_ERROR, "Datastore Exception");
 		} catch (UpdateVersionException e) {
-			Response response = Response.status(Response.Status.BAD_REQUEST)
-                    .entity(e.getMessage())
-                    .build();
-           throw new WebApplicationException(response);
+			throw new FaroWebAppException(FaroResponseStatus.UPDATE_VERSION_MISMATCH, "Update Version Mismatch");
+		} catch (UpdateException e) {
+			throw new FaroWebAppException(FaroResponseStatus.UNEXPECTED_ERROR, "Update Error");
 		}
     }
     
@@ -167,6 +175,17 @@ public class EventHandler {
             throw new WebApplicationException(response);
 		}
         return JResponse.ok(Constants.HTTP_OK).build();
+    }
+    
+    @Path("/test")
+    @POST
+    public void test(final Map<String, Object> map) throws ClassNotFoundException{
+    	Object obj = map.get("location");
+    	ObjectMapper mapper = new ObjectMapper();
+    	Location l = mapper.convertValue(obj, Location.class);
+    	Class<?> classType = Class.forName("Location");
+    	//Location obj1 = (Location) map.get("location");
+    	System.out.println(l);
     }
    
 }
