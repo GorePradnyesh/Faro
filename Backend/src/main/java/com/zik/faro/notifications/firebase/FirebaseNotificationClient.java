@@ -6,9 +6,13 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.MessageFormat;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.zik.faro.auth.AuthFilter;
 import com.zik.faro.commons.ConfigPropertiesUtil;
-
 import com.google.gson.Gson;
 import com.zik.faro.commons.Constants;
 import com.zik.faro.notifications.NotificationClient;
@@ -16,7 +20,8 @@ import com.zik.faro.notifications.NotificationClient;
 public class FirebaseNotificationClient implements NotificationClient<FirebaseHTTPRequest,FirebaseHTTPResponse>{
 	private Gson gson = new Gson();
 	private static String authHeaderValue;
-
+	private  static final Logger logger = LoggerFactory.getLogger(FirebaseNotificationClient.class);
+	
 	public FirebaseNotificationClient() {
 		authHeaderValue = ConfigPropertiesUtil.getFirebaseAuthorizationKey();
 	}
@@ -25,8 +30,7 @@ public class FirebaseNotificationClient implements NotificationClient<FirebaseHT
 	public FirebaseHTTPResponse send(FirebaseHTTPRequest t) throws Exception {
 		String payload = gson.toJson(t);
 		HttpURLConnection conn = doPost(payload, Constants.FCM_ENDPOINT+Constants.SEND_NOTIFICATION_PATH_CONST);
-		String response = getResponseString(conn);
-	    FirebaseHTTPResponse resp = gson.fromJson(response, FirebaseHTTPResponse.class);
+		FirebaseHTTPResponse resp = getResponseObject(conn);
 	    return resp;	
 	}
 
@@ -48,6 +52,9 @@ public class FirebaseNotificationClient implements NotificationClient<FirebaseHT
 	
 	private HttpURLConnection doPost(String payload, String endpoint) throws Exception{
 		
+		logger.info("Invoking firebase");
+		logger.info(MessageFormat.format("Payload: {0}", payload));
+		logger.info(MessageFormat.format("Endpoint: {0}", endpoint));
 		URL url = new URL(endpoint);
 	    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 	    conn.setDoOutput(true);
@@ -69,7 +76,8 @@ public class FirebaseNotificationClient implements NotificationClient<FirebaseHT
 	private FirebaseHTTPResponse getResponseObject(HttpURLConnection conn) throws Exception {
 		int respCode = conn.getResponseCode();
 	    String response = getResponseString(conn);
-	    System.out.println(response);
+	    logger.info(MessageFormat.format("ResponseCode: {0}",respCode));
+	    logger.info(MessageFormat.format("Response: {0}",response));
 	    FirebaseHTTPResponse resp = gson.fromJson(response, FirebaseHTTPResponse.class);
 	    resp.setStatusCode(respCode);
 	    return resp;

@@ -35,8 +35,6 @@ public class FunctionalLoginHandlerTest {
         return faroSignupDetails;
     }
 
-
-
     @Test
     public void loginTest() throws Exception {
         // Create a user first

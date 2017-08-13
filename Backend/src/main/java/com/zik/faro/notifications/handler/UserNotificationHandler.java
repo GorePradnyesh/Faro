@@ -1,5 +1,8 @@
 package com.zik.faro.notifications.handler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.exceptions.FirebaseNotificationException;
 import com.zik.faro.data.Event;
@@ -16,27 +19,10 @@ import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 public class UserNotificationHandler extends BaseNotificationHandler{
 	private NotificationClient<FirebaseHTTPRequest,FirebaseHTTPResponse> notificationClient = 
 			NotificationClientFactory.getInstance().getNotificationClient();
-
+	private  static final Logger logger = LoggerFactory.getLogger(UserNotificationHandler.class);
 	@Override
 	protected NotificationClient<FirebaseHTTPRequest, FirebaseHTTPResponse> getNotificationClient() {
 		return notificationClient;
-	}
-	
-	public void inviteFriendToEventNotification(EventDo event, FaroUserDo faroUser) throws FirebaseNotificationException{
-		sendNotification(event, faroUser, "You are invited to "+ event.getEventName(), 
-				Constants.NOTIFICATION_TYPE_EVENT_INVITE);
-		
-	}
-	
-	public void pendingAssignmentNotification(EventDo event, FaroUserDo faroUser){
-		sendNotification(event, faroUser, "OOPS! You missed some of your assignments", 
-				Constants.NOTIFICATION_TYPE_ASSIGNMENT_PENDING);
-	}
-	
-	public void assignmentCreatedNotification(EventDo event, FaroUserDo faroUser){
-		sendNotification(event, faroUser, "Well Well Well! You have been assigned items for the event :)"
-				+ "\n Complete them you must", 
-				Constants.NOTIFICATION_TYPE_ASSIGNMENT_CREATED);
 	}
 	
 	public void mediaAddedNotification(EventDo event, FaroUserDo faroUser){
@@ -51,21 +37,17 @@ public class UserNotificationHandler extends BaseNotificationHandler{
 	}
 	
 	public void sendNotification(EventDo event, FaroUserDo faroUser, String body, String type){
-		NotificationPayload notificationPayload = new NotificationPayload();
-		notificationPayload.setTitle(event.getEventName());
-		notificationPayload.setBody(body);
-		notificationPayload.setClick_action(Constants.CLICK_ACTION_DEFAULT);
-		DataPayload dataPayload = new DataPayload();
+		DataPayload dataPayload = new DataPayload(event.getEventName(), body, Constants.CLICK_ACTION_DEFAULT);
 		dataPayload.addKVPair(Constants.NOTIFICATION_TYPE_CONST, type);
 		dataPayload.addKVPair(Constants.NOTIFICATION_EVENTID_CONST, event.getId());
 		dataPayload.addKVPair(Constants.NOTIFICATION_VERSION_CONST, event.getVersion().toString());
+		dataPayload.addKVPair(Constants.NOTIFICATION_USER_CONST, faroUser.getId());
 		try {
-			FirebaseHTTPRequest request = createDataAndNotificationMessage(
-					Constants.FARO_EVENT_TOPIC_CONST+faroUser.getId(), notificationPayload, dataPayload);
+			FirebaseHTTPRequest request = createDataMessage(
+					Constants.FARO_EVENT_TOPIC_CONST+encodeTo(faroUser.getId()), dataPayload);
 			notificationClient.send(request);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Notification Failure", e);
 		}
 	}
 }

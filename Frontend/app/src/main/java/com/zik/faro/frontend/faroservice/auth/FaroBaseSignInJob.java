@@ -53,11 +53,6 @@ public abstract class FaroBaseSignInJob implements FaroSignInJob {
 
         if (Strings.isNullOrEmpty(firebaseNotificationToken)) {
             Log.e(TAG, "firebase notification token is not present. Cant allow user to proceed.");
-
-            if (this instanceof FacebookLoginJob || this instanceof FacebookSignupJob) {
-
-            }
-
             handleResultOnUi(new SignInJobResult(email, new Exception("firebase notification token is not present")));
             return;
         }

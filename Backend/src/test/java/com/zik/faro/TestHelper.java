@@ -96,7 +96,7 @@ public class TestHelper {
         String port = System.getProperty(PORT_PROPERTY);
         if(port == null){
             //port = "80";
-        	port = "8888";
+        	port = "8080";
         }
         return new URL("http://" + hostname + ":" + port);
     }

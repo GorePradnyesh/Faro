@@ -37,21 +37,20 @@ public class EventManagement {
         		ev.getEventDescription(), ev.getControlFlag(), ev.getExpenseGroup(), 
         		ev.getLocation(), ObjectStatus.OPEN, new Assignment(), userId);
         EventDatastoreImpl.storeEvent(userId, ConversionUtils.toDo(event));
-        EventNotificationHandler handler = new EventNotificationHandler();
         try{
         	List<String> faroUserTokens = UserDatastoreImpl.loadFaroUserById(userId).getTokens();
-        	eventNotificationHandler.subscribeToTopic(handler.getTopicName(event.getId()), faroUserTokens.toArray(new String[0]));
+        	eventNotificationHandler.subscribeToTopic(event.getId(), faroUserTokens.toArray(new String[0]));
         }catch(Exception e){
         	e.printStackTrace();
         }
         return event;
     }
 
-    public static void deleteEvent(final String eventId) throws DataNotFoundException {
+    public static void deleteEvent(final String eventId, final String userId) throws DataNotFoundException {
         EventDo eventDo = EventDatastoreImpl.loadEventByID(eventId);
     	EventDatastoreImpl.deleteEvent(eventId);
         try {
-			eventNotificationHandler.deleteEventNotification(eventDo);
+			eventNotificationHandler.deleteEventNotification(eventDo, userId);
 		} catch (FirebaseNotificationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -63,14 +62,14 @@ public class EventManagement {
         return new EventInviteStatusWrapper(ConversionUtils.fromDo(eventUserDo.getEvent()), eventUserDo.getInviteStatus());
     }
     
-    public static Event updateEvent(final Event updateObj, final String eventId) throws DataNotFoundException, DatastoreException, UpdateVersionException {
+    public static Event updateEvent(final Event updateObj, final String eventId, final String userId) throws DataNotFoundException, DatastoreException, UpdateVersionException {
         //TODO: Validate that the user has permissions to modify event, from the EventUser table
     	//TODO: Validate if the user is the owner of the event
     	EventDo eventDo = ConversionUtils.toDo(updateObj);
     	EventDo updatedEvent = EventDatastoreImpl.updateEvent(eventId, eventDo);
     	try {
     		// TODO: For now keeping it generic. Need to filter based on properties updated
-    		eventNotificationHandler.updateEventNotificationGeneric(eventDo);
+    		eventNotificationHandler.updateEventNotificationGeneric(eventDo, userId);
 		} catch (FirebaseNotificationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -80,35 +79,21 @@ public class EventManagement {
     
     public static void addFriendToEvent(final String eventId, final String userId, 
     		final AddFriendRequest friendRequest) throws DataNotFoundException, IllegalDataOperation{
-    	FaroUser existingUser = UserManagement.loadFaroUser(userId);
-    	List<String> tokens = new ArrayList<String>();
     	for(String friendId : friendRequest.getFriendIds()){
     		// Create friend if not present and establish friend relation if not present
     		// TODO: If friend is not in the system, then we need to create a FaroUser with friend's email
     		// and send out the invite to him and after that establish friend relation with a "NOTACCEPTED" kind of state.
     		// Once user accepts invitation and joins Faro this has to be updated.
-    		FriendManagement.createFriendRelation(existingUser.getId(), friendId);
+    		FriendManagement.createFriendRelation(userId, friendId);
         	// Add to event invitees
         	EventUserManagement.storeEventUser(eventId, friendId);
         	EventInviteStatusWrapper eventWrapper = EventManagement.getEventDetails(userId, eventId);
-        	FaroUserDo friend = UserDatastoreImpl.loadFaroUserById(friendId);
         	try {
-				eventNotificationHandler.inviteFriendToEventNotification(eventWrapper.getEvent(), ConversionUtils.fromDo(friend));
+				eventNotificationHandler.inviteFriendToEventNotification(eventWrapper.getEvent(), friendId, userId);
 			} catch (FirebaseNotificationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-        	if(friend != null && friend.getTokens() != null){
-        		tokens.addAll(friend.getTokens());
-        	}
-    	}
-    	if(!tokens.isEmpty()){
-    		try{
-    			eventNotificationHandler.subscribeToTopic(eventNotificationHandler.getTopicName(eventId), 
-    					tokens.toArray(new String[0]));
-            }catch(Exception e){
-            	e.printStackTrace();
-            }
     	}
     }
     

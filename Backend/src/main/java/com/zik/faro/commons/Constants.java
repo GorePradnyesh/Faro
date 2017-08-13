@@ -127,10 +127,18 @@ public final class Constants {
     public static final String NOTIFICATION_TYPE_MEDIA_ADDED					= "notificationType_MediaAdded";
     public static final String NOTIFICATION_TYPE_UPLOAD_MEDIA_REMINDER			= "notificationType_UploadMediaReminder";
     public static final String NOTIFICATION_TYPE_CONST							= "type";
+    public static final String NOTIFICATION_TITLE_CONST							= "title";
+    public static final String NOTIFICATION_BODY_CONST							= "body";
+    public static final String NOTIFICATION_CLICK_ACTION_CONST					= "click_action";
+    public static final String NOTIFICATION_USER_CONST							= "user";
+    
     public static final String NOTIFICATION_EVENTID_CONST						= "eventId";
     public static final String NOTIFICATION_POLLID_CONST						= "pollId";
     public static final String NOTIFICATION_ACTIVITYID_CONST					= "activityId";
+    public static final String NOTIFICATION_ASSIGNMENTID_CONST					= "assignmentId";
     public static final String NOTIFICATION_VERSION_CONST						= "version";
+    public static final String NOTIFICATION_ID_CONST						 	= "notificationId";
+    
 
     // -- Authentication path constants -- //
     public static final String AUTH_PATH_CONST                                  = "/nativeLogin";
