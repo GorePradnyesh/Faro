@@ -31,9 +31,11 @@ import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
+import com.zik.faro.frontend.util.FaroObjectNotFoundException;
 
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -102,8 +104,16 @@ public class EditActivity extends android.app.Activity {
         eventId = extras.getString(FaroIntentConstants.EVENT_ID);
         activityId = extras.getString(FaroIntentConstants.ACTIVITY_ID);
 
-        event = eventListHandler.getEventCloneFromMap(eventId);
-        cloneActivity = activityListHandler.getActivityCloneFromMap(activityId);
+
+        try {
+            event = eventListHandler.getCloneObject(eventId);
+            cloneActivity = activityListHandler.getCloneObject(activityId);
+        } catch (FaroObjectNotFoundException e) {
+            Log.i(TAG, MessageFormat.format("{0} {1} has been deleted",
+                    (event == null) ? "Event" : "Activity",
+                    (event == null) ? eventId : activityId));
+            finish();
+        }
 
         startDateButton = (Button) findViewById(R.id.startDateButton);
         startTimeButton = (Button) findViewById(R.id.startTimeButton);
@@ -503,13 +513,18 @@ public class EditActivity extends android.app.Activity {
 
     @Override
     protected void onResume() {
+        super.onResume();
         // Check if the version is same. It can be different if this page is loaded and a notification
         // is received for this later which updates the global memory but clonedata on this page remains
         // stale.
-        Long versionInGlobalMemory = activityListHandler.getOriginalActivityFromMap(activityId).getVersion();
-        if (!cloneActivity.getVersion().equals(versionInGlobalMemory)){
-            setupPageDetails();
+        try {
+            if (!activityListHandler.checkObjectVersionIfLatest(activityId, cloneActivity.getVersion())) {
+                setupPageDetails();
+            }
+        } catch (FaroObjectNotFoundException e) {
+            //Activity has been deleted.
+            Log.i(TAG, MessageFormat.format("Activity {0} has been deleted", activityId));
+            finish();
         }
-        super.onResume();
     }
 }

@@ -15,14 +15,17 @@ import com.squareup.okhttp.Request;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.EventInviteStatusWrapper;
+import com.zik.faro.data.InviteeList;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.notification.NotificationPayloadHandler;
 import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
+import com.zik.faro.frontend.util.FaroObjectNotFoundException;
 
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
@@ -34,6 +37,7 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
     private ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
     private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
+    private EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
     private EventListHandler eventListHandler = EventListHandler.getInstance();
     private String eventId = null;
     private String activityId = null;
@@ -80,7 +84,12 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
         if (!receivedEvent || !receivedAllActivities)
             return;
 
-        cloneActivity = activityListHandler.getActivityCloneFromMap(activityId);
+        try {
+            cloneActivity = activityListHandler.getCloneObject(activityId);
+        } catch (FaroObjectNotFoundException e) {
+            Log.i(TAG, MessageFormat.format("Activity {0} has been deleted", activityId));
+            finish();
+        }
 
         linlaHeaderProgress.setVisibility(View.GONE);
         activityLandingPageRelativeLayout.setVisibility(View.VISIBLE);
@@ -148,6 +157,9 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
             getEventActivitiesFromServer();
 
             getEventFromServer();
+
+            //Make API call to get all all invitees for this event
+            getEventInviteesFromServer();
         }
     }
 
@@ -210,18 +222,49 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
         }, eventId);
     }
 
+    public void getEventInviteesFromServer(){
+        serviceHandler.getEventHandler().getEventInvitees(new BaseFaroRequestCallback<InviteeList>() {
+            @Override
+            public void onFailure(Request request, IOException ex) {
+                Log.e(TAG, "failed to get cloneEvent Invitees");
+            }
+
+            @Override
+            public void onResponse(final InviteeList inviteeList, HttpError error) {
+                if (error == null) {
+                    Runnable myRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.i(TAG, "Successfully received Invitee List for the cloneEvent");
+                            eventFriendListHandler.addDownloadedFriendsToListAndMap(eventId, inviteeList, mContext);
+                        }
+                    };
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(myRunnable);
+                } else {
+                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                }
+            }
+        }, eventId);
+    }
+
     @Override
     protected void onResume() {
+        super.onResume();
         if (bundleType.equals(FaroIntentConstants.IS_NOT_NOTIFICATION)) {
             // Check if the version is same. It can be different if this page is loaded and a notification
             // is received for this later which updates the global memory but clonedata on this page remains
             // stale.
             // This check is not necessary when opening this page directly through a notification.
-            Long versionInGlobalMemory = activityListHandler.getOriginalActivityFromMap(activityId).getVersion();
-            if (!cloneActivity.getVersion().equals(versionInGlobalMemory)) {
-               setupPageDetails();
+            try {
+                if (!activityListHandler.checkObjectVersionIfLatest(activityId, cloneActivity.getVersion())) {
+                    setupPageDetails();
+                }
+            } catch (FaroObjectNotFoundException e) {
+                //Activity has been deleted.
+                Log.i(TAG, MessageFormat.format("Activity {0} has been deleted", activityId));
+                finish();
             }
         }
-        super.onResume();
     }
 }

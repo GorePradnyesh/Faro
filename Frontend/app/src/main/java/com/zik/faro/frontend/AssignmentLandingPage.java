@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTabHost;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -13,6 +14,9 @@ import android.widget.TextView;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Event;
 import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
+import com.zik.faro.frontend.util.FaroObjectNotFoundException;
+
+import java.text.MessageFormat;
 
 public class AssignmentLandingPage extends FragmentActivity {
     private FragmentTabHost mTabHost;
@@ -26,6 +30,7 @@ public class AssignmentLandingPage extends FragmentActivity {
     private Activity cloneActivity = null;
     private Event cloneEvent = null;
     private View assignmentLandingPageRelativeLayout = null;
+    private String TAG = "AssignmentLandingPage";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,11 +51,19 @@ public class AssignmentLandingPage extends FragmentActivity {
     }
 
     private void setupPageDetails () {
-        if (activityId == null){
-            cloneEvent = eventListHandler.getEventCloneFromMap(eventId);
-        } else {
-            cloneActivity = activityListHandler.getActivityCloneFromMap(activityId);
+        try {
+            if (activityId == null) {
+                cloneEvent = eventListHandler.getCloneObject(eventId);
+            } else {
+                cloneActivity = activityListHandler.getCloneObject(activityId);
+            }
+        } catch (FaroObjectNotFoundException e) {
+            Log.i(TAG, MessageFormat.format("{0} {1} has been deleted",
+                    (activityId == null) ? "Event" : "Activity",
+                    (activityId == null) ? eventId : activityId));
+            finish();
         }
+
 
         Bundle bundle = new Bundle();
         bundle.putString(FaroIntentConstants.EVENT_ID, eventId);

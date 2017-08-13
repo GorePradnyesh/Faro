@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -28,6 +29,7 @@ import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
+import com.zik.faro.frontend.util.FaroObjectNotFoundException;
 
 import static android.widget.Toast.LENGTH_LONG;
 
@@ -79,7 +81,12 @@ public class CreateNewActivity extends android.app.Activity {
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
             eventId = extras.getString(FaroIntentConstants.EVENT_ID);
-            event = eventListHandler.getEventCloneFromMap(eventId);
+            try {
+                event = eventListHandler.getCloneObject(eventId);
+            } catch (FaroObjectNotFoundException e) {
+                Log.i(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
+                finish();
+            }
         }
 
         activityName.addTextChangedListener(new TextWatcher() {

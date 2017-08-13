@@ -11,6 +11,7 @@ import android.util.Log;
 
 import com.zik.faro.frontend.FaroIntentConstants;
 import com.zik.faro.frontend.R;
+import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 import org.json.JSONException;
@@ -28,44 +29,35 @@ public class FaroNotificationBuilder {
         PendingIntent pendingIntent = null;
         String faroNotificationDataStr = null;
         JSONObject faroNotificationDataJSON = null;
-        String user = null;
+        String user = "";
+        FaroUserContext faroUserContext = FaroUserContext.getInstance();
+        String myUserId = faroUserContext.getEmail();
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context);
 
         try {
             faroNotificationDataStr = data.getString(FaroIntentConstants.FARO_NOTIFICATION_DATA);
             faroNotificationDataJSON = new JSONObject(faroNotificationDataStr);
-            user = faroNotificationDataJSON.getString("user");
+            user = faroNotificationDataJSON.getString(FaroIntentConstants.USER);
             if (user == null)
                 return null;
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        if (user != null && user.equals("harsha@gmail.com"))
-            return null;
-
-        if (clickAction == null) {
-            try {
-                if (faroNotificationDataJSON != null) {
-                    clickAction = faroNotificationDataJSON.getString(FaroIntentConstants.CLICK_ACTION);
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-
-        if (clickAction == null)
+        // incase the notification was triggered by me, then should not show up on the system tray.
+        if (user.equals(myUserId))
             return null;
 
         switch (clickAction){
             case "DEFAULTACTION":
                 intent = new Intent(context, ReceivedNotificationHandler.class);
-                //intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                int requestID = (int) System.currentTimeMillis();
                 FaroIntentInfoBuilder.notificationHandlerIntent(intent,
                         FaroIntentConstants.FOREGROUND_NOTIFICATION, data.toString());
-                pendingIntent = PendingIntent.getActivity(context, 0 /* Request code */, intent,
-                        PendingIntent.FLAG_ONE_SHOT);
+                pendingIntent = PendingIntent.getActivity(context, requestID, intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT);
                 Log.d(TAG, "In RECEIVEDNOTIFICATIONHANDLER case when building builder ====");
                 break;
             default:
@@ -87,29 +79,9 @@ public class FaroNotificationBuilder {
             e.printStackTrace();
         }
 
-        if (title == null) {
-            try {
-                if (faroNotificationDataJSON != null) {
-                    title = faroNotificationDataJSON.getString(FaroIntentConstants.TITLE);
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-
-        if (messageBody == null) {
-            try {
-                if (faroNotificationDataJSON != null) {
-                    messageBody = faroNotificationDataJSON.getString(FaroIntentConstants.TEXT);
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-
         Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
-                notificationBuilder.setSmallIcon(R.drawable.blue)
+        notificationBuilder.setSmallIcon(R.drawable.blue)
                 .setContentTitle(title)
                 .setContentText(messageBody)
                 .setAutoCancel(true)

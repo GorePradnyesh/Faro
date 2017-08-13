@@ -30,8 +30,10 @@ import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
+import com.zik.faro.frontend.util.FaroObjectNotFoundException;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -104,7 +106,12 @@ public class PickPollWinnerPage extends Activity {
 
         eventId = extras.getString(FaroIntentConstants.EVENT_ID);
         pollId = extras.getString(FaroIntentConstants.POLL_ID);
-        clonePoll = pollListHandler.getPollCloneFromMap(pollId);
+        try {
+            clonePoll = pollListHandler.getCloneObject(pollId);
+        } catch (FaroObjectNotFoundException e) {
+            Log.i(TAG, MessageFormat.format("Poll {0} has been deleted", pollId));
+            finish();
+        }
 
         pollDesc = (TextView)findViewById(R.id.pollDescription);
         selectWinner = (Button) findViewById(R.id.selectWinner);
@@ -276,13 +283,20 @@ public class PickPollWinnerPage extends Activity {
 
     @Override
     protected void onResume() {
+        super.onResume();
+
         // Check if the version is same. It can be different if this page is loaded and a notification
         // is received for this later which updates the global memory but clonedata on this page remains
         // stale.
-        Long versionInGlobalMemory = pollListHandler.getOriginalPollFromMap(pollId).getVersion();
-        if (!clonePoll.getVersion().equals(versionInGlobalMemory)) {
-           setupPageDetails();
+
+        try {
+            if (!pollListHandler.checkObjectVersionIfLatest(pollId, clonePoll.getVersion())) {
+                setupPageDetails();
+            }
+        } catch (FaroObjectNotFoundException e) {
+            //Poll has been deleted.
+            Log.i(TAG, MessageFormat.format("Poll {0} has been deleted", pollId));
+            finish();
         }
-        super.onResume();
     }
 }

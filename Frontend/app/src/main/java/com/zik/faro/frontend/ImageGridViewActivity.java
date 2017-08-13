@@ -18,6 +18,7 @@ import com.zik.faro.data.FaroImageBase;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
+import com.zik.faro.frontend.util.FaroObjectNotFoundException;
 
 import java.io.IOException;
 import java.text.MessageFormat;
@@ -39,7 +40,13 @@ public class ImageGridViewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_grid_view);
 
         String eventId = getIntent().getStringExtra(FaroIntentConstants.EVENT_ID);
-        cloneEvent = eventListHandler.getEventCloneFromMap(eventId);
+        try {
+            cloneEvent = eventListHandler.getCloneObject(eventId);
+        } catch (FaroObjectNotFoundException e) {
+            Log.i(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
+            finish();
+        }
+
         final String eventName = cloneEvent.getEventName();
         Log.i(TAG, "eventName = " + eventName);
 

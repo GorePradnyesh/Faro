@@ -54,6 +54,7 @@ import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.notification.NotificationPayloadHandler;
 import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
+import com.zik.faro.frontend.util.FaroObjectNotFoundException;
 
 import java.io.File;
 import java.io.IOException;
@@ -306,9 +307,11 @@ public class EventLandingPage extends FragmentActivity
 
     private void setupPageDetails(){
 
-        cloneEvent = eventListHandler.getEventCloneFromMap(eventId);
-        if (cloneEvent == null){
-            return; //TODO How to handle such a case?
+        try {
+            cloneEvent = eventListHandler.getCloneObject(eventId);
+        } catch (FaroObjectNotFoundException e) {
+            Log.i(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
+            finish();
         }
 
         linlaHeaderProgress.setVisibility(View.GONE);
@@ -543,7 +546,13 @@ public class EventLandingPage extends FragmentActivity
         getEventInviteesFromServer();
 
         //Add event's assignment to the Assignment Handler
-        Event originalEvent = eventListHandler.getOriginalEventFromMap(eventId);
+        Event originalEvent = null;
+        try {
+            originalEvent = (Event) eventListHandler.getOriginalObject(eventId);
+        } catch (FaroObjectNotFoundException e) {
+            Log.i(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
+            finish();
+        }
         assignmentListHandler.addAssignmentToListAndMap(eventId, originalEvent.getAssignment(), null, mContext);
 
         //Make API call to get all activities for this event
@@ -882,16 +891,22 @@ public class EventLandingPage extends FragmentActivity
 
     @Override
     protected void onResume() {
+        super.onResume();
         if (bundleType.equals(FaroIntentConstants.IS_NOT_NOTIFICATION)) {
+
             // Check if the version is same. It can be different if this page is loaded and a notification
             // is received for this later which updates the global memory but clonedata on this page remains
             // stale.
-            // This check is not necessary when opening this page directly through a notification.
-            Long versionInGlobalMemory = eventListHandler.getOriginalEventFromMap(eventId).getVersion();
-            if (!cloneEvent.getVersion().equals(versionInGlobalMemory)) {
-                setupPageDetails();
+
+            try {
+                if (!eventListHandler.checkObjectVersionIfLatest(eventId, cloneEvent.getVersion())) {
+                    setupPageDetails();
+                }
+            } catch (FaroObjectNotFoundException e) {
+                //Activity has been deleted.
+                Log.i(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
+                finish();
             }
         }
-        super.onResume();
     }
 }

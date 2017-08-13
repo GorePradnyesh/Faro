@@ -7,8 +7,10 @@ import android.util.Log;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.zik.faro.frontend.FaroIntentConstants;
 
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class FaroFirebaseMessagingService extends FirebaseMessagingService {
@@ -16,15 +18,13 @@ public class FaroFirebaseMessagingService extends FirebaseMessagingService {
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
-        String title = null;
-        String body = null;
-        String clickAction = null;
+        String title = "";
+        String body = "";
+        String clickAction = "";
+        String notificationId = "";
         JSONObject data = null;
-
-
-        if (remoteMessage.getData().size() > 0){
-            data = new JSONObject(remoteMessage.getData());
-        }
+        String faroNotificationDataStr = null;
+        JSONObject faroNotificationDataJSON = null;
 
         if (remoteMessage.getNotification() != null){
             title = remoteMessage.getNotification().getTitle();
@@ -34,10 +34,25 @@ public class FaroFirebaseMessagingService extends FirebaseMessagingService {
             Log.d(TAG, "body is" + body);
             Log.d(TAG, "clickAction type is " + clickAction);
         }
-        sendNotification(title, body, clickAction, data);
+
+        if (remoteMessage.getData().size() > 0){
+            data = new JSONObject(remoteMessage.getData());
+            try {
+                faroNotificationDataStr = data.getString(FaroIntentConstants.FARO_NOTIFICATION_DATA);
+                faroNotificationDataJSON = new JSONObject(faroNotificationDataStr);
+                title = faroNotificationDataJSON.getString(FaroIntentConstants.TITLE);
+                body = faroNotificationDataJSON.getString(FaroIntentConstants.BODY);
+                clickAction = faroNotificationDataJSON.getString(FaroIntentConstants.CLICK_ACTION);
+                notificationId = faroNotificationDataJSON.getString(FaroIntentConstants.NOTIFICATION_ID);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        sendNotification(title, body, clickAction, data, notificationId);
     }
 
-    private void sendNotification(String title, String messageBody, String clickAction, JSONObject data) {
+    private void sendNotification(String title, String messageBody, String clickAction,
+                                  JSONObject data, String notificationId) {
         NotificationCompat.Builder notificationBuilder =
                 FaroNotificationBuilder.getNotificationBuilder(this, title,
                         messageBody, clickAction, data);
@@ -48,6 +63,6 @@ public class FaroFirebaseMessagingService extends FirebaseMessagingService {
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
+        notificationManager.notify(notificationId, 0, notificationBuilder.build());
     }
 }

@@ -20,17 +20,19 @@ import com.zik.faro.frontend.PollListHandler;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
+import com.zik.faro.frontend.util.FaroObjectNotFoundException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.List;
+import java.text.MessageFormat;
 
 public class ForegroundNotificationSilentHandler {
     private String faroNotificationDataStr = null;
     private JSONObject faroNotificationDataJSON = null;
     private String payloadNotificationType = "default";
+    private Long version;
     private String eventId = null;
     private String pollId = null;
     private String assignmentId = null;
@@ -49,6 +51,7 @@ public class ForegroundNotificationSilentHandler {
         faroNotificationDataStr = notificationDataJSON.getString(FaroIntentConstants.FARO_NOTIFICATION_DATA);
         faroNotificationDataJSON = new JSONObject(faroNotificationDataStr);
         payloadNotificationType = faroNotificationDataJSON.getString(FaroIntentConstants.PAYLOAD_NOTIFICATION_TYPE);
+        version = Long.parseLong(faroNotificationDataJSON.getString(FaroIntentConstants.VERSION));
         mContext = context;
 
         switch (payloadNotificationType){
@@ -97,13 +100,19 @@ public class ForegroundNotificationSilentHandler {
         eventId = faroNotificationDataJSON.getString(FaroIntentConstants.EVENT_ID);
 
         //Check if event object present in global memory for this eventId.
-        Event event = eventListHandler.getOriginalEventFromMap(eventId);
-        if (event == null)
+        Event event = null;
+        try {
+            event = (Event) eventListHandler.getOriginalObject(eventId);
+        } catch (FaroObjectNotFoundException e) {
+            Log.i(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
             return;
+        }
 
-        // If version passed in the notification, then check it against the version in the event object
+        // Check version passed in the notification against the version in the event object
         // If greater only then make an api call.
-        getEventFromServer();
+        if (version > event.getVersion()) {
+            getEventFromServer();
+        }
     }
 
     private void updatePollObjectInGlobalMemory() throws JSONException {
@@ -111,13 +120,20 @@ public class ForegroundNotificationSilentHandler {
         pollId = faroNotificationDataJSON.getString(FaroIntentConstants.POLL_ID);
 
         //Check if poll object is present in global memory.
-        Poll poll = pollListHandler.getOriginalPollFromMap(pollId);
-        if (poll == null)
+        Poll poll = null;
+        try {
+            poll = (Poll) pollListHandler.getOriginalObject(pollId);
+        } catch (FaroObjectNotFoundException e) {
+            //Poll has been deleted.
+            Log.i(TAG, MessageFormat.format("Poll {0} has been deleted", pollId));
             return;
+        }
 
-        // If version passed in the notification, then check it against the version in the poll object
+        // Check version passed in the notification against the version in the poll object
         // If greater only then make an api call.
-        getUpdatedPollFromServer();
+        if (version > poll.getVersion()) {
+            getUpdatedPollFromServer();
+        }
     }
 
     private void updateActivityObjectInGlobalMemory() throws JSONException {
@@ -125,13 +141,19 @@ public class ForegroundNotificationSilentHandler {
         activityId = faroNotificationDataJSON.getString(FaroIntentConstants.ACTIVITY_ID);
 
         //Check if Activity object is present in global memory.
-        Activity activity = activityListHandler.getOriginalActivityFromMap(activityId);
-        if (activity == null)
+        Activity activity = null;
+        try {
+            activity = (Activity) activityListHandler.getOriginalObject(activityId);
+        } catch (FaroObjectNotFoundException e) {
+            Log.i(TAG, MessageFormat.format("Activity {0} has been deleted", activityId));
             return;
+        }
 
-        // If version passed in the notification, then check it against the version in the activity object
+        // Check version passed in the notification against the version in the activity object
         // If greater only then make an api call.
-        getUpdatedActivityFromServer();
+        if (version > activity.getVersion()) {
+            getUpdatedActivityFromServer();
+        }
     }
 
     private void updateAssignmentObjectInGlobalMemory() throws JSONException {
@@ -139,25 +161,54 @@ public class ForegroundNotificationSilentHandler {
         activityId = faroNotificationDataJSON.getString(FaroIntentConstants.ACTIVITY_ID);
         assignmentId = faroNotificationDataJSON.getString(FaroIntentConstants.ASSIGNMENT_ID);
 
+        Event event = null;
+        Activity activity = null;
+        Long globalMemoryVersion;
+
         //Check if Assignment object is present in global memory.
         Assignment assignment =  assignmentListHandler.getOriginalAssignmentFromMap(assignmentId);
         if (assignment == null)
             return;
 
-        // If version passed in the notification, then check it against the version in the activity object
+        try {
+            if (activityId.equals("")) {
+                event = (Event) eventListHandler.getOriginalObject(eventId);
+                globalMemoryVersion = event.getVersion();
+            } else {
+                activity = (Activity) activityListHandler.getOriginalObject(activityId);
+                globalMemoryVersion = activity.getVersion();
+            }
+        } catch (FaroObjectNotFoundException e) {
+            Log.i(TAG, MessageFormat.format("{0} {1} has been deleted",
+                    activityId.equals("") ? "Event" : "Activity",
+                    activityId.equals("") ? eventId : activityId));
+            return;
+        }
+
+        // Check version passed in the notification against the version in the evnt/activity object
         // If greater only then make an api call.
-        getUpdatedAssignmentFromServer();
+        if (version > globalMemoryVersion) {
+            getUpdatedAssignmentFromServer();
+        }
     }
 
     private void updateEventFriendListInGlobalMemory() throws JSONException {
         eventId = faroNotificationDataJSON.getString(FaroIntentConstants.EVENT_ID);
 
         //Check if event object present in global memory for this eventId.
-        Event event = eventListHandler.getOriginalEventFromMap(eventId);
-        if (event == null)
+        Event event = null;
+        try {
+            event = (Event) eventListHandler.getOriginalObject(eventId);
+        } catch (FaroObjectNotFoundException e) {
+            Log.i(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
             return;
+        }
 
-        getEventInviteesFromServer();
+        // check version passed in the notification against the version in the event object
+        // If greater only then make an api call.
+        if (version > event.getVersion()) {
+            getEventInviteesFromServer();
+        }
     }
 
     private void getEventFromServer(){

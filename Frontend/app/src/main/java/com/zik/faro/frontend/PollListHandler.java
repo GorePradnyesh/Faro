@@ -3,16 +3,19 @@ package com.zik.faro.frontend;
 import android.content.Context;
 
 import com.google.gson.Gson;
+import com.zik.faro.data.BaseEntity;
 import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.Poll;
+import com.zik.faro.frontend.util.FaroObjectNotFoundException;
 
+import java.text.MessageFormat;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-public class PollListHandler {
+public class PollListHandler extends BaseObjectHandler<Poll>{
     /*
      * This is a Singleton class
      */
@@ -45,17 +48,15 @@ public class PollListHandler {
     */
     private Map<String, Poll> pollMap = new ConcurrentHashMap<>();
 
-    public Poll getPollCloneFromMap(String pollId){
+    @Override
+    public Poll getOriginalObject(String pollId) throws FaroObjectNotFoundException {
         Poll poll = pollMap.get(pollId);
-        Gson gson = new Gson();
-        String json = gson.toJson(poll);
-        Poll clonePoll = gson.fromJson(json, Poll.class);
-        return clonePoll;
-    }
-
-    public Poll getOriginalPollFromMap(String pollId){
-        Poll poll = pollMap.get(pollId);
-        return poll;
+        if (poll == null) {
+            throw new FaroObjectNotFoundException
+                    (MessageFormat.format("Poll with id {0} not found in global memory", pollId));
+        } else {
+            return poll;
+        }
     }
 
 
@@ -197,5 +198,10 @@ public class PollListHandler {
                 closedPollsAdapterMap.remove(eventId);
             }
         }
+    }
+
+    @Override
+    public Class<Poll> getType() {
+        return Poll.class;
     }
 }

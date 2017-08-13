@@ -41,9 +41,11 @@ import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
+import com.zik.faro.frontend.util.FaroObjectNotFoundException;
 
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -128,7 +130,12 @@ public class EditEvent extends Activity {
         * This way if the user makes some changes but then clicks back without clicking OK button,
         * the original event is not affected.
         */
-        cloneEvent = eventListHandler.getEventCloneFromMap(eventId);
+        try {
+            cloneEvent = eventListHandler.getCloneObject(eventId);
+        } catch (FaroObjectNotFoundException e) {
+            Log.i(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
+            finish();
+        }
 
         startDateButton = (Button) findViewById(R.id.startDateButton);
         startTimeButton = (Button) findViewById(R.id.startTimeButton);
@@ -565,13 +572,19 @@ public class EditEvent extends Activity {
 
     @Override
     protected void onResume() {
+        super.onResume();
         // Check if the version is same. It can be different if this page is loaded and a notification
         // is received for this later which updates the global memory but clonedata on this page remains
         // stale.
-        Long versionInGlobalMemory = eventListHandler.getOriginalEventFromMap(eventId).getVersion();
-        if (!cloneEvent.getVersion().equals(versionInGlobalMemory)){
-           setupPageDetails();
+        try {
+            if (!eventListHandler.checkObjectVersionIfLatest(eventId, cloneEvent.getVersion())) {
+                setupPageDetails();
+            }
+        } catch (FaroObjectNotFoundException e) {
+            //Activity has been deleted.
+            Log.i(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
+            finish();
         }
-        super.onResume();
+
     }
 }

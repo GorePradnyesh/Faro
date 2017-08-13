@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,9 @@ import com.zik.faro.data.Event;
 import com.zik.faro.data.InviteeList;
 import com.zik.faro.frontend.notification.NotificationPayloadHandler;
 import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
+import com.zik.faro.frontend.util.FaroObjectNotFoundException;
+
+import java.text.MessageFormat;
 
 
 /**
@@ -37,6 +41,7 @@ public class EventFriendListFragment extends Fragment implements NotificationPay
 
     private EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
 
+    private String TAG = "EvntFrndListFragment";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -65,7 +70,12 @@ public class EventFriendListFragment extends Fragment implements NotificationPay
         linlaHeaderProgress.setVisibility(View.GONE);
         eventFriendListRelativeLayout.setVisibility(View.VISIBLE);
 
-        cloneEvent = eventListHandler.getEventCloneFromMap(eventId);
+        try {
+            cloneEvent = eventListHandler.getCloneObject(eventId);
+        } catch (FaroObjectNotFoundException e) {
+            Log.i(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
+            getActivity().finish();
+        }
 
         ListView guestList = (ListView) fragmentView.findViewById(R.id.guestList);
         guestList.setBackgroundColor(Color.BLACK);
@@ -105,13 +115,19 @@ public class EventFriendListFragment extends Fragment implements NotificationPay
 
     @Override
     public void onResume() {
+        super.onResume();
         // Check if the version is same. It can be different if this page is loaded and a notification
         // is received for this later which updates the global memory but clonedata on this page remains
         // stale.
-        Long versionInGlobalMemory = eventListHandler.getOriginalEventFromMap(eventId).getVersion();
-        if (!cloneEvent.getVersion().equals(versionInGlobalMemory)) {
-            setupPageDetails();
+
+        try {
+            if (!eventListHandler.checkObjectVersionIfLatest(eventId, cloneEvent.getVersion())) {
+                setupPageDetails();
+            }
+        } catch (FaroObjectNotFoundException e) {
+            //Activity has been deleted.
+            Log.i(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
+            getActivity().finish();
         }
-        super.onResume();
     }
 }
