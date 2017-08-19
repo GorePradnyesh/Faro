@@ -3,19 +3,35 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/inviteFacebookFriendsToAppButton"
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/addFriendsLayout"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:clickable="true"
-        android:gravity="center"
-        android:text="Invite Facebook Friends to Faro" />
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    <ListView
-        android:id="@+id/facebookFriendsList"
-        android:layout_below="@+id/inviteFacebookFriendsToAppButton"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        <TextView
+            android:id="@+id/inviteFacebookFriendsToAppButton"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:clickable="true"
+            android:gravity="center"
+            android:text="Invite Facebook Friends to Faro" />
 
+        <ListView
+            android:id="@+id/facebookFriendsList"
+            android:layout_below="@+id/inviteFacebookFriendsToAppButton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <Button
+            android:id="@+id/addFacebookFriendsDoneButton"
+            android:text="Add"
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="fill"
+            android:layout_width="match_parent"
+            android:layout_height="50dp" />
+
+    </RelativeLayout>
 
 </LinearLayout>

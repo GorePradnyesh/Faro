@@ -1,12 +1,14 @@
 package com.zik.faro.frontend;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.ContactsContract;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -19,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.CommonDataKinds;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
@@ -27,9 +30,17 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
+import com.squareup.okhttp.Request;
 import com.zik.faro.data.MinUser;
+import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
+import com.zik.faro.frontend.faroservice.FaroServiceHandler;
+import com.zik.faro.frontend.faroservice.HttpError;
+import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 
+import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.Map;
 
 /**
  * Created by gaurav on 7/5/17.
@@ -37,12 +48,16 @@ import java.text.MessageFormat;
 
 public class AddPhoneContactsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private ListView contactsFriendsList;
+    private Button addContactsFriendsDoneButton;
+    private Map<String, MinUser> selectedFriends = Maps.newHashMap();
+    private Activity addFriendsActivity;
 
     // An adapter that binds the result Cursor to the ListView
     private CursorAdapter cursorAdapter;
 
     // Define a projection
-    private static final String[] PROJECTION = {Contacts._ID, Contacts.DISPLAY_NAME_PRIMARY, Contacts.PHOTO_THUMBNAIL_URI, CommonDataKinds.Email.DATA};
+    private static final String[] PROJECTION = {Contacts._ID, Contacts.DISPLAY_NAME_PRIMARY, Contacts.PHOTO_THUMBNAIL_URI,
+            CommonDataKinds.Email.DATA};
 
     // Defines the text expression
     private static final String SELECTION = Contacts.DISPLAY_NAME_PRIMARY + " LIKE ?" ;
@@ -54,11 +69,8 @@ public class AddPhoneContactsFragment extends Fragment implements LoaderManager.
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-
-        /*
-         * Make search string into pattern by inserting "%" characters to represent a sequence of zero or more chars
-         * and store it in the selection array
-         */
+         // Make search string into pattern by inserting "%" characters to represent a sequence of zero or more chars
+         // and store it in the selection array
         mSelectionArgs[0] = "%";
         // Starts the query
         return new CursorLoader(
@@ -93,19 +105,35 @@ public class AddPhoneContactsFragment extends Fragment implements LoaderManager.
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        ((AddFriendsActivity) getActivity()).removeAllSelectedFriends();
-        ((AddFriendsActivity) getActivity()).setCurrentTabId("Contacts");
+        removeAllSelectedFriends();
 
         // Inflate the fragment layout
-        return inflater.inflate(R.layout.fragment_contacts_list, container, false);
+        View fragmentView = inflater.inflate(R.layout.fragment_contacts_list, container, false);
+
+        contactsFriendsList = (ListView) fragmentView.findViewById(R.id.contactsFriendsList);
+        contactsFriendsList.setBackgroundColor(Color.BLUE);
+
+        addContactsFriendsDoneButton = (Button) fragmentView.findViewById(R.id.addContactFriendsDoneButton);
+        addContactsFriendsDoneButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!selectedFriends.isEmpty()){
+                    addFriends();
+                }
+
+                // Complete this Activity and go back to the previous page
+                getActivity().finish();
+            }
+        });
+        addContactsFriendsDoneButton.setVisibility(View.GONE);
+
+        return fragmentView;
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-        contactsFriendsList = (ListView) getActivity().findViewById(R.id.contactsFriendsList);
-        contactsFriendsList.setBackgroundColor(Color.BLUE);
+        addFriendsActivity = getActivity();
 
         // Get a CursorAdapter
         cursorAdapter =  new PhoneContactsAdapter(getActivity(), null, 0);
@@ -117,6 +145,76 @@ public class AddPhoneContactsFragment extends Fragment implements LoaderManager.
             // Initialize the loader
             getLoaderManager().initLoader(0, null, this);
         }
+    }
+
+    private void addFriends() {
+        for (MinUser minUser : selectedFriends.values()) {
+            final String friendEmailId = minUser.getEmail();
+            String myUserId = FaroUserContext.getInstance().getEmail();
+
+            if (friendEmailId.equals(myUserId)) {
+                // TODO: Add error popUp with "Cant invite self message"
+                return;
+            }
+
+            FaroServiceHandler.getFaroServiceHandler().getFriendsHandler().inviteFriend(new BaseFaroRequestCallback<String>() {
+                @Override
+                public void onFailure(Request request, IOException ex) {
+                    Log.e(TAG, MessageFormat.format("failed to send friend invite request for friend {0}", friendEmailId));
+                }
+
+                @Override
+                public void onResponse(String email, HttpError httpError) {
+                    if (httpError == null ) {
+                        Handler mainHandler = new Handler(addFriendsActivity.getMainLooper());
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                Log.i(TAG, MessageFormat.format("Friend invite for {0} succeeded", friendEmailId));
+                                // TODO it would be better if we return the MinUser object instead of a String
+                                MinUser minUser = new MinUser().withEmail(friendEmailId);
+                                UserFriendListHandler.getInstance().addFriendToListAndMap(minUser);
+                            }
+                        });
+                    } else {
+                        Log.e(TAG, MessageFormat.format("Failed to invite friend {0}. code = {1}, message = {2}", friendEmailId, httpError.getCode(), httpError.getMessage()));
+                    }
+                }
+            }, friendEmailId);
+        }
+    }
+
+    private void showAddFriendsDoneButton(boolean visible) {
+        if (visible) {
+            // Hide the addByEmail button and then make the add friends button visible
+            ((AddFriendsActivity) getActivity()).showAddByEmailButton(false);
+            addContactsFriendsDoneButton.setVisibility(View.VISIBLE);
+        } else {
+            // Hide the add friends button and then make the addByEmail button visible
+            addContactsFriendsDoneButton.setVisibility(View.GONE);
+            ((AddFriendsActivity) getActivity()).showAddByEmailButton(true);
+        }
+    }
+
+    private void addSelectedFriend(MinUser minUser) {
+        selectedFriends.put(minUser.getEmail(), minUser);
+        // If first friend is selected, show the add friends button and hide the add by email button
+        if (selectedFriends.size() == 1 ) {
+            showAddFriendsDoneButton(true);
+        }
+    }
+
+    private void removeSelectedFriend(String email) {
+        selectedFriends.remove(email);
+
+        // If this was the last friend selected, show the add by email button and hide the add friends button
+        if (selectedFriends.isEmpty()) {
+            showAddFriendsDoneButton(false);
+        }
+    }
+
+    private void removeAllSelectedFriends() {
+        selectedFriends.clear();
     }
 
     private boolean checkContactsPermission() {
@@ -158,14 +256,14 @@ public class AddPhoneContactsFragment extends Fragment implements LoaderManager.
         public void bindView(View view, Context context, final Cursor cursor) {
             TextView contactNameTextView = (TextView) view.findViewById(R.id.contactFriendName);
             String friendName = cursor.getString(cursor.getColumnIndex(Contacts.DISPLAY_NAME_PRIMARY));
-            Log.i(TAG, "friendName = " + friendName);
+            Log.i(TAG, MessageFormat.format("friendName = {0}", friendName));
 
             if (!Strings.isNullOrEmpty(friendName)) {
                 contactNameTextView.setText(friendName);
             }
 
             String photoUri = cursor.getString(cursor.getColumnIndex(Contacts.PHOTO_THUMBNAIL_URI));
-            Log.i(TAG, "photoUri = " + photoUri);
+            Log.i(TAG, MessageFormat.format("photoUri = {0}", photoUri));
 
             ImageView contactPhotoImageView = (ImageView) view.findViewById(R.id.contactFriendPicture);
 
@@ -180,22 +278,21 @@ public class AddPhoneContactsFragment extends Fragment implements LoaderManager.
             contactFriendSelectionCheckBox.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Log.i(TAG, "onItemClick");
+                    Log.d(TAG, "onItemClick");
 
                     CheckBox selectedCheckbox = (CheckBox) view;
                     cursor.moveToPosition((Integer) selectedCheckbox.getTag());
                     String contactEmail = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.ADDRESS));
-                    AddFriendsActivity addFriendsActivity = ((AddFriendsActivity) getActivity());
 
                     if (selectedCheckbox.isChecked()) {
                         String firstName = cursor.getString(cursor.getColumnIndex(Contacts.DISPLAY_NAME_PRIMARY));
 
                         Log.i(TAG, MessageFormat.format("email = {0}, firstName = {1}", contactEmail, firstName));
 
-                        addFriendsActivity.addSelectedFriend(new MinUser().withEmail(contactEmail)
+                        addSelectedFriend(new MinUser().withEmail(contactEmail)
                                 .withFirstName(firstName));
                     } else {
-                        addFriendsActivity.removeSelectedFriend(new MinUser().withEmail(contactEmail));
+                        removeSelectedFriend(contactEmail);
                     }
                 }
             });
