@@ -78,9 +78,4 @@ public class EventDatastoreImpl {
         DatastoreObjectifyDAL.delelteObjectById(eventId, EventDo.class);
         logger.info("Event deleted");
     }
-
-//    public static List<Event> getEventsOfFaroUser(final String faroUserId){
-//    	List<EventUser> events = EventUserDatastoreImpl.loadEventUserByFaroUser(faroUserId);
-//    	for(EventUser event : events){
-//    }
 }

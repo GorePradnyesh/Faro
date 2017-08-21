@@ -40,7 +40,7 @@ public class FunctionalEventTest {
     public static void init() throws Exception {
         endpoint = TestHelper.getExternalTargetEndpoint();
         token = TestHelper.createUserAndGetToken(callerEmail);
-        FaroUser faroUser = new FaroUser(callerEmail, "Kaivan", "Vijay", "Sanghvi", "testId", "1234456", null);
+        FaroUser faroUser = new FaroUser(callerEmail, "sachin", "Vijay", "tendulkar", "testId", "1234456", null);
         faroUser.addToken("dnrr9xc1D6g:APA91bGJLMMHbtfVFw1FjfLmZq_pDx53UIbd-iKDDuIWllHVh05BcifGGvtFW_x5OyiqxPrOUUYTVoLyDS7IPfJVO3YvMjh3ECIlaP3WC4OdDl5QGIjzU7SRDt1fYt3Tkk8XfwOAWUML");
     	ClientResponse upsertResp = TestHelper.doPUT(endpoint.toString(), "v1/profile/upsert", token, faroUser);
         //token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE0Njg1ODkwNzMsInVzZXJuYW1lIjoiNzY0ZmZlYjAtZGViMi00MTdhLTkyNzYtZWRkZmRiZGFkNzUwQGdtYWlsLmNvbSIsImVtYWlsIjoiNzY0ZmZlYjAtZGViMi00MTdhLTkyNzYtZWRkZmRiZGFkNzUwQGdtYWlsLmNvbSIsImlzcyI6ImZhcm8iLCJpYXQiOjE0NjM0MDUwNzN9.Ktv4YbXV8BrJsYSHdBikpEwINNF-q8iTLUBhzr9cVZA";
@@ -206,41 +206,7 @@ public class FunctionalEventTest {
     	List<EventInviteStatusWrapper> events = eventsResponse.getEntity(new GenericType<List<EventInviteStatusWrapper>>(){});
     	Assert.assertEquals(14, events.size());
     }
-    
-//    public void test() throws Exception {
-//    	// Create
-//		GeoPosition geoPosition1 = new GeoPosition(0,0);
-//		GeoPosition geoPosition2 = new GeoPosition(100,100);
-//    	Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(),
-//                Calendar.getInstance(), false,"Description",  null, new 
-//				Location("NYC", "NYC's Address", geoPosition1),"Mafia god");
-//    	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/create", token, eventCreateData);
-//        Event ev = response.getEntity(Event.class);
-//    	
-//    	// Read
-//    	ClientResponse response1 = TestHelper.doGET(endpoint.toString(), "v1/event/"+ ev.getId()+"/details", new MultivaluedMapImpl(), token);
-//        EventInviteStatusWrapper eventDetails = response1.getEntity(EventInviteStatusWrapper.class);
-//        assertEntity(eventCreateData, eventDetails.getEvent());
-//        
-//        Event updateObj = new Event();
-//        geoPosition2 = new GeoPosition(100,100);
-//        Location l = new Location("SF", "city", geoPosition2);
-//        updateObj.setId(eventDetails.getEvent().getId());
-//        
-//        updateObj.setEndDate(Calendar.getInstance());
-//        updateObj.setEventDescription("Updated description");
-//        updateObj.setLocation(l);
-//        
-//        UpdateRequest<Event> request = new UpdateRequest<Event>();
-//        request.setUpdate(updateObj);
-//        request.addUpdatedFields("endDate");
-//        request.addUpdatedFields("eventDescription");
-//        request.addUpdatedFields("location");
-//        ClientResponse updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventDetails.getEvent().getId()+"/updateEvent", token, request);
-//        FaroResponse<Event> faroResponse = updateResponse.getEntity(new GenericType<FaroResponse<Event>>(){});
-//        Event e = faroResponse.getEntity();
-//        System.out.println(faroResponse.getEntity());
-//    }
+ 
     
     public void updateEvent() throws Exception{
     	// Create
@@ -322,7 +288,7 @@ public class FunctionalEventTest {
     	createEventTest();
     	getEventDetails();
     	getEvents();
-    	//getEventInvitees();
+    	getEventInvitees();
     	updateEvent();
     	
     }

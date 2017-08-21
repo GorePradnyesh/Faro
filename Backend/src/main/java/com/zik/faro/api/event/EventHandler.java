@@ -126,7 +126,7 @@ public class EventHandler {
     
     @Path(EVENT_UPDATE_PATH_CONST)
     @POST
-	@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public JResponse<FaroResponse<Event>> updateEvent(@PathParam(EVENT_ID_PATH_PARAM) final String eventId, final UpdateRequest<Event> updateObj){
         // TODO: Validation to make sure only event owner can update
     	String userId = context.getUserPrincipal().getName();
@@ -175,17 +175,6 @@ public class EventHandler {
             throw new WebApplicationException(response);
 		}
         return JResponse.ok(Constants.HTTP_OK).build();
-    }
-    
-    @Path("/test")
-    @POST
-    public void test(final Map<String, Object> map) throws ClassNotFoundException{
-    	Object obj = map.get("location");
-    	ObjectMapper mapper = new ObjectMapper();
-    	Location l = mapper.convertValue(obj, Location.class);
-    	Class<?> classType = Class.forName("Location");
-    	//Location obj1 = (Location) map.get("location");
-    	System.out.println(l);
     }
    
 }
