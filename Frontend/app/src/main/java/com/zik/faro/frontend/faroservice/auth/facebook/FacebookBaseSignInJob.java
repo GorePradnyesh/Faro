@@ -9,7 +9,6 @@ import com.facebook.GraphResponse;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
-import com.google.common.collect.Lists;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
@@ -18,16 +17,14 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.MinUser;
-import com.zik.faro.frontend.FbGraphApiService;
+import com.zik.faro.frontend.faroservice.facebook.FbGraphApiService;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.faroservice.auth.FaroBaseSignInJob;
 import com.zik.faro.frontend.faroservice.okHttp.OkHttpResponse;
 
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.text.MessageFormat;

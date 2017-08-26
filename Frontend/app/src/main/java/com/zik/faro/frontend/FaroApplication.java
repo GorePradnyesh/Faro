@@ -1,12 +1,15 @@
 package com.zik.faro.frontend;
 
-import android.app.Activity;
 import android.app.Application;
 import android.util.Log;
 
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
+import com.zik.faro.frontend.ui.adapters.EventAdapter;
+import com.zik.faro.frontend.ui.adapters.UserFriendAdapter;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
+import com.zik.faro.frontend.handlers.EventListHandler;
+import com.zik.faro.frontend.handlers.UserFriendListHandler;
 import com.zik.faro.frontend.util.ConfigPropertiesUtil;
 
 import java.net.MalformedURLException;

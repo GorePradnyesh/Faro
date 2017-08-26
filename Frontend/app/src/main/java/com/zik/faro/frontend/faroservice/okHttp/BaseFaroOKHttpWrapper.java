@@ -3,9 +3,8 @@ package com.zik.faro.frontend.faroservice.okHttp;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.squareup.okhttp.OkHttpClient;
-import com.zik.faro.frontend.faroservice.auth.TokenCache;
-import com.zik.faro.frontend.request.CustomCalendarDeserializer;
-import com.zik.faro.frontend.request.CustomCalendarSerializer;
+import com.zik.faro.frontend.faroservice.request.CustomCalendarDeserializer;
+import com.zik.faro.frontend.faroservice.request.CustomCalendarSerializer;
 
 import java.net.MalformedURLException;
 import java.net.URL;
