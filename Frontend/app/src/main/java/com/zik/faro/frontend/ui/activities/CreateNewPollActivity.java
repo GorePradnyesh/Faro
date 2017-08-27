@@ -33,7 +33,7 @@ import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 import java.io.IOException;
 
 
-public class CreateNewPoll extends Activity {
+public class CreateNewPollActivity extends Activity {
 
     private PollListHandler pollListHandler = PollListHandler.getInstance();
     private String eventId = null;
@@ -42,7 +42,7 @@ public class CreateNewPoll extends Activity {
     private String myUserId = faroUserContext.getEmail();
 
     private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
-    private static String TAG = "CreateNewPoll";
+    private static String TAG = "CreateNewPollActivity";
 
     private EditText pollDescription = null;
     private CheckBox isMultiChoice = null;
@@ -81,7 +81,7 @@ public class CreateNewPoll extends Activity {
 
         createNewPollOK = (Button) findViewById(R.id.createNewPollOK);
 
-        PollLandingPageIntent = new Intent(CreateNewPoll.this, PollLandingPage.class);
+        PollLandingPageIntent = new Intent(CreateNewPollActivity.this, PollLandingPage.class);
 
         pollOptionsAdapter = new PollOptionsAdapter(this, R.layout.poll_option_can_edit_row_style);
         pollOptionsList.setAdapter(pollOptionsAdapter);

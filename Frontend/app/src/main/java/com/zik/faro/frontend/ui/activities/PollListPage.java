@@ -57,7 +57,7 @@ public class PollListPage extends Activity {
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
         PollLandingPageIntent = new Intent(PollListPage.this, PollLandingPage.class);
-        CreateNewPoll = new Intent(PollListPage.this, com.zik.faro.frontend.ui.activities.CreateNewPoll.class);
+        CreateNewPoll = new Intent(PollListPage.this, CreateNewPollActivity.class);
 
         extras = getIntent().getExtras();
         if(extras == null) return; //TODO How to handle this case?

@@ -45,7 +45,7 @@ import java.util.Map;
 
 import static android.widget.Toast.LENGTH_LONG;
 
-public class EditPoll extends Activity {
+public class EditPollActivity extends Activity {
     private PollListHandler pollListHandler = PollListHandler.getInstance();
     private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
@@ -54,7 +54,7 @@ public class EditPoll extends Activity {
     private Poll clonePoll;
     private Intent PollLandingPageIntent;
 
-    private static String TAG = "EditPoll";
+    private static String TAG = "EditPollActivity";
 
     private final List <PollOption> newPollOptionList = new LinkedList<>();
     private Context mContext;
@@ -100,7 +100,7 @@ public class EditPoll extends Activity {
         eventId = extras.getString(FaroIntentConstants.EVENT_ID);
         pollId = extras.getString(FaroIntentConstants.POLL_ID);
 
-        PollLandingPageIntent = new Intent(EditPoll.this, PollLandingPage.class);
+        PollLandingPageIntent = new Intent(EditPollActivity.this, PollLandingPage.class);
 
         clonePoll = pollListHandler.getPollCloneFromMap(pollId);
 
@@ -223,7 +223,7 @@ public class EditPoll extends Activity {
                         public void run() {
                             pollListHandler.removePollFromListAndMap(eventId, clonePoll, mContext);
                             popupWindow.dismiss();
-                            Toast.makeText(EditPoll.this, clonePoll.getDescription() + "is Deleted", LENGTH_LONG).show();
+                            Toast.makeText(EditPollActivity.this, clonePoll.getDescription() + "is Deleted", LENGTH_LONG).show();
                             finish();
                         }
                     };

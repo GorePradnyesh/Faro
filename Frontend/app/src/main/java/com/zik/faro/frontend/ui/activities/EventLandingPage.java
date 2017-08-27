@@ -358,7 +358,7 @@ public class EventLandingPage extends FragmentActivity
         statusMaybe = (Button) findViewById(R.id.statusMaybe);
 
         final Intent PollListPage = new Intent(EventLandingPage.this, PollListPage.class);
-        final Intent EditEvent = new Intent(EventLandingPage.this, EditEvent.class);
+        final Intent EditEvent = new Intent(EventLandingPage.this, EditEventActivity.class);
         final Intent ActivityListPage = new Intent(EventLandingPage.this, ActivityListPage.class);
         final Intent EventFriendListLandingPageIntent = new Intent(EventLandingPage.this, EventFriendListLandingPage.class);
         final Intent AssignmentLandingPageTabsIntent = new Intent(EventLandingPage.this, AssignmentLandingPage.class);

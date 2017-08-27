@@ -25,11 +25,11 @@ import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.Item;
 import com.zik.faro.frontend.handlers.AssignmentListHandler;
 import com.zik.faro.frontend.handlers.EventListHandler;
+import com.zik.faro.frontend.ui.activities.EditAssignmentActivity;
 import com.zik.faro.frontend.util.FaroExceptionHandler;
 import com.zik.faro.frontend.FaroIntentConstants;
 import com.zik.faro.frontend.ui.adapters.ItemsAdapter;
 import com.zik.faro.frontend.R;
-import com.zik.faro.frontend.ui.activities.EditAssignment;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
@@ -118,7 +118,7 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
 
         Button updateAssignment = (Button) fragmentView.findViewById(R.id.updateAssignment);
 
-        final Intent EditAssignmentPage = new Intent(getActivity(), EditAssignment.class);
+        final Intent EditAssignmentPage = new Intent(getActivity(), EditAssignmentActivity.class);
 
         itemList = (ListView) fragmentView.findViewById(R.id.itemList);
         itemList.setTag("AssignmentLandingPageFragment");

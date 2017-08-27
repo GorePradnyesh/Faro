@@ -40,7 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MyAssignmentsFragment extends Fragment implements NotificationPayloadHandler {
+public class AssignmentsFragment extends Fragment implements NotificationPayloadHandler {
 
     private AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
     private EventListHandler eventListHandler = EventListHandler.getInstance();
@@ -57,7 +57,7 @@ public class MyAssignmentsFragment extends Fragment implements NotificationPaylo
     private FaroUserContext faroUserContext = FaroUserContext.getInstance();
     private String myUserId = faroUserContext.getEmail();
 
-    private static String TAG = "MyAssignmentsFragment";
+    private static String TAG = "AssignmentsFragment";
     private String bundleType = null;
     private Context mContext;
     private Activity cloneActivity = null;
@@ -100,7 +100,7 @@ public class MyAssignmentsFragment extends Fragment implements NotificationPaylo
         Button updateAssignment = (Button) fragmentView.findViewById(R.id.updateAssignment);
 
         itemList = (ListView) fragmentView.findViewById(R.id.itemList);
-        itemList.setTag("MyAssignmentsFragment");
+        itemList.setTag("AssignmentsFragment");
         final ItemsAdapter myItemsAdapter = new ItemsAdapter(getActivity(), R.layout.assignment_update_item_row_style);
         itemList.setAdapter(myItemsAdapter);
 

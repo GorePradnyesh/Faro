@@ -41,7 +41,7 @@ public class AppLandingPage extends FragmentActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_landing_page);
 
-        final Intent createNewEventIntent = new Intent(this, CreateNewEvent.class);
+        final Intent createNewEventIntent = new Intent(this, CreateNewEventActivity.class);
 
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 

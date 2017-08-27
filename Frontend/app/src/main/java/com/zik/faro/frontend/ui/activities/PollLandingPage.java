@@ -121,7 +121,7 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
         PickPollWinnerIntent = new Intent(PollLandingPage.this, PickPollWinnerPage.class);
-        EditPollPageIntent = new Intent(PollLandingPage.this, EditPoll.class);
+        EditPollPageIntent = new Intent(PollLandingPage.this, EditPollActivity.class);
 
         linlaHeaderProgress = (LinearLayout) findViewById(R.id.linlaHeaderProgress);
 

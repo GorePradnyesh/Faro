@@ -57,7 +57,7 @@ import static android.widget.Toast.LENGTH_LONG;
  * Checks are made to make sure that the Start Date/Time is not set after the End Date/Time.
  *
  */
-public class CreateNewEvent extends Activity {
+public class CreateNewEventActivity extends Activity {
 
     //public static final int NO_CHANGES = 0;
     private EventListHandler eventListHandler = EventListHandler.getInstance();
@@ -77,7 +77,7 @@ public class CreateNewEvent extends Activity {
     private DateFormat sdf = new SimpleDateFormat("MMM dd yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
 
-    private static String TAG = "CreateNewEvent";
+    private static String TAG = "CreateNewEventActivity";
 
     private int PLACE_PICKER_REQUEST = 1;
 
@@ -107,7 +107,7 @@ public class CreateNewEvent extends Activity {
 
         final Button createNewEventOK = (Button) findViewById(R.id.createNewEventOK);
 
-        final Intent EventLanding = new Intent(CreateNewEvent.this, EventLandingPage.class);
+        final Intent EventLanding = new Intent(CreateNewEventActivity.this, EventLandingPage.class);
 
         final Context mContext = this;
 
@@ -331,7 +331,7 @@ public class CreateNewEvent extends Activity {
     }
 
     private void setStartDate(){
-        new DatePickerDialog(CreateNewEvent.this,
+        new DatePickerDialog(CreateNewEventActivity.this,
                 startDate,
                 startDateCalendar.get(Calendar.YEAR),
                 startDateCalendar.get(Calendar.MONTH),
@@ -340,7 +340,7 @@ public class CreateNewEvent extends Activity {
     }
 
     private void setStartTime(){
-        new TimePickerDialog(CreateNewEvent.this,
+        new TimePickerDialog(CreateNewEventActivity.this,
                 startTime,
                 startDateCalendar.get(Calendar.HOUR_OF_DAY),
                 startDateCalendar.get(Calendar.MINUTE),
@@ -348,7 +348,7 @@ public class CreateNewEvent extends Activity {
     }
 
     private void setEndDate(){
-        new DatePickerDialog(CreateNewEvent.this,
+        new DatePickerDialog(CreateNewEventActivity.this,
                 endDate,
                 endDateCalendar.get(Calendar.YEAR),
                 endDateCalendar.get(Calendar.MONTH),
@@ -357,7 +357,7 @@ public class CreateNewEvent extends Activity {
     }
 
     private void setEndTime(){
-        new TimePickerDialog(CreateNewEvent.this,
+        new TimePickerDialog(CreateNewEventActivity.this,
                 endTime,
                 endDateCalendar.get(Calendar.HOUR_OF_DAY),
                 endDateCalendar.get(Calendar.MINUTE),
@@ -369,7 +369,7 @@ public class CreateNewEvent extends Activity {
     private boolean isStartDateValid(Calendar eventStartCalendar){
         boolean ret_value = eventStartCalendar.after(currentCalendar);
         if (!ret_value) {
-            Toast.makeText(CreateNewEvent.this, "Event's Start Date cannot be before current time", LENGTH_LONG).show();
+            Toast.makeText(CreateNewEventActivity.this, "Event's Start Date cannot be before current time", LENGTH_LONG).show();
         }
         return ret_value;
     }
@@ -379,7 +379,7 @@ public class CreateNewEvent extends Activity {
         boolean ret_value = (startDateCalendar.before(eventEndCalendar) ||
                 startDateCalendar.equals(eventEndCalendar));
         if (!ret_value){
-            Toast.makeText(CreateNewEvent.this, "Event's End Date cannot be before Event's Start date", LENGTH_LONG).show();
+            Toast.makeText(CreateNewEventActivity.this, "Event's End Date cannot be before Event's Start date", LENGTH_LONG).show();
         }
         return ret_value;
     }

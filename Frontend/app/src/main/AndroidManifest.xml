@@ -49,16 +49,16 @@
             android:name=".ui.activities.SignupActivity"
             android:label="SignupPage" />
         <activity
-            android:name=".ui.activities.CreateNewEvent"
+            android:name=".ui.activities.CreateNewEventActivity"
             android:label="@string/title_activity_create_new_event" />
         <activity
-            android:name=".ui.activities.CreateNewPoll"
+            android:name=".ui.activities.CreateNewPollActivity"
             android:label="@string/title_activity_create_new_poll" />
         <activity
-            android:name=".ui.activities.EditEvent"
+            android:name=".ui.activities.EditEventActivity"
             android:label="@string/title_activity_edit_event" />
         <activity
-            android:name=".ui.activities.EventCalendarView"
+            android:name=".ui.activities.EventCalendarViewActivity"
             android:label="@string/title_activity_event_calendar_view" />
         <activity
             android:name=".ui.activities.EventLandingPage"
@@ -72,7 +72,7 @@
         <activity
             android:name=".ui.activities.CreateNewActivity"
             android:label="@string/title_activity_create_new" />
-        <activity android:name=".ui.activities.EditPoll" />
+        <activity android:name=".ui.activities.EditPollActivity" />
         <activity
             android:name=".ui.activities.PickPollWinnerPage"
             android:label="@string/title_activity_pick_poll_winner" />
@@ -83,10 +83,10 @@
             android:name=".ui.activities.ActivityLandingPage"
             android:label="@string/title_activity_activity_landing_page" />
         <activity
-            android:name=".ui.activities.EditActivity"
+            android:name=".ui.activities.EditActivityPage"
             android:label="@string/title_activity_edit" />
         <activity
-            android:name=".ui.activities.EditAssignment"
+            android:name=".ui.activities.EditAssignmentActivity"
             android:label="@string/title_activity_edit_assignment" />
         <activity
             android:name=".ui.activities.AppLandingPage"

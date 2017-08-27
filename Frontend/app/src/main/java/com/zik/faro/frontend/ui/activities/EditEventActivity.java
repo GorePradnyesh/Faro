@@ -61,7 +61,7 @@ import static android.widget.Toast.LENGTH_LONG;
 * Special care should be taken that the updates should not reflect in the Event object until the
 * user presses the OK button. Until then simply collect all the updated information in local
 * variables.*/
-public class EditEvent extends Activity {
+public class EditEventActivity extends Activity {
     private Button startDateButton = null;
     private Button startTimeButton = null;
     private Button endTimeButton = null;
@@ -84,7 +84,7 @@ public class EditEvent extends Activity {
     private RelativeLayout popUpRelativeLayout;
 
     private String eventId;
-    private static String TAG = "EditEvent";
+    private static String TAG = "EditEventActivity";
 
     private Intent EventLanding = null;
 
@@ -152,7 +152,7 @@ public class EditEvent extends Activity {
 
         popUpRelativeLayout = (RelativeLayout) findViewById(R.id.editEventPage);
 
-        EventLanding = new Intent(EditEvent.this, EventLandingPage.class);
+        EventLanding = new Intent(EditEventActivity.this, EventLandingPage.class);
 
         String ev_name = cloneEvent.getEventName();
         eventName.setText(ev_name);
@@ -356,7 +356,7 @@ public class EditEvent extends Activity {
                                 public void run() {
                                     eventListHandler.removeEventFromListAndMap(eventId);
                                     popupWindow.dismiss();
-                                    Toast.makeText(EditEvent.this, cloneEvent.getEventName() + "is Deleted", LENGTH_LONG).show();
+                                    Toast.makeText(EditEventActivity.this, cloneEvent.getEventName() + "is Deleted", LENGTH_LONG).show();
                                     finish();
                                 }
                             };
@@ -416,7 +416,7 @@ public class EditEvent extends Activity {
     }
 
     private void setStartDate(){
-        new DatePickerDialog(EditEvent.this,
+        new DatePickerDialog(EditEventActivity.this,
                 startDate,
                 startDateCalendar.get(Calendar.YEAR),
                 startDateCalendar.get(Calendar.MONTH),
@@ -424,7 +424,7 @@ public class EditEvent extends Activity {
     }
 
     private void setStartTime(){
-        new TimePickerDialog(EditEvent.this,
+        new TimePickerDialog(EditEventActivity.this,
                 startTime,
                 startDateCalendar.get(Calendar.HOUR_OF_DAY),
                 startDateCalendar.get(Calendar.MINUTE),
@@ -432,7 +432,7 @@ public class EditEvent extends Activity {
     }
 
     private void setEndDate(){
-        new DatePickerDialog(EditEvent.this,
+        new DatePickerDialog(EditEventActivity.this,
                 endDate,
                 endDateCalendar.get(Calendar.YEAR),
                 endDateCalendar.get(Calendar.MONTH),
@@ -441,7 +441,7 @@ public class EditEvent extends Activity {
     }
 
     private void setEndTime(){
-        new TimePickerDialog(EditEvent.this,
+        new TimePickerDialog(EditEventActivity.this,
                 endTime,
                 endDateCalendar.get(Calendar.HOUR_OF_DAY),
                 endDateCalendar.get(Calendar.MINUTE),
@@ -452,7 +452,7 @@ public class EditEvent extends Activity {
     private boolean isStartDateValid(Calendar eventStartCalendar){
         boolean ret_value = eventStartCalendar.after(currentCalendar);
         if (!ret_value) {
-            Toast.makeText(EditEvent.this, "Event's Start Date cannot be before current time", LENGTH_LONG).show();
+            Toast.makeText(EditEventActivity.this, "Event's Start Date cannot be before current time", LENGTH_LONG).show();
         }
         return ret_value;
     }
@@ -462,7 +462,7 @@ public class EditEvent extends Activity {
         boolean ret_value = (startDateCalendar.before(eventEndCalendar) ||
                 startDateCalendar.equals(eventEndCalendar));
         if (!ret_value){
-            Toast.makeText(EditEvent.this, "Event's End Date cannot be before Event's Start date", LENGTH_LONG).show();
+            Toast.makeText(EditEventActivity.this, "Event's End Date cannot be before Event's Start date", LENGTH_LONG).show();
         }
         return ret_value;
     }

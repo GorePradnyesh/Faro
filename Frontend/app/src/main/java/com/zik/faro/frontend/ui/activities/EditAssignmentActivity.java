@@ -60,8 +60,7 @@ import static android.widget.Toast.LENGTH_LONG;
 /*
  * We can arrive on this page from 2 different pages.
  */
-public class EditAssignment extends android.app.Activity {
-
+public class EditAssignmentActivity extends android.app.Activity {
     private Event originalEvent;
     private Activity originalActivity = null;
     private Event cloneEvent = null;
@@ -83,11 +82,11 @@ public class EditAssignment extends android.app.Activity {
     private HashSet<Item> newItemSet = new HashSet<>();
     private HashSet<Item> originalItemSet = new HashSet<>();
 
-    private Intent AssignmentLandingPageTabsIntent;
+    private Intent assignmentLandingPageTabsIntent;
 
     private ArrayList <String> itemUnitArray = new ArrayList<>();
 
-    private static String TAG = "EditAssignment";
+    private static String TAG = "EditAssignmentActivity";
 
     private int editItemPosition = -1;
     private boolean addEditedItem = false;
@@ -152,7 +151,7 @@ public class EditAssignment extends android.app.Activity {
         final Spinner inviteeSpinner = (Spinner) findViewById(R.id.inviteeSpinner);
         final Spinner itemUnitSpinner = (Spinner) findViewById(R.id.itemUnitSpinner);
 
-        inviteeSpinner.setTag("EditAssignment");
+        inviteeSpinner.setTag("EditAssignmentActivity");
         inviteeSpinner.setAdapter(eventFriendListHandler.getAcceptedFriendAdapter(eventId, mContext));
 
 
@@ -168,7 +167,7 @@ public class EditAssignment extends android.app.Activity {
         addNewItemButton.setEnabled(false);
 
         final ListView itemList = (ListView)findViewById(R.id.itemList);
-        itemList.setTag("EditAssignment");
+        itemList.setTag("EditAssignmentActivity");
         final ItemsAdapter itemsAdapter = new ItemsAdapter(this, R.layout.item_cant_edit_row_style);
         itemList.setAdapter(itemsAdapter);
 
@@ -204,7 +203,7 @@ public class EditAssignment extends android.app.Activity {
             createNewAssignmentOK.setEnabled(true);
         }
 
-        AssignmentLandingPageTabsIntent = new Intent(EditAssignment.this, AssignmentLandingPage.class);
+        assignmentLandingPageTabsIntent = new Intent(EditAssignmentActivity.this, AssignmentLandingPage.class);
 
         //Enable the addNewItem only after Users enters an item
         itemNameEditText.addTextChangedListener(new TextWatcher() {
@@ -292,14 +291,14 @@ public class EditAssignment extends android.app.Activity {
             public void onClick(View v) {
 
                 if (itemsAdapter.getCount() == 0 && originalItemSet.size() == 0){
-                    Toast.makeText(EditAssignment.this, "Add atleast one item to create an Assignment", LENGTH_LONG).show();
+                    Toast.makeText(EditAssignmentActivity.this, "Add atleast one item to create an Assignment", LENGTH_LONG).show();
                     createNewAssignmentOK.setEnabled(false);
                     return;
                 }
 
                 final List<Item> updatedItemList = new LinkedList<>();
                 if (itemsAdapter.getCount() == 0){
-                    Toast.makeText(EditAssignment.this, "Deleting all the previous assignments", LENGTH_LONG).show();
+                    Toast.makeText(EditAssignmentActivity.this, "Deleting all the previous assignments", LENGTH_LONG).show();
                 }else {
                     for (int i = 0; i < itemsAdapter.list.size(); i++) {
                         updatedItemList.add(itemsAdapter.list.get(i));
@@ -307,7 +306,7 @@ public class EditAssignment extends android.app.Activity {
                     }
 
                     if (originalItemSet.equals(newItemSet)){
-                        Toast.makeText(EditAssignment.this, "No change made to assignment List", LENGTH_LONG).show();
+                        Toast.makeText(EditAssignmentActivity.this, "No change made to assignment List", LENGTH_LONG).show();
                         newItemSet.clear();
                         return;
                     }
@@ -352,9 +351,9 @@ public class EditAssignment extends android.app.Activity {
                                 originalEvent.setAssignment(cloneAssignment);
                             }
                             assignmentListHandler.addAssignmentToListAndMap(eventId, cloneAssignment, activityId, mContext);
-                            FaroIntentInfoBuilder.assignmentIntent(AssignmentLandingPageTabsIntent,
+                            FaroIntentInfoBuilder.assignmentIntent(assignmentLandingPageTabsIntent,
                                     eventId, activityId, assignmentId);
-                            startActivity(AssignmentLandingPageTabsIntent);
+                            startActivity(assignmentLandingPageTabsIntent);
                             finish();
                         }
                     };
@@ -416,9 +415,9 @@ public class EditAssignment extends android.app.Activity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        FaroIntentInfoBuilder.assignmentIntent(AssignmentLandingPageTabsIntent, eventId,
+        FaroIntentInfoBuilder.assignmentIntent(assignmentLandingPageTabsIntent, eventId,
                 activityId, assignmentId);
-        startActivity(AssignmentLandingPageTabsIntent);
+        startActivity(assignmentLandingPageTabsIntent);
         finish();
     }
 

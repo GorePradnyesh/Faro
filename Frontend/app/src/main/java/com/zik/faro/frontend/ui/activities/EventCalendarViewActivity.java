@@ -1,4 +1,4 @@
-package com.zik.faro.frontend.activities;
+package com.zik.faro.frontend.ui.activities;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -16,7 +16,7 @@ import com.zik.faro.frontend.R;
 
 import java.util.Calendar;
 
-public class EventCalendarView extends Activity {
+public class EventCalendarViewActivity extends Activity {
 
     private CalendarView calendarView = null;
     private int yr, mon, dy;
@@ -40,7 +40,7 @@ public class EventCalendarView extends Activity {
 
         datePickerButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                new DatePickerDialog(EventCalendarView.this, dateListener, yr, mon, dy).show();
+                new DatePickerDialog(EventCalendarViewActivity.this, dateListener, yr, mon, dy).show();
             }
         });
         calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {

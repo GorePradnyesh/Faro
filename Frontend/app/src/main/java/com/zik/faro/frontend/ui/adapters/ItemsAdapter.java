@@ -85,7 +85,7 @@ public class ItemsAdapter extends ArrayAdapter {
         ImgHolder holder = new ImgHolder();
 
         switch ((String)parent.getTag()){
-            case "EditAssignment":
+            case "EditAssignmentActivity":
              /*   if (item.getId() != null){
                     row = inflater.inflate(R.layout.item_cant_edit_row_style, parent, false);
                 }else{*/
@@ -115,7 +115,7 @@ public class ItemsAdapter extends ArrayAdapter {
                 holder.ITEM_NAME.setText(item.getName());
                 break;
             case "AssignmentLandingPageFragment":
-            case "MyAssignmentsFragment":
+            case "AssignmentsFragment":
                 row = inflater.inflate(R.layout.assignment_update_item_row_style, parent, false);
                 holder.ITEM_CHECKBOX = (CheckBox) row.findViewById(R.id.itemCheckBox);
                 holder.ITEM_COUNT = (TextView) row.findViewById(R.id.itemCount);

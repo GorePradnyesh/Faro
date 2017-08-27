@@ -75,7 +75,7 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
         activityLandingPageRelativeLayout = (RelativeLayout) findViewById(R.id.activityLandingPageRelativeLayout);
         activityLandingPageRelativeLayout.setVisibility(View.GONE);
 
-        EditActivityPage = new Intent(ActivityLandingPage.this, EditActivity.class);
+        EditActivityPage = new Intent(ActivityLandingPage.this, EditActivityPage.class);
         AssignmentLandingPageIntent = new Intent(ActivityLandingPage.this, AssignmentLandingPage.class);
 
         checkAndHandleNotification();

@@ -44,7 +44,7 @@ import java.util.Calendar;
 
 import static android.widget.Toast.LENGTH_LONG;
 
-public class EditActivity extends android.app.Activity {
+public class EditActivityPage extends android.app.Activity {
     private String eventId = null;
     private String activityId = null;
     private Event event;
@@ -66,7 +66,7 @@ public class EditActivity extends android.app.Activity {
 
     private RelativeLayout popUpRelativeLayout;
 
-    private static String TAG = "EditActivity";
+    private static String TAG = "EditActivityPage";
 
     private Intent ActivityLandingPage;
 
@@ -120,7 +120,7 @@ public class EditActivity extends android.app.Activity {
 
         popUpRelativeLayout = (RelativeLayout) findViewById(R.id.editActivity);
 
-        ActivityLandingPage = new Intent(EditActivity.this, ActivityLandingPage.class);
+        ActivityLandingPage = new Intent(EditActivityPage.this, ActivityLandingPage.class);
 
         final EditText activityDescription = (EditText) findViewById(R.id.activityDescriptionEditText);;
 
@@ -281,7 +281,7 @@ public class EditActivity extends android.app.Activity {
     }
 
     private void setStartDate(){
-        new DatePickerDialog(EditActivity.this,
+        new DatePickerDialog(EditActivityPage.this,
                 startDate,
                 startDateCalendar.get(Calendar.YEAR),
                 startDateCalendar.get(Calendar.MONTH),
@@ -290,7 +290,7 @@ public class EditActivity extends android.app.Activity {
     }
 
     private void setStartTime(){
-        new TimePickerDialog(EditActivity.this,
+        new TimePickerDialog(EditActivityPage.this,
                 startTime,
                 startDateCalendar.get(Calendar.HOUR_OF_DAY),
                 startDateCalendar.get(Calendar.MINUTE),
@@ -298,7 +298,7 @@ public class EditActivity extends android.app.Activity {
     }
 
     private void setEndDate(){
-        new DatePickerDialog(EditActivity.this,
+        new DatePickerDialog(EditActivityPage.this,
                 endDate,
                 endDateCalendar.get(Calendar.YEAR),
                 endDateCalendar.get(Calendar.MONTH),
@@ -306,7 +306,7 @@ public class EditActivity extends android.app.Activity {
     }
 
     private void setEndTime(){
-        new TimePickerDialog(EditActivity.this,
+        new TimePickerDialog(EditActivityPage.this,
                 endTime,
                 endDateCalendar.get(Calendar.HOUR_OF_DAY),
                 endDateCalendar.get(Calendar.MINUTE),
@@ -321,9 +321,9 @@ public class EditActivity extends android.app.Activity {
                 activityStartCalendar.equals(event.getStartDate()));
         boolean ret_val2 = activityStartCalendar.before(event.getEndDate());
         if (!ret_val1){
-            Toast.makeText(EditActivity.this, "Activity's Start Date cannot be before Event's Start Date", LENGTH_LONG).show();
+            Toast.makeText(EditActivityPage.this, "Activity's Start Date cannot be before Event's Start Date", LENGTH_LONG).show();
         }else if (!ret_val2){
-            Toast.makeText(EditActivity.this, "Activity's Start Date cannot be on/after Event's End Date", LENGTH_LONG).show();
+            Toast.makeText(EditActivityPage.this, "Activity's Start Date cannot be on/after Event's End Date", LENGTH_LONG).show();
         }
         return (ret_val1 && ret_val2);
     }
@@ -339,9 +339,9 @@ public class EditActivity extends android.app.Activity {
                 activityEndCalendar.equals(event.getEndDate()));
 
         if (!ret_val1){
-            Toast.makeText(EditActivity.this, "Activity's End Date cannot be before Activity's Start Date", LENGTH_LONG).show();
+            Toast.makeText(EditActivityPage.this, "Activity's End Date cannot be before Activity's Start Date", LENGTH_LONG).show();
         }else if (!ret_val2){
-            Toast.makeText(EditActivity.this, "Activity's End Date cannot be after Event's End Date", LENGTH_LONG).show();
+            Toast.makeText(EditActivityPage.this, "Activity's End Date cannot be after Event's End Date", LENGTH_LONG).show();
         }
         return  (ret_val2 && ret_val1);
     }
@@ -483,7 +483,7 @@ public class EditActivity extends android.app.Activity {
                         public void run() {
                             activityListHandler.removeActivityFromListAndMap(eventId, activityId, mContext);
                             popupWindow.dismiss();
-                            Toast.makeText(EditActivity.this, cloneActivity.getName() + "is Deleted", LENGTH_LONG).show();
+                            Toast.makeText(EditActivityPage.this, cloneActivity.getName() + "is Deleted", LENGTH_LONG).show();
                             finish();
                         }
                     };

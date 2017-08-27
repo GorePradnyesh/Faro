@@ -15,9 +15,9 @@ import com.zik.faro.frontend.handlers.ActivityListHandler;
 import com.zik.faro.frontend.ui.fragments.AssignmentLandingFragment;
 import com.zik.faro.frontend.handlers.AssignmentListHandler;
 import com.zik.faro.frontend.handlers.EventListHandler;
+import com.zik.faro.frontend.ui.fragments.AssignmentsFragment;
 import com.zik.faro.frontend.util.FaroExceptionHandler;
 import com.zik.faro.frontend.FaroIntentConstants;
-import com.zik.faro.frontend.ui.fragments.MyAssignmentsFragment;
 import com.zik.faro.frontend.R;
 
 public class AssignmentLandingPage extends FragmentActivity {
@@ -72,7 +72,7 @@ public class AssignmentLandingPage extends FragmentActivity {
                 AssignmentLandingFragment.class, bundle);
         mTabHost.addTab(
                 mTabHost.newTabSpec("tab2").setIndicator(getTabIndicator(mTabHost.getContext(), "My Items")),
-                MyAssignmentsFragment.class, bundle);
+                AssignmentsFragment.class, bundle);
     }
 
     private View getTabIndicator(Context context, String tabText) {
