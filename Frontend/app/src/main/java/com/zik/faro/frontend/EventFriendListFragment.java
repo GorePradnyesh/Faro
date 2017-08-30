@@ -13,6 +13,7 @@ import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.zik.faro.data.Event;
 import com.zik.faro.data.InviteeList;
@@ -21,6 +22,8 @@ import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 import com.zik.faro.frontend.util.FaroObjectNotFoundException;
 
 import java.text.MessageFormat;
+
+import static android.widget.Toast.LENGTH_LONG;
 
 
 /**
@@ -61,21 +64,23 @@ public class EventFriendListFragment extends Fragment implements NotificationPay
         eventFriendListRelativeLayout = (RelativeLayout) fragmentView.findViewById(R.id.eventFriendListRelativeLayout);
         eventFriendListRelativeLayout.setVisibility(View.GONE);
 
-        checkAndHandleNotification();
+        try {
+            checkAndHandleNotification();
+        } catch (FaroObjectNotFoundException e) {
+            // Event has been deleted.
+            Toast.makeText(getActivity(), "Event has been deleted", LENGTH_LONG).show();
+            Log.e(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
+            getActivity().finish();
+        }
 
         return fragmentView;
     }
 
-    private void setupPageDetails () {
+    private void setupPageDetails () throws FaroObjectNotFoundException{
         linlaHeaderProgress.setVisibility(View.GONE);
         eventFriendListRelativeLayout.setVisibility(View.VISIBLE);
 
-        try {
-            cloneEvent = eventListHandler.getCloneObject(eventId);
-        } catch (FaroObjectNotFoundException e) {
-            Log.i(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
-            getActivity().finish();
-        }
+        cloneEvent = eventListHandler.getCloneObject(eventId);
 
         ListView guestList = (ListView) fragmentView.findViewById(R.id.guestList);
         guestList.setBackgroundColor(Color.BLACK);
@@ -96,7 +101,7 @@ public class EventFriendListFragment extends Fragment implements NotificationPay
     }
 
     @Override
-    public void checkAndHandleNotification() {
+    public void checkAndHandleNotification() throws FaroObjectNotFoundException{
 
         extras = getArguments();
         if (extras == null)return; //TODO: How to handle such conditions
@@ -117,7 +122,7 @@ public class EventFriendListFragment extends Fragment implements NotificationPay
     public void onResume() {
         super.onResume();
         // Check if the version is same. It can be different if this page is loaded and a notification
-        // is received for this later which updates the global memory but clonedata on this page remains
+        // is received for this later which updates the cache but clonedata on this page remains
         // stale.
 
         try {
@@ -125,8 +130,9 @@ public class EventFriendListFragment extends Fragment implements NotificationPay
                 setupPageDetails();
             }
         } catch (FaroObjectNotFoundException e) {
-            //Activity has been deleted.
-            Log.i(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
+            // Event has been deleted.
+            Toast.makeText(getActivity(), "Event has been deleted", LENGTH_LONG).show();
+            Log.e(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
             getActivity().finish();
         }
     }

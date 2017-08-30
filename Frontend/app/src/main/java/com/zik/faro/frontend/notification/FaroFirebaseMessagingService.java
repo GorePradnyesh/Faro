@@ -13,15 +13,17 @@ import com.zik.faro.frontend.FaroIntentConstants;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.MessageFormat;
+
 public class FaroFirebaseMessagingService extends FirebaseMessagingService {
-    private static final String TAG = "MyFirebaseMsgService";
+    private static final String TAG = "FaroFirebaseMsgngSrvc";
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
-        String title = "";
-        String body = "";
-        String clickAction = "";
-        String notificationId = "";
+        String title = null;
+        String body = null;
+        String clickAction = null;
+        String notificationId = null;
         JSONObject data = null;
         String faroNotificationDataStr = null;
         JSONObject faroNotificationDataJSON = null;
@@ -45,7 +47,7 @@ public class FaroFirebaseMessagingService extends FirebaseMessagingService {
                 clickAction = faroNotificationDataJSON.getString(FaroIntentConstants.CLICK_ACTION);
                 notificationId = faroNotificationDataJSON.getString(FaroIntentConstants.NOTIFICATION_ID);
             } catch (JSONException e) {
-                e.printStackTrace();
+                Log.e(TAG, MessageFormat.format("failed to get {0} from Notification Data", e.getCause()));
             }
         }
         sendNotification(title, body, clickAction, data, notificationId);

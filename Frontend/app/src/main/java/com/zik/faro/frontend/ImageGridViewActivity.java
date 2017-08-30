@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
@@ -23,6 +24,8 @@ import com.zik.faro.frontend.util.FaroObjectNotFoundException;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.List;
+
+import static android.widget.Toast.LENGTH_LONG;
 
 
 /**
@@ -43,8 +46,10 @@ public class ImageGridViewActivity extends AppCompatActivity {
         try {
             cloneEvent = eventListHandler.getCloneObject(eventId);
         } catch (FaroObjectNotFoundException e) {
+            Toast.makeText(this, "Event has been deleted", LENGTH_LONG).show();
             Log.i(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
             finish();
+            return;
         }
 
         final String eventName = cloneEvent.getEventName();
@@ -91,15 +96,14 @@ public class ImageGridViewActivity extends AppCompatActivity {
                             }
                         }));
 
-                        Runnable myRunnable = new Runnable() {
+                        Handler mainHandler = new Handler(context.getMainLooper());
+                        mainHandler.post(new Runnable() {
                             @Override
                             public void run() {
                                 Log.i(TAG, "Successfully obtained images for the event");
                                 ImagesListHandler.getInstance().addImages(imageUrls);
                             }
-                        };
-                        Handler mainHandler = new Handler(context.getMainLooper());
-                        mainHandler.post(myRunnable);
+                        });
                     }
                 } else {
                     Log.e(TAG, MessageFormat.format("error = {0}", error.getCode()));

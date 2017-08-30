@@ -47,7 +47,7 @@ public class ForegroundNotificationSilentHandler {
     private AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
     private EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
 
-    public void updateGlobalMemoryIfPresent(Context context, JSONObject notificationDataJSON) throws JSONException {
+    public void updateObjectInCacheIfPresent(Context context, JSONObject notificationDataJSON) throws JSONException {
         faroNotificationDataStr = notificationDataJSON.getString(FaroIntentConstants.FARO_NOTIFICATION_DATA);
         faroNotificationDataJSON = new JSONObject(faroNotificationDataStr);
         payloadNotificationType = faroNotificationDataJSON.getString(FaroIntentConstants.PAYLOAD_NOTIFICATION_TYPE);
@@ -61,13 +61,13 @@ public class ForegroundNotificationSilentHandler {
             case "notificationType_EventLocationChanged":
             case "notificationType_EventDescriptionUpdate":
             case "notificationType_EventGeneric":
-                updateEventObjectInGlobalMemory();
+                updateEventObjectInCache();
                 break;
             case "notificationType_PollCreated":
             case "notificationType_PollModified":
             case "notificationType_PollClosed":
             case "notificationType_PollGeneric":
-                updatePollObjectInGlobalMemory();
+                updatePollObjectInCache();
                 break;
             case "notificationType_ActivityCreated":
             case "notificationType_ActivityDateChanged":
@@ -75,17 +75,17 @@ public class ForegroundNotificationSilentHandler {
             case "notificationType_ActivityLocationChanged":
             case "notificationType_ActivityDescriptionChanged":
             case "notificationType_ActivityGeneric":
-                updateActivityObjectInGlobalMemory();
+                updateActivityObjectInCache();
                 break;
             case "notificationType_NewAssignmentForYou":
             case "notificationType_AssignmentCreated":
             case "notificationType_AssignmentPending":
-                updateAssignmentObjectInGlobalMemory();
+                updateAssignmentObjectInCache();
                 break;
             case "notificationType_FriendInviteAccepted":
             case "notificationType_FriendInviteMaybe":
             case "notificationType_FriendInviteNotGoing":
-                updateEventFriendListInGlobalMemory();
+                updateEventFriendListInCache();
                 break;
             case "notificationType_RemovedFromEvent":
             case "notificationType_EventDeleted":
@@ -96,76 +96,75 @@ public class ForegroundNotificationSilentHandler {
         }
     }
 
-    private void updateEventObjectInGlobalMemory() throws JSONException {
+    private void updateEventObjectInCache() throws JSONException {
         eventId = faroNotificationDataJSON.getString(FaroIntentConstants.EVENT_ID);
 
-        //Check if event object present in global memory for this eventId.
+        //Check if event object present in cache for this eventId.
         Event event = null;
         try {
             event = (Event) eventListHandler.getOriginalObject(eventId);
-        } catch (FaroObjectNotFoundException e) {
-            Log.i(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
-            return;
-        }
 
-        // Check version passed in the notification against the version in the event object
-        // If greater only then make an api call.
-        if (version > event.getVersion()) {
-            getEventFromServer();
+            // Check version passed in the notification against the version in the event object
+            // If greater only then make an api call.
+            if (version > event.getVersion()) {
+                getEventFromServer();
+            }
+        } catch (FaroObjectNotFoundException e) {
+            Log.i(TAG, MessageFormat.format("Event {0} not present in cache", eventId));
         }
     }
 
-    private void updatePollObjectInGlobalMemory() throws JSONException {
+    private void updatePollObjectInCache() throws JSONException {
         eventId = faroNotificationDataJSON.getString(FaroIntentConstants.EVENT_ID);
         pollId = faroNotificationDataJSON.getString(FaroIntentConstants.POLL_ID);
 
-        //Check if poll object is present in global memory.
+        //Check if poll object is present in cache.
         Poll poll = null;
         try {
             poll = (Poll) pollListHandler.getOriginalObject(pollId);
+
+            // Check version passed in the notification against the version in the poll object
+            // If greater only then make an api call.
+            if (version > poll.getVersion()) {
+                getUpdatedPollFromServer();
+            }
+
         } catch (FaroObjectNotFoundException e) {
             //Poll has been deleted.
-            Log.i(TAG, MessageFormat.format("Poll {0} has been deleted", pollId));
-            return;
-        }
-
-        // Check version passed in the notification against the version in the poll object
-        // If greater only then make an api call.
-        if (version > poll.getVersion()) {
-            getUpdatedPollFromServer();
+            Log.i(TAG, MessageFormat.format("Poll {0} not present in cache", pollId));
         }
     }
 
-    private void updateActivityObjectInGlobalMemory() throws JSONException {
+    private void updateActivityObjectInCache() throws JSONException {
         eventId = faroNotificationDataJSON.getString(FaroIntentConstants.EVENT_ID);
         activityId = faroNotificationDataJSON.getString(FaroIntentConstants.ACTIVITY_ID);
 
-        //Check if Activity object is present in global memory.
+        //Check if Activity object is present in cache.
         Activity activity = null;
         try {
             activity = (Activity) activityListHandler.getOriginalObject(activityId);
-        } catch (FaroObjectNotFoundException e) {
-            Log.i(TAG, MessageFormat.format("Activity {0} has been deleted", activityId));
-            return;
-        }
 
-        // Check version passed in the notification against the version in the activity object
-        // If greater only then make an api call.
-        if (version > activity.getVersion()) {
-            getUpdatedActivityFromServer();
+            // Check version passed in the notification against the version in the activity object
+            // If greater only then make an api call.
+            if (version > activity.getVersion()) {
+                getUpdatedActivityFromServer();
+            }
+
+        } catch (FaroObjectNotFoundException e) {
+            Log.i(TAG, MessageFormat.format("Activity {0} not present in cache", activityId));
         }
     }
 
-    private void updateAssignmentObjectInGlobalMemory() throws JSONException {
+    private void updateAssignmentObjectInCache() throws JSONException {
         eventId = faroNotificationDataJSON.getString(FaroIntentConstants.EVENT_ID);
         activityId = faroNotificationDataJSON.getString(FaroIntentConstants.ACTIVITY_ID);
         assignmentId = faroNotificationDataJSON.getString(FaroIntentConstants.ASSIGNMENT_ID);
 
         Event event = null;
         Activity activity = null;
-        Long globalMemoryVersion;
+        Long cacheVersion;
 
-        //Check if Assignment object is present in global memory.
+        //Check if Assignment object is present in cache.
         Assignment assignment =  assignmentListHandler.getOriginalAssignmentFromMap(assignmentId);
         if (assignment == null)
             return;
@@ -173,41 +172,41 @@ public class ForegroundNotificationSilentHandler {
         try {
             if (activityId.equals("")) {
                 event = (Event) eventListHandler.getOriginalObject(eventId);
-                globalMemoryVersion = event.getVersion();
+                cacheVersion = event.getVersion();
             } else {
                 activity = (Activity) activityListHandler.getOriginalObject(activityId);
-                globalMemoryVersion = activity.getVersion();
+                cacheVersion = activity.getVersion();
             }
+
+            // Check version passed in the notification against the version in the evnt/activity object
+            // If greater only then make an api call.
+            if (version > cacheVersion) {
+                getUpdatedAssignmentFromServer();
+            }
+
         } catch (FaroObjectNotFoundException e) {
-            Log.i(TAG, MessageFormat.format("{0} {1} has been deleted",
+            Log.i(TAG, MessageFormat.format("{0} {1} not present in cache",
                     activityId.equals("") ? "Event" : "Activity",
                     activityId.equals("") ? eventId : activityId));
-            return;
-        }
-
-        // Check version passed in the notification against the version in the evnt/activity object
-        // If greater only then make an api call.
-        if (version > globalMemoryVersion) {
-            getUpdatedAssignmentFromServer();
         }
     }
 
-    private void updateEventFriendListInGlobalMemory() throws JSONException {
+    private void updateEventFriendListInCache() throws JSONException {
         eventId = faroNotificationDataJSON.getString(FaroIntentConstants.EVENT_ID);
 
-        //Check if event object present in global memory for this eventId.
+        //Check if event object present in cache for this eventId.
         Event event = null;
         try {
             event = (Event) eventListHandler.getOriginalObject(eventId);
-        } catch (FaroObjectNotFoundException e) {
-            Log.i(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
-            return;
-        }
 
-        // check version passed in the notification against the version in the event object
-        // If greater only then make an api call.
-        if (version > event.getVersion()) {
-            getEventInviteesFromServer();
+            // check version passed in the notification against the version in the event object
+            // If greater only then make an api call.
+            if (version > event.getVersion()) {
+                getEventInviteesFromServer();
+            }
+
+        } catch (FaroObjectNotFoundException e) {
+            Log.i(TAG, MessageFormat.format("Event {0} not present in cache", eventId));
         }
     }
 
@@ -221,19 +220,18 @@ public class ForegroundNotificationSilentHandler {
             @Override
             public void onResponse(final EventInviteStatusWrapper eventInviteStatusWrapper, HttpError error) {
                 if (error == null ) {
-                    Runnable myRunnable = new Runnable() {
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                    Log.i(TAG, "Successfully received Event from server");
-                    Event event = eventInviteStatusWrapper.getEvent();
-                    eventListHandler.addEventToListAndMap(event,
-                            eventInviteStatusWrapper.getInviteStatus());
+                            Log.i(TAG, "Successfully received Event from server");
+                            Event event = eventInviteStatusWrapper.getEvent();
+                            eventListHandler.addEventToListAndMap(event,
+                                    eventInviteStatusWrapper.getInviteStatus());
                         }
-                    };
-                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                    mainHandler.post(myRunnable);
+                    });
                 }else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
             }
         }, eventId);
@@ -250,17 +248,16 @@ public class ForegroundNotificationSilentHandler {
             public void onResponse(final Poll receivedPoll, HttpError error) {
                 if (error == null ) {
                     //Since update to server successful
-                    Runnable myRunnable = new Runnable() {
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             pollListHandler.addPollToListAndMap(eventId, receivedPoll, mContext);
                         }
-                    };
-                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                    mainHandler.post(myRunnable);
+                    });
                 }
                 else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
 
             }
@@ -277,17 +274,16 @@ public class ForegroundNotificationSilentHandler {
             @Override
             public void onResponse(final Activity activity, HttpError error) {
                 if (error == null) {
-                    Runnable myRunnable = new Runnable() {
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             Log.i(TAG, "Successfully received activities from the server!!");
                             activityListHandler.addActivityToListAndMap(eventId, activity, mContext);
                         }
-                    };
-                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                    mainHandler.post(myRunnable);
+                    });
                 } else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
             }
         }, eventId, activityId);
@@ -303,18 +299,17 @@ public class ForegroundNotificationSilentHandler {
             @Override
             public void onResponse(final Assignment assignment, HttpError error) {
                 if (error == null ) {
-                    Runnable myRunnable = new Runnable() {
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             Log.i(TAG, "Successfully received Assignment from server");
                             assignmentListHandler.addAssignmentToListAndMap(eventId,
                                     assignment, activityId, mContext);
                         }
-                    };
-                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                    mainHandler.post(myRunnable);
+                    });
                 }else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
             }
         }, eventId, assignmentId, activityId);
@@ -330,17 +325,16 @@ public class ForegroundNotificationSilentHandler {
             @Override
             public void onResponse(final InviteeList inviteeList, HttpError error) {
                 if (error == null) {
-                    Runnable myRunnable = new Runnable() {
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             Log.i(TAG, "Successfully received Invitee List for the cloneEvent");
                             eventFriendListHandler.addDownloadedFriendsToListAndMap(eventId, inviteeList, mContext);
                         }
-                    };
-                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                    mainHandler.post(myRunnable);
+                    });
                 } else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
             }
         }, eventId);

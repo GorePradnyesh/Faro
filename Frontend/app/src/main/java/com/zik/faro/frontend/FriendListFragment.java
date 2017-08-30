@@ -154,7 +154,7 @@ public class FriendListFragment extends Fragment {
                                         }
                                     });
                                 } else {
-                                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                                 }
                             }
                         }, friendEmailId);

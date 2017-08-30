@@ -10,6 +10,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.Activity;
@@ -28,6 +29,8 @@ import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
+
+import static android.widget.Toast.LENGTH_LONG;
 
 public class ActivityLandingPage extends android.app.Activity implements NotificationPayloadHandler {
 
@@ -76,20 +79,21 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
         EditActivityPage = new Intent(ActivityLandingPage.this, EditActivity.class);
         AssignmentLandingPageIntent = new Intent(ActivityLandingPage.this, AssignmentLandingPage.class);
 
-        checkAndHandleNotification();
+        try {
+            checkAndHandleNotification();
+        } catch (FaroObjectNotFoundException e) {
+            Log.e(TAG, MessageFormat.format("Activity {0} has been deleted", activityId));
+            Toast.makeText(mContext, "Activity has been deleted", LENGTH_LONG).show();
+            finish();
+        }
     }
 
-    private void setupPageDetails() {
+    private void setupPageDetails() throws FaroObjectNotFoundException{
 
         if (!receivedEvent || !receivedAllActivities)
             return;
 
-        try {
-            cloneActivity = activityListHandler.getCloneObject(activityId);
-        } catch (FaroObjectNotFoundException e) {
-            Log.i(TAG, MessageFormat.format("Activity {0} has been deleted", activityId));
-            finish();
-        }
+        cloneActivity = activityListHandler.getCloneObject(activityId);
 
         linlaHeaderProgress.setVisibility(View.GONE);
         activityLandingPageRelativeLayout.setVisibility(View.VISIBLE);
@@ -131,10 +135,11 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
                 startActivity(AssignmentLandingPageIntent);
             }
         });
+
     }
 
     @Override
-    public void checkAndHandleNotification() {
+    public void checkAndHandleNotification() throws FaroObjectNotFoundException{
         extras = getIntent().getExtras();
         if (extras == null) return; //TODO How to handle this case?
 
@@ -173,19 +178,24 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
             @Override
             public void onResponse(final List<com.zik.faro.data.Activity> activities, HttpError error) {
                 if (error == null) {
-                    Runnable myRunnable = new Runnable() {
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             receivedAllActivities = true;
                             Log.i(TAG, "Successfully received activities from the server!!");
                             activityListHandler.addDownloadedActivitiesToListAndMap(eventId, activities, mContext);
-                            setupPageDetails();
+                            try {
+                                setupPageDetails();
+                            } catch (FaroObjectNotFoundException e) {
+                                Log.e(TAG, MessageFormat.format("Activity {0} has been deleted", activityId));
+                                Toast.makeText(mContext, "Activity has been deleted", LENGTH_LONG).show();
+                                finish();
+                            }
                         }
-                    };
-                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                    mainHandler.post(myRunnable);
+                    });
                 } else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
             }
         }, eventId);
@@ -201,7 +211,8 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
             @Override
             public void onResponse(final EventInviteStatusWrapper eventInviteStatusWrapper, HttpError error) {
                 if (error == null) {
-                    Runnable myRunnable = new Runnable() {
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             Log.i(TAG, "Successfully received Event from server");
@@ -210,13 +221,16 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
                             eventListHandler.addEventToListAndMap(event,
                                     eventInviteStatusWrapper.getInviteStatus());
                             assignmentListHandler.addAssignmentToListAndMap(eventId, event.getAssignment(), null, mContext);
-                            setupPageDetails();
-                        }
-                    };
-                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                    mainHandler.post(myRunnable);
+                            try {
+                                setupPageDetails();
+                            } catch (FaroObjectNotFoundException e) {
+                                Log.e(TAG, MessageFormat.format("Activity {0} has been deleted", activityId));
+                                Toast.makeText(mContext, "Activity has been deleted", LENGTH_LONG).show();
+                                finish();
+                            }
+                        }});
                 } else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
             }
         }, eventId);
@@ -232,17 +246,16 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
             @Override
             public void onResponse(final InviteeList inviteeList, HttpError error) {
                 if (error == null) {
-                    Runnable myRunnable = new Runnable() {
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             Log.i(TAG, "Successfully received Invitee List for the cloneEvent");
                             eventFriendListHandler.addDownloadedFriendsToListAndMap(eventId, inviteeList, mContext);
                         }
-                    };
-                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                    mainHandler.post(myRunnable);
+                    });
                 } else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
             }
         }, eventId);
@@ -253,7 +266,7 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
         super.onResume();
         if (bundleType.equals(FaroIntentConstants.IS_NOT_NOTIFICATION)) {
             // Check if the version is same. It can be different if this page is loaded and a notification
-            // is received for this later which updates the global memory but clonedata on this page remains
+            // is received for this later which updates the cache but clonedata on this page remains
             // stale.
             // This check is not necessary when opening this page directly through a notification.
             try {
@@ -262,7 +275,8 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
                 }
             } catch (FaroObjectNotFoundException e) {
                 //Activity has been deleted.
-                Log.i(TAG, MessageFormat.format("Activity {0} has been deleted", activityId));
+                Log.e(TAG, MessageFormat.format("Activity {0} has been deleted", activityId));
+                Toast.makeText(this, "Activity has been deleted", LENGTH_LONG).show();
                 finish();
             }
         }

@@ -190,7 +190,7 @@ public class ActivityListHandler extends BaseObjectHandler<Activity>{
         Activity activity = activityMap.get(activityId);
         if (activity == null) {
             throw new FaroObjectNotFoundException
-                    (MessageFormat.format("Actvity with id {0} not found in global memory", activityId));
+                    (MessageFormat.format("Actvity with id {0} not found in cache", activityId));
         } else {
             return activity;
         }

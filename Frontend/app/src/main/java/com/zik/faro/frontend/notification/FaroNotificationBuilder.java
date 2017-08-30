@@ -17,6 +17,8 @@ import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.MessageFormat;
+
 public class FaroNotificationBuilder {
     private static final String TAG = "FaroNotificationBuilder";
 
@@ -29,7 +31,7 @@ public class FaroNotificationBuilder {
         PendingIntent pendingIntent = null;
         String faroNotificationDataStr = null;
         JSONObject faroNotificationDataJSON = null;
-        String user = "";
+        String user = null;
         FaroUserContext faroUserContext = FaroUserContext.getInstance();
         String myUserId = faroUserContext.getEmail();
 
@@ -39,15 +41,17 @@ public class FaroNotificationBuilder {
             faroNotificationDataStr = data.getString(FaroIntentConstants.FARO_NOTIFICATION_DATA);
             faroNotificationDataJSON = new JSONObject(faroNotificationDataStr);
             user = faroNotificationDataJSON.getString(FaroIntentConstants.USER);
-            if (user == null)
+            if (user == null) {
                 return null;
+            }
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.e(TAG, MessageFormat.format("failed to get {0} from Notification Data", e.getCause()));
         }
 
         // incase the notification was triggered by me, then should not show up on the system tray.
-        if (user.equals(myUserId))
+        if (myUserId.equals(user)) {
             return null;
+        }
 
         switch (clickAction){
             case "DEFAULTACTION":
@@ -74,9 +78,9 @@ public class FaroNotificationBuilder {
         ForegroundNotificationSilentHandler foregroundNotificationSilentHandler =
                 new ForegroundNotificationSilentHandler();
         try {
-            foregroundNotificationSilentHandler.updateGlobalMemoryIfPresent(context, data);
+            foregroundNotificationSilentHandler.updateObjectInCacheIfPresent(context, data);
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.e(TAG, MessageFormat.format("failed to get {0} from Notification Data", e.getCause()));
         }
 
         Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);

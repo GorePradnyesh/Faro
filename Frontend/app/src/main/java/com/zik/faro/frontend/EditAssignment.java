@@ -111,10 +111,18 @@ public class EditAssignment extends android.app.Activity {
         extras = getIntent().getExtras();
         if (extras == null)return; //TODO: How to handle such conditions
 
-        setupPageDetails();
+        try {
+            setupPageDetails();
+        } catch (FaroObjectNotFoundException e) {
+            //Activity has been deleted.
+            Toast.makeText(this, activityId == null ? "Event" : "Activity" + " has been deleted", LENGTH_LONG).show();
+            Log.e(TAG, MessageFormat.format("{0} {1} has been deleted",
+                    activityId == null ? "Event" : "Activity",
+                    activityId == null ? eventId : activityId));
+            finish();        }
     }
 
-    private void setupPageDetails () {
+    private void setupPageDetails () throws FaroObjectNotFoundException{
 
         linlaHeaderProgress.setVisibility(View.GONE);
         editAssignmentRelativeLayout.setVisibility(View.VISIBLE);
@@ -123,23 +131,12 @@ public class EditAssignment extends android.app.Activity {
         activityId = extras.getString(FaroIntentConstants.ACTIVITY_ID);
         assignmentId = extras.getString(FaroIntentConstants.ASSIGNMENT_ID);
 
-        try {
-            originalEvent = (Event) eventListHandler.getOriginalObject(eventId);
-            cloneEvent = eventListHandler.getCloneObject(eventId);
-        } catch (FaroObjectNotFoundException e) {
-            Log.i(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
-            finish();
-        }
-
+        originalEvent = (Event) eventListHandler.getOriginalObject(eventId);
+        cloneEvent = eventListHandler.getCloneObject(eventId);
 
         if (activityId != null) {
-            try {
-                originalActivity = (Activity) activityListHandler.getOriginalObject(activityId);
-                cloneActivity = activityListHandler.getCloneObject(activityId);
-            } catch (FaroObjectNotFoundException e) {
-                Log.i(TAG, MessageFormat.format("Activity {0} has been deleted", activityId));
-                finish();
-            }
+            originalActivity = (Activity) activityListHandler.getOriginalObject(activityId);
+            cloneActivity = activityListHandler.getCloneObject(activityId);
         }
 
         cloneAssignment = assignmentListHandler.getAssignmentCloneFromMap(assignmentId);
@@ -281,19 +278,14 @@ public class EditAssignment extends android.app.Activity {
                     itemsAdapter.removeFromPosition(editItemPosition);
 
                     String itemId = itemIdTextView.getText().toString();
-                    try {
-                        item = new Item(itemDescription, assigneeId, itemCount, selectedUnit, itemId);
-                    } catch (IllegalDataOperation illegalDataOperation) {
-                        illegalDataOperation.printStackTrace();
-                    }
+
+                    item = new Item(itemDescription, assigneeId, itemCount, selectedUnit, itemId);
+
                     itemsAdapter.insertAtPosition(item, editItemPosition);
                     editItemPosition = -1;
                 }else {
-                    try {
-                        item = new Item(itemDescription, assigneeId, itemCount, selectedUnit);
-                    } catch (IllegalDataOperation illegalDataOperation) {
-                        illegalDataOperation.printStackTrace();
-                    }
+                    item = new Item(itemDescription, assigneeId, itemCount, selectedUnit);
+
                     itemsAdapter.insertAtBeginning(item);
                 }
                 itemsAdapter.notifyDataSetChanged();
@@ -380,7 +372,7 @@ public class EditAssignment extends android.app.Activity {
                     Handler mainHandler = new Handler(mContext.getMainLooper());
                     mainHandler.post(myRunnable);
                 }else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
 
             }
@@ -445,7 +437,7 @@ public class EditAssignment extends android.app.Activity {
     protected void onResume() {
         super.onResume();
         // Check if the version is same. It can be different if this page is loaded and a notification
-        // is received for this later which updates the global memory but clonedata on this page remains
+        // is received for this later which updates the cache but clonedata on this page remains
         // stale.
         try {
             if (activityId == null) {
@@ -459,7 +451,8 @@ public class EditAssignment extends android.app.Activity {
             }
         } catch (FaroObjectNotFoundException e) {
             //Activity has been deleted.
-            Log.i(TAG, MessageFormat.format("{0} {1} has been deleted",
+            Toast.makeText(this, activityId == null ? "Event" : "Activity" + " has been deleted", LENGTH_LONG).show();
+            Log.e(TAG, MessageFormat.format("{0} {1} has been deleted",
                     activityId == null ? "Event" : "Activity",
                     activityId == null ? eventId : activityId));
             finish();

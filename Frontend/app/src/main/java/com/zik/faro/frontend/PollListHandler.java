@@ -53,7 +53,7 @@ public class PollListHandler extends BaseObjectHandler<Poll>{
         Poll poll = pollMap.get(pollId);
         if (poll == null) {
             throw new FaroObjectNotFoundException
-                    (MessageFormat.format("Poll with id {0} not found in global memory", pollId));
+                    (MessageFormat.format("Poll with id {0} not found in cache", pollId));
         } else {
             return poll;
         }

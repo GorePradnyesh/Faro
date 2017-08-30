@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Event;
@@ -17,6 +18,8 @@ import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 import com.zik.faro.frontend.util.FaroObjectNotFoundException;
 
 import java.text.MessageFormat;
+
+import static android.widget.Toast.LENGTH_LONG;
 
 public class AssignmentLandingPage extends FragmentActivity {
     private FragmentTabHost mTabHost;
@@ -46,24 +49,24 @@ public class AssignmentLandingPage extends FragmentActivity {
             assignmentId = extras.getString(FaroIntentConstants.ASSIGNMENT_ID);
             bundleType = extras.getString(FaroIntentConstants.BUNDLE_TYPE);
 
-            setupPageDetails();
+            try {
+                setupPageDetails();
+            } catch (FaroObjectNotFoundException e) {
+                Toast.makeText(this, (activityId == null) ? "Event" : "Activity" + " has been deleted", LENGTH_LONG).show();
+                Log.i(TAG, MessageFormat.format("{0} {1} has been deleted",
+                        (activityId == null) ? "Event" : "Activity",
+                        (activityId == null) ? eventId : activityId));
+                finish();
+            }
         }
     }
 
-    private void setupPageDetails () {
-        try {
-            if (activityId == null) {
-                cloneEvent = eventListHandler.getCloneObject(eventId);
-            } else {
-                cloneActivity = activityListHandler.getCloneObject(activityId);
-            }
-        } catch (FaroObjectNotFoundException e) {
-            Log.i(TAG, MessageFormat.format("{0} {1} has been deleted",
-                    (activityId == null) ? "Event" : "Activity",
-                    (activityId == null) ? eventId : activityId));
-            finish();
+    private void setupPageDetails ()  throws FaroObjectNotFoundException{
+        if (activityId == null) {
+            cloneEvent = eventListHandler.getCloneObject(eventId);
+        } else {
+            cloneActivity = activityListHandler.getCloneObject(activityId);
         }
-
 
         Bundle bundle = new Bundle();
         bundle.putString(FaroIntentConstants.EVENT_ID, eventId);

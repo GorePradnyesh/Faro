@@ -130,17 +130,19 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
         extras = getIntent().getExtras();
         if (extras == null) return; // TODO: how to handle this case?
 
-        checkAndHandleNotification();
-    }
-
-    private void setupPageDetails() {
-
         try {
-            clonePoll = pollListHandler.getCloneObject(pollId);
+            checkAndHandleNotification();
         } catch (FaroObjectNotFoundException e) {
-            Log.i(TAG, MessageFormat.format("Poll {0} has been deleted", pollId));
+            //Poll has been deleted.
+            Toast.makeText(this, "Poll has been deleted", LENGTH_LONG).show();
+            Log.e(TAG, MessageFormat.format("Poll {0} has been deleted", pollId));
             finish();
         }
+    }
+
+    private void setupPageDetails() throws FaroObjectNotFoundException{
+
+        clonePoll = pollListHandler.getCloneObject(pollId);
 
         DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
@@ -434,19 +436,25 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
             @Override
             public void onResponse(final Poll receivedPoll, HttpError error) {
                 if (error == null ) {
-                    Runnable myRunnable = new Runnable() {
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             Log.i(TAG, "Poll Update Response received Successfully");
                             pollListHandler.removePollFromListAndMap(eventId, clonePoll, mContext);
                             pollListHandler.addPollToListAndMap(eventId, receivedPoll, mContext);
-                           setupPageDetails();
+                            try {
+                                setupPageDetails();
+                            } catch (FaroObjectNotFoundException e) {
+                                //Poll has been deleted.
+                                Toast.makeText(mContext, "Poll has been deleted", LENGTH_LONG).show();
+                                Log.e(TAG, MessageFormat.format("Poll {0} has been deleted", pollId));
+                                finish();
+                            }
                         }
-                    };
-                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                    mainHandler.post(myRunnable);
+                    });
                 }else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
             }
         }, eventId, pollId, map);
@@ -489,7 +497,7 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
     }
 
     @Override
-    public void checkAndHandleNotification() {
+    public void checkAndHandleNotification() throws FaroObjectNotFoundException{
         if (extras == null) return; //TODO: How to handle such conditions
 
         bundleType = extras.getString(FaroIntentConstants.BUNDLE_TYPE);
@@ -518,17 +526,23 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
             @Override
             public void onResponse(final Poll poll, HttpError error) {
                 if (error == null ) {
-                    Runnable myRunnable = new Runnable() {
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             pollListHandler.addPollToListAndMap(eventId, poll, mContext);
-                            setupPageDetails();
+                            try {
+                                setupPageDetails();
+                            } catch (FaroObjectNotFoundException e) {
+                                //Poll has been deleted.
+                                Toast.makeText(mContext, "Poll has been deleted", LENGTH_LONG).show();
+                                Log.e(TAG, MessageFormat.format("Poll {0} has been deleted", pollId));
+                                finish();
+                            }
                         }
-                    };
-                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                    mainHandler.post(myRunnable);
+                    });
                 }else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
             }
         }, eventId, pollId, map);
@@ -545,18 +559,24 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
             public void onResponse(final Poll receivedPoll, HttpError error) {
                 if (error == null ) {
                     //Since update to server successful
-                    Runnable myRunnable = new Runnable() {
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             pollListHandler.addPollToListAndMap(eventId, receivedPoll, mContext);
-                            setupPageDetails();
+                            try {
+                                setupPageDetails();
+                            } catch (FaroObjectNotFoundException e) {
+                                //Poll has been deleted.
+                                Toast.makeText(mContext, "Poll has been deleted", LENGTH_LONG).show();
+                                Log.e(TAG, MessageFormat.format("Poll {0} has been deleted", pollId));
+                                finish();
+                            }
                         }
-                    };
-                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                    mainHandler.post(myRunnable);
+                    });
                 }
                 else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
 
             }
@@ -568,7 +588,7 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
         super.onResume();
         if (bundleType.equals(FaroIntentConstants.IS_NOT_NOTIFICATION)) {
             // Check if the version is same. It can be different if this page is loaded and a notification
-            // is received for this later which updates the global memory but clonedata on this page remains
+            // is received for this later which updates the cache but clonedata on this page remains
             // stale.
             // This check is not necessary when opening this page directly through a notification.
             try {
@@ -577,7 +597,8 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
                 }
             } catch (FaroObjectNotFoundException e) {
                 //Poll has been deleted.
-                Log.i(TAG, MessageFormat.format("Poll {0} has been deleted", pollId));
+                Toast.makeText(this, "Poll has been deleted", LENGTH_LONG).show();
+                Log.e(TAG, MessageFormat.format("Poll {0} has been deleted", pollId));
                 finish();
             }
         }

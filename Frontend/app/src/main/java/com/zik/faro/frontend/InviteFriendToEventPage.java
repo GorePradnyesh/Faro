@@ -25,6 +25,7 @@ import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -98,7 +99,8 @@ public class InviteFriendToEventPage extends Activity {
                         @Override
                         public void onResponse(String s, HttpError error) {
                             if (error == null ) {
-                                final Runnable myRunnable = new Runnable() {
+                                Handler mainHandler = new Handler(mContext.getMainLooper());
+                                mainHandler.post(new Runnable() {
                                     @Override
                                     public void run() {
                                         Log.i(TAG, "Friends successfully invited to the event");
@@ -107,11 +109,9 @@ public class InviteFriendToEventPage extends Activity {
                                         startActivity(EventFriendListLandingPageIntent);
                                         finish();
                                     }
-                                };
-                                Handler mainHandler = new Handler(mContext.getMainLooper());
-                                mainHandler.post(myRunnable);
+                                });
                             }else {
-                                Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                                Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                             }
                         }
                     }, eventId, addFriendRequest);

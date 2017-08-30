@@ -113,10 +113,17 @@ public class EditEvent extends Activity {
         extras = getIntent().getExtras();
         if (extras == null)return; //TODO: How to handle such conditions
 
-        setupPageDetails();
+        try {
+            setupPageDetails();
+        } catch (FaroObjectNotFoundException e) {
+            //Event has been deleted.
+            Toast.makeText(this, "Event has been deleted", LENGTH_LONG).show();
+            Log.e(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
+            finish();
+        }
     }
 
-    private void setupPageDetails () {
+    private void setupPageDetails () throws FaroObjectNotFoundException{
 
         linlaHeaderProgress.setVisibility(View.GONE);
         editEventRelativeLayout.setVisibility(View.VISIBLE);
@@ -130,12 +137,8 @@ public class EditEvent extends Activity {
         * This way if the user makes some changes but then clicks back without clicking OK button,
         * the original event is not affected.
         */
-        try {
-            cloneEvent = eventListHandler.getCloneObject(eventId);
-        } catch (FaroObjectNotFoundException e) {
-            Log.i(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
-            finish();
-        }
+
+        cloneEvent = eventListHandler.getCloneObject(eventId);
 
         startDateButton = (Button) findViewById(R.id.startDateButton);
         startTimeButton = (Button) findViewById(R.id.startTimeButton);
@@ -242,7 +245,8 @@ public class EditEvent extends Activity {
                     public void onResponse(final Event receivedEvent, HttpError error) {
                         if (error == null ) {
                             //Since update to server successful, adding event to List and Map below
-                            Runnable myRunnable = new Runnable() {
+                            Handler mainHandler = new Handler(mContext.getMainLooper());
+                            mainHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
                                     //Since update to server successful, adding event to List and Map below
@@ -252,11 +256,9 @@ public class EditEvent extends Activity {
                                     startActivity(EventLanding);
                                     finish();
                                 }
-                            };
-                            Handler mainHandler = new Handler(mContext.getMainLooper());
-                            mainHandler.post(myRunnable);
+                            });
                         } else {
-                            Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                            Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                         }
                     }
                 }, eventId, cloneEvent);
@@ -353,7 +355,8 @@ public class EditEvent extends Activity {
                     @Override
                     public void onResponse(String s, HttpError error) {
                         if (error == null ) {
-                            Runnable myRunnable = new Runnable() {
+                            Handler mainHandler = new Handler(mContext.getMainLooper());
+                            mainHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
                                     eventListHandler.removeEventFromListAndMap(eventId);
@@ -361,11 +364,9 @@ public class EditEvent extends Activity {
                                     Toast.makeText(EditEvent.this, cloneEvent.getEventName() + "is Deleted", LENGTH_LONG).show();
                                     finish();
                                 }
-                            };
-                            Handler mainHandler = new Handler(mContext.getMainLooper());
-                            mainHandler.post(myRunnable);
+                            });
                         }else {
-                            Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                            Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                         }
                     }
                 }, eventId);
@@ -574,15 +575,16 @@ public class EditEvent extends Activity {
     protected void onResume() {
         super.onResume();
         // Check if the version is same. It can be different if this page is loaded and a notification
-        // is received for this later which updates the global memory but clonedata on this page remains
+        // is received for this later which updates the cache but clonedata on this page remains
         // stale.
         try {
             if (!eventListHandler.checkObjectVersionIfLatest(eventId, cloneEvent.getVersion())) {
                 setupPageDetails();
             }
         } catch (FaroObjectNotFoundException e) {
-            //Activity has been deleted.
-            Log.i(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
+            //Event has been deleted.
+            Toast.makeText(this, "Event has been deleted", LENGTH_LONG).show();
+            Log.e(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
             finish();
         }
 

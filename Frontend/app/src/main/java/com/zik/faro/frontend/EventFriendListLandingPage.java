@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.zik.faro.data.Event;
 import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
@@ -16,6 +17,8 @@ import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 import com.zik.faro.frontend.util.FaroObjectNotFoundException;
 
 import java.text.MessageFormat;
+
+import static android.widget.Toast.LENGTH_LONG;
 
 public class EventFriendListLandingPage extends FragmentActivity {
     private FragmentTabHost mTabHost;
@@ -50,8 +53,10 @@ public class EventFriendListLandingPage extends FragmentActivity {
             try {
                 cloneEvent = eventListHandler.getCloneObject(eventId);
             } catch (FaroObjectNotFoundException e) {
-                Log.i(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
+                Toast.makeText(this, "Event has been deleted", LENGTH_LONG).show();
+                Log.e(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
                 finish();
+                return;
             }
             if (!cloneEvent.getEventCreatorId().equals(myUserId)){
                 addFriendsImageButton.setVisibility(View.GONE);

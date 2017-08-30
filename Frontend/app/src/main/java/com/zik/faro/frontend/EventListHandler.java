@@ -95,7 +95,7 @@ public class EventListHandler extends BaseObjectHandler<Event>{
                     EventInviteStatusWrapper eventInviteStatusWrapper = new EventInviteStatusWrapper(receivedEvent, EventInviteStatus.ACCEPTED);
                     eventMap.put(receivedEvent.getId(), eventInviteStatusWrapper);
                 } else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
             }
         }, event);
@@ -294,7 +294,7 @@ public class EventListHandler extends BaseObjectHandler<Event>{
         EventInviteStatusWrapper eventInviteStatusWrapper = eventMap.get(eventId);
         if (eventInviteStatusWrapper == null || eventInviteStatusWrapper.getEvent() == null) {
             throw new FaroObjectNotFoundException
-                    (MessageFormat.format("Event with id {0} not found in global memory", eventId));
+                    (MessageFormat.format("Event with id {0} not found in cache", eventId));
         }
 
         return eventInviteStatusWrapper.getEvent();

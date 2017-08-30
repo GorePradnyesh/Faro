@@ -4,9 +4,9 @@ import com.google.gson.Gson;
 import com.zik.faro.data.BaseEntity;
 import com.zik.faro.frontend.util.FaroObjectNotFoundException;
 
-// Function returns true if the versions match
 public abstract class BaseObjectHandler<T extends BaseEntity> implements FaroObjectHandler<T>{
     @Override
+    // Function returns true if the versions match
     public boolean checkObjectVersionIfLatest(String objectId, Long cloneVersion) throws FaroObjectNotFoundException{
         T originalBaseEntity = getOriginalObject(objectId);
         return cloneVersion.equals(originalBaseEntity.getVersion());
