@@ -1,5 +1,6 @@
 package com.zik.faro.persistence.datastore;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -63,77 +64,135 @@ public class PollDatastoreImpl {
     	return count;
     }
     
-    public static PollDo updatePoll(final String eventId, final String pollId,
-    		final PollDo updatePoll, final String userId, final Set<String> options) throws DatastoreException, DataNotFoundException, UpdateVersionException{
+    public static PollDo castVote(final Set<String> addOptions, final Set<String> removeOptions, 
+    		final String pollId, final String eventId, final Long version, final String userId) throws DatastoreException, DataNotFoundException, UpdateVersionException, UpdateException{
     	Work w = new Work<TransactionResult<PollDo>>() {
-    		
-			@Override
-			public TransactionResult<PollDo> run(){
-				PollDo poll;
+	        public TransactionResult<PollDo> run() {
+	        	// Read from datastore
+	        	PollDo poll = null;
 				try {
 					poll = loadPollById(pollId, eventId);
-					if(!BaseDatastoreImpl.isVersionOk(updatePoll, poll)){
-						return new TransactionResult<PollDo>(null, TransactionStatus.VERSIONMISSMATCH, "Incorrect entity version. Current version:"+poll.getVersion().toString());
-					}
-					
-					// Iterate over all poll options. 
-					// Since it is a list I cannot get O(1) operation either ways.
-					if(options != null && !options.isEmpty()){
-						for(PollOption pollOption : poll.getPollOptions()){
-							if(options.contains(pollOption.getId())){
-								pollOption.getVoters().add(userId);
-							}else{
-								pollOption.getVoters().remove(userId);
-							}
-						}
-					}
-					
-					if(updatePoll.getCreatorId() != null){
-						poll.setCreatorId(updatePoll.getCreatorId());
-					}
-					
-					if(updatePoll.getDeadline() != null){
-						poll.setDeadline(updatePoll.getDeadline());
-					}
-					
-					if(updatePoll.getDescription() != null){
-						poll.setDescription(updatePoll.getDescription());
-					}
-					
-					if(updatePoll.getOwner() != null){
-						poll.setOwner(updatePoll.getOwner());
-					}
-					
-					if(updatePoll.getPollOptions() != null && !updatePoll.getPollOptions().isEmpty()){
-						for(PollOption option: updatePoll.getPollOptions()){
-							poll.addPollOptions(option);
-						}
-					}
-					
-					if(updatePoll.getStatus() != null){
-						poll.setStatus(updatePoll.getStatus());
-					}
-					
-					if(updatePoll.getWinnerId() != null && userId.equals(poll.getCreatorId())){
-						poll.setWinnerId(updatePoll.getWinnerId());
-					}
-	                BaseDatastoreImpl.versionIncrement(updatePoll, poll);
-	                storePoll(poll);
+					logger.info("Poll loaded!");
 				} catch (DataNotFoundException e) {
 					return new TransactionResult<PollDo>(null, TransactionStatus.DATANOTFOUND);
 				}
-				return new TransactionResult<PollDo>(poll, TransactionStatus.SUCCESS);
-			}
-		};
-        TransactionResult<PollDo> result = DatastoreObjectifyDAL.update(w);
-        try {
-			DatastoreUtil.processResult(result);
-		} catch (UpdateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        logger.info("Poll updated");
-        return result.getEntity();
+				
+				if(!BaseDatastoreImpl.isVersionOk(version, poll.getVersion())){
+					return new TransactionResult<PollDo>(null, TransactionStatus.VERSIONMISSMATCH, "Incorrect entity version. Current version:"+poll.getVersion().toString());
+				}
+				
+				if(removeOptions != null){
+					for(PollOption p : poll.getPollOptions()){
+						if(removeOptions.contains(p.getId())){
+							p.getVoters().remove(userId);
+						}
+					}
+				}
+				
+				if(addOptions != null){
+					for(PollOption p : poll.getPollOptions()){
+						if(addOptions.contains(p.getId())){
+							p.getVoters().add(userId);
+						}
+					}
+				}
+				
+				BaseDatastoreImpl.versionIncrement(poll);
+
+	            // Store
+	            try {
+					storePoll(poll);
+				} catch (DataNotFoundException e) {
+					return new TransactionResult<PollDo>(null, TransactionStatus.DATANOTFOUND);
+				}
+	            return new TransactionResult<PollDo>(poll, TransactionStatus.SUCCESS);
+	        }
+	    };
+	    
+    	TransactionResult<PollDo> result = DatastoreObjectifyDAL.update(w);
+    	DatastoreUtil.processResult(result);
+		logger.info("Poll updated!");
+    	return result.getEntity();
+    }
+    
+    public static PollDo updatePollOptions(final List<PollOption> addOptions, final List<PollOption> removeOptions, 
+    		final String pollId, final String eventId, final Long version) throws DatastoreException, DataNotFoundException, UpdateVersionException, UpdateException{
+    	Work w = new Work<TransactionResult<PollDo>>() {
+	        public TransactionResult<PollDo> run() {
+	        	// Read from datastore
+	        	PollDo poll = null;
+				try {
+					poll = loadPollById(pollId, eventId);
+					logger.info("Poll loaded!");
+				} catch (DataNotFoundException e) {
+					return new TransactionResult<PollDo>(null, TransactionStatus.DATANOTFOUND);
+				}
+				
+				if(!BaseDatastoreImpl.isVersionOk(version, poll.getVersion())){
+					return new TransactionResult<PollDo>(null, TransactionStatus.VERSIONMISSMATCH, "Incorrect entity version. Current version:"+poll.getVersion().toString());
+				}
+				
+				if(removeOptions != null)
+					poll.getPollOptions().removeAll(removeOptions);
+				if(addOptions != null)
+					poll.getPollOptions().addAll(addOptions);
+				
+				BaseDatastoreImpl.versionIncrement(poll);
+
+	            // Store
+	            try {
+					storePoll(poll);
+				} catch (DataNotFoundException e) {
+					return new TransactionResult<PollDo>(null, TransactionStatus.DATANOTFOUND);
+				}
+	            return new TransactionResult<PollDo>(poll, TransactionStatus.SUCCESS);
+	        }
+	    };
+	    
+    	TransactionResult<PollDo> result = DatastoreObjectifyDAL.update(w);
+    	DatastoreUtil.processResult(result);
+		logger.info("Poll updated!");
+    	return result.getEntity();
+    }
+    
+    public static PollDo updatePoll(final PollDo updatedPoll, final Set<String> updatedFields) 
+    			 throws DataNotFoundException, DatastoreException, UpdateVersionException, UpdateException{
+    	Work w = new Work<TransactionResult<PollDo>>() {
+	        public TransactionResult<PollDo> run() {
+	        	// Read from datastore
+	        	PollDo poll = null;
+				try {
+					poll = loadPollById(updatedPoll.getId(), updatedPoll.getEventId());
+					logger.info("Poll loaded!");
+				} catch (DataNotFoundException e) {
+					return new TransactionResult<PollDo>(null, TransactionStatus.DATANOTFOUND);
+				}
+				
+				if(!BaseDatastoreImpl.isVersionOk(updatedPoll, poll)){
+					return new TransactionResult<PollDo>(null, TransactionStatus.VERSIONMISSMATCH, "Incorrect entity version. Current version:"+poll.getVersion().toString());
+				}
+				
+				try {
+					BaseDatastoreImpl.updateModifiedFields(poll, updatedPoll, updatedFields);
+				} catch (Exception e) {
+					return new TransactionResult<PollDo>(null, TransactionStatus.UPDATEEXCEPTION, "Cannot apply update delta");
+				}
+				BaseDatastoreImpl.versionIncrement(updatedPoll, poll);
+
+	            // Store
+	            try {
+					storePoll(poll);
+				} catch (DataNotFoundException e) {
+					return new TransactionResult<PollDo>(null, TransactionStatus.DATANOTFOUND);
+				}
+	            return new TransactionResult<PollDo>(poll, TransactionStatus.SUCCESS);
+	        }
+	    };
+	    
+    	TransactionResult<PollDo> result = DatastoreObjectifyDAL.update(w);
+    	DatastoreUtil.processResult(result);
+		logger.info("Poll updated!");
+    	return result.getEntity();
     }
     
     public static void deletePoll(final String eventId, final String pollId){

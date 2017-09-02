@@ -17,9 +17,18 @@ public class BaseDatastoreImpl {
 		return true;
 	}
 	
+	public static boolean isVersionOk(Long toBeUpdatedVersion, Long existingVersion){
+		return toBeUpdatedVersion.equals(existingVersion);
+	}
+	
 	public static void versionIncrement(BaseEntityDo toBeUpdated, BaseEntityDo existing){
 		Long updatedVersion = toBeUpdated.getVersion();
 		existing.setVersion(++updatedVersion);
+	}
+	
+	public static void versionIncrement(BaseEntityDo existing){
+		Long version = existing.getVersion();
+		existing.setVersion(++version);
 	}
 	
 

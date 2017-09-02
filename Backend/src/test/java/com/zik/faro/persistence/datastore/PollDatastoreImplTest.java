@@ -22,9 +22,10 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateException;
 import com.zik.faro.commons.exceptions.UpdateVersionException;
-import com.zik.faro.data.Location;
 import com.zik.faro.data.GeoPosition;
+import com.zik.faro.data.Location;
 import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.PollOption;
 import com.zik.faro.data.expense.ExpenseGroup;
@@ -136,20 +137,17 @@ public class PollDatastoreImplTest {
     }
     
     @Test
-    public void testCastVote() throws DataNotFoundException, DatastoreException, UpdateVersionException{
+    public void testCastVote() throws DataNotFoundException, DatastoreException, UpdateVersionException, UpdateException{
     	EventDo event = createEvent();
     	String eventId = event.getId();
         PollDo poll1 = createPollObjectForEventId(eventId);
         PollDatastoreImpl.storePoll(poll1);
+        
         Set<String> optionIds = new HashSet<String>();
         optionIds.add(poll1.getPollOptions().get(0).getId());
         optionIds.add(poll1.getPollOptions().get(1).getId());
-        System.out.println(poll1.getPollOptions());
-        PollDo updateObj = new PollDo();
-        updateObj.setId(poll1.getId());updateObj.setEventId(poll1.getEventId());updateObj.setVersion(poll1.getVersion());
         
-        // Cast user3's vote to both options of the poll(Shasta and vegas)
-        PollDatastoreImpl.updatePoll(event.getId(), poll1.getId(), updateObj, "user3", optionIds);
+        PollDatastoreImpl.castVote(optionIds, null, poll1.getId(), event.getId(), poll1.getVersion(), "user3");
         
         // Verify. If vote went through. User3 should be present in both shasta and vegas
         PollDo returnedPollDo = PollDatastoreImpl.loadPollById(poll1.getId(), eventId);
@@ -160,14 +158,18 @@ public class PollDatastoreImplTest {
         // CHange user3s vote and verify
         optionIds = new HashSet<String>();
         optionIds.add(poll1.getPollOptions().get(2).getId());
-        updateObj.setVersion(returnedPollDo.getVersion());
-        PollDatastoreImpl.updatePoll(event.getId(), poll1.getId(), updateObj, "user3", optionIds);
+        Set<String> removeOptions = new HashSet<String>();
+        removeOptions.add(poll1.getPollOptions().get(0).getId());
+        
+        PollDatastoreImpl.castVote(optionIds, removeOptions, poll1.getId(), event.getId(), returnedPollDo.getVersion(), "user3");
+        
         returnedPollDo = PollDatastoreImpl.loadPollById(poll1.getId(), eventId);
         Assert.assertFalse(returnedPollDo.getPollOptions().get(0).getVoters().contains("user3"));
-        Assert.assertFalse(returnedPollDo.getPollOptions().get(1).getVoters().contains("user3"));
+        Assert.assertTrue(returnedPollDo.getPollOptions().get(1).getVoters().contains("user3"));
         Assert.assertTrue(returnedPollDo.getPollOptions().get(2).getVoters().contains("user3"));
+        
         try{
-        	PollDatastoreImpl.updatePoll(event.getId(), poll1.getId(), updateObj, "user3", optionIds);
+        	PollDatastoreImpl.castVote(optionIds, removeOptions, poll1.getId(), event.getId(), poll1.getVersion(), "user3");
         }catch(UpdateVersionException e){
         	Assert.assertNotNull(e);
         	Assert.assertEquals("Incorrect entity version. Current version:3", e.getMessage());
@@ -175,7 +177,46 @@ public class PollDatastoreImplTest {
     }
     
     @Test
-    public void testUpdatePoll() throws DataNotFoundException, DatastoreException, UpdateVersionException{
+    public void testUpdatePollOptions() throws DataNotFoundException, DatastoreException, UpdateVersionException, UpdateException{
+    	List<PollOption> addOptions; 
+    	List<PollOption> removeOptions;
+    	String pollId, eventId;
+    	Long version;
+    	
+    	EventDo event = createEvent();
+    	PollDo poll = createPollObjectForEventId(event.getId());
+    	PollDatastoreImpl.storePoll(poll);
+    	
+    	// Add Poll Options
+    	List<PollOption> options = new ArrayList<>();
+        options.add(new PollOption(UUID.randomUUID().toString(),"Shasta"));
+        PollOption vegasOption = new PollOption(UUID.randomUUID().toString(),"Las Vegas");
+        vegasOption.addVoters("user1");
+        vegasOption.addVoters("user2");
+        options.add(vegasOption);
+        
+        PollDo updatedPoll = PollDatastoreImpl.updatePollOptions(options, null, poll.getId(), event.getId(), poll.getVersion());
+        Assert.assertEquals(options.size()+3, updatedPoll.getPollOptions().size());
+        
+        // Only remove poll options
+        removeOptions = new ArrayList<PollOption>();
+        removeOptions.add(vegasOption);
+        
+        updatedPoll = PollDatastoreImpl.updatePollOptions(null, removeOptions, poll.getId(), event.getId(), updatedPoll.getVersion());
+        Assert.assertEquals(options.size()+2, updatedPoll.getPollOptions().size());
+        
+        // Add and remove poll options
+        removeOptions.add(updatedPoll.getPollOptions().get(0));
+        addOptions = new ArrayList<PollOption>();
+        addOptions.add(new PollOption(UUID.randomUUID().toString(),"Florida"));
+        
+        updatedPoll = PollDatastoreImpl.updatePollOptions(null, removeOptions, poll.getId(), event.getId(), updatedPoll.getVersion());
+        Assert.assertEquals(options.size()+1, updatedPoll.getPollOptions().size());
+        
+    }
+    
+    @Test
+    public void testUpdatePoll() throws DataNotFoundException, DatastoreException, UpdateVersionException, UpdateException{
     	EventDo event = createEvent();
     	String eventId = event.getId();
         PollDo poll1 = createPollObjectForEventId(eventId);
@@ -189,22 +230,23 @@ public class PollDatastoreImplTest {
         updateObj.setDescription("Updated description");
         updateObj.setStatus(ObjectStatus.CLOSED);
         updateObj.setWinnerId("Updated poll winner");
-        //updateObj.setMultiChoice(true);
-        updateObj.addPollOptions(new PollOption(UUID.randomUUID().toString(), "Bombay"));
         updateObj.setVersion(1L);
         
+        Set<String> updatedFields = new HashSet<String>();
+        updatedFields.add("creatorId");updatedFields.add("deadline");
+        updatedFields.add("description");updatedFields.add("status");
+        updatedFields.add("winnerId");updatedFields.add("creatorId");
+        
         // Call update API
-        PollDatastoreImpl.updatePoll(updateObj.getEventId(), updateObj.getId(), updateObj, null, null);
+        PollDatastoreImpl.updatePoll(updateObj, updatedFields);
         
         // Verify. 
         PollDo returnedPollDo = PollDatastoreImpl.loadPollById(poll1.getId(), eventId);
         Assert.assertEquals(returnedPollDo.getDescription(), updateObj.getDescription());
         Assert.assertEquals(returnedPollDo.getCreatorId(), updateObj.getCreatorId());
-        Assert.assertEquals(returnedPollDo.getDeadline(), updateObj.getDeadline());
+        Assert.assertEquals(returnedPollDo.getDeadline().getTimeInMillis(), updateObj.getDeadline().getTimeInMillis());
         Assert.assertEquals(returnedPollDo.getStatus(), updateObj.getStatus());
         Assert.assertEquals(returnedPollDo.getWinnerId(), updateObj.getWinnerId());
-        //Assert.assertTrue(returnedPollDo.getMultiChoice());
-        Assert.assertEquals(4, returnedPollDo.getPollOptions().size());
         Long newVersion = updateObj.getVersion();
         Assert.assertEquals(++newVersion, returnedPollDo.getVersion());
         
@@ -214,7 +256,10 @@ public class PollDatastoreImplTest {
         updateObj.setCreatorId("Updated creator2");
         updateObj.setVersion(returnedPollDo.getVersion());
         
-        returnedPollDo = PollDatastoreImpl.updatePoll(updateObj.getEventId(), updateObj.getId(), updateObj, null, null);
+        updatedFields.clear();
+        updatedFields.add("creatorId");
+        
+        returnedPollDo = PollDatastoreImpl.updatePoll(updateObj, updatedFields);
         Assert.assertEquals(returnedPollDo.getCreatorId(), updateObj.getCreatorId());
         newVersion = updateObj.getVersion();
         Assert.assertEquals(++newVersion, returnedPollDo.getVersion());
@@ -222,7 +267,7 @@ public class PollDatastoreImplTest {
         //Another update with wrong version
         updateObj.setCreatorId("Updated creator3");
         try{
-        	returnedPollDo = PollDatastoreImpl.updatePoll(updateObj.getEventId(), updateObj.getId(), updateObj, null, null);
+        	returnedPollDo = PollDatastoreImpl.updatePoll(updateObj, updatedFields);
         }catch(UpdateVersionException e){
         	Assert.assertNotNull(e);
         	Assert.assertEquals("Incorrect entity version. Current version:3", e.getMessage());

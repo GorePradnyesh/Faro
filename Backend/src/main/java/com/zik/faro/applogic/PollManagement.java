@@ -14,11 +14,14 @@ import com.zik.faro.commons.FaroResponseStatus;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
 import com.zik.faro.commons.exceptions.FaroWebAppException;
+import com.zik.faro.commons.exceptions.UpdateException;
 import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.PollOption;
 import com.zik.faro.notifications.handler.PollNotificationHandler;
+import com.zik.faro.persistence.datastore.ActivityDatastoreImpl;
 import com.zik.faro.persistence.datastore.PollDatastoreImpl;
+import com.zik.faro.persistence.datastore.data.ActivityDo;
 import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.persistence.datastore.data.PollDo;
 
@@ -54,17 +57,33 @@ public class PollManagement {
 		return PollDatastoreImpl.getCountofUnvotedPolls(eventId, userId);
 	}
 	
-	public static Poll update(final String eventId, final String pollId,
-    		final Map<String, Object> updateObj, final String userId ) throws DatastoreException, DataNotFoundException, UpdateVersionException{
-		Poll poll = extractPollUpdateObject(updateObj);
-		Set<String> voteOptions = extractVoteOptionsUpdateObject(updateObj);
-		generatePollIds(poll.getPollOptions());
-		PollDo pollDo = ConversionUtils.toDo(poll);
-		pollDo = PollDatastoreImpl.updatePoll(eventId, pollId, pollDo, userId, voteOptions);
-		pollNotificationHandler.updatePollNotification(pollDo, pollDo.getEventRef().get(), userId);
-		return ConversionUtils.fromDo(pollDo);
+	public static Poll update(final Poll updatedPoll, final Set<String> updatedFields, final String userId) throws DataNotFoundException, DatastoreException, UpdateVersionException, UpdateException{
+		unUpdateableFields(updatedFields);
+		PollDo updatedPollDo = ConversionUtils.toDo(updatedPoll);
+		PollDo updatedPollDoResponse = PollDatastoreImpl.updatePoll(updatedPollDo, updatedFields);
+		pollNotificationHandler.updatePollNotification(updatedPollDoResponse, updatedPollDoResponse.getEventRef().get(), userId);
+		return ConversionUtils.fromDo(updatedPollDoResponse);
 	}
 	
+	public static void unUpdateableFields(Set<String> updatedFields){
+		// Hard coding for now but need to be done in a better way through a generic interface
+		// since many other objects might need to leverage it
+		updatedFields.remove("pollOptions");
+	}
+	
+	public static Poll updatePollOptions(final List<PollOption> addOptions, final List<PollOption> removeOptions, 
+			final String pollId, final String eventId, final Long version) throws DatastoreException, DataNotFoundException, UpdateVersionException, UpdateException{
+		generatePollIds(addOptions);
+		PollDo updatedPollDo = PollDatastoreImpl.updatePollOptions(addOptions, removeOptions, pollId, eventId, version);
+		return ConversionUtils.fromDo(updatedPollDo);
+	}
+	
+	public static Poll castVote(final Set<String> addOptions, final Set<String> removeOptions, final String pollId, final String eventId, 
+			final Long version, final String userId) throws DatastoreException, DataNotFoundException, UpdateVersionException, UpdateException{
+		PollDo updatedPollDo = PollDatastoreImpl.castVote(addOptions, removeOptions, pollId, eventId, version, userId);
+		return ConversionUtils.fromDo(updatedPollDo);
+	}
+
 	public static Poll extractPollUpdateObject(Map<String, Object> updateObj){
 		if(updateObj != null && updateObj.containsKey("poll")){
 			
