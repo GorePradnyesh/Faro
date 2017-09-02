@@ -16,12 +16,15 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphRequestBatch;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
+import com.google.common.base.Joiner;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.FaroImageBase;
 import com.zik.faro.data.FbImage;
+import com.zik.faro.frontend.data.FacebookMinUser;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
@@ -43,9 +46,19 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import static com.zik.faro.frontend.FbGraphApiConstants.*;
 
 /**
  * Created by granganathan on 7/23/16.
+ */
+
+/**
+ *  This class is provides the functionality for Facebook graph api workflows
+ *  Refer the Facebook graph api at
+ *
+ *  https://developers.facebook.com/docs/graph-api/reference
+ *  https://developers.facebook.com/docs/graph-api/using-graph-api
+ *
  */
 public class FbGraphApiService {
     private String TAG = "FbGraphApiService";
@@ -80,13 +93,13 @@ public class FbGraphApiService {
         if (response.getError() == null) {
             JSONObject responseObject = response.getJSONObject();
             try {
-                JSONArray albums = responseObject.getJSONArray("data");
+                JSONArray albums = responseObject.getJSONArray(RESPONSE_DATA);
                 for (int i = 0; i < albums.length(); i++) {
                     JSONObject album = albums.getJSONObject(i);
-                    if (albumName.equals(album.getString("name"))) {
+                    if (albumName.equals(album.getString(ALBUM_NAME))) {
                         // Album already exists. Return the album id
                         Log.d(TAG, MessageFormat.format("Album {0} exists. Return album id : {1}", albumName, album.getString("id")));
-                        return album.getString("id");
+                        return album.getString(ALBUM_ID);
                     }
                 }
 
@@ -116,14 +129,14 @@ public class FbGraphApiService {
 
             // Create new album
             Bundle parameters = new Bundle();
-            parameters.putString("name", albumName);
+            parameters.putString(ALBUM_NAME, albumName);
 
             // Set privacy of the album to SELF i.e. only the user can view the album and its photos
             JSONObject privacyObject = new JSONObject();
             try {
-                privacyObject.put("value", "SELF");
+                privacyObject.put(ALBUM_PRIVACY_VALUE, ALBUM_PRIVACY_SELF);
 
-                parameters.putString("privacy", privacyObject.toString());
+                parameters.putString(ALBUM_PRIVACY, privacyObject.toString());
                 GraphRequest createRequest = new GraphRequest(
                         accessToken,
                         "/me/albums",
@@ -134,7 +147,7 @@ public class FbGraphApiService {
                     JSONObject createAlbumResponsObject = response.getJSONObject();
                     if (createAlbumResponsObject != null) {
                         try {
-                            albumId = createAlbumResponsObject.getString("id");
+                            albumId = createAlbumResponsObject.getString(ALBUM_ID);
                         } catch (JSONException e) {
                             Log.e(TAG, "Error processing response from album creation response");
                         }
@@ -161,7 +174,7 @@ public class FbGraphApiService {
         List<FaroImageBase> faroImages = Lists.newArrayList();
 
         Bundle params = new Bundle();
-        params.putString("fields", "images, created_time, height, width, album");
+        params.putString(REQUEST_FIELDS, Joiner.on(", ").join(PHOTO_IMAGES, PHOTO_CREATED_TIME, PHOTO_HEIGHT, PHOTO_WIDTH, PHOTO_ALBUM));
 
         for (String fbPhoto : fbPhotos.keySet()) {
             GraphResponse response = new GraphRequest(
@@ -174,19 +187,19 @@ public class FbGraphApiService {
             if (response.getError() == null) {
                 try {
                     JSONObject jsonResponse = response.getJSONObject();
-                    String createdTime = jsonResponse.getString("created_time");
-                    Integer height = jsonResponse.getInt("height");
-                    Integer width = jsonResponse.getInt("width");
-                    String albumName = jsonResponse.getJSONObject("album").getString("name");
+                    String createdTime = jsonResponse.getString(PHOTO_CREATED_TIME);
+                    Integer height = jsonResponse.getInt(PHOTO_HEIGHT);
+                    Integer width = jsonResponse.getInt(PHOTO_WIDTH);
+                    String albumName = jsonResponse.getJSONObject(PHOTO_ALBUM).getString(ALBUM_NAME);
 
                     String url = null;
 
                     Log.i(TAG, MessageFormat.format("createdTime: {0} height: {1} width: {2}", createdTime, height, width));
-                    JSONArray imagesArray = jsonResponse.getJSONArray("images");
+                    JSONArray imagesArray = jsonResponse.getJSONArray(PHOTO_IMAGES);
                     if (imagesArray != null) {
                         JSONObject imageObject = imagesArray.getJSONObject(0);
 
-                        url = imageObject.getString("source");
+                        url = imageObject.getString(PLATFORM_IMAGE_SOURCE_SOURCE);
                         Log.d(TAG, MessageFormat.format("Found image URL : {0}", url));
                     } else {
                         Log.e(TAG, "images not present for the photo");
@@ -255,6 +268,15 @@ public class FbGraphApiService {
         mNotificationManager.notify(notificationId, notificationBuilder.build());
     }
 
+    /**
+     * Upload the given photos to the facebook album of the specified event
+     * and then save the image metadata (including image public url) on the Faro app server
+     * Context here is used for creating a Notification showing the upload progress on the UI
+     *
+     * @param photoPaths
+     * @param event
+     * @param context
+     */
     public void uploadPhotos(final List<String> photoPaths, final Event event, final Context context) {
         threadPool.submit(new Callable<List<String>>() {
             @Override
@@ -292,8 +314,8 @@ public class FbGraphApiService {
                         data = baos.toByteArray();
 
                         Bundle params = new Bundle();
-                        params.putByteArray("source", data);
-                        params.putBoolean("no_story", true);
+                        params.putByteArray(ALBUM_PHOTOS_SOURCE, data);
+                        params.putBoolean(ALBUM_PHOTOS_NO_STORY, true);
 
                         Log.i(TAG, MessageFormat.format("Uploading image {0}", photoPath));
 
@@ -340,12 +362,12 @@ public class FbGraphApiService {
                         }
 
                         @Override
-                        public void onResponse(List<FaroImageBase> faroImageBases, HttpError error) {
-                            if (error == null) {
+                        public void onResponse(List<FaroImageBase> faroImageBases, HttpError httpError) {
+                            if (httpError == null) {
                                 Log.i(TAG, "saved images successfully on app serever");
                                 updateNotification(notificationBuilder, context, notificationId);
                             } else {
-                                Log.e(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                                Log.e(TAG, MessageFormat.format("Failed to save images on the app server. code={0} , message={1}", httpError.getCode(), httpError.getMessage()));
                             }
                         }
                     }, event.getId(), fbImages);
@@ -356,14 +378,16 @@ public class FbGraphApiService {
         });
     }
 
+    /**
+     * Find all Facebook friends of the facebook user.
+     * These friends are all of those who are also Faro users
+     *
+     * @param callback
+     */
     public void findFacebookFriends(GraphRequest.Callback callback) {
         GraphRequest graphRequest = createFindFriendsRequest();
         graphRequest.setCallback(callback);
         graphRequest.executeAsync();
-    }
-
-    public GraphResponse findFacebookFriends() {
-        return createFindFriendsRequest().executeAndWait();
     }
 
     private GraphRequest createFindFriendsRequest() {
@@ -372,7 +396,7 @@ public class FbGraphApiService {
 
         if (accessToken != null) {
             Bundle params = new Bundle();
-            params.putString("fields", "email, id, first_name, last_name, picture");
+            params.putString(REQUEST_FIELDS, Joiner.on(", ").join(USER_EMAIL, USER_ID, USER_FIRST_NAME, USER_LAST_NAME, USER_PICTURE));
 
             return new GraphRequest(AccessToken.getCurrentAccessToken(),
                     "/me/friends",
@@ -384,24 +408,80 @@ public class FbGraphApiService {
         throw new IllegalStateException("Access token is null. Not logged into FB account");
     }
 
-    /*public <T> void processGraphResponse(GraphResponse response, Class resultClass) {
-        try {
-            JSONArray jsonArray = response.getJSONObject().getJSONArray("data");
+    /**
+     * Parse the Graph API response object to obtain a list of friends with their info
+     * @param response
+     * @return
+     */
+    public List<FacebookMinUser> getFriendsFromGraphResponse(GraphResponse response) {
+        List<FacebookMinUser> fbFriendsList = Lists.newArrayList();
 
-            List<T> result = Lists.newArrayList();
-            if (jsonArray != null) {
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    result.add((T) convertJson(jsonArray.getJSONObject(i), resultClass));
+        if (response.getError() == null) {
+            JSONObject jsonObject = response.getJSONObject();
+            Log.i(TAG, MessageFormat.format("jsonObject = {0}", jsonObject));
 
+            try {
+                JSONArray friendsArray = jsonObject.getJSONArray(RESPONSE_DATA);
+                if (friendsArray != null) {
+                    for (int i = 0; i < friendsArray.length(); i++) {
+                        JSONObject friend = friendsArray.getJSONObject(i);
+                        String firstName = friend.getString(USER_FIRST_NAME);
+                        String lastName = friend.getString(USER_LAST_NAME);
+                        String id = friend.getString(USER_ID);
+                        JSONObject pictureData = friend.getJSONObject(USER_PICTURE).getJSONObject(RESPONSE_DATA);
+                        String pictureUrl = pictureData.getString(USER_PICTURE_URL);
+
+                        Log.i(TAG, MessageFormat.format("friendName = {0}, last_name = {1}, id = {2}",
+                                firstName, lastName, id));
+
+                        fbFriendsList.add((FacebookMinUser) new FacebookMinUser(id)
+                                .withFirstName(firstName)
+                                .withLastName(lastName)
+                                .withThumbProfileImageUrl(pictureUrl));
+                    }
+                } else {
+                    throw new JSONException("data not present in the JSON response");
                 }
+            } catch (JSONException e) {
+                Log.e(TAG, "Error processing response for friends list", e);
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
+
+        return fbFriendsList;
     }
 
-    public <T> T convertJson(JSONObject jsonObject, Class resultClass) throws JSONException {
-        Gson gson = new Gson();
-        return (T) gson.fromJson(jsonObject.toString(), resultClass);
-    }*/
+    /**
+     * Parse the Graph API response object to obtain a list of friend userids
+     * @param response
+     * @return
+     */
+    public List<String> getFriendIdsFromGraphResponse(GraphResponse response) throws JSONException {
+        List<String> fbFriendsList = Lists.newArrayList();
+
+        if (response.getError() == null) {
+            JSONObject jsonObject = response.getJSONObject();
+            Log.i(TAG, MessageFormat.format("jsonObject = {0}", jsonObject));
+
+            JSONArray friendsArray = jsonObject.getJSONArray(RESPONSE_DATA);
+            if (friendsArray != null) {
+                for (int i = 0; i < friendsArray.length(); i++) {
+                    JSONObject friend = friendsArray.getJSONObject(i);
+                    String fbUserId = friend.getString(USER_ID);
+
+                    // TODO : Exchange the fb user id with email
+                    Log.i(TAG, MessageFormat.format("facebook  friend id = {0}", fbUserId));
+                    if (!Strings.isNullOrEmpty(fbUserId)) {
+                        fbFriendsList.add(fbUserId);
+                    } else {
+                        throw new JSONException("user id not present in the JSON response");
+                    }
+                }
+            } else {
+                throw new JSONException("data not present in the JSON response");
+            }
+        }
+
+        return fbFriendsList;
+    }
+
 }
