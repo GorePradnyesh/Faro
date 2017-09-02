@@ -38,8 +38,10 @@ import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
+import com.zik.faro.frontend.util.FaroObjectNotFoundException;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -109,10 +111,18 @@ public class EditAssignment extends android.app.Activity {
         extras = getIntent().getExtras();
         if (extras == null)return; //TODO: How to handle such conditions
 
-        setupPageDetails();
+        try {
+            setupPageDetails();
+        } catch (FaroObjectNotFoundException e) {
+            //Activity has been deleted.
+            Toast.makeText(this, activityId == null ? "Event" : "Activity" + " has been deleted", LENGTH_LONG).show();
+            Log.e(TAG, MessageFormat.format("{0} {1} has been deleted",
+                    activityId == null ? "Event" : "Activity",
+                    activityId == null ? eventId : activityId));
+            finish();        }
     }
 
-    private void setupPageDetails () {
+    private void setupPageDetails () throws FaroObjectNotFoundException{
 
         linlaHeaderProgress.setVisibility(View.GONE);
         editAssignmentRelativeLayout.setVisibility(View.VISIBLE);
@@ -121,13 +131,14 @@ public class EditAssignment extends android.app.Activity {
         activityId = extras.getString(FaroIntentConstants.ACTIVITY_ID);
         assignmentId = extras.getString(FaroIntentConstants.ASSIGNMENT_ID);
 
-        originalEvent = eventListHandler.getOriginalEventFromMap(eventId);
-        cloneEvent = eventListHandler.getEventCloneFromMap(eventId);
+        originalEvent = (Event) eventListHandler.getOriginalObject(eventId);
+        cloneEvent = eventListHandler.getCloneObject(eventId);
 
         if (activityId != null) {
-            originalActivity = activityListHandler.getOriginalActivityFromMap(activityId);
-            cloneActivity = activityListHandler.getActivityCloneFromMap(activityId);
+            originalActivity = (Activity) activityListHandler.getOriginalObject(activityId);
+            cloneActivity = activityListHandler.getCloneObject(activityId);
         }
+
         cloneAssignment = assignmentListHandler.getAssignmentCloneFromMap(assignmentId);
 
         TextView assignmentDescription = (TextView)findViewById(R.id.assignmentDescription);
@@ -139,6 +150,9 @@ public class EditAssignment extends android.app.Activity {
 
         final EditText itemNameEditText = (EditText)findViewById(R.id.itemNameEditText);
         final EditText itemCountEditText = (EditText)findViewById(R.id.itemCount);
+        final TextView itemIdTextView = (TextView) findViewById(R.id.itemId);
+
+        itemIdTextView.setVisibility(View.GONE);
         itemCountEditText.setText("0");
 
         final Spinner inviteeSpinner = (Spinner) findViewById(R.id.inviteeSpinner);
@@ -174,7 +188,10 @@ public class EditAssignment extends android.app.Activity {
                     itemCountEditText.setText(Integer.toString(item.getCount()));
                     inviteeSpinner.setSelection(getAssigneePositionInList(item.getAssigneeId()));
                     itemUnitSpinner.setSelection(getUnitPositionInList(item.getUnit()));
-                    itemsAdapter.removeFromPosition(position);
+                    itemIdTextView.setText(item.getId());
+                    //itemsAdapter.removeFromPosition(position);
+                    //TODO: Can change color of the element which is being changed
+                    itemsAdapter.notifyDataSetChanged();
                     editItemPosition = position;
                     addEditedItem = true;
                 }
@@ -253,20 +270,22 @@ public class EditAssignment extends android.app.Activity {
                     errorMsgPopUp("Number passed is too big");
                     return;
                 }
-
-
                 Item item = null;
-                try {
-                    item = new Item(itemDescription, assigneeId, itemCount, selectedUnit);
-                } catch (IllegalDataOperation illegalDataOperation) {
-                    illegalDataOperation.printStackTrace();
-                }
+
 
                 if (addEditedItem){
                     addEditedItem = false;
+                    itemsAdapter.removeFromPosition(editItemPosition);
+
+                    String itemId = itemIdTextView.getText().toString();
+
+                    item = new Item(itemDescription, assigneeId, itemCount, selectedUnit, itemId);
+
                     itemsAdapter.insertAtPosition(item, editItemPosition);
                     editItemPosition = -1;
                 }else {
+                    item = new Item(itemDescription, assigneeId, itemCount, selectedUnit);
+
                     itemsAdapter.insertAtBeginning(item);
                 }
                 itemsAdapter.notifyDataSetChanged();
@@ -353,7 +372,7 @@ public class EditAssignment extends android.app.Activity {
                     Handler mainHandler = new Handler(mContext.getMainLooper());
                     mainHandler.post(myRunnable);
                 }else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
 
             }
@@ -416,23 +435,27 @@ public class EditAssignment extends android.app.Activity {
 
     @Override
     protected void onResume() {
-        // Check if the version is same. It can be different if this page is loaded and a notification
-        // is received for this later which updates the global memory but clonedata on this page remains
-        // stale.
-        Long versionInGlobalMemory = null;
-        Long previousVersion = null;
-
-        if (activityId == null){
-            versionInGlobalMemory = eventListHandler.getOriginalEventFromMap(eventId).getVersion();
-            previousVersion = cloneEvent.getVersion();
-        } else {
-            versionInGlobalMemory = activityListHandler.getOriginalActivityFromMap(activityId).getVersion();
-            previousVersion = cloneActivity.getVersion();
-        }
-
-        if (!previousVersion.equals(versionInGlobalMemory)) {
-            setupPageDetails();
-        }
         super.onResume();
+        // Check if the version is same. It can be different if this page is loaded and a notification
+        // is received for this later which updates the cache but clonedata on this page remains
+        // stale.
+        try {
+            if (activityId == null) {
+                if (!eventListHandler.checkObjectVersionIfLatest(eventId, cloneEvent.getVersion())) {
+                    setupPageDetails();
+                }
+            } else {
+                if (!activityListHandler.checkObjectVersionIfLatest(activityId, cloneActivity.getVersion())) {
+                    setupPageDetails();
+                }
+            }
+        } catch (FaroObjectNotFoundException e) {
+            //Activity has been deleted.
+            Toast.makeText(this, activityId == null ? "Event" : "Activity" + " has been deleted", LENGTH_LONG).show();
+            Log.e(TAG, MessageFormat.format("{0} {1} has been deleted",
+                    activityId == null ? "Event" : "Activity",
+                    activityId == null ? eventId : activityId));
+            finish();
+        }
     }
 }

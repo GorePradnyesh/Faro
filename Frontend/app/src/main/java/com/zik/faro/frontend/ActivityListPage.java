@@ -15,7 +15,6 @@ import android.widget.RelativeLayout;
 
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Event;
-import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 /*

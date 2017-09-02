@@ -54,6 +54,7 @@ import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.notification.NotificationPayloadHandler;
 import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
+import com.zik.faro.frontend.util.FaroObjectNotFoundException;
 
 import java.io.File;
 import java.io.IOException;
@@ -64,6 +65,7 @@ import java.util.Date;
 import java.util.List;
 
 import static android.os.Environment.getExternalStoragePublicDirectory;
+import static android.widget.Toast.LENGTH_LONG;
 
 public class EventLandingPage extends FragmentActivity
         implements OnMapReadyCallback,
@@ -177,7 +179,13 @@ public class EventLandingPage extends FragmentActivity
         extras = getIntent().getExtras();
         if (extras == null)return; //TODO: How to handle such conditions
 
-        checkAndHandleNotification();
+        try {
+            checkAndHandleNotification();
+        } catch (FaroObjectNotFoundException e) {
+            Toast.makeText(this, "Event has been deleted", LENGTH_LONG).show();
+            Log.e(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
+            finish();
+        }
     }
 
 
@@ -196,27 +204,33 @@ public class EventLandingPage extends FragmentActivity
                     Runnable myRunnable = new Runnable() {
                         @Override
                         public void run() {
-                            switch (eventInviteStatus){
-                                case ACCEPTED:
-                                    eventListHandler.addEventToListAndMap(cloneEvent, EventInviteStatus.ACCEPTED);
-                                    setupPageDetails();
-                                    break;
-                                case MAYBE:
-                                    eventListHandler.addEventToListAndMap(cloneEvent, EventInviteStatus.MAYBE);
-                                    setupPageDetails();
-                                    break;
-                                case DECLINED:
-                                    //TODO: change this to not do the below but just change the state and keep it in the list and Map
-                                    eventListHandler.removeEventFromListAndMap(eventId);
-                                    finish();
-                                    break;
+                            try {
+                                switch (eventInviteStatus) {
+                                    case ACCEPTED:
+                                        eventListHandler.addEventToListAndMap(cloneEvent, EventInviteStatus.ACCEPTED);
+                                        setupPageDetails();
+                                        break;
+                                    case MAYBE:
+                                        eventListHandler.addEventToListAndMap(cloneEvent, EventInviteStatus.MAYBE);
+                                        setupPageDetails();
+                                        break;
+                                    case DECLINED:
+                                        //TODO: change this to not do the below but just change the state and keep it in the list and Map
+                                        eventListHandler.removeEventFromListAndMap(eventId);
+                                        finish();
+                                        break;
+                                }
+                            } catch (FaroObjectNotFoundException e) {
+                                Toast.makeText(mContext, "Event has been deleted", LENGTH_LONG).show();
+                                Log.e(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
+                                finish();
                             }
                         }
                     };
                     Handler mainHandler = new Handler(mContext.getMainLooper());
                     mainHandler.post(myRunnable);
                 } else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
             }
         }, eventId, eventInviteStatus);
@@ -289,7 +303,7 @@ public class EventLandingPage extends FragmentActivity
     }
 
     @Override
-    public void checkAndHandleNotification() {
+    public void checkAndHandleNotification() throws FaroObjectNotFoundException{
         bundleType = extras.getString(FaroIntentConstants.BUNDLE_TYPE);
         eventId = extras.getString(FaroIntentConstants.EVENT_ID);
 
@@ -304,12 +318,9 @@ public class EventLandingPage extends FragmentActivity
         getEventFromServer();
     }
 
-    private void setupPageDetails(){
+    private void setupPageDetails() throws FaroObjectNotFoundException{
 
-        cloneEvent = eventListHandler.getEventCloneFromMap(eventId);
-        if (cloneEvent == null){
-            return; //TODO How to handle such a case?
-        }
+        cloneEvent = eventListHandler.getCloneObject(eventId);
 
         linlaHeaderProgress.setVisibility(View.GONE);
         eventLandingPageRelativeLayout.setVisibility(View.VISIBLE);
@@ -543,7 +554,8 @@ public class EventLandingPage extends FragmentActivity
         getEventInviteesFromServer();
 
         //Add event's assignment to the Assignment Handler
-        Event originalEvent = eventListHandler.getOriginalEventFromMap(eventId);
+        Event originalEvent = (Event) eventListHandler.getOriginalObject(eventId);
+
         assignmentListHandler.addAssignmentToListAndMap(eventId, originalEvent.getAssignment(), null, mContext);
 
         //Make API call to get all activities for this event
@@ -642,20 +654,26 @@ public class EventLandingPage extends FragmentActivity
             @Override
             public void onResponse(final EventInviteStatusWrapper eventInviteStatusWrapper, HttpError error) {
                 if (error == null ) {
-                    Runnable myRunnable = new Runnable() {
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             Log.i(TAG, "Successfully received Event from server");
                             Event event = eventInviteStatusWrapper.getEvent();
                             eventListHandler.addEventToListAndMap(event,
                                     eventInviteStatusWrapper.getInviteStatus());
-                            setupPageDetails();
+                            try {
+                                setupPageDetails();
+                            } catch (FaroObjectNotFoundException e) {
+                                //Activity has been deleted.
+                                Toast.makeText(mContext, "Event has been deleted", LENGTH_LONG).show();
+                                Log.e(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
+                                finish();
+                            }
                         }
-                    };
-                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                    mainHandler.post(myRunnable);
+                    });
                 }else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
             }
         }, eventId);
@@ -671,17 +689,16 @@ public class EventLandingPage extends FragmentActivity
             @Override
             public void onResponse(final List<com.zik.faro.data.Activity> activities, HttpError error) {
                 if (error == null) {
-                    Runnable myRunnable = new Runnable() {
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             Log.i(TAG, "Successfully received activities from the server!!");
                             activityListHandler.addDownloadedActivitiesToListAndMap(eventId, activities, mContext);
                         }
-                    };
-                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                    mainHandler.post(myRunnable);
+                    });
                 } else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
             }
         }, eventId);
@@ -864,17 +881,16 @@ public class EventLandingPage extends FragmentActivity
             @Override
             public void onResponse(final InviteeList inviteeList, HttpError error) {
                 if (error == null) {
-                    Runnable myRunnable = new Runnable() {
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             Log.i(TAG, "Successfully received Invitee List for the cloneEvent");
                             eventFriendListHandler.addDownloadedFriendsToListAndMap(eventId, inviteeList, mContext);
                         }
-                    };
-                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                    mainHandler.post(myRunnable);
+                    });
                 } else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
             }
         }, eventId);
@@ -882,16 +898,23 @@ public class EventLandingPage extends FragmentActivity
 
     @Override
     protected void onResume() {
+        super.onResume();
         if (bundleType.equals(FaroIntentConstants.IS_NOT_NOTIFICATION)) {
+
             // Check if the version is same. It can be different if this page is loaded and a notification
-            // is received for this later which updates the global memory but clonedata on this page remains
+            // is received for this later which updates the cache but clonedata on this page remains
             // stale.
-            // This check is not necessary when opening this page directly through a notification.
-            Long versionInGlobalMemory = eventListHandler.getOriginalEventFromMap(eventId).getVersion();
-            if (!cloneEvent.getVersion().equals(versionInGlobalMemory)) {
-                setupPageDetails();
+
+            try {
+                if (!eventListHandler.checkObjectVersionIfLatest(eventId, cloneEvent.getVersion())) {
+                    setupPageDetails();
+                }
+            } catch (FaroObjectNotFoundException e) {
+                //Activity has been deleted.
+                Toast.makeText(this, "Event has been deleted", LENGTH_LONG).show();
+                Log.e(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
+                finish();
             }
         }
-        super.onResume();
     }
 }

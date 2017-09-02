@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,11 +13,17 @@ import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.zik.faro.data.Event;
 import com.zik.faro.data.InviteeList;
 import com.zik.faro.frontend.notification.NotificationPayloadHandler;
 import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
+import com.zik.faro.frontend.util.FaroObjectNotFoundException;
+
+import java.text.MessageFormat;
+
+import static android.widget.Toast.LENGTH_LONG;
 
 
 /**
@@ -37,6 +44,7 @@ public class EventFriendListFragment extends Fragment implements NotificationPay
 
     private EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
 
+    private String TAG = "EvntFrndListFragment";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -56,16 +64,23 @@ public class EventFriendListFragment extends Fragment implements NotificationPay
         eventFriendListRelativeLayout = (RelativeLayout) fragmentView.findViewById(R.id.eventFriendListRelativeLayout);
         eventFriendListRelativeLayout.setVisibility(View.GONE);
 
-        checkAndHandleNotification();
+        try {
+            checkAndHandleNotification();
+        } catch (FaroObjectNotFoundException e) {
+            // Event has been deleted.
+            Toast.makeText(getActivity(), "Event has been deleted", LENGTH_LONG).show();
+            Log.e(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
+            getActivity().finish();
+        }
 
         return fragmentView;
     }
 
-    private void setupPageDetails () {
+    private void setupPageDetails () throws FaroObjectNotFoundException{
         linlaHeaderProgress.setVisibility(View.GONE);
         eventFriendListRelativeLayout.setVisibility(View.VISIBLE);
 
-        cloneEvent = eventListHandler.getEventCloneFromMap(eventId);
+        cloneEvent = eventListHandler.getCloneObject(eventId);
 
         ListView guestList = (ListView) fragmentView.findViewById(R.id.guestList);
         guestList.setBackgroundColor(Color.BLACK);
@@ -86,7 +101,7 @@ public class EventFriendListFragment extends Fragment implements NotificationPay
     }
 
     @Override
-    public void checkAndHandleNotification() {
+    public void checkAndHandleNotification() throws FaroObjectNotFoundException{
 
         extras = getArguments();
         if (extras == null)return; //TODO: How to handle such conditions
@@ -105,13 +120,20 @@ public class EventFriendListFragment extends Fragment implements NotificationPay
 
     @Override
     public void onResume() {
-        // Check if the version is same. It can be different if this page is loaded and a notification
-        // is received for this later which updates the global memory but clonedata on this page remains
-        // stale.
-        Long versionInGlobalMemory = eventListHandler.getOriginalEventFromMap(eventId).getVersion();
-        if (!cloneEvent.getVersion().equals(versionInGlobalMemory)) {
-            setupPageDetails();
-        }
         super.onResume();
+        // Check if the version is same. It can be different if this page is loaded and a notification
+        // is received for this later which updates the cache but clonedata on this page remains
+        // stale.
+
+        try {
+            if (!eventListHandler.checkObjectVersionIfLatest(eventId, cloneEvent.getVersion())) {
+                setupPageDetails();
+            }
+        } catch (FaroObjectNotFoundException e) {
+            // Event has been deleted.
+            Toast.makeText(getActivity(), "Event has been deleted", LENGTH_LONG).show();
+            Log.e(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
+            getActivity().finish();
+        }
     }
 }

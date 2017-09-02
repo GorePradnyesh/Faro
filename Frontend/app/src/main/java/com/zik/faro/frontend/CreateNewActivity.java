@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -28,6 +29,7 @@ import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
+import com.zik.faro.frontend.util.FaroObjectNotFoundException;
 
 import static android.widget.Toast.LENGTH_LONG;
 
@@ -79,7 +81,14 @@ public class CreateNewActivity extends android.app.Activity {
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
             eventId = extras.getString(FaroIntentConstants.EVENT_ID);
-            event = eventListHandler.getEventCloneFromMap(eventId);
+            try {
+                event = eventListHandler.getCloneObject(eventId);
+            } catch (FaroObjectNotFoundException e) {
+                Toast.makeText(this, "Event has been deleted", LENGTH_LONG).show();
+                Log.i(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
+                finish();
+                return;
+            }
         }
 
         activityName.addTextChangedListener(new TextWatcher() {
@@ -140,7 +149,8 @@ public class CreateNewActivity extends android.app.Activity {
                     @Override
                     public void onResponse(final Activity receivedActivity, HttpError error) {
                         if (error == null ) {
-                            Runnable myRunnable = new Runnable() {
+                            Handler mainHandler = new Handler(mContext.getMainLooper());
+                            mainHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
                                     //Since update to server successful, adding activity to List and Map below
@@ -150,11 +160,9 @@ public class CreateNewActivity extends android.app.Activity {
                                     startActivity(activityLanding);
                                     finish();
                                 }
-                            };
-                            Handler mainHandler = new Handler(mContext.getMainLooper());
-                            mainHandler.post(myRunnable);
+                            });
                         } else {
-                            Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                            Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                         }
                     }
                 }, eventId, eventActivity);

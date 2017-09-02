@@ -31,8 +31,10 @@ import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
+import com.zik.faro.frontend.util.FaroObjectNotFoundException;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -85,10 +87,17 @@ public class EditPoll extends Activity {
         extras = getIntent().getExtras();
         if (extras == null)return; //TODO: How to handle such conditions
 
-        setupPageDetails();
+        try {
+            setupPageDetails();
+        } catch (FaroObjectNotFoundException e) {
+            //Poll has been deleted.
+            Toast.makeText(this, "Poll has been deleted", LENGTH_LONG).show();
+            Log.e(TAG, MessageFormat.format("Poll {0} has been deleted", pollId));
+            finish();
+        }
     }
 
-    private void setupPageDetails () {
+    private void setupPageDetails () throws FaroObjectNotFoundException{
 
         linlaHeaderProgress.setVisibility(View.GONE);
         editPollRelativeLayout.setVisibility(View.VISIBLE);
@@ -97,7 +106,7 @@ public class EditPoll extends Activity {
 
         PollLandingPageIntent = new Intent(EditPoll.this, PollLandingPage.class);
 
-        clonePoll = pollListHandler.getPollCloneFromMap(pollId);
+        clonePoll = pollListHandler.getCloneObject(pollId);
 
         pollDescription = (TextView) findViewById(R.id.pollDescription);
         isMultiChoice = (CheckBox)findViewById(R.id.multiChoiceFlag);
@@ -184,7 +193,8 @@ public class EditPoll extends Activity {
             @Override
             public void onResponse(final Poll poll, HttpError error) {
                 if (error == null ) {
-                    Runnable myRunnable = new Runnable() {
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             Log.i(TAG, "Poll Update Response received Successfully");
@@ -193,11 +203,9 @@ public class EditPoll extends Activity {
                             startActivity(PollLandingPageIntent);
                             finish();
                         }
-                    };
-                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                    mainHandler.post(myRunnable);
+                    });
                 }else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
             }
         }, eventId, pollId, map);
@@ -213,7 +221,8 @@ public class EditPoll extends Activity {
             @Override
             public void onResponse(String s, HttpError error) {
                 if (error == null ) {
-                    Runnable myRunnable = new Runnable() {
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             pollListHandler.removePollFromListAndMap(eventId, clonePoll, mContext);
@@ -221,11 +230,9 @@ public class EditPoll extends Activity {
                             Toast.makeText(EditPoll.this, clonePoll.getDescription() + "is Deleted", LENGTH_LONG).show();
                             finish();
                         }
-                    };
-                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                    mainHandler.post(myRunnable);
+                    });
                 }else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
             }
         }, eventId, pollId);
@@ -278,14 +285,22 @@ public class EditPoll extends Activity {
 
     @Override
     protected void onResume() {
-        // Check if the version is same. It can be different if this page is loaded and a notification
-        // is received for this later which updates the global memory but clonedata on this page remains
-        // stale.
-        Long versionInGlobalMemory = pollListHandler.getOriginalPollFromMap(pollId).getVersion();
-        if (!clonePoll.getVersion().equals(versionInGlobalMemory)) {
-           setupPageDetails();
-        }
         super.onResume();
+
+        // Check if the version is same. It can be different if this page is loaded and a notification
+        // is received for this later which updates the cache but clonedata on this page remains
+        // stale.
+
+        try {
+            if (!pollListHandler.checkObjectVersionIfLatest(pollId, clonePoll.getVersion())) {
+                setupPageDetails();
+            }
+        } catch (FaroObjectNotFoundException e) {
+            //Poll has been deleted.
+            Toast.makeText(this, "Poll has been deleted", LENGTH_LONG).show();
+            Log.e(TAG, MessageFormat.format("Poll {0} has been deleted", pollId));
+            finish();
+        }
     }
 }
 

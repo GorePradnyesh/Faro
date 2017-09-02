@@ -4,14 +4,17 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.squareup.okhttp.Request;
+import com.zik.faro.data.BaseEntity;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
+import com.zik.faro.frontend.util.FaroObjectNotFoundException;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
@@ -19,7 +22,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-public class EventListHandler {
+public class EventListHandler extends BaseObjectHandler<Event>{
 
     /*
      *This is a Singleton class
@@ -92,7 +95,7 @@ public class EventListHandler {
                     EventInviteStatusWrapper eventInviteStatusWrapper = new EventInviteStatusWrapper(receivedEvent, EventInviteStatus.ACCEPTED);
                     eventMap.put(receivedEvent.getId(), eventInviteStatusWrapper);
                 } else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
             }
         }, event);
@@ -125,8 +128,15 @@ public class EventListHandler {
     public int getAcceptedFutureEventsStartingPosition() {
         int position = 0;
         for (Event event: acceptedEventAdapter.list) {
+
+            //Check for an event which is in progress
+            if (event.getStartDate().before(Calendar.getInstance()) && event.getEndDate().after(Calendar.getInstance()))
+                break;
+
+            //Check for the first upcoming event
             if (event.getStartDate().after(Calendar.getInstance()))
                 break;
+
             position++;
         }
         return position;
@@ -135,8 +145,15 @@ public class EventListHandler {
     public int getNotAcceptedFutureEventsStartingPosition() {
         int position = 0;
         for (Event event: notAcceptedEventAdapter.list) {
+
+            //Check for an event which is in progress
+            if (event.getStartDate().before(Calendar.getInstance()) && event.getEndDate().after(Calendar.getInstance()))
+                break;
+
+            //Check for the first upcoming event
             if (event.getStartDate().after(Calendar.getInstance()))
                 break;
+
             position++;
         }
         return position;
@@ -272,21 +289,13 @@ public class EventListHandler {
         boolean issync = isMapAndListInSync();
     }
 
-    Event getEventCloneFromMap(String eventId){
+    @Override
+    public Event getOriginalObject(String eventId) throws FaroObjectNotFoundException{
         EventInviteStatusWrapper eventInviteStatusWrapper = eventMap.get(eventId);
-        if (eventInviteStatusWrapper == null)
-            return null;
-
-        Event event = eventInviteStatusWrapper.getEvent();
-        Gson gson = new Gson();
-        String json = gson.toJson(event);
-        return gson.fromJson(json, Event.class);
-    }
-
-    public Event getOriginalEventFromMap (String eventId){
-        EventInviteStatusWrapper eventInviteStatusWrapper = eventMap.get(eventId);
-        if (eventInviteStatusWrapper == null)
-            return null;
+        if (eventInviteStatusWrapper == null || eventInviteStatusWrapper.getEvent() == null) {
+            throw new FaroObjectNotFoundException
+                    (MessageFormat.format("Event with id {0} not found in cache", eventId));
+        }
 
         return eventInviteStatusWrapper.getEvent();
     }
@@ -327,5 +336,10 @@ public class EventListHandler {
 
     public int getAcceptedEventListSize(){
         return acceptedEventAdapter.list.size();
+    }
+
+    @Override
+    public Class<Event> getType() {
+        return Event.class;
     }
 }

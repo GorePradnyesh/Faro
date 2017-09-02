@@ -5,13 +5,20 @@ import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTabHost;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.zik.faro.data.Event;
 import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
+import com.zik.faro.frontend.util.FaroObjectNotFoundException;
+
+import java.text.MessageFormat;
+
+import static android.widget.Toast.LENGTH_LONG;
 
 public class EventFriendListLandingPage extends FragmentActivity {
     private FragmentTabHost mTabHost;
@@ -25,6 +32,7 @@ public class EventFriendListLandingPage extends FragmentActivity {
     String myUserId = faroUserContext.getEmail();
 
     private Context mContext;
+    private String TAG = "EvntFrndListFragment";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +50,14 @@ public class EventFriendListLandingPage extends FragmentActivity {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             eventId = extras.getString(FaroIntentConstants.EVENT_ID);
-            cloneEvent = eventListHandler.getEventCloneFromMap(eventId);
+            try {
+                cloneEvent = eventListHandler.getCloneObject(eventId);
+            } catch (FaroObjectNotFoundException e) {
+                Toast.makeText(this, "Event has been deleted", LENGTH_LONG).show();
+                Log.e(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
+                finish();
+                return;
+            }
             if (!cloneEvent.getEventCreatorId().equals(myUserId)){
                 addFriendsImageButton.setVisibility(View.GONE);
             }

@@ -29,6 +29,7 @@ import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 
 
 public class CreateNewPoll extends Activity {
@@ -143,7 +144,8 @@ public class CreateNewPoll extends Activity {
             @Override
             public void onResponse(final Poll receivedPoll, HttpError error) {
                 if (error == null ) {
-                    Runnable myRunnable = new Runnable() {
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             Log.i(TAG, "Poll Create Response received Successfully");
@@ -153,11 +155,9 @@ public class CreateNewPoll extends Activity {
                             startActivity(PollLandingPageIntent);
                             finish();
                         }
-                    };
-                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                    mainHandler.post(myRunnable);
+                    });
                 }else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
             }
         }, eventId, poll);

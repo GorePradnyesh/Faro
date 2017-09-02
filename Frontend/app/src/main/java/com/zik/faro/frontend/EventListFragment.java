@@ -27,6 +27,7 @@ import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.List;
 
 public class EventListFragment extends Fragment {
@@ -75,8 +76,8 @@ public class EventListFragment extends Fragment {
         getEventsFromServer();
 
         //Let this api call be on EventListFragment and not on FriendListFragment since this is where the
-        // global memory for friendlist is populated which is later used when inviting friends for
-        // events. If the user never goes to the FriendListFragment then this global memory would not be
+        // cache for friendlist is populated which is later used when inviting friends for
+        // events. If the user never goes to the FriendListFragment then this cache would not be
         // populated.
         getFriendsFromServer();
 
@@ -182,7 +183,8 @@ public class EventListFragment extends Fragment {
             @Override
             public void onResponse(final List<EventInviteStatusWrapper> eventInviteStatusWrappers, HttpError error) {
                 if (error == null ) {
-                    Runnable myRunnable = new Runnable() {
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             Log.i(TAG, "Successfully received events from the server!!");
@@ -191,11 +193,9 @@ public class EventListFragment extends Fragment {
                             receivedEvents = true;
                             setupPageDetails(fragmentView);
                         }
-                    };
-                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                    mainHandler.post(myRunnable);
+                    });
                 }else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
             }
         });
@@ -211,7 +211,8 @@ public class EventListFragment extends Fragment {
             @Override
             public void onResponse(final List<MinUser> minUsers, HttpError error) {
                 if (error == null ) {
-                    Runnable myRunnable = new Runnable() {
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             Log.i(TAG, "Successfully received friends from the server!!");
@@ -219,11 +220,9 @@ public class EventListFragment extends Fragment {
                             receivedFriends = true;
                             setupPageDetails(fragmentView);
                         }
-                    };
-                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                    mainHandler.post(myRunnable);
+                    });
                 }else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
             }
         });

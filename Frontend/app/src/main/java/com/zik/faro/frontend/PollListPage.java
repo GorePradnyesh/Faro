@@ -25,6 +25,7 @@ import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.List;
 
 public class PollListPage extends Activity {
@@ -140,18 +141,17 @@ public class PollListPage extends Activity {
             @Override
             public void onResponse(final List<Poll> polls, HttpError error) {
                 if (error == null ) {
-                    Runnable myRunnable = new Runnable() {
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             Log.i(TAG, "Successfully received polls from the server!!");
                             pollListHandler.addDownloadedPollsToListAndMap(eventId, polls, mContext);
                             setupPageDetails();
                         }
-                    };
-                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                    mainHandler.post(myRunnable);
+                    });
                 }else{
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
             }
         }, eventId);

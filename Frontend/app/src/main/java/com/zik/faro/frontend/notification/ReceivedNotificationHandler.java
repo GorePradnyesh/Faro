@@ -72,7 +72,6 @@ public class ReceivedNotificationHandler extends AppCompatActivity {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
         }
 
         if (payloadNotificationType == null)return; // TODO: how to handle this condition?
@@ -115,6 +114,7 @@ public class ReceivedNotificationHandler extends AppCompatActivity {
             case "notificationType_ActivityDeleted":
             case "notificationType_PollDeleted":
             default:
+                // TODO: How to handle this incase when user is on some landing page.
                 intent = new Intent(this, AppLandingPage.class);
                 break;
         }
