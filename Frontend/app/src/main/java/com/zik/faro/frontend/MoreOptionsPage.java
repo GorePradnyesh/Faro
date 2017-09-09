@@ -27,7 +27,7 @@ import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
 
 public class MoreOptionsPage extends Fragment {
-    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private EventListHandler eventListHandler = EventListHandler.getInstance(getActivity());
     private UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
     private FaroUserContext faroUserContext = FaroUserContext.getInstance();
     private String myUserId = faroUserContext.getEmail();

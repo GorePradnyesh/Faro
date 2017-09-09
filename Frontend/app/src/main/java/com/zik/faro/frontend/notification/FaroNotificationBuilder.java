@@ -76,9 +76,9 @@ public class FaroNotificationBuilder {
         }
 
         ForegroundNotificationSilentHandler foregroundNotificationSilentHandler =
-                new ForegroundNotificationSilentHandler();
+                new ForegroundNotificationSilentHandler(context);
         try {
-            foregroundNotificationSilentHandler.updateObjectInCacheIfPresent(context, data);
+            foregroundNotificationSilentHandler.updateObjectInCacheIfPresent(data);
         } catch (JSONException e) {
             Log.e(TAG, MessageFormat.format("failed to get {0} from Notification Data", e.getCause()));
         }

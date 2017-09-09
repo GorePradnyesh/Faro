@@ -1,0 +1,26 @@
+diff --git a/Frontend/app/src/main/java/com/zik/faro/frontend/notification/FaroNotificationBuilder.java b/Frontend/app/src/main/java/com/zik/faro/frontend/notification/FaroNotificationBuilder.java
+index 4084957..3f28dee 100644
+--- a/Frontend/app/src/main/java/com/zik/faro/frontend/notification/FaroNotificationBuilder.java
++++ b/Frontend/app/src/main/java/com/zik/faro/frontend/notification/FaroNotificationBuilder.java
+@@ -78,7 +78,7 @@ public class FaroNotificationBuilder {
+         ForegroundNotificationSilentHandler foregroundNotificationSilentHandler =
+                 new ForegroundNotificationSilentHandler(context);
+         try {
+-            foregroundNotificationSilentHandler.updateGlobalMemoryIfPresent(data);
++            foregroundNotificationSilentHandler.updateObjectInCacheIfPresent(data);
+         } catch (JSONException e) {
+             Log.e(TAG, MessageFormat.format("failed to get {0} from Notification Data", e.getCause()));
+         }
+diff --git a/Frontend/app/src/main/java/com/zik/faro/frontend/notification/ForegroundNotificationSilentHandler.java b/Frontend/app/src/main/java/com/zik/faro/frontend/notification/ForegroundNotificationSilentHandler.java
+index a2050c5..cf403eb 100644
+--- a/Frontend/app/src/main/java/com/zik/faro/frontend/notification/ForegroundNotificationSilentHandler.java
++++ b/Frontend/app/src/main/java/com/zik/faro/frontend/notification/ForegroundNotificationSilentHandler.java
+@@ -51,7 +51,7 @@ public class ForegroundNotificationSilentHandler {
+         this.mContext = mContext;
+     }
+ 
+-    public void updateObjectInCacheIfPresent(Context context, JSONObject notificationDataJSON) throws JSONException {
++    public void updateObjectInCacheIfPresent(JSONObject notificationDataJSON) throws JSONException {
+         faroNotificationDataStr = notificationDataJSON.getString(FaroIntentConstants.FARO_NOTIFICATION_DATA);
+         faroNotificationDataJSON = new JSONObject(faroNotificationDataStr);
+         payloadNotificationType = faroNotificationDataJSON.getString(FaroIntentConstants.PAYLOAD_NOTIFICATION_TYPE);

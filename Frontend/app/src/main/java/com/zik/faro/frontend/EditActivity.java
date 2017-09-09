@@ -46,7 +46,7 @@ public class EditActivity extends android.app.Activity {
     private String activityId = null;
     private Event event;
     private Activity cloneActivity;
-    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private EventListHandler eventListHandler = EventListHandler.getInstance(this);
     private ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
     private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 

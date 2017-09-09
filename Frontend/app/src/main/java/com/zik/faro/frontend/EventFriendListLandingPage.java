@@ -25,7 +25,7 @@ public class EventFriendListLandingPage extends FragmentActivity {
     private String eventId;
     private Event cloneEvent;
 
-    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private EventListHandler eventListHandler = EventListHandler.getInstance(this);
     private EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
 
     FaroUserContext faroUserContext = FaroUserContext.getInstance();

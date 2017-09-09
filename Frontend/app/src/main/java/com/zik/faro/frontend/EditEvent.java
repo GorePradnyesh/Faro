@@ -70,7 +70,7 @@ public class EditEvent extends Activity {
     private DateFormat sdf = new SimpleDateFormat("MMM dd yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
 
-    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private EventListHandler eventListHandler = EventListHandler.getInstance(this);
     private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private Event cloneEvent;
 
@@ -148,7 +148,7 @@ public class EditEvent extends Activity {
         deleteLocation.setImageResource(R.drawable.cancel);
         deleteLocation.setVisibility(View.GONE);
 
-        TextView eventName = (TextView) findViewById(R.id.eventName);
+        TextView eventName = (TextView) findViewById(R.id.eventNameTextView);
         final EditText eventDescription = (EditText) findViewById(R.id.eventDescriptionEditText);
         eventAddress = (TextView) findViewById(R.id.locationAddressTextView);
 
@@ -361,7 +361,7 @@ public class EditEvent extends Activity {
                                 public void run() {
                                     eventListHandler.removeEventFromListAndMap(eventId);
                                     popupWindow.dismiss();
-                                    Toast.makeText(EditEvent.this, cloneEvent.getEventName() + "is Deleted", LENGTH_LONG).show();
+                                    Toast.makeText(EditEvent.this, cloneEvent.getEventName() + " is Deleted", LENGTH_LONG).show();
                                     finish();
                                 }
                             });

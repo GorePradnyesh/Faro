@@ -39,7 +39,7 @@ public class EventFriendListFragment extends Fragment implements NotificationPay
     private RelativeLayout eventFriendListRelativeLayout = null;
     private Bundle extras = null;
     private String bundleType = null;
-    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private EventListHandler eventListHandler = EventListHandler.getInstance(getActivity());
     private Event cloneEvent;
 
     private EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();

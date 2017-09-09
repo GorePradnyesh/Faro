@@ -41,7 +41,7 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
     private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
     private EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
-    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private EventListHandler eventListHandler = EventListHandler.getInstance(this);
     private String eventId = null;
     private String activityId = null;
     private ImageButton editButton = null;
@@ -135,7 +135,6 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
                 startActivity(AssignmentLandingPageIntent);
             }
         });
-
     }
 
     @Override

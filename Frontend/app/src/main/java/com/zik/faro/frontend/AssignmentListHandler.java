@@ -64,6 +64,7 @@ public class AssignmentListHandler {
     public AssignmentAdapter getAssignmentAdapter (String eventId, Context context) {
         AssignmentAdapter assignmentAdapter = assignmentAdapterMap.get(eventId);
         if (assignmentAdapter == null){
+            // TODO: Why is event row style being passed in the below constructor?
             assignmentAdapter = new AssignmentAdapter(context, R.layout.event_row_style);
             assignmentAdapterMap.put(eventId, assignmentAdapter);
         }

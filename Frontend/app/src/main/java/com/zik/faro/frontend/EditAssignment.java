@@ -62,7 +62,7 @@ public class EditAssignment extends android.app.Activity {
     private Activity cloneActivity = null;
     private Assignment cloneAssignment;
 
-    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private EventListHandler eventListHandler = EventListHandler.getInstance(this);
     private ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
     private AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
     private EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();

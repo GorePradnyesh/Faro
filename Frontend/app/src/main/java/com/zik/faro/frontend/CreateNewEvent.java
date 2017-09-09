@@ -57,7 +57,7 @@ import static android.widget.Toast.LENGTH_LONG;
 public class CreateNewEvent extends Activity {
 
     //public static final int NO_CHANGES = 0;
-    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private EventListHandler eventListHandler = EventListHandler.getInstance(this);
     private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
     private Calendar startDateCalendar = Calendar.getInstance();
