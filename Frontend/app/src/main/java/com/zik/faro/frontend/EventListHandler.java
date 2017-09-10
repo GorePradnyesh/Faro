@@ -25,6 +25,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class EventListHandler extends BaseObjectHandler<Event>{
 
+    public static final int MAX_EVENTS_PAGE_SIZE = 100;
+    private static final int MAX_TOTAL_EVENTS_IN_CACHE = 500;
+    public EventAdapter acceptedEventAdapter;
+    public EventAdapter notAcceptedEventAdapter;
+
     /*
      *This is a Singleton class
      */
@@ -50,14 +55,6 @@ public class EventListHandler extends BaseObjectHandler<Event>{
     }
 
     private EventListHandler(){}
-
-
-    public EventAdapter acceptedEventAdapter;
-    public EventAdapter notAcceptedEventAdapter;
-
-
-    public static final int MAX_EVENTS_PAGE_SIZE = 100;
-    private static final int MAX_TOTAL_EVENTS_IN_CACHE = 500;
 
     /*
     * Map of events needed to access events downloaded from the server in O(1) time. The Key to the
@@ -189,41 +186,29 @@ public class EventListHandler extends BaseObjectHandler<Event>{
         eventMap.put(receivedEvent.getId(), eventInviteStatusWrapper);
     }
 
-    public int getAcceptedFutureEventsStartingPosition() {
+    private int getStartingEventPosition (EventAdapter eventAdapter) {
         Event event = null;
         int position = 0;
 
-        for(position = 0 ; position < acceptedEventAdapter.getCount() ; position++){
-            event = acceptedEventAdapter.getItem(position);
+        for(position = 0 ; position < eventAdapter.getCount() ; position++){
+            event = eventAdapter.getItem(position);
 
             Calendar currentCalendar = Calendar.getInstance();
-            //Check for an event which is in progress
-            if (event.getStartDate().before(currentCalendar) && event.getEndDate().after(currentCalendar))
+            //Check for an event which is in progress or for the first upcoming event
+            if ((event.getStartDate().before(currentCalendar) && event.getEndDate().after(currentCalendar))
+                    || (event.getStartDate().after(currentCalendar))) {
                 break;
-
-            //Check for the first upcoming event
-            if (event.getStartDate().after(currentCalendar))
-                break;
+            }
         }
         return position;
     }
 
+    public int getAcceptedFutureEventsStartingPosition() {
+        return getStartingEventPosition(acceptedEventAdapter);
+    }
+
     public int getNotAcceptedFutureEventsStartingPosition() {
-        int position = 0;
-
-        Event event = null;
-
-        for(position = 0 ; position < notAcceptedEventAdapter.getCount() ; position++){
-            event = notAcceptedEventAdapter.getItem(position);
-            //Check for an event which is in progress
-            if (event.getStartDate().before(Calendar.getInstance()) && event.getEndDate().after(Calendar.getInstance()))
-                break;
-
-            //Check for the first upcoming event
-            if (event.getStartDate().after(Calendar.getInstance()))
-                break;
-        }
-        return position;
+        return getStartingEventPosition(notAcceptedEventAdapter);
     }
 
     public void addDownloadedEventsToListAndMap(List<EventInviteStatusWrapper> eventInviteStatusWrappers){
@@ -281,7 +266,6 @@ public class EventListHandler extends BaseObjectHandler<Event>{
 
         EventAdapter eventAdapter;
         eventAdapter = getEventAdapter(eventInviteStatus);
-        if (eventAdapter == null) return;
 
         eventAdapter.addEvent(event);
 
@@ -358,7 +342,7 @@ public class EventListHandler extends BaseObjectHandler<Event>{
         EventAdapter eventAdapter;
         EventInviteStatus eventInviteStatus = getUserEventStatus(event.getId());
         eventAdapter = getEventAdapter(eventInviteStatus);
-        if (eventAdapter == null) return;
+
         int lastEventIndex = eventAdapter.getCount() - 1;
         Event lastEventInList = eventAdapter.getItem(lastEventIndex);
         if (lastEventInList == null)

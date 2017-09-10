@@ -57,7 +57,7 @@ public class ForegroundNotificationSilentHandler {
         faroNotificationDataJSON = new JSONObject(faroNotificationDataStr);
         payloadNotificationType = faroNotificationDataJSON.getString(FaroIntentConstants.PAYLOAD_NOTIFICATION_TYPE);
         version = Long.parseLong(faroNotificationDataJSON.getString(FaroIntentConstants.VERSION));
-        
+
         switch (payloadNotificationType){
             case "notificationType_EventInvite":
             case "notificationType_EventDateChanged":
