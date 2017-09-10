@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
@@ -21,11 +22,14 @@ import com.zik.faro.frontend.R;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
+import com.zik.faro.frontend.util.FaroObjectNotFoundException;
 import com.zik.faro.frontend.handlers.EventListHandler;
 
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.List;
+
+import static android.widget.Toast.LENGTH_LONG;
 
 
 /**
@@ -35,7 +39,7 @@ public class ImageGridViewActivity extends AppCompatActivity {
     private static final String TAG = "ImageGridViewActivity";
     private final Context context = this;
     private Event cloneEvent = null;
-    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private EventListHandler eventListHandler = EventListHandler.getInstance(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +47,15 @@ public class ImageGridViewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_grid_view);
 
         String eventId = getIntent().getStringExtra(FaroIntentConstants.EVENT_ID);
-        cloneEvent = eventListHandler.getEventCloneFromMap(eventId);
+        try {
+            cloneEvent = eventListHandler.getCloneObject(eventId);
+        } catch (FaroObjectNotFoundException e) {
+            Toast.makeText(this, "Event has been deleted", LENGTH_LONG).show();
+            Log.i(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
+            finish();
+            return;
+        }
+
         final String eventName = cloneEvent.getEventName();
         Log.i(TAG, "eventName = " + eventName);
 
@@ -88,15 +100,14 @@ public class ImageGridViewActivity extends AppCompatActivity {
                             }
                         }));
 
-                        Runnable myRunnable = new Runnable() {
+                        Handler mainHandler = new Handler(context.getMainLooper());
+                        mainHandler.post(new Runnable() {
                             @Override
                             public void run() {
                                 Log.i(TAG, "Successfully obtained images for the event");
                                 ImagesListHandler.getInstance().addImages(imageUrls);
                             }
-                        };
-                        Handler mainHandler = new Handler(context.getMainLooper());
-                        mainHandler.post(myRunnable);
+                        });
                     }
                 } else {
                     Log.e(TAG, MessageFormat.format("error = {0}", error.getCode()));

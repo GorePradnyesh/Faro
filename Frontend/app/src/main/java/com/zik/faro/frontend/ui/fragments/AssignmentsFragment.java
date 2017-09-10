@@ -13,6 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.ActionStatus;
@@ -30,20 +31,25 @@ import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
+import com.zik.faro.frontend.faroservice.notification.NotificationPayloadHandler;
+import com.zik.faro.frontend.util.FaroObjectNotFoundException;
 import com.zik.faro.frontend.handlers.ActivityListHandler;
 import com.zik.faro.frontend.handlers.AssignmentListHandler;
 import com.zik.faro.frontend.handlers.EventListHandler;
 import com.zik.faro.frontend.faroservice.notification.NotificationPayloadHandler;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static android.widget.Toast.LENGTH_LONG;
+
 public class AssignmentsFragment extends Fragment implements NotificationPayloadHandler {
 
     private AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
-    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private EventListHandler eventListHandler = EventListHandler.getInstance(getActivity());
     private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
 
@@ -85,7 +91,15 @@ public class AssignmentsFragment extends Fragment implements NotificationPayload
         myAssignmentLandingFragmentRelativeLayout = (RelativeLayout) fragmentView.findViewById(R.id.myAssignmentLandingFragmentRelativeLayout);
         myAssignmentLandingFragmentRelativeLayout.setVisibility(View.GONE);
 
-        checkAndHandleNotification();
+        try {
+            checkAndHandleNotification();
+        } catch (FaroObjectNotFoundException e) {
+            Toast.makeText(mContext, (activityId == null) ? "Event" : "Activity" + " has been deleted", LENGTH_LONG).show();
+            Log.e(TAG, MessageFormat.format("{0} {1} has been deleted",
+                    (activityId == null) ? "Event" : "Activity",
+                    (activityId == null) ? eventId : activityId));
+            getActivity().finish();
+        }
 
         return fragmentView;
     }
@@ -147,16 +161,28 @@ public class AssignmentsFragment extends Fragment implements NotificationPayload
                                 @Override
                                 public void run() {
                                     for(Map.Entry<String, List<Item>> entry: stringListMap.entrySet()){
-                                        String activityId = entry.getKey();
+                                        String objectId = entry.getKey();
                                         Assignment originalAssignment;
-                                        if (activityId.equals(eventId)){
-                                            Event originalEvent = eventListHandler.getOriginalEventFromMap(eventId);
-                                            originalAssignment = originalEvent.getAssignment();
-                                            originalAssignment.setItems(entry.getValue());
-                                        }else {
-                                            Activity originalActivity = activityListHandler.getOriginalActivityFromMap(activityId);
-                                            originalAssignment = originalActivity.getAssignment();
-                                            originalAssignment.setItems(entry.getValue());
+                                        try {
+                                            if (objectId.equals(eventId)){
+                                                Event originalEvent = (Event) eventListHandler.getOriginalObject(eventId);
+                                                originalAssignment = originalEvent.getAssignment();
+                                                originalAssignment.setItems(entry.getValue());
+                                            } else {
+                                                Activity originalActivity = (Activity) activityListHandler.getOriginalObject(objectId);
+                                                originalAssignment = originalActivity.getAssignment();
+                                                originalAssignment.setItems(entry.getValue());
+                                            }
+                                        } catch (FaroObjectNotFoundException e) {
+                                            //Activity has been deleted.
+                                            Toast.makeText(getActivity(),
+                                                    objectId.equals(eventId) ? "Event" : "Activity" + " has been deleted",
+                                                    LENGTH_LONG).show();
+                                            Log.e(TAG, MessageFormat.format("{0} {1} has been deleted",
+                                                    objectId.equals(eventId) ? "Event" : "Activity",
+                                                    objectId.equals(eventId) ? eventId : objectId));
+                                            getActivity().finish();
+                                            return;
                                         }
                                     }
                                     Log.i(TAG, "Successfully updated items list to server");
@@ -167,7 +193,7 @@ public class AssignmentsFragment extends Fragment implements NotificationPayload
                             Handler mainHandler = new Handler(mContext.getMainLooper());
                             mainHandler.post(myRunnable);
                         }else {
-                            Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                            Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                         }
                     }
                 }, eventId, activityToItemListMap);
@@ -177,7 +203,7 @@ public class AssignmentsFragment extends Fragment implements NotificationPayload
 
 
     @Override
-    public void checkAndHandleNotification() {
+    public void checkAndHandleNotification() throws FaroObjectNotFoundException{
         Bundle extras = getArguments();
         if (extras == null) return; //TODO: How to handle such conditions
 
@@ -187,9 +213,9 @@ public class AssignmentsFragment extends Fragment implements NotificationPayload
         bundleType = extras.getString(FaroIntentConstants.BUNDLE_TYPE);
 
         if (activityId == null){
-            cloneEvent = eventListHandler.getEventCloneFromMap(eventId);
+            cloneEvent = eventListHandler.getCloneObject(eventId);
         } else {
-            cloneActivity = activityListHandler.getActivityCloneFromMap(activityId);
+            cloneActivity = activityListHandler.getCloneObject(activityId);
         }
 
         setupPageDetails();
@@ -197,26 +223,30 @@ public class AssignmentsFragment extends Fragment implements NotificationPayload
 
     @Override
     public void onResume() {
+        super.onResume();
         if (bundleType.equals(FaroIntentConstants.IS_NOT_NOTIFICATION)) {
             // Check if the version is same. It can be different if this page is loaded and a notification
-            // is received for this later which updates the global memory but clonedata on this page remains
+            // is received for this later which updates the cache but clonedata on this page remains
             // stale.
             // This check is not necessary when opening this page directly through a notification.
-            Long versionInGlobalMemory = null;
-            Long previousVersion = null;
-
-            if (activityId == null) {
-                versionInGlobalMemory = eventListHandler.getOriginalEventFromMap(eventId).getVersion();
-                previousVersion = cloneEvent.getVersion();
-            } else {
-                versionInGlobalMemory = activityListHandler.getOriginalActivityFromMap(activityId).getVersion();
-                previousVersion = cloneActivity.getVersion();
-            }
-
-            if (!previousVersion.equals(versionInGlobalMemory)) {
-                setupPageDetails();
+            try {
+                if (activityId == null) {
+                    if (!eventListHandler.checkObjectVersionIfLatest(eventId, cloneEvent.getVersion())) {
+                        setupPageDetails();
+                    }
+                } else {
+                    if (!activityListHandler.checkObjectVersionIfLatest(activityId, cloneActivity.getVersion())) {
+                        setupPageDetails();
+                    }
+                }
+            } catch (FaroObjectNotFoundException e) {
+                //Activity has been deleted.
+                Toast.makeText(mContext, (activityId == null) ? "Event" : "Activity" + " has been deleted", LENGTH_LONG).show();
+                Log.e(TAG, MessageFormat.format("{0} {1} has been deleted",
+                        activityId == null ? "Event" : "Activity",
+                        activityId == null ? eventId : activityId));
+                getActivity().finish();
             }
         }
-        super.onResume();
     }
 }

@@ -5,16 +5,21 @@ import android.content.Context;
 
 import com.google.gson.Gson;
 import com.zik.faro.data.Activity;
+import com.zik.faro.frontend.BaseObjectHandler;
 import com.zik.faro.frontend.R;
 import com.zik.faro.frontend.ui.adapters.ActivityAdapter;
 
+import com.zik.faro.data.BaseEntity;
+import com.zik.faro.frontend.util.FaroObjectNotFoundException;
+
+import java.text.MessageFormat;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ActivityListHandler {
+public class ActivityListHandler extends BaseObjectHandler<Activity> {
     /*
      * This is a Singleton class
      */
@@ -44,21 +49,6 @@ public class ActivityListHandler {
     * Map is the activityId String which returns the Activity as the value
     */
     private Map<String, Activity> activityMap = new ConcurrentHashMap<>();
-
-
-    public Activity getActivityCloneFromMap(String activityId){
-        Activity activity = activityMap.get(activityId);
-        Gson gson = new Gson();
-        String json = gson.toJson(activity);
-        Activity cloneActivity = gson.fromJson(json, Activity.class);
-        return cloneActivity;
-    }
-
-    public Activity getOriginalActivityFromMap (String activityId){
-        Activity activity = activityMap.get(activityId);
-        return activity;
-    }
-
 
     public ActivityAdapter getActivityAdapter(String eventId, Context context){
         ActivityAdapter activityAdapter = activityAdapterMap.get(eventId);
@@ -197,6 +187,22 @@ public class ActivityListHandler {
     public void clearEverything() {
         activityAdapterMap.clear();
         activityMap.clear();
+    }
+
+    @Override
+    public Activity getOriginalObject(String activityId) throws FaroObjectNotFoundException {
+        Activity activity = activityMap.get(activityId);
+        if (activity == null) {
+            throw new FaroObjectNotFoundException
+                    (MessageFormat.format("Actvity with id {0} not found in cache", activityId));
+        } else {
+            return activity;
+        }
+    }
+
+    @Override
+    public Class getType() {
+        return null;
     }
 
     //

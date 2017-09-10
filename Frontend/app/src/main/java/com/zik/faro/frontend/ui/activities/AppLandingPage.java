@@ -57,20 +57,11 @@ public class AppLandingPage extends FragmentActivity{
                 mTabHost.newTabSpec("tab2").setIndicator(getTabIndicator(mTabHost.getContext(), R.drawable.friend_list)),
                 FriendListFragment.class, null);
         mTabHost.addTab(
-                mTabHost.newTabSpec("tab3").setIndicator(getTabIndicator(mTabHost.getContext(), R.drawable.plus)),
-                null, null);
-        mTabHost.addTab(
-                mTabHost.newTabSpec("tab4").setIndicator(getTabIndicator(mTabHost.getContext(), R.drawable.notification)),
+                mTabHost.newTabSpec("tab3").setIndicator(getTabIndicator(mTabHost.getContext(), R.drawable.notification)),
                 MoreOptionsPage.class, null);
         mTabHost.addTab(
-                mTabHost.newTabSpec("tab5").setIndicator(getTabIndicator(mTabHost.getContext(), R.drawable.options)),
+                mTabHost.newTabSpec("tab4").setIndicator(getTabIndicator(mTabHost.getContext(), R.drawable.options)),
                 MoreOptionsPage.class, null);
-        mTabHost.getTabWidget().getChildAt(2).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(createNewEventIntent);
-            }
-        });
     }
 
     private View getTabIndicator(Context context, int icon) {

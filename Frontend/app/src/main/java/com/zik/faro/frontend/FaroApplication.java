@@ -51,16 +51,9 @@ public class FaroApplication extends Application {
     }
 
     private void createGlobalHandlersAndAdapters() {
-        EventListHandler eventListHandler = EventListHandler.getInstance();
+        EventListHandler eventListHandler = EventListHandler.getInstance(this);
         UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
 
-        if (eventListHandler.acceptedEventAdapter == null) {
-            eventListHandler.acceptedEventAdapter = new EventAdapter(this, R.layout.event_row_style);
-        }
-
-        if (eventListHandler.notAcceptedEventAdapter == null) {
-            eventListHandler.notAcceptedEventAdapter = new EventAdapter(this, R.layout.event_row_style);
-        }
 
         if (userFriendListHandler.userFriendAdapter == null){
             userFriendListHandler.userFriendAdapter = new UserFriendAdapter(this, R.layout.friend_row_style);

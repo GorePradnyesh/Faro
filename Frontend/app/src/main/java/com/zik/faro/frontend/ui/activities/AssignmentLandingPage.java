@@ -5,12 +5,20 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTabHost;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Event;
+import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
+import com.zik.faro.frontend.util.FaroObjectNotFoundException;
+
+import java.text.MessageFormat;
+
+import static android.widget.Toast.LENGTH_LONG;
 import com.zik.faro.frontend.handlers.ActivityListHandler;
 import com.zik.faro.frontend.ui.fragments.AssignmentLandingFragment;
 import com.zik.faro.frontend.handlers.AssignmentListHandler;
@@ -27,11 +35,12 @@ public class AssignmentLandingPage extends FragmentActivity {
     private String assignmentId = null;
     private String bundleType = null;
     private AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
-    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private EventListHandler eventListHandler = EventListHandler.getInstance(this);
     private ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
     private Activity cloneActivity = null;
     private Event cloneEvent = null;
     private View assignmentLandingPageRelativeLayout = null;
+    private String TAG = "AssignmentLandingPage";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,15 +56,23 @@ public class AssignmentLandingPage extends FragmentActivity {
             assignmentId = extras.getString(FaroIntentConstants.ASSIGNMENT_ID);
             bundleType = extras.getString(FaroIntentConstants.BUNDLE_TYPE);
 
-            setupPageDetails();
+            try {
+                setupPageDetails();
+            } catch (FaroObjectNotFoundException e) {
+                Toast.makeText(this, (activityId == null) ? "Event" : "Activity" + " has been deleted", LENGTH_LONG).show();
+                Log.i(TAG, MessageFormat.format("{0} {1} has been deleted",
+                        (activityId == null) ? "Event" : "Activity",
+                        (activityId == null) ? eventId : activityId));
+                finish();
+            }
         }
     }
 
-    private void setupPageDetails () {
-        if (activityId == null){
-            cloneEvent = eventListHandler.getEventCloneFromMap(eventId);
+    private void setupPageDetails ()  throws FaroObjectNotFoundException{
+        if (activityId == null) {
+            cloneEvent = eventListHandler.getCloneObject(eventId);
         } else {
-            cloneActivity = activityListHandler.getActivityCloneFromMap(activityId);
+            cloneActivity = activityListHandler.getCloneObject(activityId);
         }
 
         Bundle bundle = new Bundle();

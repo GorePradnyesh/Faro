@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -60,7 +61,7 @@ import static android.widget.Toast.LENGTH_LONG;
 public class CreateNewEventActivity extends Activity {
 
     //public static final int NO_CHANGES = 0;
-    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private EventListHandler eventListHandler = EventListHandler.getInstance(this);
     private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
     private Calendar startDateCalendar = Calendar.getInstance();
@@ -209,7 +210,8 @@ public class CreateNewEventActivity extends Activity {
                     @Override
                     public void onResponse(final Event receivedEvent, HttpError error) {
                         if (error == null ) {
-                            Runnable myRunnable = new Runnable() {
+                            Handler mainHandler = new Handler(mContext.getMainLooper());
+                            mainHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
                                     //Since update to server successful, adding event to List and Map below
@@ -219,11 +221,9 @@ public class CreateNewEventActivity extends Activity {
                                     startActivity(EventLanding);
                                     finish();
                                 }
-                            };
-                            Handler mainHandler = new Handler(mContext.getMainLooper());
-                            mainHandler.post(myRunnable);
+                            });
                         } else {
-                            Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                            Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                         }
                     }
                 }, event);

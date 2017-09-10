@@ -11,10 +11,13 @@ import android.util.Log;
 
 import com.zik.faro.frontend.FaroIntentConstants;
 import com.zik.faro.frontend.R;
+import com.zik.faro.frontend.faroservice.auth.FaroUserContext;
 import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.text.MessageFormat;
 
 public class FaroNotificationBuilder {
     private static final String TAG = "FaroNotificationBuilder";
@@ -29,43 +32,36 @@ public class FaroNotificationBuilder {
         String faroNotificationDataStr = null;
         JSONObject faroNotificationDataJSON = null;
         String user = null;
+        FaroUserContext faroUserContext = FaroUserContext.getInstance();
+        String myUserId = faroUserContext.getEmail();
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context);
 
         try {
             faroNotificationDataStr = data.getString(FaroIntentConstants.FARO_NOTIFICATION_DATA);
             faroNotificationDataJSON = new JSONObject(faroNotificationDataStr);
-            user = faroNotificationDataJSON.getString("user");
-            if (user == null)
+            user = faroNotificationDataJSON.getString(FaroIntentConstants.USER);
+            if (user == null) {
                 return null;
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        if (user != null && user.equals("harsha@gmail.com"))
-            return null;
-
-        if (clickAction == null) {
-            try {
-                if (faroNotificationDataJSON != null) {
-                    clickAction = faroNotificationDataJSON.getString(FaroIntentConstants.CLICK_ACTION);
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
             }
+        } catch (JSONException e) {
+            Log.e(TAG, MessageFormat.format("failed to get {0} from Notification Data", e.getCause()));
         }
 
-        if (clickAction == null)
+        // incase the notification was triggered by me, then should not show up on the system tray.
+        if (myUserId.equals(user)) {
             return null;
+        }
 
         switch (clickAction){
             case "DEFAULTACTION":
                 intent = new Intent(context, ReceivedNotificationHandler.class);
-                //intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                int requestID = (int) System.currentTimeMillis();
                 FaroIntentInfoBuilder.notificationHandlerIntent(intent,
                         FaroIntentConstants.FOREGROUND_NOTIFICATION, data.toString());
-                pendingIntent = PendingIntent.getActivity(context, 0 /* Request code */, intent,
-                        PendingIntent.FLAG_ONE_SHOT);
+                pendingIntent = PendingIntent.getActivity(context, requestID, intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT);
                 Log.d(TAG, "In RECEIVEDNOTIFICATIONHANDLER case when building builder ====");
                 break;
             default:
@@ -80,36 +76,16 @@ public class FaroNotificationBuilder {
         }
 
         ForegroundNotificationSilentHandler foregroundNotificationSilentHandler =
-                new ForegroundNotificationSilentHandler();
+                new ForegroundNotificationSilentHandler(context);
         try {
-            foregroundNotificationSilentHandler.updateGlobalMemoryIfPresent(context, data);
+            foregroundNotificationSilentHandler.updateObjectInCacheIfPresent(data);
         } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        if (title == null) {
-            try {
-                if (faroNotificationDataJSON != null) {
-                    title = faroNotificationDataJSON.getString(FaroIntentConstants.TITLE);
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-
-        if (messageBody == null) {
-            try {
-                if (faroNotificationDataJSON != null) {
-                    messageBody = faroNotificationDataJSON.getString(FaroIntentConstants.TEXT);
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            Log.e(TAG, MessageFormat.format("failed to get {0} from Notification Data", e.getCause()));
         }
 
         Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
-                notificationBuilder.setSmallIcon(R.drawable.blue)
+        notificationBuilder.setSmallIcon(R.drawable.blue)
                 .setContentTitle(title)
                 .setContentText(messageBody)
                 .setAutoCancel(true)

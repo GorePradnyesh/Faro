@@ -3,6 +3,8 @@ package com.zik.faro.frontend.handlers;
 import android.content.Context;
 
 import com.google.gson.Gson;
+import com.zik.faro.data.BaseEntity;
+import com.zik.faro.data.Event;
 import com.zik.faro.data.InviteeList;
 import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.frontend.R;
@@ -13,7 +15,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class EventFriendListHandler {
+public class EventFriendListHandler{
     private static EventFriendListHandler eventFriendListHandler = null;
 
     public static EventFriendListHandler getInstance(){
@@ -265,7 +267,6 @@ public class EventFriendListHandler {
         InviteeList.Invitees invitee = friendMap.get(emailId);
         Gson gson = new Gson();
         String json = gson.toJson(invitee);
-        InviteeList.Invitees cloneInvitee = gson.fromJson(json, InviteeList.Invitees.class);
-        return cloneInvitee;
+        return gson.fromJson(json, InviteeList.Invitees.class);
     }
 }

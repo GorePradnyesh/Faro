@@ -13,7 +13,7 @@ public class Item {
     }
     
     
-    public Item(String name, String assigneeId, int count, Unit unit, String id) throws IllegalDataOperation {
+    public Item(String name, String assigneeId, int count, Unit unit, String id) {
     	this.id = id;
         this.name = name;
         this.assigneeId = assigneeId;
@@ -22,7 +22,7 @@ public class Item {
         this.status = ActionStatus.INCOMPLETE;
     }
 
-    public Item(String name, String assigneeId, int count, Unit unit) throws IllegalDataOperation {
+    public Item(String name, String assigneeId, int count, Unit unit) {
         this(name,assigneeId,count,unit,null);
     }
 

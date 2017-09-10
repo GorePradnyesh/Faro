@@ -36,9 +36,11 @@ import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
+import com.zik.faro.frontend.util.FaroObjectNotFoundException;
 
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -49,7 +51,7 @@ public class EditActivityPage extends android.app.Activity {
     private String activityId = null;
     private Event event;
     private Activity cloneActivity;
-    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private EventListHandler eventListHandler = EventListHandler.getInstance(this);
     private ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
     private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
@@ -96,10 +98,16 @@ public class EditActivityPage extends android.app.Activity {
         extras = getIntent().getExtras();
         if (extras == null)return; //TODO: How to handle such conditions
 
-        setupPageDetails();
+        try {
+            setupPageDetails();
+        } catch (FaroObjectNotFoundException e) {
+            Log.e(TAG, MessageFormat.format("Activity {0} has been deleted", activityId));
+            Toast.makeText(this, "Activity has been deleted", LENGTH_LONG).show();
+            finish();
+        }
     }
 
-    private void setupPageDetails () {
+    private void setupPageDetails () throws FaroObjectNotFoundException{
 
         linlaHeaderProgress.setVisibility(View.GONE);
         editActivityRelativeLayout.setVisibility(View.VISIBLE);
@@ -107,8 +115,8 @@ public class EditActivityPage extends android.app.Activity {
         eventId = extras.getString(FaroIntentConstants.EVENT_ID);
         activityId = extras.getString(FaroIntentConstants.ACTIVITY_ID);
 
-        event = eventListHandler.getEventCloneFromMap(eventId);
-        cloneActivity = activityListHandler.getActivityCloneFromMap(activityId);
+        event = eventListHandler.getCloneObject(eventId);
+        cloneActivity = activityListHandler.getCloneObject(activityId);
 
         startDateButton = (Button) findViewById(R.id.startDateButton);
         startTimeButton = (Button) findViewById(R.id.startTimeButton);
@@ -450,7 +458,8 @@ public class EditActivityPage extends android.app.Activity {
             @Override
             public void onResponse(String s, HttpError error) {
                 if (error == null ) {
-                    Runnable myRunnable = new Runnable() {
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             activityListHandler.addActivityToListAndMap(eventId, cloneActivity, mContext);
@@ -458,11 +467,9 @@ public class EditActivityPage extends android.app.Activity {
                             startActivity(ActivityLandingPage);
                             finish();
                         }
-                    };
-                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                    mainHandler.post(myRunnable);
+                    });
                 }else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
             }
         }, eventId, activityId, cloneActivity);
@@ -478,7 +485,8 @@ public class EditActivityPage extends android.app.Activity {
             @Override
             public void onResponse(String s, HttpError error) {
                 if (error == null ) {
-                    Runnable myRunnable = new Runnable() {
+                    Handler mainHandler = new Handler(mContext.getMainLooper());
+                    mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             activityListHandler.removeActivityFromListAndMap(eventId, activityId, mContext);
@@ -486,11 +494,9 @@ public class EditActivityPage extends android.app.Activity {
                             Toast.makeText(EditActivityPage.this, cloneActivity.getName() + "is Deleted", LENGTH_LONG).show();
                             finish();
                         }
-                    };
-                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                    mainHandler.post(myRunnable);
+                    });
                 }else {
-                    Log.i(TAG, "code = " + error.getCode() + ", message = " + error.getMessage());
+                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
             }
         }, eventId, activityId);
@@ -508,13 +514,19 @@ public class EditActivityPage extends android.app.Activity {
 
     @Override
     protected void onResume() {
-        // Check if the version is same. It can be different if this page is loaded and a notification
-        // is received for this later which updates the global memory but clonedata on this page remains
-        // stale.
-        Long versionInGlobalMemory = activityListHandler.getOriginalActivityFromMap(activityId).getVersion();
-        if (!cloneActivity.getVersion().equals(versionInGlobalMemory)){
-            setupPageDetails();
-        }
         super.onResume();
+        // Check if the version is same. It can be different if this page is loaded and a notification
+        // is received for this later which updates the cache but clonedata on this page remains
+        // stale.
+        try {
+            if (!activityListHandler.checkObjectVersionIfLatest(activityId, cloneActivity.getVersion())) {
+                setupPageDetails();
+            }
+        } catch (FaroObjectNotFoundException e) {
+            //Activity has been deleted.
+            Log.e(TAG, MessageFormat.format("Activity {0} has been deleted", activityId));
+            Toast.makeText(this, "Activity has been deleted", LENGTH_LONG).show();
+            finish();
+        }
     }
 }

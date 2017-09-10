@@ -16,6 +16,7 @@ import com.zik.faro.frontend.handlers.ActivityListHandler;
 import com.zik.faro.frontend.util.FaroExceptionHandler;
 import com.zik.faro.frontend.FaroIntentConstants;
 import com.zik.faro.frontend.R;
+import com.zik.faro.data.Event;
 import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 
 /*
