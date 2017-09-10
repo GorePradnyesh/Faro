@@ -28,7 +28,7 @@ public class AssignmentLandingPage extends FragmentActivity {
     private String assignmentId = null;
     private String bundleType = null;
     private AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
-    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private EventListHandler eventListHandler = EventListHandler.getInstance(this);
     private ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
     private Activity cloneActivity = null;
     private Event cloneEvent = null;

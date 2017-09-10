@@ -36,7 +36,7 @@ import static android.widget.Toast.LENGTH_LONG;
 public class CreateNewActivity extends android.app.Activity {
 
     private String eventId = null;
-    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private EventListHandler eventListHandler = EventListHandler.getInstance(this);
     private ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
     private Event event = null;
 

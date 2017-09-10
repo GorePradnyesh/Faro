@@ -41,18 +41,22 @@ public class ForegroundNotificationSilentHandler {
     private Context mContext = null;
 
     private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
-    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private EventListHandler eventListHandler = null;
     private PollListHandler pollListHandler = PollListHandler.getInstance();
     private ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
     private AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
     private EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
 
-    public void updateObjectInCacheIfPresent(Context context, JSONObject notificationDataJSON) throws JSONException {
+    public ForegroundNotificationSilentHandler(Context mContext) {
+        this.mContext = mContext;
+        eventListHandler = EventListHandler.getInstance(mContext);
+    }
+
+    public void updateObjectInCacheIfPresent(JSONObject notificationDataJSON) throws JSONException {
         faroNotificationDataStr = notificationDataJSON.getString(FaroIntentConstants.FARO_NOTIFICATION_DATA);
         faroNotificationDataJSON = new JSONObject(faroNotificationDataStr);
         payloadNotificationType = faroNotificationDataJSON.getString(FaroIntentConstants.PAYLOAD_NOTIFICATION_TYPE);
         version = Long.parseLong(faroNotificationDataJSON.getString(FaroIntentConstants.VERSION));
-        mContext = context;
 
         switch (payloadNotificationType){
             case "notificationType_EventInvite":

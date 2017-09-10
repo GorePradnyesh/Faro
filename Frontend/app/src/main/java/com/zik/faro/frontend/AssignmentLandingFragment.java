@@ -49,7 +49,7 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
     private String assignmentId = null;
     private Assignment cloneAssignment = null;
 
-    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private EventListHandler eventListHandler = EventListHandler.getInstance(getActivity());
     private ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
     private AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
     private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();

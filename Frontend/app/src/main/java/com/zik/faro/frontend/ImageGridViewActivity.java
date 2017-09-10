@@ -35,7 +35,7 @@ public class ImageGridViewActivity extends AppCompatActivity {
     private static final String TAG = "ImageGridViewActivity";
     private final Context context = this;
     private Event cloneEvent = null;
-    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private EventListHandler eventListHandler = EventListHandler.getInstance(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

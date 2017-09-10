@@ -52,7 +52,7 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
 
     private PollListHandler pollListHandler = PollListHandler.getInstance();
     private UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
-    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private EventListHandler eventListHandler = EventListHandler.getInstance(this);
     private FaroServiceHandler serviceHandler = eventListHandler.serviceHandler;;
 
     private static String TAG = "PollLandngPage";

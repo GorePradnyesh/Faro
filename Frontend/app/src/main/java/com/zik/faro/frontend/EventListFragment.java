@@ -1,5 +1,6 @@
 package com.zik.faro.frontend;
 
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -31,7 +33,7 @@ import java.text.MessageFormat;
 import java.util.List;
 
 public class EventListFragment extends Fragment {
-    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private EventListHandler eventListHandler = EventListHandler.getInstance(getActivity());
     private UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
     private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private static String TAG = "EventListFragment";
@@ -39,12 +41,17 @@ public class EventListFragment extends Fragment {
     private boolean receivedEvents = false;
     private boolean receivedFriends = false;
 
-    private RelativeLayout eventListFragmentRelativeLayout = null;
     private LinearLayout linlaHeaderProgress = null;
+    private ListView theAcceptedListView = null;
+    private FloatingActionButton createNewEventFloatingActionButton = null;
+    private RelativeLayout eventListFragmentRelativeLayout = null;
 
     private Context mContext;
 
     private View fragmentView;
+
+    private Intent createNewEventIntent = null;
+    private int mLastFirstVisibleItem;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -71,6 +78,17 @@ public class EventListFragment extends Fragment {
 
         linlaHeaderProgress = (LinearLayout)fragmentView.findViewById(R.id.linlaHeaderProgress);
         eventListFragmentRelativeLayout = (RelativeLayout) fragmentView.findViewById(R.id.eventListFragmentRelativeLayout);
+
+        theAcceptedListView  = (ListView)fragmentView.findViewById(R.id.acceptedList);
+        createNewEventFloatingActionButton = (FloatingActionButton) fragmentView.findViewById(R.id.createNewEventFloatingActionButton);
+        createNewEventIntent = new Intent(getActivity(), CreateNewEvent.class);
+        createNewEventFloatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(createNewEventIntent);
+            }
+        });
+
         eventListFragmentRelativeLayout.setVisibility(View.GONE);
 
         getEventsFromServer();
@@ -92,30 +110,10 @@ public class EventListFragment extends Fragment {
         linlaHeaderProgress.setVisibility(View.GONE);
         eventListFragmentRelativeLayout.setVisibility(View.VISIBLE);
 
-        TabHost eventTabHost = (TabHost)view.findViewById(R.id.eventTabHost);
-        eventTabHost.setup();
 
-        TabHost.TabSpec acceptedTabSpec = eventTabHost.newTabSpec("accepted");
-        acceptedTabSpec.setContent(R.id.acceptedTab);
-        acceptedTabSpec.setIndicator("Accepted");
-        eventTabHost.addTab(acceptedTabSpec);
-
-        TabHost.TabSpec notAcceptedTabSpec = eventTabHost.newTabSpec("not_accepted");
-        notAcceptedTabSpec.setContent(R.id.notAcceptedTab);
-        notAcceptedTabSpec.setIndicator("Not Accepted");
-        eventTabHost.addTab(notAcceptedTabSpec);
-
-        ListView theAcceptedListView  = (ListView)view.findViewById(R.id.acceptedList);
-        theAcceptedListView.setBackgroundColor(Color.BLACK);
         theAcceptedListView.setAdapter(eventListHandler.acceptedEventAdapter);
-        theAcceptedListView.setSelectionFromTop(
-                eventListHandler.getAcceptedFutureEventsStartingPosition(), 0);
-
-        ListView theNotAcceptedListView  = (ListView)view.findViewById(R.id.notAcceptedList);
-        theNotAcceptedListView.setBackgroundColor(Color.BLACK);
-        theNotAcceptedListView.setAdapter(eventListHandler.notAcceptedEventAdapter);
-        theNotAcceptedListView.setSelectionFromTop(
-                eventListHandler.getNotAcceptedFutureEventsStartingPosition(), 0);
+        int firstVisibleEventPosition = eventListHandler.getAcceptedFutureEventsStartingPosition();
+        theAcceptedListView.setSelectionFromTop(firstVisibleEventPosition, 0);
 
         //ImageButton calendar_view = (ImageButton)view.findViewById(R.id.calendarViewButton);
         //calendar_view.setImageResource(R.drawable.calendar);
@@ -132,18 +130,21 @@ public class EventListFragment extends Fragment {
             }
         });
 
-        //Listener to go to the Event Landing Page for the event selected in the "Not Accepted" list
-        theNotAcceptedListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                eventSelectedFromList(parent, position, eventLanding);
-            }
-        });
+
 
         theAcceptedListView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
+                if (view.getId() == theAcceptedListView.getId()) {
+                    final int currentFirstVisibleItem = theAcceptedListView.getFirstVisiblePosition();
 
+                    if (currentFirstVisibleItem > mLastFirstVisibleItem) {
+                        createNewEventFloatingActionButton.hide();
+                    } else if (currentFirstVisibleItem < mLastFirstVisibleItem) {
+                        createNewEventFloatingActionButton.show();
+                    }
+                    mLastFirstVisibleItem = currentFirstVisibleItem;
+                }
             }
 
             @Override
@@ -188,7 +189,6 @@ public class EventListFragment extends Fragment {
                         @Override
                         public void run() {
                             Log.i(TAG, "Successfully received events from the server!!");
-                            eventListHandler.clearListAndMap();
                             eventListHandler.addDownloadedEventsToListAndMap(eventInviteStatusWrappers);
                             receivedEvents = true;
                             setupPageDetails(fragmentView);

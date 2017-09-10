@@ -40,7 +40,7 @@ import static android.widget.Toast.LENGTH_LONG;
 public class MyAssignmentsFragment extends Fragment implements NotificationPayloadHandler {
 
     private AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
-    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private EventListHandler eventListHandler = EventListHandler.getInstance(getActivity());
     private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
     private ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
 

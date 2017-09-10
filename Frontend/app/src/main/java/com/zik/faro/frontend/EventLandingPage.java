@@ -14,6 +14,7 @@ import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
@@ -75,7 +76,7 @@ public class EventLandingPage extends FragmentActivity
 
     private DateFormat sdf = new SimpleDateFormat(" EEE, MMM d, yyyy");
     private DateFormat stf = new SimpleDateFormat("hh:mm a");
-    private EventListHandler eventListHandler = EventListHandler.getInstance();
+    private EventListHandler eventListHandler = EventListHandler.getInstance(this);
     private PollListHandler pollListHandler = PollListHandler.getInstance();
     private ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
     private EventFriendListHandler eventFriendListHandler = EventFriendListHandler.getInstance();
@@ -144,6 +145,15 @@ public class EventLandingPage extends FragmentActivity
     private LinearLayout photosStuffLinearLayout = null;
     private String bundleType = null;
 
+    private FloatingActionButton addNewFAB = null;
+    private FloatingActionButton addNewPollFAB = null;
+    private FloatingActionButton addNewActivityFAB = null;
+    private FloatingActionButton addNewAssignmentFAB = null;
+    private FloatingActionButton addNewPhotoFAB = null;
+    private boolean isFABOpen = false;
+    private Intent createNewPollIntent = null;
+
+    private View dimmerView = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -176,6 +186,41 @@ public class EventLandingPage extends FragmentActivity
         eventLandingPageRelativeLayout = (RelativeLayout) findViewById(R.id.eventLandingPageRelativeLayout);
         eventLandingPageRelativeLayout.setVisibility(View.GONE);
 
+        addNewFAB = (FloatingActionButton) findViewById(R.id.addNewFAB);
+        addNewPollFAB = (FloatingActionButton) findViewById(R.id.addNewPollFAB);
+        addNewActivityFAB = (FloatingActionButton) findViewById(R.id.addNewActivityFAB);
+        addNewAssignmentFAB = (FloatingActionButton) findViewById(R.id.addNewAssignmentFAB);
+        addNewPhotoFAB = (FloatingActionButton) findViewById(R.id.addNewPhotoFAB);
+
+        createNewPollIntent = new Intent(this, CreateNewPoll.class);
+
+        addNewPollFAB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FaroIntentInfoBuilder.eventIntent(createNewPollIntent, eventId);
+                startActivity(createNewPollIntent);
+            }
+        });
+
+        dimmerView = (View) findViewById(R.id.dimmerView);
+        dimmerView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                closeFABMenu();
+            }
+        });
+
+        addNewFAB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(!isFABOpen){
+                    showFABMenu();
+                }else{
+                    closeFABMenu();
+                }
+            }
+        });
+
         extras = getIntent().getExtras();
         if (extras == null)return; //TODO: How to handle such conditions
 
@@ -188,7 +233,59 @@ public class EventLandingPage extends FragmentActivity
         }
     }
 
+    private void setBackgroundDimming(boolean dimmed) {
+        final float targetAlpha = dimmed ? 1f : 0;
+        final int endVisibility = dimmed ? View.VISIBLE : View.GONE;
+        dimmerView.setVisibility(View.VISIBLE);
+        dimmerView.animate()
+                .alpha(targetAlpha)
+                .setDuration(15)
+                .withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        dimmerView.setVisibility(endVisibility);
+                    }
+                })
+                .start();
 
+    }
+
+    private void showFABMenu(){
+        isFABOpen=true;
+
+        addNewPollFAB.animate().translationX(-getResources().getDimension(R.dimen.standard_70));
+        addNewPollFAB.animate().translationY(getResources().getDimension(R.dimen.standard_0));
+
+        addNewActivityFAB.animate().translationX(-getResources().getDimension(R.dimen.standard_35));
+        addNewActivityFAB.animate().translationY(-getResources().getDimension(R.dimen.standard_60));
+
+        addNewAssignmentFAB.animate().translationX(getResources().getDimension(R.dimen.standard_35));
+        addNewAssignmentFAB.animate().translationY(-getResources().getDimension(R.dimen.standard_60));
+
+        addNewPhotoFAB.animate().translationX(getResources().getDimension(R.dimen.standard_70));
+        addNewPhotoFAB.animate().translationY(getResources().getDimension(R.dimen.standard_0));
+
+        //setBackgroundDimming(true);
+    }
+
+    private void closeFABMenu(){
+        isFABOpen=false;
+
+
+        addNewPollFAB.animate().translationY(0);
+        addNewPollFAB.animate().translationX(0);
+
+        addNewActivityFAB.animate().translationY(0);
+        addNewActivityFAB.animate().translationX(0);
+
+        addNewAssignmentFAB.animate().translationY(0);
+        addNewAssignmentFAB.animate().translationX(0);
+
+        addNewPhotoFAB.animate().translationY(0);
+        addNewPhotoFAB.animate().translationX(0);
+
+        //setBackgroundDimming(false);
+    }
 
     private void updateUserEventInviteStatus(final EventInviteStatus eventInviteStatus) {
         serviceHandler.getEventHandler().updateEventUserInviteStatus(new BaseFaroRequestCallback<String>() {
