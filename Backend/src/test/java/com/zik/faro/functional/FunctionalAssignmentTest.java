@@ -18,6 +18,8 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import com.zik.faro.TestHelper;
+import com.zik.faro.TestUtil;
+import com.zik.faro.commons.FaroResponse;
 import com.zik.faro.data.ActionStatus;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Event;
@@ -27,6 +29,7 @@ import com.zik.faro.data.Item;
 import com.zik.faro.data.Location;
 import com.zik.faro.data.GeoPosition;
 import com.zik.faro.data.Unit;
+import com.zik.faro.data.UpdateCollectionRequest;
 
 public class FunctionalAssignmentTest {
 	private static URL endpoint;
@@ -53,75 +56,126 @@ public class FunctionalAssignmentTest {
         eventId = event.getId();
     }
     
-    public void updateEventAndActivityAssignmentTodo() throws IllegalDataOperation, IOException{
-    	ClientResponse response1 = TestHelper.doGET(endpoint.toString(), "v1/event/"+ eventId+"/details", new MultivaluedMapImpl(), token);
-        EventInviteStatusWrapper eventDetails = response1.getEntity(EventInviteStatusWrapper.class);
+    @Test
+    public void updateEventAssignmentTodoTest() throws IllegalDataOperation, IOException{
+    	ClientResponse response = TestHelper.doGET(endpoint.toString(), "v1/event/"+ eventId+"/details", new MultivaluedMapImpl(), token);
+        EventInviteStatusWrapper eventDetails = response.getEntity(EventInviteStatusWrapper.class);
+        Event e = eventDetails.getEvent();
+    	
+        // Add only
+        List<Item> toBeAdded = new ArrayList<Item>();
+        toBeAdded.add(new Item("food", "Gaurav", 2, Unit.COUNT) );
+        toBeAdded.add(new Item("drinks", "Kaivan", 5, Unit.COUNT) );
+        UpdateCollectionRequest<Event,Item> requestObj = new UpdateCollectionRequest<>();
+        requestObj.setUpdate(e);
+        requestObj.setToBeAdded(toBeAdded);
         
-    	// Add event level assignment
-        Map<String,List<Item>> map = new HashMap<String,List<Item>>();
-    	List<Item> items = new ArrayList<Item>();
-    	items.add(new Item("food", "Gaurav", 2, Unit.COUNT) );
-    	map.put(eventId, items);
-    	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/assignment/updateItems", token, map);
-    	Map<String,List<Item>> updatedItems = response.getEntity(new GenericType<Map<String,List<Item>>>(){});
-    	Assert.assertEquals(map.size(), updatedItems.size());
-    	map = updatedItems;
-    	
-    	// Verify Event Level
-    	response1 = TestHelper.doGET(endpoint.toString(), "v1/event/"+ eventId+"/details", new MultivaluedMapImpl(), token);
-        eventDetails = response1.getEntity(EventInviteStatusWrapper.class);
-        assertTodo(map.get(eventId), eventDetails.getEvent().getAssignment().getItems());
-    	
-        // update above added item-todo for event level
-        items.get(0).setCount(5);
-        response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/assignment/updateItems", token, map);
-        updatedItems = response.getEntity(new GenericType<Map<String,List<Item>>>(){});
-    	assertTodo(map.get(eventId), updatedItems.get(eventId));
-    	map = updatedItems;
-    	
-    	// Create activity
-		GeoPosition geoPosition = new GeoPosition(0,0);
-		Activity activity = new Activity(eventId, "Hiking",
-				"Test activity description", new Location("NYC", "NYC Address", geoPosition),
-				Calendar.getInstance(), Calendar.getInstance(), null);
-		response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/create", token, activity);
-		Activity activityResponse = response.getEntity(Activity.class);
-		FunctionalActivityTest.assertCreatedEntity(activity, activityResponse);
-		// Read recently created activity
-		ClientResponse readResponse = TestHelper.doGET(endpoint.toString(), "v1/event/"+eventId+"/activity/"+activityResponse.getId(), new MultivaluedMapImpl(), token);
-		activityResponse = readResponse.getEntity(Activity.class);
-		FunctionalActivityTest.assertCreatedEntity(activity, activityResponse);
-		
-		// Add item-todo to activity assignment
-    	List<Item> activityItems = new ArrayList<Item>();
-    	
-    	activityItems.add(new Item("food", "Gaurav", 2, Unit.COUNT));
-    	map.put(activityResponse.getId(), activityItems);
-    	response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/assignment/updateItems", token, map);
-    	updatedItems = response.getEntity(new GenericType<Map<String,List<Item>>>(){});
-    	Assert.assertEquals(map.size(), updatedItems.size());
-    	map = updatedItems;
-
-    	// Verify Activity Level
-    	response = TestHelper.doGET(endpoint.toString(), "v1/event/"+ eventId+"/activity/"+activityResponse.getId(), new MultivaluedMapImpl(), token);
-        activityResponse = response.getEntity(Activity.class);
-        assertTodo(map.get(activityResponse.getId()), activityResponse.getAssignment().getItems());
+        response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/assignment/updateItems", token, requestObj);
+        FaroResponse<Event> faroResponse = response.getEntity(new GenericType<FaroResponse<Event>>(){});
+        Event updatedEvent = faroResponse.getEntity();
         
-    	// add and update item-todo for activity level
-    	activityItems.get(0).setAssigneeId("Kaivan");
-    	activityItems.get(0).setCount(10);
-    	activityItems.get(0).setStatus(ActionStatus.COMPLETE);
+        TestUtil.isEqualList(updatedEvent.getAssignment().getItems(), toBeAdded);
+        
+        // Add, Modify and Delete
+        toBeAdded.clear();
+        toBeAdded.add(updatedEvent.getAssignment().getItems().get(0));
+    	toBeAdded.get(0).setCount(5);
+    	toBeAdded.add(new Item("blankets", "Nakul", 10, Unit.COUNT));
     	
-    	// add and update item-todo for event level
-    	items.get(0).setCount(10);
-
-    	activityItems.add(new Item("drinks", "Kunal", 3, Unit.COUNT));
-    	response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/assignment/updateItems", token, map);
-        updatedItems = response.getEntity(new GenericType<Map<String,List<Item>>>(){});
-        assertTodo(map.get(eventId), updatedItems.get(eventId));
-    	assertTodo(map.get(activityResponse.getId()), updatedItems.get(activityResponse.getId()));
-
+    	List<Item> toBeRemoved = new ArrayList<>();
+    	toBeRemoved.add(updatedEvent.getAssignment().getItems().get(1));
+    	
+    	requestObj = new UpdateCollectionRequest<>();
+        requestObj.setUpdate(updatedEvent);
+        requestObj.setToBeAdded(toBeAdded);
+        requestObj.setToBeRemoved(toBeRemoved);
+        ClientResponse response1 = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/assignment/updateItems", token, requestObj);
+        FaroResponse<Event> faroResponse1 = response1.getEntity(new GenericType<FaroResponse<Event>>(){});
+        Event updatedEvent1 = faroResponse1.getEntity();
+        
+        List<Item> expected = new ArrayList<Item>();
+        expected.addAll(toBeAdded);
+        
+        TestUtil.isEqualList(expected, updatedEvent1.getAssignment().getItems());
+    	
+        toBeRemoved.clear();
+        toBeRemoved.add(updatedEvent1.getAssignment().getItems().get(0));
+        requestObj = new UpdateCollectionRequest<>();
+        requestObj.setUpdate(updatedEvent1);
+        requestObj.setToBeRemoved(toBeRemoved);
+    	
+        ClientResponse response2 = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/assignment/updateItems", token, requestObj);
+        FaroResponse<Event> faroResponse2 = response2.getEntity(new GenericType<FaroResponse<Event>>(){});
+        Event updatedEvent2 = faroResponse2.getEntity();
+        
+        expected.clear();
+        expected.add(updatedEvent1.getAssignment().getItems().get(1));
+    	
+        TestUtil.isEqualList(expected, updatedEvent2.getAssignment().getItems());
     }
+    
+    @Test
+    public void updateActivityAssignmentTodoTest() throws Exception{
+    	GeoPosition geoPosition = new GeoPosition(0,0);
+        Activity activity = new Activity(eventId, "Hiking",
+                "Test activity description", new Location("NYC", "NYC's Address", geoPosition),
+                Calendar.getInstance(), Calendar.getInstance(),null);
+        ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/create", token, activity);
+        Activity activityResponse = response.getEntity(Activity.class);
+    	
+        // Add only
+        List<Item> toBeAdded = new ArrayList<Item>();
+        toBeAdded.add(new Item("food", "Gaurav", 2, Unit.COUNT) );
+        toBeAdded.add(new Item("drinks", "Kaivan", 5, Unit.COUNT) );
+        UpdateCollectionRequest<Activity,Item> requestObj = new UpdateCollectionRequest<>();
+        requestObj.setUpdate(activityResponse);
+        requestObj.setToBeAdded(toBeAdded);
+        
+        response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+activityResponse.getEventId()+"/activity/"+activityResponse.getId()+"/assignment/updateItems", token, requestObj);
+        FaroResponse<Activity> faroResponse = response.getEntity(new GenericType<FaroResponse<Activity>>(){});
+        Activity updatedActivity = faroResponse.getEntity();
+        
+        TestUtil.isEqualList(updatedActivity.getAssignment().getItems(), toBeAdded);
+        
+        // Add, Modify and Delete
+        toBeAdded.clear();
+        toBeAdded.add(updatedActivity.getAssignment().getItems().get(0));
+    	toBeAdded.get(0).setCount(5);
+    	toBeAdded.add(new Item("blankets", "Nakul", 10, Unit.COUNT));
+    	
+    	List<Item> toBeRemoved = new ArrayList<>();
+    	toBeRemoved.add(updatedActivity.getAssignment().getItems().get(1));
+    	
+    	requestObj = new UpdateCollectionRequest<>();
+        requestObj.setUpdate(updatedActivity);
+        requestObj.setToBeAdded(toBeAdded);
+        requestObj.setToBeRemoved(toBeRemoved);
+        ClientResponse response1 = TestHelper.doPOST(endpoint.toString(), "v1/event/"+activityResponse.getEventId()+"/activity/"+activityResponse.getId()+"/assignment/updateItems", token, requestObj);
+        FaroResponse<Activity> faroResponse1 = response1.getEntity(new GenericType<FaroResponse<Activity>>(){});
+        Activity updatedActivity1 = faroResponse1.getEntity();
+        
+        List<Item> expected = new ArrayList<Item>();
+        expected.addAll(toBeAdded);
+        
+        TestUtil.isEqualList(expected, updatedActivity1.getAssignment().getItems());
+    	
+        toBeRemoved.clear();
+        toBeRemoved.add(updatedActivity1.getAssignment().getItems().get(0));
+        requestObj = new UpdateCollectionRequest<>();
+        requestObj.setUpdate(updatedActivity1);
+        requestObj.setToBeRemoved(toBeRemoved);
+    	
+        ClientResponse response2 = TestHelper.doPOST(endpoint.toString(), "v1/event/"+activityResponse.getEventId()+"/activity/"+activityResponse.getId()+"/assignment/updateItems", token, requestObj);
+        FaroResponse<Activity> faroResponse2 = response2.getEntity(new GenericType<FaroResponse<Activity>>(){});
+        Activity updatedActivity2 = faroResponse2.getEntity();
+        
+        expected.clear();
+        expected.add(updatedActivity1.getAssignment().getItems().get(1));
+    	
+        TestUtil.isEqualList(expected, updatedActivity2.getAssignment().getItems());
+    }
+    
+
     
     private void assertTodo(List<Item> expected, List<Item> actual){
     	int assertCount = 0;
@@ -138,9 +192,5 @@ public class FunctionalAssignmentTest {
     	}
     	Assert.assertEquals(expected.size(), assertCount);
     }
-    
-    @Test
-    public void allTest() throws IllegalDataOperation, IOException{
-    	updateEventAndActivityAssignmentTodo();
-    }
+
 }

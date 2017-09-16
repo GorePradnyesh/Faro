@@ -1,15 +1,6 @@
 package com.zik.faro.api.event;
 
-import static com.zik.faro.commons.Constants.COUNT_PARAM;
-import static com.zik.faro.commons.Constants.EVENT_ADD_FRIENDS_CONST;
-import static com.zik.faro.commons.Constants.EVENT_DETAILS_PATH_CONST;
-import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM;
-import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM_STRING;
-import static com.zik.faro.commons.Constants.EVENT_INVITEES_PATH_CONST;
-import static com.zik.faro.commons.Constants.EVENT_PATH_CONST;
-import static com.zik.faro.commons.Constants.EVENT_REMOVE_ATTENDEE_PATH_CONST;
-import static com.zik.faro.commons.Constants.EVENT_UPDATE_PATH_CONST;
-import static com.zik.faro.commons.Constants.UPDATE_INVITE_STATUS_PATH_CONST;
+import static com.zik.faro.commons.Constants.*;
 
 import java.util.Map;
 
@@ -29,6 +20,7 @@ import javax.ws.rs.core.SecurityContext;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import com.sun.jersey.api.JResponse;
+import com.zik.faro.applogic.AssignmentManagement;
 import com.zik.faro.applogic.EventManagement;
 import com.zik.faro.applogic.EventUserManagement;
 import com.zik.faro.commons.Constants;
@@ -44,7 +36,9 @@ import com.zik.faro.data.Event;
 import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.IllegalDataOperation;
 import com.zik.faro.data.InviteeList;
+import com.zik.faro.data.Item;
 import com.zik.faro.data.Location;
+import com.zik.faro.data.UpdateCollectionRequest;
 import com.zik.faro.data.UpdateRequest;
 import com.zik.faro.data.user.EventInviteStatus;
 
@@ -80,6 +74,42 @@ public class EventHandler {
         InviteeList list = EventUserManagement.getEventInvitees(eventId);
         return JResponse.ok(list).build();
     }
+    
+//    @Path(ASSIGNMENT_PATH_CONST+ASSIGNMENT_UPDATE_PATH_CONST+"/test")
+//    @POST
+//    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+//    public JResponse<FaroResponse<Event>> updateEventAssignmentItems(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+//    		final UpdateCollectionRequest<Event, Item> updateObj){
+//    	Event updatedEvent = updateObj.getUpdate();
+//    	
+//		try {
+//			Event updatedEventResponse = AssignmentManagement.updateEventItems2(updatedEvent.getId(), updateObj.getToBeAdded(), 
+//					updateObj.getToBeRemoved(), updatedEvent.getVersion());
+//			FaroResponseStatus updateStatus = FaroResponseStatus.OK;
+//        	FaroResponse<Event> response = new FaroResponse<Event>(updatedEventResponse, updateStatus);
+//        	return JResponse.ok(response).status(response.getFaroResponseStatus().getRestResponseStatus()).build();
+//		} catch (DataNotFoundException e) {
+//			Response response = Response.status(Response.Status.NOT_FOUND)
+//                    .entity(e.getMessage())
+//                    .build();
+//            throw new WebApplicationException(response);
+//		} catch (DatastoreException e) {
+//			Response response = Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+//                    .entity(e.getMessage())
+//                    .build();
+//            throw new WebApplicationException(response);
+//		} catch (UpdateVersionException e) {
+//			Response response = Response.status(Response.Status.BAD_REQUEST)
+//                    .entity(e.getMessage())
+//                    .build();
+//            throw new WebApplicationException(response);
+//		} catch (UpdateException e) {
+//			Response response = Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+//                    .entity(e.getMessage())
+//                    .build();
+//            throw new WebApplicationException(response);
+//		}
+//	}
 
     @DELETE
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})

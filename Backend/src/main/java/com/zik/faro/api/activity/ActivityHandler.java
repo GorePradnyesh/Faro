@@ -1,14 +1,10 @@
 package com.zik.faro.api.activity;
 
-import static com.zik.faro.commons.Constants.ACTIVITY_CREATE_PATH_CONST;
-import static com.zik.faro.commons.Constants.ACTIVITY_ID_PATH_PARAM;
-import static com.zik.faro.commons.Constants.ACTIVITY_ID_PATH_PARAM_STRING;
-import static com.zik.faro.commons.Constants.ACTIVITY_PATH_CONST;
-import static com.zik.faro.commons.Constants.ACTIVITY_UPDATE_PATH_CONST;
-import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM;
-import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM_STRING;
-import static com.zik.faro.commons.Constants.EVENT_PATH_CONST;
+import static com.zik.faro.commons.Constants.*;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.DELETE;
@@ -28,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.api.JResponse;
 import com.zik.faro.applogic.ActivityManagement;
+import com.zik.faro.applogic.AssignmentManagement;
 import com.zik.faro.commons.Constants;
 import com.zik.faro.commons.FaroResponse;
 import com.zik.faro.commons.FaroResponseStatus;
@@ -38,6 +35,8 @@ import com.zik.faro.commons.exceptions.UpdateException;
 import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Event;
+import com.zik.faro.data.Item;
+import com.zik.faro.data.UpdateCollectionRequest;
 import com.zik.faro.data.UpdateRequest;
 
 @Path(EVENT_PATH_CONST + EVENT_ID_PATH_PARAM_STRING + ACTIVITY_PATH_CONST)
@@ -122,6 +121,44 @@ public class ActivityHandler {
 			throw new FaroWebAppException(FaroResponseStatus.UNEXPECTED_ERROR, "Update Error");
 		}
     }
+    
+    @Path(ACTIVITY_ID_PATH_PARAM_STRING + ASSIGNMENT_PATH_CONST + ASSIGNMENT_UPDATE_PATH_CONST)
+    @POST
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public JResponse<FaroResponse<Activity>> updateActivityAssignmentItems(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    		@PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId, final UpdateCollectionRequest<Activity, Item> updateObj){
+    	String userId = context.getUserPrincipal().getName();
+    	Activity updatedActivity = updateObj.getUpdate();
+    	updatedActivity.setEventId(eventId);
+    	updatedActivity.setId(activityId);
+    	try {
+			Activity updatedEventResponse = AssignmentManagement.updateActivityItems2(updatedActivity.getEventId(), updatedActivity.getId(), updateObj.getToBeAdded(), 
+					updateObj.getToBeRemoved(), updatedActivity.getVersion());
+			FaroResponseStatus updateStatus = FaroResponseStatus.OK;
+        	FaroResponse<Activity> response = new FaroResponse<Activity>(updatedEventResponse, updateStatus);
+        	return JResponse.ok(response).status(response.getFaroResponseStatus().getRestResponseStatus()).build();
+		} catch (DataNotFoundException e) {
+			Response response = Response.status(Response.Status.NOT_FOUND)
+                    .entity(e.getMessage())
+                    .build();
+            throw new WebApplicationException(response);
+		} catch (DatastoreException e) {
+			Response response = Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(e.getMessage())
+                    .build();
+            throw new WebApplicationException(response);
+		} catch (UpdateVersionException e) {
+			Response response = Response.status(Response.Status.BAD_REQUEST)
+                    .entity(e.getMessage())
+                    .build();
+            throw new WebApplicationException(response);
+		} catch (UpdateException e) {
+			Response response = Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(e.getMessage())
+                    .build();
+            throw new WebApplicationException(response);
+		}
+	}
 
 
     @Path(ACTIVITY_ID_PATH_PARAM_STRING)

@@ -236,7 +236,7 @@ public class FunctionalPollTest {
         assertEntity(p, pollResponse);
         
         // Cast vote: only add
-        Set<String> add = new HashSet<String>();
+        List<String> add = new ArrayList<String>();
         add.add(pollResponse.getPollOptions().get(0).getId());
         add.add(pollResponse.getPollOptions().get(1).getId());
         
@@ -256,7 +256,7 @@ public class FunctionalPollTest {
         Assert.assertFalse(updateResponsePoll.getPollOptions().get(2).getVoters().contains(callerEmail));
         
         // Cast Vote: only remove
-        Set<String> remove = new HashSet<String>();
+        List<String> remove = new ArrayList<String>();
         remove.add(updateResponsePoll.getPollOptions().get(0).getId());
         updateRequest = new UpdateCollectionRequest<>();
         updateRequest.setToBeRemoved(remove);
