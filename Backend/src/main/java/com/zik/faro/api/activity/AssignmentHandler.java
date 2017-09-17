@@ -41,6 +41,7 @@ import com.zik.faro.commons.FaroResponse;
 import com.zik.faro.commons.FaroResponseStatus;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.FaroWebAppException;
 import com.zik.faro.commons.exceptions.UpdateException;
 import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.Activity;
@@ -112,31 +113,19 @@ public class AssignmentHandler {
     	Event updatedEvent = updateObj.getUpdate();
     	
 		try {
-			Event updatedEventResponse = AssignmentManagement.updateEventItems2(updatedEvent.getId(), updateObj.getToBeAdded(), 
+			Event updatedEventResponse = AssignmentManagement.updateEventItems(updatedEvent.getId(), updateObj.getToBeAdded(), 
 					updateObj.getToBeRemoved(), updatedEvent.getVersion());
 			FaroResponseStatus updateStatus = FaroResponseStatus.OK;
         	FaroResponse<Event> response = new FaroResponse<Event>(updatedEventResponse, updateStatus);
         	return JResponse.ok(response).status(response.getFaroResponseStatus().getRestResponseStatus()).build();
 		} catch (DataNotFoundException e) {
-			Response response = Response.status(Response.Status.NOT_FOUND)
-                    .entity(e.getMessage())
-                    .build();
-            throw new WebApplicationException(response);
-		} catch (DatastoreException e) {
-			Response response = Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(e.getMessage())
-                    .build();
-            throw new WebApplicationException(response);
+        	throw new FaroWebAppException(FaroResponseStatus.NOT_FOUND, "Data Not Found");
+        } catch (DatastoreException e) {
+        	throw new FaroWebAppException(FaroResponseStatus.UNEXPECTED_ERROR, "Datastore Exception");
 		} catch (UpdateVersionException e) {
-			Response response = Response.status(Response.Status.BAD_REQUEST)
-                    .entity(e.getMessage())
-                    .build();
-            throw new WebApplicationException(response);
+			throw new FaroWebAppException(FaroResponseStatus.UPDATE_VERSION_MISMATCH, "Update Version Mismatch");
 		} catch (UpdateException e) {
-			Response response = Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(e.getMessage())
-                    .build();
-            throw new WebApplicationException(response);
+			throw new FaroWebAppException(FaroResponseStatus.UNEXPECTED_ERROR, "Update Error");
 		}
 	}
     

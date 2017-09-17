@@ -132,31 +132,19 @@ public class ActivityHandler {
     	updatedActivity.setEventId(eventId);
     	updatedActivity.setId(activityId);
     	try {
-			Activity updatedEventResponse = AssignmentManagement.updateActivityItems2(updatedActivity.getEventId(), updatedActivity.getId(), updateObj.getToBeAdded(), 
+			Activity updatedEventResponse = AssignmentManagement.updateActivityItems(updatedActivity.getEventId(), updatedActivity.getId(), updateObj.getToBeAdded(), 
 					updateObj.getToBeRemoved(), updatedActivity.getVersion());
 			FaroResponseStatus updateStatus = FaroResponseStatus.OK;
         	FaroResponse<Activity> response = new FaroResponse<Activity>(updatedEventResponse, updateStatus);
         	return JResponse.ok(response).status(response.getFaroResponseStatus().getRestResponseStatus()).build();
-		} catch (DataNotFoundException e) {
-			Response response = Response.status(Response.Status.NOT_FOUND)
-                    .entity(e.getMessage())
-                    .build();
-            throw new WebApplicationException(response);
-		} catch (DatastoreException e) {
-			Response response = Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(e.getMessage())
-                    .build();
-            throw new WebApplicationException(response);
+    	} catch (DataNotFoundException e) {
+        	throw new FaroWebAppException(FaroResponseStatus.NOT_FOUND);
+        } catch (DatastoreException e) {
+        	throw new FaroWebAppException(FaroResponseStatus.UNEXPECTED_ERROR, e.getMessage());
 		} catch (UpdateVersionException e) {
-			Response response = Response.status(Response.Status.BAD_REQUEST)
-                    .entity(e.getMessage())
-                    .build();
-            throw new WebApplicationException(response);
+			throw new FaroWebAppException(FaroResponseStatus.UPDATE_VERSION_MISMATCH);
 		} catch (UpdateException e) {
-			Response response = Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(e.getMessage())
-                    .build();
-            throw new WebApplicationException(response);
+			throw new FaroWebAppException(FaroResponseStatus.UNEXPECTED_ERROR, "Update Error");
 		}
 	}
 

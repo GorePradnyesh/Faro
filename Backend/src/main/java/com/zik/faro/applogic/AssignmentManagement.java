@@ -46,7 +46,7 @@ public class AssignmentManagement {
 		return AssignmentDatastoreImpl.getAllAssignments(eventId);
 	}
 	
-	public static Activity updateActivityItems2(final String eventId, final String activityId, final List<Item> toBeAdded, final List<Item> toBeRemoved, 
+	public static Activity updateActivityItems(final String eventId, final String activityId, final List<Item> toBeAdded, final List<Item> toBeRemoved, 
 			Long version) throws DataNotFoundException, DatastoreException, UpdateVersionException, UpdateException{
 		createItemIds(toBeAdded);
 		ActivityDo activityDo = AssignmentDatastoreImpl.updateActivityAssignmentItems(toBeAdded, toBeRemoved, activityId, eventId, version);
@@ -54,7 +54,7 @@ public class AssignmentManagement {
 		return ConversionUtils.fromDo(activityDo);
 	}
 	
-	public static Event updateEventItems2(final String eventId, final List<Item> toBeAdded, final List<Item> toBeRemoved, 
+	public static Event updateEventItems(final String eventId, final List<Item> toBeAdded, final List<Item> toBeRemoved, 
 			Long version) throws DataNotFoundException, DatastoreException, UpdateVersionException, UpdateException{
 		createItemIds(toBeAdded);
 		EventDo eventDo = AssignmentDatastoreImpl.updateEventAssignmentItems(toBeAdded, toBeRemoved, eventId, version);

@@ -75,41 +75,6 @@ public class EventHandler {
         return JResponse.ok(list).build();
     }
     
-//    @Path(ASSIGNMENT_PATH_CONST+ASSIGNMENT_UPDATE_PATH_CONST+"/test")
-//    @POST
-//    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-//    public JResponse<FaroResponse<Event>> updateEventAssignmentItems(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
-//    		final UpdateCollectionRequest<Event, Item> updateObj){
-//    	Event updatedEvent = updateObj.getUpdate();
-//    	
-//		try {
-//			Event updatedEventResponse = AssignmentManagement.updateEventItems2(updatedEvent.getId(), updateObj.getToBeAdded(), 
-//					updateObj.getToBeRemoved(), updatedEvent.getVersion());
-//			FaroResponseStatus updateStatus = FaroResponseStatus.OK;
-//        	FaroResponse<Event> response = new FaroResponse<Event>(updatedEventResponse, updateStatus);
-//        	return JResponse.ok(response).status(response.getFaroResponseStatus().getRestResponseStatus()).build();
-//		} catch (DataNotFoundException e) {
-//			Response response = Response.status(Response.Status.NOT_FOUND)
-//                    .entity(e.getMessage())
-//                    .build();
-//            throw new WebApplicationException(response);
-//		} catch (DatastoreException e) {
-//			Response response = Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-//                    .entity(e.getMessage())
-//                    .build();
-//            throw new WebApplicationException(response);
-//		} catch (UpdateVersionException e) {
-//			Response response = Response.status(Response.Status.BAD_REQUEST)
-//                    .entity(e.getMessage())
-//                    .build();
-//            throw new WebApplicationException(response);
-//		} catch (UpdateException e) {
-//			Response response = Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-//                    .entity(e.getMessage())
-//                    .build();
-//            throw new WebApplicationException(response);
-//		}
-//	}
 
     @DELETE
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
