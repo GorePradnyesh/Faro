@@ -1,9 +1,5 @@
 package com.zik.faro.frontend;
 
-/**
- * Created by nakulshah on 7/1/17.
- */
-
 public class FaroIntentConstants {
     public static final String EVENT_ID = "eventId";
     public static final String ACTIVITY_ID = "activityId";
@@ -20,8 +16,10 @@ public class FaroIntentConstants {
     public static final String NOTIFICATION_DATA = "notificationData";
     public static final String PAYLOAD_NOTIFICATION_TYPE = "type";
     public static final String FARO_NOTIFICATION_DATA = "faroData";
-    public static final String CLICK_ACTION = "clickAction";
+    public static final String CLICK_ACTION = "click_action";
     public static final String TITLE = "title";
-    public static final String TEXT = "text";
-
+    public static final String BODY = "body";
+    public static final String USER = "user";
+    public static final String VERSION = "version";
+    public static final String NOTIFICATION_ID = "notificationId";
 }

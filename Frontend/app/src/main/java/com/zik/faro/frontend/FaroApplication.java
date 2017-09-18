@@ -1,12 +1,15 @@
 package com.zik.faro.frontend;
 
-import android.app.Activity;
 import android.app.Application;
 import android.util.Log;
 
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
+import com.zik.faro.frontend.ui.adapters.EventAdapter;
+import com.zik.faro.frontend.ui.adapters.UserFriendAdapter;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
+import com.zik.faro.frontend.handlers.EventListHandler;
+import com.zik.faro.frontend.handlers.UserFriendListHandler;
 import com.zik.faro.frontend.util.ConfigPropertiesUtil;
 
 import java.net.MalformedURLException;
@@ -48,16 +51,9 @@ public class FaroApplication extends Application {
     }
 
     private void createGlobalHandlersAndAdapters() {
-        EventListHandler eventListHandler = EventListHandler.getInstance();
+        EventListHandler eventListHandler = EventListHandler.getInstance(this);
         UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
 
-        if (eventListHandler.acceptedEventAdapter == null) {
-            eventListHandler.acceptedEventAdapter = new EventAdapter(this, R.layout.event_row_style);
-        }
-
-        if (eventListHandler.notAcceptedEventAdapter == null) {
-            eventListHandler.notAcceptedEventAdapter = new EventAdapter(this, R.layout.event_row_style);
-        }
 
         if (userFriendListHandler.userFriendAdapter == null){
             userFriendListHandler.userFriendAdapter = new UserFriendAdapter(this, R.layout.friend_row_style);

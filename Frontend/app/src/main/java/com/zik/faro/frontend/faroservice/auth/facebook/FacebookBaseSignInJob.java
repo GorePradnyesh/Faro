@@ -9,7 +9,6 @@ import com.facebook.GraphResponse;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
-import com.google.common.collect.Lists;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
@@ -18,16 +17,14 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.MinUser;
-import com.zik.faro.frontend.FbGraphApiService;
+import com.zik.faro.frontend.faroservice.facebook.FbGraphApiService;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.faroservice.auth.FaroBaseSignInJob;
 import com.zik.faro.frontend.faroservice.okHttp.OkHttpResponse;
 
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.text.MessageFormat;
@@ -98,51 +95,35 @@ public abstract class FacebookBaseSignInJob extends FaroBaseSignInJob implements
 
     private void addFriends() {
         // Find all Facebook friends who are also Faro users and set up friend relation with them
-        // Do this op in the background
-
-        new FbGraphApiService().findFacebookFriends(new GraphRequest.Callback() {
+        // Do this operation in the background
+        final FbGraphApiService fbGraphApiService = new FbGraphApiService();
+        fbGraphApiService.findFacebookFriends(new GraphRequest.Callback() {
             @Override
             public void onCompleted(GraphResponse response) {
                 // handle the result
-                if (response.getError() == null) {
-                    JSONObject jsonObject = response.getJSONObject();
-                    Log.i(TAG, MessageFormat.format("jsonObject = {0}", jsonObject));
-                    try {
-                        JSONArray friendsArray = jsonObject.getJSONArray("data");
-                        List<String> friendIds = Lists.newArrayList();
-                        if (friendsArray != null) {
-                            for (int i = 0; i < friendsArray.length(); i++) {
-                                JSONObject friend = friendsArray.getJSONObject(i);
-                                String firstName = friend.getString("first_name");
-                                String lastName = friend.getString("last_name");
-                                String id = friend.getString("id");
-                                friendIds.add(id);
+                try {
+                    List<String> facebookFriendIds = fbGraphApiService.getFriendIdsFromGraphResponse(response);
 
-                                Log.i(TAG, MessageFormat.format("friend first_name = {0}, last_name = {1}, id = {2}", firstName, lastName, id));
+                    // Setup friend relation with all of these friends
+                    if (!facebookFriendIds.isEmpty()) {
+                        FaroServiceHandler.getFaroServiceHandler().getFriendsHandler().inviteFacebookFriends(new BaseFaroRequestCallback<List<MinUser>>() {
+                            @Override
+                            public void onFailure(Request request, IOException ex) {
+                                Log.e(TAG, "failed to establish friend relation with facebook friends", ex);
                             }
 
-                            // Setup friend relation with all of these friends
-                            if (!friendIds.isEmpty()) {
-                                FaroServiceHandler.getFaroServiceHandler().getFriendsHandler().inviteFacebookFriends(new BaseFaroRequestCallback<List<MinUser>>() {
-                                    @Override
-                                    public void onFailure(Request request, IOException ex) {
-                                        Log.e(TAG, "failed to establish friend relation with facebook friends", ex);
-                                    }
-
-                                    @Override
-                                    public void onResponse(List<MinUser> minUsers, HttpError error) {
-                                        if (error != null) {
-                                            Log.i(TAG, "successfully established friend relation with facebook friends");
-                                        } else {
-                                            Log.e(TAG, MessageFormat.format("Failed to establish friend relation with facebook friends. error = {0}", error));
-                                        }
-                                    }
-                                }, friendIds);
+                            @Override
+                            public void onResponse(List<MinUser> minUsers, HttpError error) {
+                                if (error != null) {
+                                    Log.i(TAG, "successfully established friend relation with facebook friends");
+                                } else {
+                                    Log.e(TAG, MessageFormat.format("Failed to establish friend relation with facebook friends. error = {0}", error));
+                                }
                             }
-                        }
-                    } catch (JSONException e) {
-                        Log.e(TAG, "Error processing response for friends list", e);
+                        }, facebookFriendIds);
                     }
+                } catch (JSONException e) {
+                    Log.e(TAG, "Could not establish friend relation with facebook friends");
                 }
             }
         });
