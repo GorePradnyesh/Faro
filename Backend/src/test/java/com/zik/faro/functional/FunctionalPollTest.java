@@ -4,10 +4,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -20,11 +18,9 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import com.zik.faro.TestHelper;
-import com.zik.faro.commons.FaroResponse;
-import com.zik.faro.data.Activity;
 import com.zik.faro.data.Event;
-import com.zik.faro.data.Location;
 import com.zik.faro.data.GeoPosition;
+import com.zik.faro.data.Location;
 import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.PollOption;
@@ -146,9 +142,7 @@ public class FunctionalPollTest {
         updateObj.setUpdatedFields(fields);
         ClientResponse updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/"
         		+pollResponse.getId()+"/updatePoll", token, updateObj);
-        FaroResponse<Poll> faroResponse = updateResponse.getEntity(new GenericType<FaroResponse<Poll>>(){});
-        
-        Poll updatedPollResponse= faroResponse.getEntity();
+        Poll updatedPollResponse= updateResponse.getEntity(Poll.class);
         Assert.assertEquals("Updated description",updatedPollResponse.getDescription());
         Assert.assertEquals("Jawahar",updatedPollResponse.getCreatorId());
         Assert.assertEquals(newDeadline.getTimeInMillis(),updatedPollResponse.getDeadline().getTimeInMillis());
@@ -178,8 +172,7 @@ public class FunctionalPollTest {
         updateRequest.setUpdate(pollResponse);
         response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/"
         		+pollResponse.getId()+"/updatePollOptions", token, updateRequest);
-        FaroResponse<Poll> faroResponse = response.getEntity(new GenericType<FaroResponse<Poll>>(){});
-        Poll updateResponsePoll= faroResponse.getEntity();
+        Poll updateResponsePoll= response.getEntity(Poll.class);
         
         Assert.assertEquals(updateResponsePoll.getPollOptions().size(), 3);
         Assert.assertEquals(updateResponsePoll.getPollOptions().get(0).getOption(), pollOptions.get(0).getOption());
@@ -196,8 +189,7 @@ public class FunctionalPollTest {
         updateRequest.setUpdate(updateResponsePoll);
         response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/"
         		+pollResponse.getId()+"/updatePollOptions", token, updateRequest);
-        faroResponse = response.getEntity(new GenericType<FaroResponse<Poll>>(){});
-        Poll updateResponsePoll1= faroResponse.getEntity();
+        Poll updateResponsePoll1= response.getEntity(Poll.class);
         Assert.assertEquals(updateResponsePoll1.getPollOptions().size(), 2);
         Assert.assertEquals(updateResponsePoll1.getPollOptions().get(0).getOption(), updateResponsePoll.getPollOptions().get(0).getOption());
         Assert.assertEquals(updateResponsePoll1.getPollOptions().get(1).getOption(), updateResponsePoll.getPollOptions().get(1).getOption());
@@ -212,8 +204,7 @@ public class FunctionalPollTest {
         updateRequest.setUpdate(updateResponsePoll1);
         response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/"
         		+pollResponse.getId()+"/updatePollOptions", token, updateRequest);
-        faroResponse = response.getEntity(new GenericType<FaroResponse<Poll>>(){});
-        Poll updateResponsePoll2= faroResponse.getEntity();
+        Poll updateResponsePoll2= response.getEntity(Poll.class);
         Assert.assertEquals(updateResponsePoll2.getPollOptions().size(), 3);
         Assert.assertEquals(updateResponsePoll2.getPollOptions().get(0).getOption(), updateResponsePoll1.getPollOptions().get(0).getOption());
         Assert.assertEquals(updateResponsePoll2.getPollOptions().get(1).getOption(), updateResponsePoll1.getPollOptions().get(1).getOption());
@@ -245,8 +236,7 @@ public class FunctionalPollTest {
         updateRequest.setUpdate(pollResponse);
         response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/"
         		+pollResponse.getId()+"/castVote", token, updateRequest);
-        FaroResponse<Poll> faroResponse = response.getEntity(new GenericType<FaroResponse<Poll>>(){});
-        Poll updateResponsePoll= faroResponse.getEntity();
+        Poll updateResponsePoll= response.getEntity(Poll.class);
         
         Assert.assertEquals(updateResponsePoll.getPollOptions().get(0).getVoters().size(), 1);
         Assert.assertEquals(updateResponsePoll.getPollOptions().get(1).getVoters().size(), 1);
@@ -263,8 +253,7 @@ public class FunctionalPollTest {
         updateRequest.setUpdate(updateResponsePoll);
         response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/"
         		+pollResponse.getId()+"/castVote", token, updateRequest);
-        faroResponse = response.getEntity(new GenericType<FaroResponse<Poll>>(){});
-        Poll updateResponsePoll1= faroResponse.getEntity();
+        Poll updateResponsePoll1= response.getEntity(Poll.class);
         Assert.assertEquals(updateResponsePoll1.getPollOptions().get(0).getVoters().size(), 0);
         Assert.assertEquals(updateResponsePoll1.getPollOptions().get(1).getVoters().size(), 1);
         Assert.assertEquals(updateResponsePoll1.getPollOptions().get(2).getVoters().size(), 0);
@@ -282,8 +271,7 @@ public class FunctionalPollTest {
         updateRequest.setUpdate(updateResponsePoll1);
         response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/"
         		+pollResponse.getId()+"/castVote", token, updateRequest);
-        faroResponse = response.getEntity(new GenericType<FaroResponse<Poll>>(){});
-        Poll updateResponsePoll2= faroResponse.getEntity();
+        Poll updateResponsePoll2= response.getEntity(Poll.class);
         Assert.assertEquals(updateResponsePoll2.getPollOptions().get(0).getVoters().size(), 0);
         Assert.assertEquals(updateResponsePoll2.getPollOptions().get(1).getVoters().size(), 0);
         Assert.assertEquals(updateResponsePoll2.getPollOptions().get(2).getVoters().size(), 1);

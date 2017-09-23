@@ -1,10 +1,16 @@
 package com.zik.faro.api.activity;
 
-import static com.zik.faro.commons.Constants.*;
+import static com.zik.faro.commons.Constants.ACTIVITY_CREATE_PATH_CONST;
+import static com.zik.faro.commons.Constants.ACTIVITY_ID_PATH_PARAM;
+import static com.zik.faro.commons.Constants.ACTIVITY_ID_PATH_PARAM_STRING;
+import static com.zik.faro.commons.Constants.ACTIVITY_PATH_CONST;
+import static com.zik.faro.commons.Constants.ACTIVITY_UPDATE_PATH_CONST;
+import static com.zik.faro.commons.Constants.ASSIGNMENT_PATH_CONST;
+import static com.zik.faro.commons.Constants.ASSIGNMENT_UPDATE_PATH_CONST;
+import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM;
+import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM_STRING;
+import static com.zik.faro.commons.Constants.EVENT_PATH_CONST;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.DELETE;
@@ -26,7 +32,6 @@ import com.sun.jersey.api.JResponse;
 import com.zik.faro.applogic.ActivityManagement;
 import com.zik.faro.applogic.AssignmentManagement;
 import com.zik.faro.commons.Constants;
-import com.zik.faro.commons.FaroResponse;
 import com.zik.faro.commons.FaroResponseStatus;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
@@ -34,7 +39,6 @@ import com.zik.faro.commons.exceptions.FaroWebAppException;
 import com.zik.faro.commons.exceptions.UpdateException;
 import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.Activity;
-import com.zik.faro.data.Event;
 import com.zik.faro.data.Item;
 import com.zik.faro.data.UpdateCollectionRequest;
 import com.zik.faro.data.UpdateRequest;
@@ -98,7 +102,7 @@ public class ActivityHandler {
     @POST
     @Path(ACTIVITY_ID_PATH_PARAM_STRING + ACTIVITY_UPDATE_PATH_CONST)
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public JResponse<FaroResponse<Activity>> updateActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public JResponse<Activity> updateActivity(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
                                @PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId,
                                UpdateRequest<Activity> updateObj){
     	String userId = context.getUserPrincipal().getName();
@@ -108,9 +112,7 @@ public class ActivityHandler {
     	updatedActivity.setEventId(eventId);
         try {
         	updatedActivity = ActivityManagement.updateActivity(updatedActivity, eventId, userId, updatedFields);
-        	FaroResponseStatus updateStatus = FaroResponseStatus.OK;
-        	FaroResponse<Activity> response = new FaroResponse<Activity>(updatedActivity, updateStatus);
-        	return JResponse.ok(response).status(response.getFaroResponseStatus().getRestResponseStatus()).build();
+        	return JResponse.ok(updatedActivity).status(Response.Status.OK).build();
 		} catch (DataNotFoundException e) {
         	throw new FaroWebAppException(FaroResponseStatus.NOT_FOUND);
         } catch (DatastoreException e) {
@@ -125,18 +127,16 @@ public class ActivityHandler {
     @Path(ACTIVITY_ID_PATH_PARAM_STRING + ASSIGNMENT_PATH_CONST + ASSIGNMENT_UPDATE_PATH_CONST)
     @POST
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public JResponse<FaroResponse<Activity>> updateActivityAssignmentItems(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    public JResponse<Activity> updateActivityAssignmentItems(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
     		@PathParam(ACTIVITY_ID_PATH_PARAM) final String activityId, final UpdateCollectionRequest<Activity, Item> updateObj){
     	String userId = context.getUserPrincipal().getName();
     	Activity updatedActivity = updateObj.getUpdate();
     	updatedActivity.setEventId(eventId);
     	updatedActivity.setId(activityId);
     	try {
-			Activity updatedEventResponse = AssignmentManagement.updateActivityItems(updatedActivity.getEventId(), updatedActivity.getId(), updateObj.getToBeAdded(), 
+			Activity updatedActivityResponse = AssignmentManagement.updateActivityItems(updatedActivity.getEventId(), updatedActivity.getId(), updateObj.getToBeAdded(), 
 					updateObj.getToBeRemoved(), updatedActivity.getVersion());
-			FaroResponseStatus updateStatus = FaroResponseStatus.OK;
-        	FaroResponse<Activity> response = new FaroResponse<Activity>(updatedEventResponse, updateStatus);
-        	return JResponse.ok(response).status(response.getFaroResponseStatus().getRestResponseStatus()).build();
+			return JResponse.ok(updatedActivityResponse).status(Response.Status.OK).build();
     	} catch (DataNotFoundException e) {
         	throw new FaroWebAppException(FaroResponseStatus.NOT_FOUND);
         } catch (DatastoreException e) {

@@ -17,7 +17,6 @@ import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import com.zik.faro.TestHelper;
 import com.zik.faro.commons.FaroErrorResponse;
-import com.zik.faro.commons.FaroResponse;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.GeoPosition;
@@ -124,8 +123,7 @@ public class FunctionalActivityTest {
     	updateRequest.setUpdatedFields(updatedFields);
     	updateRequest.setUpdate(activity);
         ClientResponse updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/"+ activityResponse.getId()+"/update", token, updateRequest);
-        FaroResponse<Activity> faroResponse = updateResponse.getEntity(new GenericType<FaroResponse<Activity>>(){});
-        Activity updateResponseActivity= faroResponse.getEntity();
+        Activity updateResponseActivity= updateResponse.getEntity(Activity.class);
         assertCreatedEntity(activity, updateResponseActivity);
         assertVersion(activity, updateResponseActivity);
     }
@@ -148,8 +146,7 @@ public class FunctionalActivityTest {
     	updateRequest.setUpdatedFields(updatedFields);
     	updateRequest.setUpdate(activity);
     	ClientResponse updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/"+ activityResponse.getId()+"/update", token, updateRequest);
-        FaroResponse<Activity> faroResponse = updateResponse.getEntity(new GenericType<FaroResponse<Activity>>(){});
-        Activity updateResponseActivity= faroResponse.getEntity();
+        Activity updateResponseActivity= updateResponse.getEntity(Activity.class);
 		
 		assertCreatedEntity(activity, updateResponseActivity);
 		assertVersion(activity, updateResponseActivity);
@@ -158,8 +155,7 @@ public class FunctionalActivityTest {
 		activity.setVersion(updateResponseActivity.getVersion());
 		updateRequest.setUpdate(activity);
 		updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/"+ activityResponse.getId()+"/update", token, updateRequest);
-        faroResponse = updateResponse.getEntity(new GenericType<FaroResponse<Activity>>(){});
-        updateResponseActivity= faroResponse.getEntity();
+        updateResponseActivity= updateResponse.getEntity(Activity.class);
 		assertCreatedEntity(activity, updateResponseActivity);
 		assertVersion(activity, updateResponseActivity);
 

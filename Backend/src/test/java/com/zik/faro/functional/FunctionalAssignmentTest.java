@@ -4,30 +4,23 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.core.MultivaluedMap;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import com.zik.faro.TestHelper;
 import com.zik.faro.TestUtil;
-import com.zik.faro.commons.FaroResponse;
-import com.zik.faro.data.ActionStatus;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.EventInviteStatusWrapper;
+import com.zik.faro.data.GeoPosition;
 import com.zik.faro.data.IllegalDataOperation;
 import com.zik.faro.data.Item;
 import com.zik.faro.data.Location;
-import com.zik.faro.data.GeoPosition;
 import com.zik.faro.data.Unit;
 import com.zik.faro.data.UpdateCollectionRequest;
 
@@ -71,8 +64,7 @@ public class FunctionalAssignmentTest {
         requestObj.setToBeAdded(toBeAdded);
         
         response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/assignment/updateItems", token, requestObj);
-        FaroResponse<Event> faroResponse = response.getEntity(new GenericType<FaroResponse<Event>>(){});
-        Event updatedEvent = faroResponse.getEntity();
+        Event updatedEvent = response.getEntity(Event.class);
         
         TestUtil.isEqualList(updatedEvent.getAssignment().getItems(), toBeAdded);
         
@@ -90,8 +82,7 @@ public class FunctionalAssignmentTest {
         requestObj.setToBeAdded(toBeAdded);
         requestObj.setToBeRemoved(toBeRemoved);
         ClientResponse response1 = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/assignment/updateItems", token, requestObj);
-        FaroResponse<Event> faroResponse1 = response1.getEntity(new GenericType<FaroResponse<Event>>(){});
-        Event updatedEvent1 = faroResponse1.getEntity();
+        Event updatedEvent1 = response1.getEntity(Event.class);
         
         List<Item> expected = new ArrayList<Item>();
         expected.addAll(toBeAdded);
@@ -105,8 +96,7 @@ public class FunctionalAssignmentTest {
         requestObj.setToBeRemoved(toBeRemoved);
     	
         ClientResponse response2 = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/assignment/updateItems", token, requestObj);
-        FaroResponse<Event> faroResponse2 = response2.getEntity(new GenericType<FaroResponse<Event>>(){});
-        Event updatedEvent2 = faroResponse2.getEntity();
+        Event updatedEvent2 = response2.getEntity(Event.class);
         
         expected.clear();
         expected.add(updatedEvent1.getAssignment().getItems().get(1));
@@ -132,8 +122,7 @@ public class FunctionalAssignmentTest {
         requestObj.setToBeAdded(toBeAdded);
         
         response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+activityResponse.getEventId()+"/activity/"+activityResponse.getId()+"/assignment/updateItems", token, requestObj);
-        FaroResponse<Activity> faroResponse = response.getEntity(new GenericType<FaroResponse<Activity>>(){});
-        Activity updatedActivity = faroResponse.getEntity();
+        Activity updatedActivity = response.getEntity(Activity.class);
         
         TestUtil.isEqualList(updatedActivity.getAssignment().getItems(), toBeAdded);
         
@@ -151,8 +140,7 @@ public class FunctionalAssignmentTest {
         requestObj.setToBeAdded(toBeAdded);
         requestObj.setToBeRemoved(toBeRemoved);
         ClientResponse response1 = TestHelper.doPOST(endpoint.toString(), "v1/event/"+activityResponse.getEventId()+"/activity/"+activityResponse.getId()+"/assignment/updateItems", token, requestObj);
-        FaroResponse<Activity> faroResponse1 = response1.getEntity(new GenericType<FaroResponse<Activity>>(){});
-        Activity updatedActivity1 = faroResponse1.getEntity();
+        Activity updatedActivity1 = response1.getEntity(Activity.class);
         
         List<Item> expected = new ArrayList<Item>();
         expected.addAll(toBeAdded);
@@ -166,8 +154,7 @@ public class FunctionalAssignmentTest {
         requestObj.setToBeRemoved(toBeRemoved);
     	
         ClientResponse response2 = TestHelper.doPOST(endpoint.toString(), "v1/event/"+activityResponse.getEventId()+"/activity/"+activityResponse.getId()+"/assignment/updateItems", token, requestObj);
-        FaroResponse<Activity> faroResponse2 = response2.getEntity(new GenericType<FaroResponse<Activity>>(){});
-        Activity updatedActivity2 = faroResponse2.getEntity();
+        Activity updatedActivity2 = response2.getEntity(Activity.class);
         
         expected.clear();
         expected.add(updatedActivity1.getAssignment().getItems().get(1));
