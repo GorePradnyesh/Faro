@@ -122,15 +122,13 @@ public class EventHandler {
     @Path(EVENT_UPDATE_PATH_CONST)
     @POST
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public JResponse<FaroResponse<Event>> updateEvent(@PathParam(EVENT_ID_PATH_PARAM) final String eventId, final UpdateRequest<Event> updateObj){
+    public JResponse<Event> updateEvent(@PathParam(EVENT_ID_PATH_PARAM) final String eventId, final UpdateRequest<Event> updateObj){
         // TODO: Validation to make sure only event owner can update
     	String userId = context.getUserPrincipal().getName();
         try {
         	Event updatedEvent = EventManagement.updateEvent(updateObj.getUpdate(), eventId, 
         			userId, updateObj.getUpdatedFields());
-        	FaroResponseStatus updateStatus = FaroResponseStatus.OK;
-        	FaroResponse<Event> response = new FaroResponse<Event>(updatedEvent, updateStatus);
-        	return JResponse.ok(response).status(response.getFaroResponseStatus().getRestResponseStatus()).build();
+        	return JResponse.ok(updatedEvent).status(Response.Status.OK).build();
         } catch (DataNotFoundException e) {
         	throw new FaroWebAppException(FaroResponseStatus.NOT_FOUND, "Data Not Found");
         } catch (DatastoreException e) {

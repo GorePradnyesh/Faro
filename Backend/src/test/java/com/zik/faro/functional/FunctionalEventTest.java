@@ -243,8 +243,7 @@ public class FunctionalEventTest {
         request.addUpdatedFields("status");
         
         ClientResponse updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventDetails.getEvent().getId()+"/updateEvent", token, request);
-        FaroResponse<Event> faroResponse = updateResponse.getEntity(new GenericType<FaroResponse<Event>>(){});
-        Event updateResponseEvent = faroResponse.getEntity();
+        Event updateResponseEvent = updateResponse.getEntity(Event.class);
         Assert.assertEquals(updateObj.getEndDate(), updateResponseEvent.getEndDate());
         Assert.assertEquals(updateObj.getStartDate(), updateResponseEvent.getStartDate());
         Assert.assertEquals(updateObj.getEventDescription(), updateResponseEvent.getEventDescription());
@@ -267,8 +266,7 @@ public class FunctionalEventTest {
         request.addUpdatedFields("controlFlag");
         
         updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventDetails.getEvent().getId()+"/updateEvent", token, request);
-        faroResponse = updateResponse.getEntity(new GenericType<FaroResponse<Event>>(){});
-        updateResponseEvent = faroResponse.getEntity();
+        updateResponseEvent = updateResponse.getEntity(Event.class);
         Assert.assertEquals(updateObj.getEndDate(), updateResponseEvent.getEndDate());
         Assert.assertEquals(updateObj.getStartDate(), updateResponseEvent.getStartDate());
         Assert.assertEquals(updateObj.getEventDescription(), updateResponseEvent.getEventDescription());
