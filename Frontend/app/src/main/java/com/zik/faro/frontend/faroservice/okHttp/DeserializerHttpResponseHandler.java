@@ -7,8 +7,8 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
-import com.zik.faro.frontend.request.CustomCalendarDeserializer;
-import com.zik.faro.frontend.request.CustomCalendarSerializer;
+import com.zik.faro.frontend.faroservice.request.CustomCalendarDeserializer;
+import com.zik.faro.frontend.faroservice.request.CustomCalendarSerializer;
 
 import java.io.IOException;
 import java.lang.reflect.Type;

@@ -1,54 +1,149 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:paddingBottom="4dp"
+    android:paddingTop="4dp"
+    android:paddingRight="4dp"
+    android:paddingLeft="4dp"
+    android:clipToPadding="false">
 
-    <ImageView
-        android:layout_width="wrap_content"
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingRight="10dp"
-        android:paddingTop="10dp"
-        android:paddingLeft="10dp"
-        android:paddingBottom="10dp"
-        android:scaleType="centerCrop"
-        android:id="@+id/status_img"
-        android:layout_centerVertical="true"
-        android:layout_alignParentStart="true"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/status_img"
-        android:layout_centerVertical="true"
-        android:paddingRight="10dp"
-        android:paddingTop="10dp"
-        android:paddingLeft="10dp"
-        android:paddingBottom="10dp"
-        android:id="@+id/event_name"
-        android:textColor="@android:color/white"
-        android:textSize="@dimen/abc_text_size_medium_material" />
-
-    <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
-        android:id="@+id/startDateAndTimeDisplay">
-        <TextView
-            android:layout_width="wrap_content"
+        app:cardCornerRadius="5dp"
+        app:cardElevation="5dp"
+        app:cardMaxElevation="20dp"
+        android:id="@+id/eventRowCardView">
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/startDate"
-            android:textColor="@android:color/white"
-            android:textSize="@dimen/abc_text_size_caption_material" />
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_centerVertical="true">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/startTime"
-            android:textColor="@android:color/white"
-            android:textSize="@dimen/abc_text_size_caption_material"
-            android:layout_below="@+id/startDate"
-            android:layout_alignEnd="@id/startDate" />
-    </RelativeLayout>
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_toStartOf="@+id/eventCoverPhotoImageView"
+                android:id="@+id/eventDetailsRelativeLayout">
 
+                <TextView
+                    android:id="@+id/eventNameTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:text="Lake Shasta"
+                    android:textSize="18sp" />
+
+                <RelativeLayout
+                    android:id="@+id/startDateAndTimeDisplay"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignStart="@+id/eventNameTextView"
+                    android:layout_below="@+id/eventNameTextView">
+
+                    <TextView
+                        android:id="@+id/startDateTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:paddingEnd="32dp"
+                        android:paddingStart="0dp"
+                        android:textSize="12sp"
+                        android:text="Sat, 5 Aug 2017"/>
+
+                    <TextView
+                        android:id="@+id/startTimeTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toEndOf="@id/startDateTextView"
+                        android:textSize="12sp"
+                        android:text="02:47 PM"/>
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/eventLocationRelativeLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignStart="@+id/eventNameTextView"
+                    android:layout_below="@id/startDateAndTimeDisplay">
+
+                    <ImageButton
+                        android:layout_width="30dp"
+                        android:layout_height="24dp"
+                        android:id="@+id/mapImageButton"
+                        android:background="@color/transparent"
+                        android:focusable="false"
+                        android:paddingRight="15dp"
+                        android:src="@drawable/ic_place_black_24dp"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentStart="true" />
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/peopleImageView"
+                        android:background="@color/transparent"
+                        android:layout_toEndOf="@+id/mapImageButton"
+                        android:layout_centerVertical="true"
+                        android:src="@drawable/ic_people_black_24dp"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/attendeesCountTextView"
+                        android:textSize="12sp"
+                        android:text="15"
+                        android:layout_toEndOf="@+id/peopleImageView"
+                        android:layout_centerVertical="true"
+                        android:paddingLeft="4dp"/>
+                </RelativeLayout>
+            </RelativeLayout>
+            <ImageView
+                android:layout_width="90dp"
+                android:layout_height="60dp"
+                android:id="@+id/eventCoverPhotoImageView"
+                android:layout_alignParentEnd="true"
+                android:scaleType="centerCrop"
+                android:src="@drawable/baby"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:id="@+id/inviteResponseLinearLayout"
+                android:layout_below="@+id/eventDetailsRelativeLayout">
+                <Button
+                    android:layout_width="0px"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/eventInvitationAccept"
+                    android:text="@string/YES"
+                    android:textSize="12sp"
+                    android:layout_weight="1"
+                    android:background="@color/transparent"
+                    android:focusable="false"/>
+                <Button
+                    android:layout_width="0px"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/eventInvitationMaybe"
+                    android:text="@string/MAYBE"
+                    android:textSize="12sp"
+                    android:layout_weight="1"
+                    android:background="@color/transparent"
+                    android:focusable="false"/>
+                <Button
+                    android:layout_width="0px"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/eventInvitationDecline"
+                    android:text="@string/NO"
+                    android:textSize="12sp"
+                    android:layout_weight="1"
+                    android:background="@color/transparent"
+                    android:focusable="false"/>
+            </LinearLayout>
+        </RelativeLayout>
+    </android.support.v7.widget.CardView>
 </RelativeLayout>

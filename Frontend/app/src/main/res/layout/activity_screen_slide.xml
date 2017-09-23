@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <fragment android:name="com.zik.faro.frontend.ScreenSlidePageFragment"
+    <fragment android:name="com.zik.faro.frontend.ui.fragments.ScreenSlidePageFragment"
         android:id="@+id/screenSlideFragment"
         android:layout_weight="1"
         android:layout_width="0dp"
