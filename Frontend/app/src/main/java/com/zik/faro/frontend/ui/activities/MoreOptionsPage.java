@@ -44,6 +44,10 @@ public class MoreOptionsPage extends Fragment {
 
     private Context mContext = null;
 
+    public MoreOptionsPage () {
+
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

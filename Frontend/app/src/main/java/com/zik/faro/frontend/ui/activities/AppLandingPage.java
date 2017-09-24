@@ -14,6 +14,7 @@ import com.zik.faro.frontend.handlers.ActivityListHandler;
 import com.zik.faro.frontend.handlers.AssignmentListHandler;
 import com.zik.faro.frontend.handlers.EventFriendListHandler;
 import com.zik.faro.frontend.ui.fragments.EventListFragment;
+import com.zik.faro.frontend.ui.fragments.PlansFragment;
 import com.zik.faro.frontend.util.FaroExceptionHandler;
 import com.zik.faro.frontend.ui.fragments.FriendListFragment;
 import com.zik.faro.frontend.handlers.PollListHandler;
@@ -58,7 +59,7 @@ public class AppLandingPage extends FragmentActivity{
                 FriendListFragment.class, null);
         mTabHost.addTab(
                 mTabHost.newTabSpec("tab3").setIndicator(getTabIndicator(mTabHost.getContext(), R.drawable.notification)),
-                MoreOptionsPage.class, null);
+                PlansFragment.class, null);
         mTabHost.addTab(
                 mTabHost.newTabSpec("tab4").setIndicator(getTabIndicator(mTabHost.getContext(), R.drawable.options)),
                 MoreOptionsPage.class, null);
