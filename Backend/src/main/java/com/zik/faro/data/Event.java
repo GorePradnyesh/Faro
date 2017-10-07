@@ -5,7 +5,15 @@ import com.zik.faro.data.expense.ExpenseGroup;
 import java.util.Calendar;
 import java.util.UUID;
 
-public class Event extends BaseEntity{
+public class Event extends BaseEntity {
+    public static final String NAME = "eventName";
+    public static final String START_DATE = "startDate";
+    public static final String END_DATE = "endDate";
+    public static final String DESCRIPTION = "eventDescription";
+    public static final String CONTROL_FLAG = "controlFlag";
+    public static final String EXPENSE_GROUP = "expenseGroup";
+    public static final String LOCATION = "location";
+
     private String eventName;
     private Calendar startDate;     
     private Calendar endDate;

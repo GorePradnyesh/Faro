@@ -5,10 +5,10 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import junit.framework.Assert;
 
+import org.apache.commons.collections.ListUtils;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -17,19 +17,21 @@ import org.junit.Test;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
+import com.zik.faro.TestUtil;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateException;
 import com.zik.faro.commons.exceptions.UpdateVersionException;
-import com.zik.faro.data.IllegalDataOperation;
 import com.zik.faro.data.ActionStatus;
-import com.zik.faro.persistence.datastore.data.ActivityDo;
 import com.zik.faro.data.Assignment;
-import com.zik.faro.persistence.datastore.data.EventDo;
+import com.zik.faro.data.GeoPosition;
 import com.zik.faro.data.Identifier;
+import com.zik.faro.data.IllegalDataOperation;
 import com.zik.faro.data.Item;
 import com.zik.faro.data.Location;
-import com.zik.faro.data.GeoPosition;
 import com.zik.faro.data.Unit;
+import com.zik.faro.persistence.datastore.data.ActivityDo;
+import com.zik.faro.persistence.datastore.data.EventDo;
 
 public class AssignmentDatastoreImplTest {
 	
@@ -143,25 +145,57 @@ public class AssignmentDatastoreImplTest {
 	}
 	
 	@Test
-	public void updateActivityLevelAssignmentItems() throws IllegalDataOperation, DataNotFoundException, DatastoreException, UpdateVersionException{
+	public void updateActivityLevelAssignmentItems() throws IllegalDataOperation, DataNotFoundException, DatastoreException, UpdateVersionException, UpdateException{
 		GeoPosition geoPosition = new GeoPosition(0,0);
 		EventDo event = new EventDo("TestEvent", Calendar.getInstance(), 
 				Calendar.getInstance(), false, null, new Location("San Jose", "CA", geoPosition));
     	EventDatastoreImpl.storeEventOnly(event);
 		ActivityDo activity1 = createActivity(event.getId(), "NewYork");
 		ActivityDatastoreImpl.storeActivity(activity1);
-    	List<Item> items = getItems(activity1.getAssignment());
+		List<Item> toBeAdded = new ArrayList<>();
+		List<Item> toBeRemoved = new ArrayList<>();
+	
+		// Add new item
+		Item i1 = new Item("Onions", "9876543", 1, Unit.KG, Identifier.createUniqueIdentifierString());
+		toBeAdded.add(i1);
+		ActivityDo updatedActivity = AssignmentDatastoreImpl.updateActivityAssignmentItems(toBeAdded, null, activity1.getId(), activity1.getEventId(), activity1.getVersion());
+		
+		List<Item> expected = ListUtils.union(activity1.getAssignment().getItems(), toBeAdded);
+		Assert.assertTrue(ListUtils.isEqualList(expected, updatedActivity.getAssignment().getItems()));
+		
+		// Add and update and remove
+		toBeAdded.clear();
+		i1 = new Item("Tent", "Nakul", 1, Unit.KG, Identifier.createUniqueIdentifierString());
+		toBeAdded.add(i1);
+		// Update existing item
+		updatedActivity.getAssignment().getItems().get(0).setCount(10);
+		toBeAdded.add(updatedActivity.getAssignment().getItems().get(0));
+		// Remove
+		toBeRemoved.add(updatedActivity.getAssignment().getItems().get(2));
+		
+		ActivityDo updatedActivity1 = AssignmentDatastoreImpl.updateActivityAssignmentItems(toBeAdded, toBeRemoved,
+				updatedActivity.getId(), updatedActivity.getEventId(), updatedActivity.getVersion());
+		expected = new ArrayList<Item>();
+		
+		// Handpicking since "2" was removed
+		expected.add(updatedActivity.getAssignment().getItems().get(1));
+		expected.addAll(toBeAdded);
+		Assert.assertEquals(toBeAdded.get(1).getCount(), updatedActivity1.getAssignment().getItems().get(0).getCount());
+		Assert.assertTrue(TestUtil.isEqualList(expected, updatedActivity1.getAssignment().getItems()));		
+		
+		// Only remove
+		toBeRemoved.clear();
+		toBeRemoved.add(updatedActivity1.getAssignment().getItems().get(0));
+		toBeRemoved.add(updatedActivity1.getAssignment().getItems().get(1));
     	
-    	AssignmentDatastoreImpl.updateItemsForActivityAssignment(event.getId(),
-    			activity1.getId(), items);
-    	Assignment assignment = AssignmentDatastoreImpl.getActivityAssignment(event.getId(),
-    			activity1.getId(), activity1.getAssignment().getId());
-    	// Assert size, 1 newly added and 1 updated item
-    	Assert.assertEquals(4,assignment.getItems().size());
-    	//Assert.assertEquals(items.get(2), assignment.getItem(items.get(3).getId()));
-    	//Assert.assertEquals(items.get(1), assignment.getItem(items.get(1).getId()));
-    	
-	}
+		ActivityDo updatedActivity2 = AssignmentDatastoreImpl.updateActivityAssignmentItems(null, toBeRemoved,
+				updatedActivity1.getId(), updatedActivity1.getEventId(), updatedActivity1.getVersion());
+    	expected.clear();
+    	expected.add(updatedActivity1.getAssignment().getItems().get(2));
+    	Assert.assertTrue(TestUtil.isEqualList(expected, updatedActivity2.getAssignment().getItems()));		
+    }
+	
+	
 	
 	private List<Item> getItems(Assignment assignment) throws IllegalDataOperation{
 		List<Item> items = new ArrayList<Item>();
@@ -172,23 +206,57 @@ public class AssignmentDatastoreImplTest {
 	}
 	
 	@Test
-	public void updateEventLevelAssignmentItems() throws IllegalDataOperation, DataNotFoundException, DatastoreException, UpdateVersionException{
+	public void updateEventLevelAssignmentItems() throws IllegalDataOperation, DataNotFoundException, DatastoreException, UpdateVersionException, UpdateException{
 		GeoPosition geoPosition = new GeoPosition(0,0);
 		EventDo event = new EventDo("TestEvent", Calendar.getInstance(), 
 				Calendar.getInstance(), false, null, new Location("San Jose", "CA", geoPosition));
-		Assignment eventAssignment = new Assignment();
-		eventAssignment.addItem(new Item("Kaivan", "420", 3, Unit.KG, Identifier.createUniqueIdentifierString()));
-		event.setAssignment(eventAssignment);
+		event.setAssignment(new Assignment());
+		event.getAssignment().getItems().add(new Item("blankets", "David", 4, Unit.COUNT, Identifier.createUniqueIdentifierString()));
+		event.getAssignment().getItems().add(new Item("rice", "Roger", 10, Unit.LB, Identifier.createUniqueIdentifierString()));
+		
     	EventDatastoreImpl.storeEventOnly(event);
-		List<Item> items = getItems(event.getAssignment());
+		List<Item> toBeAdded = new ArrayList<>();
+		List<Item> toBeRemoved = new ArrayList<>();
+	
+		// Add new item
+		Item i1 = new Item("Onions", "9876543", 1, Unit.KG, Identifier.createUniqueIdentifierString());
+		toBeAdded.add(i1);
+		EventDo updatedEvent = AssignmentDatastoreImpl.updateEventAssignmentItems(toBeAdded, null, event.getId(), event.getVersion());
+		
+		List<Item> expected = ListUtils.union(event.getAssignment().getItems(), toBeAdded);
+		TestUtil.isEqualList(updatedEvent.getAssignment().getItems(), expected);
+		
+		// Add and update and remove
+		toBeAdded.clear();
+		i1 = new Item("Tent", "Nakul", 1, Unit.KG, Identifier.createUniqueIdentifierString());
+		toBeAdded.add(i1);
+		// Update existing item
+		updatedEvent.getAssignment().getItems().get(0).setCount(10);
+		toBeAdded.add(updatedEvent.getAssignment().getItems().get(0));
+		// Remove
+		toBeRemoved.add(updatedEvent.getAssignment().getItems().get(2));
+		
+		EventDo updatedEvent1 = AssignmentDatastoreImpl.updateEventAssignmentItems(toBeAdded, toBeRemoved,
+				updatedEvent.getId(), updatedEvent.getVersion());
+		expected = new ArrayList<Item>();
+		
+		// Handpicking since "2" was removed
+		expected.add(updatedEvent.getAssignment().getItems().get(1));
+		expected.addAll(toBeAdded);
+		Assert.assertEquals(toBeAdded.get(1).getCount(), updatedEvent1.getAssignment().getItems().get(0).getCount());
+		Assert.assertTrue(TestUtil.isEqualList(expected, updatedEvent1.getAssignment().getItems()));	
+		
+		// Only remove
+		toBeRemoved.clear();
+		toBeRemoved.add(updatedEvent1.getAssignment().getItems().get(0));
+		toBeRemoved.add(updatedEvent1.getAssignment().getItems().get(1));
     	
-		AssignmentDatastoreImpl.updateItemsForEventAssignment(event.getId(),items);
-    	Assignment assignment = AssignmentDatastoreImpl.getEventAssignment(event.getId());
-    	// Assert size, 1 newly added and 1 updated item
-    	Assert.assertEquals(3,assignment.getItems().size());
-    	//Assert.assertEquals(items.get(2), assignment.getItem(items.get(2).getId()));
-    	//Assert.assertEquals(items.get(1), assignment.getItem(items.get(1).getId()));
-	}
+		EventDo updatedEvent2 = AssignmentDatastoreImpl.updateEventAssignmentItems(null, toBeRemoved,
+				updatedEvent1.getId(), updatedEvent1.getVersion());
+    	expected.clear();
+    	expected.add(updatedEvent1.getAssignment().getItems().get(2));
+    	Assert.assertTrue(TestUtil.isEqualList(expected, updatedEvent2.getAssignment().getItems()));		
+    }
 	
 	
 }

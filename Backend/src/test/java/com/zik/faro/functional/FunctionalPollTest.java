@@ -4,11 +4,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import junit.framework.Assert;
 
@@ -20,21 +19,24 @@ import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import com.zik.faro.TestHelper;
 import com.zik.faro.data.Event;
-import com.zik.faro.data.Location;
 import com.zik.faro.data.GeoPosition;
+import com.zik.faro.data.Location;
 import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.PollOption;
+import com.zik.faro.data.UpdateCollectionRequest;
+import com.zik.faro.data.UpdateRequest;
 
 public class FunctionalPollTest {
 	private static URL endpoint;
     private static String token = null;
     private static String eventId = null;
+    private static String callerEmail = UUID.randomUUID().toString() + "@gmail.com";
 
     @BeforeClass
     public static void init() throws Exception {
         endpoint = TestHelper.getExternalTargetEndpoint();
-        token = TestHelper.createUserAndGetToken();
+        token = TestHelper.createUserAndGetToken(callerEmail);
         createEvent();
     }
     
@@ -115,8 +117,8 @@ public class FunctionalPollTest {
         Assert.assertEquals(1, count.intValue());
     }
    
-    
-    public static void updatePollTest() throws Exception{
+    @Test
+    public void updatePollTest() throws Exception{
     	List<PollOption> pollOptions = new ArrayList<PollOption>();
     	pollOptions.add(new PollOption("Italian"));
     	pollOptions.add(new PollOption("Indian"));
@@ -128,84 +130,155 @@ public class FunctionalPollTest {
     	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/create", token, p);
         Poll pollResponse = response.getEntity(Poll.class);
         assertEntity(p, pollResponse);
-        // Add poll options
-        List<PollOption> newOptions = new ArrayList<PollOption>();
-        newOptions.add(new PollOption("Chinese"));
-        Poll update = new Poll();
-        update.setPollOptions(newOptions);
-        update.setEventId(eventId);
-        update.setId(pollResponse.getId());
-        update.setVersion(pollResponse.getVersion());
-        Map<String, Object> map = new HashMap<String,Object>();
-        map.put("poll", update);
+        
+        UpdateRequest<Poll> updateObj = new UpdateRequest<>();
+        pollResponse.setCreatorId("Jawahar");
+        Calendar newDeadline = Calendar.getInstance();
+        pollResponse.setDeadline(newDeadline);
+        pollResponse.setDescription("Updated description");
+        updateObj.setUpdate(pollResponse);
+        Set<String> fields = new HashSet<String>();
+        fields.add("creatorId");fields.add("description");fields.add("deadline");
+        updateObj.setUpdatedFields(fields);
         ClientResponse updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/"
-        		+pollResponse.getId()+"/updatePoll", token, map);
-        Poll updatedPollResponse = updateResponse.getEntity(Poll.class);
-        Assert.assertEquals(200, updateResponse.getStatus());
-        Assert.assertEquals(4,updatedPollResponse.getPollOptions().size());
-    	for(int i = 0; i < updatedPollResponse.getPollOptions().size(); i++){
-    		Assert.assertNotNull(updatedPollResponse.getPollOptions().get(i).getId());
-    	}
-    	
-    	// Update Poll properties
-    	update = new Poll(); update.setEventId(eventId); update.setId(pollResponse.getId());
-    	update.setDescription("Poll Description updated");
-    	update.setVersion(updatedPollResponse.getVersion());
-    	map.put("poll", update);
-    	updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/"
-        		+pollResponse.getId()+"/updatePoll", token, map);
-        updatedPollResponse = updateResponse.getEntity(Poll.class);
-        Assert.assertEquals(update.getDescription(), updatedPollResponse.getDescription());
-        Long version = update.getVersion();
-        Assert.assertEquals(++version, updatedPollResponse.getVersion());
-        
-        // Update Poll properties and cast vote
-        
-        update = new Poll(); update.setEventId(eventId); update.setId(pollResponse.getId());
-    	update.setDescription("Poll Description updated again");
-    	update.setVersion(updatedPollResponse.getVersion());
-    	map.put("poll", update);
-    	Set<String> voteOption = new HashSet<String>();
-        voteOption.add(pollResponse.getPollOptions().get(1).getId());
-        map.put("voteOption", voteOption);
-    	updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/"
-        		+pollResponse.getId()+"/updatePoll", token, map);
-        updatedPollResponse = updateResponse.getEntity(Poll.class);
-        Assert.assertEquals(update.getDescription(), updatedPollResponse.getDescription());
-        version = update.getVersion();
-        Assert.assertEquals(++version, updatedPollResponse.getVersion());
-        Assert.assertEquals(1,updatedPollResponse.getPollOptions().get(1).getVoters().size());
+        		+pollResponse.getId()+"/updatePoll", token, updateObj);
+        Poll updatedPollResponse= updateResponse.getEntity(Poll.class);
+        Assert.assertEquals("Updated description",updatedPollResponse.getDescription());
+        Assert.assertEquals("Jawahar",updatedPollResponse.getCreatorId());
+        Assert.assertEquals(newDeadline.getTimeInMillis(),updatedPollResponse.getDeadline().getTimeInMillis());
     }
     
-    public static void testTest() throws Exception{
+    @Test
+    public void updatePollOptions() throws Exception{
     	List<PollOption> pollOptions = new ArrayList<PollOption>();
     	pollOptions.add(new PollOption("Italian"));
     	pollOptions.add(new PollOption("Indian"));
     	pollOptions.add(new PollOption("Burmese"));
-    	Poll p = new Poll(eventId, "Kaivan", true, pollOptions, "Kaivan", "Dinner cuisine", ObjectStatus.OPEN);
-    	//new Poll(eventId, creator, multiChoice, pollOptions, owner, description, status)
+    	Poll p = new Poll(eventId, "Kaivan", pollOptions, "Kaivan", "Dinner cuisine");
     	
     	// Create sample poll
     	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/create", token, p);
         Poll pollResponse = response.getEntity(Poll.class);
         assertEntity(p, pollResponse);
-        // Add poll options
-        // Cast vote
-        Set<String> voteOption = new HashSet<String>();
-        voteOption.add(pollResponse.getPollOptions().get(1).getId());
-        voteOption.add(pollResponse.getPollOptions().get(2).getId());
-        Map<String,Object> map = new HashMap<String,Object>();
-        map.put("version", pollResponse.getVersion());
-        map.put("voteOption", voteOption);
-        map.put("poll", p);
-        ClientResponse updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/"
-        		+pollResponse.getId()+"/test", token, map);
-        Poll updatedPollResponse = updateResponse.getEntity(Poll.class);
-        Assert.assertEquals(200, updateResponse.getStatus());
-        Assert.assertEquals(4,updatedPollResponse.getPollOptions().size());
-    	for(int i = 0; i < updatedPollResponse.getPollOptions().size(); i++){
-    		Assert.assertNotNull(updatedPollResponse.getPollOptions().get(i).getId());
-    	}
+        
+        // Update: Add and Remove
+        List<PollOption> add = new ArrayList<>();
+        add.add(new PollOption("Venezuaelan"));
+        List<PollOption> remove = new ArrayList<>();
+        remove.add(pollResponse.getPollOptions().get(1));
+        UpdateCollectionRequest<Poll, PollOption> updateRequest = new UpdateCollectionRequest<>();
+        updateRequest.setToBeAdded(add);
+        updateRequest.setToBeRemoved(remove);
+        updateRequest.setUpdate(pollResponse);
+        response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/"
+        		+pollResponse.getId()+"/updatePollOptions", token, updateRequest);
+        Poll updateResponsePoll= response.getEntity(Poll.class);
+        
+        Assert.assertEquals(updateResponsePoll.getPollOptions().size(), 3);
+        Assert.assertEquals(updateResponsePoll.getPollOptions().get(0).getOption(), pollOptions.get(0).getOption());
+        Assert.assertEquals(updateResponsePoll.getPollOptions().get(1).getOption(), pollOptions.get(2).getOption());
+        Assert.assertEquals(updateResponsePoll.getPollOptions().get(2).getOption(), add.get(0).getOption());
+        Assert.assertEquals(updateResponsePoll.getPollOptions().get(0).getId(), pollResponse.getPollOptions().get(0).getId());
+        Assert.assertEquals(updateResponsePoll.getPollOptions().get(1).getId(), pollResponse.getPollOptions().get(2).getId());
+        
+        // Update: Only Remove
+        remove.clear();
+        remove.add(updateResponsePoll.getPollOptions().get(2));
+        updateRequest = new UpdateCollectionRequest<>();
+        updateRequest.setToBeRemoved(remove);
+        updateRequest.setUpdate(updateResponsePoll);
+        response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/"
+        		+pollResponse.getId()+"/updatePollOptions", token, updateRequest);
+        Poll updateResponsePoll1= response.getEntity(Poll.class);
+        Assert.assertEquals(updateResponsePoll1.getPollOptions().size(), 2);
+        Assert.assertEquals(updateResponsePoll1.getPollOptions().get(0).getOption(), updateResponsePoll.getPollOptions().get(0).getOption());
+        Assert.assertEquals(updateResponsePoll1.getPollOptions().get(1).getOption(), updateResponsePoll.getPollOptions().get(1).getOption());
+        Assert.assertEquals(updateResponsePoll1.getPollOptions().get(0).getId(), updateResponsePoll.getPollOptions().get(0).getId());
+        Assert.assertEquals(updateResponsePoll1.getPollOptions().get(1).getId(), updateResponsePoll.getPollOptions().get(1).getId());
+        
+        // Update: Only Add
+        add.clear();
+        add.add(new PollOption("Pakistani"));
+        updateRequest = new UpdateCollectionRequest<>();
+        updateRequest.setToBeAdded(add);
+        updateRequest.setUpdate(updateResponsePoll1);
+        response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/"
+        		+pollResponse.getId()+"/updatePollOptions", token, updateRequest);
+        Poll updateResponsePoll2= response.getEntity(Poll.class);
+        Assert.assertEquals(updateResponsePoll2.getPollOptions().size(), 3);
+        Assert.assertEquals(updateResponsePoll2.getPollOptions().get(0).getOption(), updateResponsePoll1.getPollOptions().get(0).getOption());
+        Assert.assertEquals(updateResponsePoll2.getPollOptions().get(1).getOption(), updateResponsePoll1.getPollOptions().get(1).getOption());
+        Assert.assertEquals(updateResponsePoll2.getPollOptions().get(0).getId(), updateResponsePoll1.getPollOptions().get(0).getId());
+        Assert.assertEquals(updateResponsePoll2.getPollOptions().get(1).getId(), updateResponsePoll1.getPollOptions().get(1).getId());
+        
+    }
+    
+    @Test
+    public void castVote() throws Exception{
+    	List<PollOption> pollOptions = new ArrayList<PollOption>();
+    	pollOptions.add(new PollOption("Italian"));
+    	pollOptions.add(new PollOption("Indian"));
+    	pollOptions.add(new PollOption("Burmese"));
+    	Poll p = new Poll(eventId, "Kaivan", pollOptions, "Kaivan", "Dinner cuisine");
+    	
+    	// Create sample poll
+    	ClientResponse response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/create", token, p);
+        Poll pollResponse = response.getEntity(Poll.class);
+        assertEntity(p, pollResponse);
+        
+        // Cast vote: only add
+        List<String> add = new ArrayList<String>();
+        add.add(pollResponse.getPollOptions().get(0).getId());
+        add.add(pollResponse.getPollOptions().get(1).getId());
+        
+        UpdateCollectionRequest<Poll, String> updateRequest = new UpdateCollectionRequest<>();
+        updateRequest.setToBeAdded(add);
+        updateRequest.setUpdate(pollResponse);
+        response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/"
+        		+pollResponse.getId()+"/castVote", token, updateRequest);
+        Poll updateResponsePoll= response.getEntity(Poll.class);
+        
+        Assert.assertEquals(updateResponsePoll.getPollOptions().get(0).getVoters().size(), 1);
+        Assert.assertEquals(updateResponsePoll.getPollOptions().get(1).getVoters().size(), 1);
+        Assert.assertEquals(updateResponsePoll.getPollOptions().get(2).getVoters().size(), 0);
+        Assert.assertTrue(updateResponsePoll.getPollOptions().get(0).getVoters().contains(callerEmail));
+        Assert.assertTrue(updateResponsePoll.getPollOptions().get(1).getVoters().contains(callerEmail));
+        Assert.assertFalse(updateResponsePoll.getPollOptions().get(2).getVoters().contains(callerEmail));
+        
+        // Cast Vote: only remove
+        List<String> remove = new ArrayList<String>();
+        remove.add(updateResponsePoll.getPollOptions().get(0).getId());
+        updateRequest = new UpdateCollectionRequest<>();
+        updateRequest.setToBeRemoved(remove);
+        updateRequest.setUpdate(updateResponsePoll);
+        response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/"
+        		+pollResponse.getId()+"/castVote", token, updateRequest);
+        Poll updateResponsePoll1= response.getEntity(Poll.class);
+        Assert.assertEquals(updateResponsePoll1.getPollOptions().get(0).getVoters().size(), 0);
+        Assert.assertEquals(updateResponsePoll1.getPollOptions().get(1).getVoters().size(), 1);
+        Assert.assertEquals(updateResponsePoll1.getPollOptions().get(2).getVoters().size(), 0);
+        Assert.assertFalse(updateResponsePoll1.getPollOptions().get(0).getVoters().contains(callerEmail));
+        Assert.assertTrue(updateResponsePoll1.getPollOptions().get(1).getVoters().contains(callerEmail));
+        Assert.assertFalse(updateResponsePoll1.getPollOptions().get(2).getVoters().contains(callerEmail));
+        
+        // Update: add and remove
+        add.clear();remove.clear();
+        add.add(updateResponsePoll1.getPollOptions().get(2).getId());
+        remove.add(updateResponsePoll1.getPollOptions().get(1).getId());
+        updateRequest = new UpdateCollectionRequest<>();
+        updateRequest.setToBeAdded(add);
+        updateRequest.setToBeRemoved(remove);
+        updateRequest.setUpdate(updateResponsePoll1);
+        response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/poll/"
+        		+pollResponse.getId()+"/castVote", token, updateRequest);
+        Poll updateResponsePoll2= response.getEntity(Poll.class);
+        Assert.assertEquals(updateResponsePoll2.getPollOptions().get(0).getVoters().size(), 0);
+        Assert.assertEquals(updateResponsePoll2.getPollOptions().get(1).getVoters().size(), 0);
+        Assert.assertEquals(updateResponsePoll2.getPollOptions().get(2).getVoters().size(), 1);
+        Assert.assertFalse(updateResponsePoll2.getPollOptions().get(0).getVoters().contains(callerEmail));
+        Assert.assertFalse(updateResponsePoll2.getPollOptions().get(1).getVoters().contains(callerEmail));
+        Assert.assertTrue(updateResponsePoll2.getPollOptions().get(2).getVoters().contains(callerEmail));
+        
     }
     
     public static void getPolls() throws Exception{
@@ -219,6 +292,5 @@ public class FunctionalPollTest {
     	createAndReadAndDeletePollTest();
     	getUnvotedCountTest();
     	getPolls();
-    	updatePollTest();
     }
 }

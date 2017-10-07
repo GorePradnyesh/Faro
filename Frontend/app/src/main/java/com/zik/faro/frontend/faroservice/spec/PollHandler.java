@@ -1,10 +1,12 @@
 package com.zik.faro.frontend.faroservice.spec;
 
 import com.zik.faro.data.Poll;
+import com.zik.faro.data.PollOption;
+import com.zik.faro.data.UpdateCollectionRequest;
+import com.zik.faro.data.UpdateRequest;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public interface PollHandler {
@@ -15,5 +17,9 @@ public interface PollHandler {
     void castVote(final BaseFaroRequestCallback<String> callback, final String eventId, final String pollId, Set<String> options);
     void closePoll(final BaseFaroRequestCallback<String> callback, final String eventId, final String pollId);
     void deletePoll(final BaseFaroRequestCallback<String> callback, final String eventId, final String pollId);
-    void updatePoll(final BaseFaroRequestCallback<Poll> callback, final String eventId, final String pollId, Map<String,Object> updateObj);
+    void updatePoll(final BaseFaroRequestCallback<Poll> callback, final String eventId, final String pollId, UpdateRequest<Poll> updateRequest);
+    void updatePollOptions(final BaseFaroRequestCallback<Poll> callback, final String eventId, final String pollId,
+                           UpdateCollectionRequest<Poll, PollOption> updateCollectionRequest);
+    void castVote(final BaseFaroRequestCallback<Poll> callback, final String eventId, final String pollId,
+                  UpdateCollectionRequest<Poll, String> updateCollectionRequest);
 }

@@ -465,11 +465,11 @@ public class EventLandingPage extends FragmentActivity
         statusNo = (Button) findViewById(R.id.statusNo);
         statusMaybe = (Button) findViewById(R.id.statusMaybe);
 
-        final Intent PollListPage = new Intent(EventLandingPage.this, PollListPage.class);
-        final Intent EditEvent = new Intent(EventLandingPage.this, EditEventActivity.class);
-        final Intent ActivityListPage = new Intent(EventLandingPage.this, ActivityListPage.class);
-        final Intent EventFriendListLandingPageIntent = new Intent(EventLandingPage.this, EventFriendListLandingPage.class);
-        final Intent AssignmentLandingPageTabsIntent = new Intent(EventLandingPage.this, AssignmentLandingPage.class);
+        final Intent pollListPageIntent = new Intent(EventLandingPage.this, PollListPage.class);
+        final Intent editEventIntent = new Intent(EventLandingPage.this, EditEventActivity.class);
+        final Intent activityListPageIntent = new Intent(EventLandingPage.this, ActivityListPage.class);
+        final Intent eventFriendListLandingPageIntent = new Intent(EventLandingPage.this, EventFriendListLandingPage.class);
+        final Intent assignmentLandingPageTabsIntent = new Intent(EventLandingPage.this, AssignmentLandingPage.class);
 
         linlaHeaderProgress = (LinearLayout) findViewById(R.id.linlaHeaderProgress);
 
@@ -500,33 +500,33 @@ public class EventLandingPage extends FragmentActivity
         pollButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FaroIntentInfoBuilder.eventIntent(PollListPage, eventId);
-                startActivity(PollListPage);
+                FaroIntentInfoBuilder.eventIntent(pollListPageIntent, eventId);
+                startActivity(pollListPageIntent);
             }
         });
 
         eventAssignmentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FaroIntentInfoBuilder.assignmentIntent(AssignmentLandingPageTabsIntent, eventId,
+                FaroIntentInfoBuilder.assignmentIntent(assignmentLandingPageTabsIntent, eventId,
                         null, cloneEvent.getAssignment().getId());
-                startActivity(AssignmentLandingPageTabsIntent);
+                startActivity(assignmentLandingPageTabsIntent);
             }
         });
 
         activityButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FaroIntentInfoBuilder.eventIntent(ActivityListPage, eventId);
-                startActivity(ActivityListPage);
+                FaroIntentInfoBuilder.eventIntent(activityListPageIntent, eventId);
+                startActivity(activityListPageIntent);
             }
         });
 
         guestListImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FaroIntentInfoBuilder.eventIntent(EventFriendListLandingPageIntent, eventId);
-                startActivity(EventFriendListLandingPageIntent);
+                FaroIntentInfoBuilder.eventIntent(eventFriendListLandingPageIntent, eventId);
+                startActivity(eventFriendListLandingPageIntent);
                 //finish();
             }
         });
@@ -534,8 +534,8 @@ public class EventLandingPage extends FragmentActivity
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FaroIntentInfoBuilder.eventIntent(EditEvent, eventId);
-                startActivity(EditEvent);
+                FaroIntentInfoBuilder.eventIntent(editEventIntent, eventId);
+                startActivity(editEventIntent);
                 finish();
             }
         });

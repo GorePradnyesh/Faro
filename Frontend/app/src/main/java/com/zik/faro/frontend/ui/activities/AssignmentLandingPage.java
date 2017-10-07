@@ -11,18 +11,12 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.zik.faro.data.Activity;
-import com.zik.faro.data.Event;
-import com.zik.faro.frontend.util.FaroIntentInfoBuilder;
 import com.zik.faro.frontend.util.FaroObjectNotFoundException;
 
 import java.text.MessageFormat;
 
 import static android.widget.Toast.LENGTH_LONG;
-import com.zik.faro.frontend.handlers.ActivityListHandler;
 import com.zik.faro.frontend.ui.fragments.AssignmentLandingFragment;
-import com.zik.faro.frontend.handlers.AssignmentListHandler;
-import com.zik.faro.frontend.handlers.EventListHandler;
 import com.zik.faro.frontend.ui.fragments.AssignmentsFragment;
 import com.zik.faro.frontend.util.FaroExceptionHandler;
 import com.zik.faro.frontend.FaroIntentConstants;
@@ -34,12 +28,6 @@ public class AssignmentLandingPage extends FragmentActivity {
     private String eventId = null;
     private String assignmentId = null;
     private String bundleType = null;
-    private AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
-    private EventListHandler eventListHandler = EventListHandler.getInstance(this);
-    private ActivityListHandler activityListHandler = ActivityListHandler.getInstance();
-    private Activity cloneActivity = null;
-    private Event cloneEvent = null;
-    private View assignmentLandingPageRelativeLayout = null;
     private String TAG = "AssignmentLandingPage";
 
     @Override
@@ -47,10 +35,8 @@ public class AssignmentLandingPage extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_assignment_landing_page_tabs);
 
-        assignmentLandingPageRelativeLayout = (View) findViewById(R.id.assignmentLandingPageRelativeLayout);
-
         Bundle extras = getIntent().getExtras();
-        if(extras != null) {
+        if (extras != null) {
             eventId = extras.getString(FaroIntentConstants.EVENT_ID);
             activityId = extras.getString(FaroIntentConstants.ACTIVITY_ID);
             assignmentId = extras.getString(FaroIntentConstants.ASSIGNMENT_ID);
@@ -68,13 +54,7 @@ public class AssignmentLandingPage extends FragmentActivity {
         }
     }
 
-    private void setupPageDetails ()  throws FaroObjectNotFoundException{
-        if (activityId == null) {
-            cloneEvent = eventListHandler.getCloneObject(eventId);
-        } else {
-            cloneActivity = activityListHandler.getCloneObject(activityId);
-        }
-
+    private void setupPageDetails() throws FaroObjectNotFoundException {
         Bundle bundle = new Bundle();
         bundle.putString(FaroIntentConstants.EVENT_ID, eventId);
         bundle.putString(FaroIntentConstants.ACTIVITY_ID, activityId);

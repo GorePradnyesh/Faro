@@ -2,7 +2,13 @@ package com.zik.faro.data;
 
 import java.util.Calendar;
 
-public class Activity extends BaseEntity{
+public class Activity extends BaseEntity {
+    public static final String NAME = "name";
+    public static final String DESCRIPTION = "description";
+    public static final String LOCATION = "location";
+    public static final String START_DATE = "startDate";
+    public static final String END_DATE = "endDate";
+
     private String eventId;
     private Assignment assignment;
     private String name;

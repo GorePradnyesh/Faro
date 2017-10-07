@@ -3,13 +3,11 @@ package com.zik.faro.frontend.handlers;
 
 import android.content.Context;
 
-import com.google.gson.Gson;
 import com.zik.faro.data.Activity;
 import com.zik.faro.frontend.BaseObjectHandler;
 import com.zik.faro.frontend.R;
 import com.zik.faro.frontend.ui.adapters.ActivityAdapter;
 
-import com.zik.faro.data.BaseEntity;
 import com.zik.faro.frontend.util.FaroObjectNotFoundException;
 
 import java.text.MessageFormat;
@@ -202,7 +200,7 @@ public class ActivityListHandler extends BaseObjectHandler<Activity> {
 
     @Override
     public Class getType() {
-        return null;
+        return Activity.class;
     }
 
     //

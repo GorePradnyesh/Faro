@@ -5,5 +5,6 @@ package com.zik.faro.persistence.datastore;
 public enum TransactionStatus {
 	SUCCESS,
 	VERSIONMISSMATCH,
+	UPDATEEXCEPTION,
 	DATANOTFOUND;
 }

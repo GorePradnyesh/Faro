@@ -91,6 +91,8 @@ public final class Constants {
     public static final String POLL_CREATE_PATH_CONST                           = "/create";
     public static final String POLL_VOTE_PATH_CONST                             = "/vote";
     public static final String POLL_UPDATE_PATH_CONST                             = "/updatePoll";
+    public static final String POLL_UPDATE_POLLOPTIONS_PATH_CONST               = "/updatePollOptions";
+    public static final String POLL_CAST_VOTE_PATH_CONST					= "/castVote";
     public static final String POLL_ADD_OPTION_PATH_CONST                       = "/addOption";
     public static final String POLL_CLOSE_PATH_CONST                            = "/close";
 

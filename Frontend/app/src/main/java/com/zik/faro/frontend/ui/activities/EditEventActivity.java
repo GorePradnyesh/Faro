@@ -32,10 +32,12 @@ import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
+import com.google.common.collect.Sets;
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.GeoPosition;
 import com.zik.faro.data.Location;
+import com.zik.faro.data.UpdateRequest;
 import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.frontend.handlers.EventListHandler;
 import com.zik.faro.frontend.util.FaroExceptionHandler;
@@ -53,6 +55,7 @@ import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Set;
 
 import static android.widget.Toast.LENGTH_LONG;
 
@@ -88,7 +91,7 @@ public class EditEventActivity extends Activity {
     private String eventId;
     private static String TAG = "EditEventActivity";
 
-    private Intent EventLanding = null;
+    private Intent eventLandingPageIntent = null;
 
     private int PLACE_PICKER_REQUEST = 1;
 
@@ -100,6 +103,8 @@ public class EditEventActivity extends Activity {
     private LinearLayout linlaHeaderProgress = null;
     private RelativeLayout editEventRelativeLayout = null;
     private Bundle extras = null;
+
+    private Set<String> updatedFields = Sets.newHashSet();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,7 +134,6 @@ public class EditEventActivity extends Activity {
     }
 
     private void setupPageDetails () throws FaroObjectNotFoundException{
-
         linlaHeaderProgress.setVisibility(View.GONE);
         editEventRelativeLayout.setVisibility(View.VISIBLE);
 
@@ -153,8 +157,8 @@ public class EditEventActivity extends Activity {
         deleteLocation.setImageResource(R.drawable.cancel);
         deleteLocation.setVisibility(View.GONE);
 
-        TextView eventName = (TextView) findViewById(R.id.eventNameTextView);
-        final EditText eventDescription = (EditText) findViewById(R.id.eventDescriptionEditText);
+        TextView eventNameTextView = (TextView) findViewById(R.id.eventNameTextView);
+        final EditText eventDescriptionEditText = (EditText) findViewById(R.id.eventDescriptionEditText);
         eventAddress = (TextView) findViewById(R.id.locationAddressTextView);
 
         Button editEventOK = (Button) findViewById(R.id.editEventOK);
@@ -162,11 +166,11 @@ public class EditEventActivity extends Activity {
 
         popUpRelativeLayout = (RelativeLayout) findViewById(R.id.editEventPage);
 
-        EventLanding = new Intent(EditEventActivity.this, EventLandingPage.class);
+        eventLandingPageIntent = new Intent(EditEventActivity.this, EventLandingPage.class);
 
-        String ev_name = cloneEvent.getEventName();
-        eventName.setText(ev_name);
-        eventDescription.setText(cloneEvent.getEventDescription());
+        String eventName = cloneEvent.getEventName();
+        eventNameTextView.setText(eventName);
+        eventDescriptionEditText.setText(cloneEvent.getEventDescription());
         setBothTimeAndDateToEventDates();
 
         //TODO: User should warned that this can lead to mismatch with previously created activities which might not lie in the event's new time period.
@@ -240,6 +244,12 @@ public class EditEventActivity extends Activity {
                 cloneEvent.setEndDate(endDateCalendar);
                 cloneEvent.setLocation(location);
 
+                updatedFields.add(Event.START_DATE);
+                updatedFields.add(Event.END_DATE);
+                updatedFields.add(Event.LOCATION);
+
+                UpdateRequest<Event> eventUpdateRequest = new UpdateRequest<>(updatedFields, cloneEvent);
+
                 serviceHandler.getEventHandler().updateEvent(new BaseFaroRequestCallback<Event>() {
                     @Override
                     public void onFailure(Request request, IOException ex) {
@@ -248,26 +258,26 @@ public class EditEventActivity extends Activity {
 
                     @Override
                     public void onResponse(final Event receivedEvent, HttpError error) {
-                        if (error == null ) {
-                            //Since update to server successful, adding event to List and Map below
+                        if (error == null) {
+                            // Since update to server was successful, adding event to List and Map below
                             Handler mainHandler = new Handler(mContext.getMainLooper());
                             mainHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    //Since update to server successful, adding event to List and Map below
-                                    Log.i(TAG, "Event Create Response received Successfully");
-                                    eventListHandler.addEventToListAndMap(receivedEvent,
-                                            EventInviteStatus.ACCEPTED);
-                                    FaroIntentInfoBuilder.eventIntent(EventLanding, eventId);
-                                    startActivity(EventLanding);
+                                    // Since update to server was successful, adding event to List and Map below
+                                    Log.i(TAG, "Event update completed successfully");
+                                    eventListHandler.addEventToListAndMap(receivedEvent, EventInviteStatus.ACCEPTED);
+                                    FaroIntentInfoBuilder.eventIntent(eventLandingPageIntent, eventId);
+                                    startActivity(eventLandingPageIntent);
                                     finish();
                                 }
                             });
                         } else {
-                            Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
+                            Log.e(TAG, MessageFormat.format("Failed to update event. code = {0) , message =  {1}", error.getCode(), error.getMessage()));
+                            // TODO : Handle errors and update version conflict
                         }
                     }
-                }, eventId, cloneEvent);
+                }, eventId, eventUpdateRequest);
             }
         });
 
@@ -278,7 +288,7 @@ public class EditEventActivity extends Activity {
             }
         });
 
-        eventDescription.addTextChangedListener(new TextWatcher() {
+        eventDescriptionEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -290,13 +300,13 @@ public class EditEventActivity extends Activity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                cloneEvent.setEventDescription(eventDescription.getText().toString());
+                cloneEvent.setEventDescription(eventDescriptionEditText.getText().toString());
+                updatedFields.add(Event.DESCRIPTION);
             }
         });
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
-
         if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
                 Place place = PlacePicker.getPlace(this, data);
@@ -572,8 +582,8 @@ public class EditEventActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        FaroIntentInfoBuilder.eventIntent(EventLanding, eventId);
-        startActivity(EventLanding);
+        FaroIntentInfoBuilder.eventIntent(eventLandingPageIntent, eventId);
+        startActivity(eventLandingPageIntent);
         finish();
         super.onBackPressed();
     }

@@ -23,6 +23,10 @@ public class FaroUser extends BaseEntity {
     private LargeProfileImage   largeProfileImage;
     private SmallProfileImage   smallProfileImage;
 
+    public FaroUser(String email) {
+        super(email.toLowerCase(), 1L);
+    }
+
     public FaroUser(final String email,
                       final String firstName,
                       final String middleName,
@@ -30,7 +34,8 @@ public class FaroUser extends BaseEntity {
                       final String externalExpenseID,
                       final String telephone,
                       final Address address) {
-        super(email.toLowerCase(),1L);
+
+        this(email);
     	// Ensure Email is a valid value as it is a mandatory field
         if (Strings.isNullOrEmpty(email)) {
             throw new IllegalArgumentException("Email is null/empty");
@@ -82,6 +87,26 @@ public class FaroUser extends BaseEntity {
 
     public Address getAddress() {
         return address;
+    }
+
+    public FaroUser withFirstName(String firstName) {
+        setFirstName(firstName);
+        return this;
+    }
+
+    public FaroUser withLastName(String lastName) {
+        setLastName(lastName);
+        return this;
+    }
+
+    public FaroUser withLargeProfileImage(LargeProfileImage largeProfileImage) {
+        setLargeProfileImage(largeProfileImage);
+        return this;
+    }
+
+    public FaroUser withSmallProfileImage(SmallProfileImage smallProfileImage) {
+        setSmallProfileImage(smallProfileImage);
+        return this;
     }
 
     public void setFirstName(String firstName) {

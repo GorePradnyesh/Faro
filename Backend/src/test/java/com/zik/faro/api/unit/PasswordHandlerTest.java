@@ -87,7 +87,8 @@ public class PasswordHandlerTest {
         } catch (Exception e) {
             Assert.assertTrue(e instanceof FaroWebAppException);
             FaroWebAppException faroWebAppException = (FaroWebAppException)e;
-            Assert.assertEquals(FaroResponseStatus.INVALID_LOGIN, faroWebAppException.getFaroResponseStatus());
+            Assert.assertEquals(FaroResponseStatus.INVALID_LOGIN, 
+            		faroWebAppException.getResponse().getStatus());
         }
 
         // Verify login succeeds with new password

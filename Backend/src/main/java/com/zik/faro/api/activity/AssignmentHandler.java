@@ -11,8 +11,6 @@ import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM;
 import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM_STRING;
 import static com.zik.faro.commons.Constants.EVENT_PATH_CONST;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.DELETE;
@@ -32,13 +30,16 @@ import javax.xml.bind.annotation.XmlRootElement;
 import com.sun.jersey.api.JResponse;
 import com.zik.faro.applogic.AssignmentManagement;
 import com.zik.faro.commons.Constants;
+import com.zik.faro.commons.FaroResponseStatus;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.FaroWebAppException;
+import com.zik.faro.commons.exceptions.UpdateException;
 import com.zik.faro.commons.exceptions.UpdateVersionException;
-import com.zik.faro.data.Activity;
 import com.zik.faro.data.Assignment;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.Item;
+import com.zik.faro.data.UpdateCollectionRequest;
 
 @Path(EVENT_PATH_CONST + EVENT_ID_PATH_PARAM_STRING + ASSIGNMENT_PATH_CONST)
 public class AssignmentHandler {
@@ -92,6 +93,30 @@ public class AssignmentHandler {
             throw new WebApplicationException(response);
 		}
     }
+    
+    // TODO: Eventually should be moved to EventHandler
+    @Path(ASSIGNMENT_UPDATE_PATH_CONST)
+    @POST
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public JResponse<Event> updateEventAssignmentItems(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    		final UpdateCollectionRequest<Event, Item> updateObj){
+    	Event updatedEvent = updateObj.getUpdate();
+    	
+		try {
+			Event updatedEventResponse = AssignmentManagement.updateEventItems(updatedEvent.getId(), updateObj.getToBeAdded(), 
+					updateObj.getToBeRemoved(), updatedEvent.getVersion());
+			return JResponse.ok(updatedEventResponse).status(Response.Status.OK).build();
+		} catch (DataNotFoundException e) {
+        	throw new FaroWebAppException(FaroResponseStatus.NOT_FOUND, "Data Not Found");
+        } catch (DatastoreException e) {
+        	throw new FaroWebAppException(FaroResponseStatus.UNEXPECTED_ERROR, "Datastore Exception");
+		} catch (UpdateVersionException e) {
+			throw new FaroWebAppException(FaroResponseStatus.UPDATE_VERSION_MISMATCH, "Update Version Mismatch");
+		} catch (UpdateException e) {
+			throw new FaroWebAppException(FaroResponseStatus.UNEXPECTED_ERROR, "Update Error");
+		}
+	}
+    
 
     @Path(ASSIGNMENT_ID_PATH_PARAM_STRING)
     @DELETE
@@ -102,46 +127,8 @@ public class AssignmentHandler {
     	return JResponse.ok(Constants.HTTP_OK).build();
     }
     
-    @Path(ASSIGNMENT_UPDATE_PATH_CONST)
-    @POST
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public JResponse<Map<String,List<Item>>> updateAssignment(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
-    		final Map<String,List<Item>> items){
-    	String userId = context.getUserPrincipal().getName();
-    	Map<String, List<Item>> responseMap = new HashMap<String,List<Item>>();
-		try {
-			// Check if map contains eventLevel todo:
-			if(items.containsKey(eventId)){
-				Event updatedEvent = AssignmentManagement.updateEventItems(eventId, items.get(eventId), userId);
-				responseMap.put(eventId, updatedEvent.getAssignment().getItems());
-			}
-			for(String activityId: items.keySet()){
-				// Skip event id's todo list processed above
-				if(!activityId.equals(eventId)){
-					Activity updatedActivity = AssignmentManagement.updateActivityItems(eventId, activityId, items.get(activityId), userId);
-					responseMap.put(activityId, updatedActivity.getAssignment().getItems());
-				}
-			}
-			return JResponse.ok(responseMap).build();
-		} catch (DataNotFoundException e) {
-			Response response = Response.status(Response.Status.NOT_FOUND)
-                    .entity(e.getMessage())
-                    .build();
-            throw new WebApplicationException(response);
-		} catch (DatastoreException e) {
-			Response response = Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(e.getMessage())
-                    .build();
-            throw new WebApplicationException(response);
-		} catch (UpdateVersionException e) {
-			Response response = Response.status(Response.Status.BAD_REQUEST)
-                    .entity(e.getMessage())
-                    .build();
-            throw new WebApplicationException(response);
-		}
-	}
-    
 
+    
     @XmlRootElement
     private static class AssignmentCount{
         public String eventId;      

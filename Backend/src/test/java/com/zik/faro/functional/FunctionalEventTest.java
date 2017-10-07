@@ -23,6 +23,7 @@ import com.zik.faro.data.InviteeList;
 import com.zik.faro.data.InviteeList.Invitees;
 import com.zik.faro.data.Location;
 import com.zik.faro.data.ObjectStatus;
+import com.zik.faro.data.UpdateRequest;
 import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.data.user.FaroUser;
 
@@ -36,7 +37,7 @@ public class FunctionalEventTest {
     public static void init() throws Exception {
         endpoint = TestHelper.getExternalTargetEndpoint();
         token = TestHelper.createUserAndGetToken(callerEmail);
-        FaroUser faroUser = new FaroUser(callerEmail, "Kaivan", "Vijay", "Sanghvi", "testId", "1234456", null);
+        FaroUser faroUser = new FaroUser(callerEmail, "sachin", "Vijay", "tendulkar", "testId", "1234456", null);
         faroUser.addToken("dnrr9xc1D6g:APA91bGJLMMHbtfVFw1FjfLmZq_pDx53UIbd-iKDDuIWllHVh05BcifGGvtFW_x5OyiqxPrOUUYTVoLyDS7IPfJVO3YvMjh3ECIlaP3WC4OdDl5QGIjzU7SRDt1fYt3Tkk8XfwOAWUML");
     	ClientResponse upsertResp = TestHelper.doPUT(endpoint.toString(), "v1/profile/upsert", token, faroUser);
         //token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE0Njg1ODkwNzMsInVzZXJuYW1lIjoiNzY0ZmZlYjAtZGViMi00MTdhLTkyNzYtZWRkZmRiZGFkNzUwQGdtYWlsLmNvbSIsImVtYWlsIjoiNzY0ZmZlYjAtZGViMi00MTdhLTkyNzYtZWRkZmRiZGFkNzUwQGdtYWlsLmNvbSIsImlzcyI6ImZhcm8iLCJpYXQiOjE0NjM0MDUwNzN9.Ktv4YbXV8BrJsYSHdBikpEwINNF-q8iTLUBhzr9cVZA";
@@ -202,6 +203,7 @@ public class FunctionalEventTest {
     	List<EventInviteStatusWrapper> events = eventsResponse.getEntity(new GenericType<List<EventInviteStatusWrapper>>(){});
     	Assert.assertEquals(14, events.size());
     }
+ 
     
     public void updateEvent() throws Exception{
     	// Create
@@ -228,50 +230,62 @@ public class FunctionalEventTest {
         updateObj.setLocation(new Location("Crater Lake", "Oregon", geoPosition2));
         updateObj.setStartDate(Calendar.getInstance());
         updateObj.setStatus(ObjectStatus.CLOSED);
+        UpdateRequest<Event> request = new UpdateRequest<Event>();
+        request.setUpdate(updateObj);
+        request.addUpdatedFields("endDate");
+        request.addUpdatedFields("eventDescription");
+        request.addUpdatedFields("eventName");
+        request.addUpdatedFields("location");
+        request.addUpdatedFields("startDate");
+        request.addUpdatedFields("status");
         
-        ClientResponse updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventDetails.getEvent().getId()+"/updateEvent", token, updateObj);
-        ev = updateResponse.getEntity(Event.class);
-        Assert.assertEquals(updateObj.getEndDate(), ev.getEndDate());
-        Assert.assertEquals(updateObj.getStartDate(), ev.getStartDate());
-        Assert.assertEquals(updateObj.getEventDescription(), ev.getEventDescription());
-        Assert.assertEquals(updateObj.getEventName(), ev.getEventName());
-        Assert.assertEquals(updateObj.getStatus(), ev.getStatus());
-        Assert.assertEquals(updateObj.getLocation().getLocationName(), ev.getLocation().getLocationName());
-        Assert.assertEquals(updateObj.getLocation().getLocationAddress(), ev.getLocation().getLocationAddress());
-        Assert.assertEquals(updateObj.getLocation().getPosition().getLatitude(), ev.getLocation().getPosition().getLatitude(),0);
-        Assert.assertEquals(updateObj.getLocation().getPosition().getLongitude(), ev.getLocation().getPosition().getLongitude(),0);
-        assertVersion(updateObj, ev);
+        ClientResponse updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventDetails.getEvent().getId()+"/updateEvent", token, request);
+        Event updateResponseEvent = updateResponse.getEntity(Event.class);
+        Assert.assertEquals(updateObj.getEndDate(), updateResponseEvent.getEndDate());
+        Assert.assertEquals(updateObj.getStartDate(), updateResponseEvent.getStartDate());
+        Assert.assertEquals(updateObj.getEventDescription(), updateResponseEvent.getEventDescription());
+        Assert.assertEquals(updateObj.getEventName(), updateResponseEvent.getEventName());
+        Assert.assertEquals(updateObj.getStatus(), updateResponseEvent.getStatus());
+        Assert.assertEquals(updateObj.getLocation().getLocationName(), updateResponseEvent.getLocation().getLocationName());
+        Assert.assertEquals(updateObj.getLocation().getLocationAddress(), updateResponseEvent.getLocation().getLocationAddress());
+        Assert.assertEquals(updateObj.getLocation().getPosition().getLatitude(), updateResponseEvent.getLocation().getPosition().getLatitude(),0);
+        Assert.assertEquals(updateObj.getLocation().getPosition().getLongitude(), updateResponseEvent.getLocation().getPosition().getLongitude(),0);
+        assertVersion(updateObj, updateResponseEvent);
         
         // Update 2
         Event updateObj2 = new Event();
         updateObj2.setId(eventDetails.getEvent().getId());
         
         updateObj2.setControlFlag(true);
-        updateObj2.setVersion(ev.getVersion());
+        updateObj2.setVersion(updateResponseEvent.getVersion());
+        request.setUpdate(updateObj2);
+        request.getUpdatedFields().clear();
+        request.addUpdatedFields("controlFlag");
         
-        updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventDetails.getEvent().getId()+"/updateEvent", token, updateObj2);
-        ev = updateResponse.getEntity(Event.class);
-        Assert.assertEquals(updateObj.getEndDate(), ev.getEndDate());
-        Assert.assertEquals(updateObj.getStartDate(), ev.getStartDate());
-        Assert.assertEquals(updateObj.getEventDescription(), ev.getEventDescription());
-        Assert.assertEquals(updateObj.getEventName(), ev.getEventName());
-        Assert.assertEquals(updateObj.getStatus(), ev.getStatus());
-        Assert.assertEquals(updateObj.getLocation().getLocationName(), ev.getLocation().getLocationName());
-        Assert.assertEquals(updateObj.getLocation().getLocationAddress(), ev.getLocation().getLocationAddress());
-        Assert.assertEquals(ev.getLocation().getPosition().getLatitude(), updateObj.getLocation().getPosition().getLatitude(),0);
-        Assert.assertEquals(ev.getLocation().getPosition().getLongitude(), updateObj.getLocation().getPosition().getLongitude(),0);
-        assertVersion(updateObj2, ev);
-        Assert.assertTrue(ev.getControlFlag());
+        updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventDetails.getEvent().getId()+"/updateEvent", token, request);
+        updateResponseEvent = updateResponse.getEntity(Event.class);
+        Assert.assertEquals(updateObj.getEndDate(), updateResponseEvent.getEndDate());
+        Assert.assertEquals(updateObj.getStartDate(), updateResponseEvent.getStartDate());
+        Assert.assertEquals(updateObj.getEventDescription(), updateResponseEvent.getEventDescription());
+        Assert.assertEquals(updateObj.getEventName(), updateResponseEvent.getEventName());
+        Assert.assertEquals(updateObj.getStatus(), updateResponseEvent.getStatus());
+        Assert.assertEquals(updateObj.getLocation().getLocationName(), updateResponseEvent.getLocation().getLocationName());
+        Assert.assertEquals(updateObj.getLocation().getLocationAddress(), updateResponseEvent.getLocation().getLocationAddress());
+        Assert.assertEquals(updateObj.getLocation().getPosition().getLatitude(), updateResponseEvent.getLocation().getPosition().getLatitude(),0);
+        Assert.assertEquals(updateObj.getLocation().getPosition().getLongitude(), updateResponseEvent.getLocation().getPosition().getLongitude(),0);
+        assertVersion(updateObj2, updateResponseEvent);
+        Assert.assertTrue(updateResponseEvent.getControlFlag());
     }
     
     @Test
     public void allTest() throws Exception{
     	System.out.println(token);
-//    	createEventTest();
-//    	getEventDetails();
-//    	getEvents();
-//    	getEventInvitees();
+    	createEventTest();
+    	getEventDetails();
+    	getEvents();
+    	getEventInvitees();
     	updateEvent();
+    	
     }
 
     
@@ -298,5 +312,7 @@ public class FunctionalEventTest {
     	Long version = expected.getVersion();
         Assert.assertEquals(++version, actual.getVersion());
     }
+    
+    
     
 }
