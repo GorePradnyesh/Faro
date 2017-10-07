@@ -3,7 +3,6 @@ package com.zik.faro.data;
 import java.util.List;
 
 public class UpdateCollectionRequest<T,V> extends UpdateRequest<T> {
-	
 	private List<V> toBeAdded;
 	private List<V> toBeRemoved;
 	

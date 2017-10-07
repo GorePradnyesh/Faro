@@ -6,6 +6,15 @@ import java.util.Set;
 public class UpdateRequest<T> {
 	private Set<String> updatedFields = new HashSet<String>();
 	private T update;
+
+	public UpdateRequest() {
+
+    }
+
+    public UpdateRequest(Set<String> updatedFields, T update) {
+	    this.updatedFields = updatedFields;
+	    this.update = update;
+    }
 	
 	public Set<String> getUpdatedFields() {
 		return updatedFields;

@@ -24,9 +24,11 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.google.common.collect.Sets;
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Event;
+import com.zik.faro.data.UpdateRequest;
 import com.zik.faro.frontend.handlers.ActivityListHandler;
 import com.zik.faro.frontend.handlers.EventListHandler;
 import com.zik.faro.frontend.util.FaroExceptionHandler;
@@ -43,6 +45,7 @@ import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Set;
 
 import static android.widget.Toast.LENGTH_LONG;
 
@@ -70,7 +73,7 @@ public class EditActivityPage extends android.app.Activity {
 
     private static String TAG = "EditActivityPage";
 
-    private Intent ActivityLandingPage;
+    private Intent activityLandingPageIntent;
 
     private Context mContext;
 
@@ -80,6 +83,8 @@ public class EditActivityPage extends android.app.Activity {
     private RelativeLayout editActivityRelativeLayout = null;
 
     private Bundle extras = null;
+
+    private Set<String> updatedFields = Sets.newHashSet();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,7 +133,7 @@ public class EditActivityPage extends android.app.Activity {
 
         popUpRelativeLayout = (RelativeLayout) findViewById(R.id.editActivity);
 
-        ActivityLandingPage = new Intent(EditActivityPage.this, ActivityLandingPage.class);
+        activityLandingPageIntent = new Intent(EditActivityPage.this, ActivityLandingPage.class);
 
         final EditText activityDescription = (EditText) findViewById(R.id.activityDescriptionEditText);;
 
@@ -141,7 +146,6 @@ public class EditActivityPage extends android.app.Activity {
         */
 
         if (cloneActivity != null) {
-
             TextView activityName = (TextView) findViewById(R.id.activityName);
             activityName.setText(cloneActivity.getName());
 
@@ -162,6 +166,7 @@ public class EditActivityPage extends android.app.Activity {
             @Override
             public void afterTextChanged(Editable s) {
                 cloneActivity.setDescription(activityDescription.getText().toString());
+                updatedFields.add(Activity.DESCRIPTION);
             }
         });
 
@@ -173,9 +178,10 @@ public class EditActivityPage extends android.app.Activity {
             public void onClick(View v) {
                 cloneActivity.setStartDate(startDateCalendar);
                 cloneActivity.setEndDate(endDateCalendar);
+                updatedFields.add(Activity.START_DATE);
+                updatedFields.add(Activity.END_DATE);
 
                 updateActivityToServer();
-
             }
         });
 
@@ -449,10 +455,13 @@ public class EditActivityPage extends android.app.Activity {
     };
 
     private void updateActivityToServer() {
+        UpdateRequest<Activity> updateRequest = new UpdateRequest<>(updatedFields, cloneActivity);
         serviceHandler.getActivityHandler().updateActivity(new BaseFaroRequestCallback<String>() {
             @Override
             public void onFailure(Request request, IOException ex) {
                 Log.e(TAG, "failed to update cloneactivity");
+
+                // TODO:  Handle errors and update version conflict
             }
 
             @Override
@@ -463,16 +472,16 @@ public class EditActivityPage extends android.app.Activity {
                         @Override
                         public void run() {
                             activityListHandler.addActivityToListAndMap(eventId, cloneActivity, mContext);
-                            FaroIntentInfoBuilder.activityIntent(ActivityLandingPage, eventId, cloneActivity.getId());
-                            startActivity(ActivityLandingPage);
+                            FaroIntentInfoBuilder.activityIntent(activityLandingPageIntent, eventId, cloneActivity.getId());
+                            startActivity(activityLandingPageIntent);
                             finish();
                         }
                     });
-                }else {
+                } else {
                     Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
             }
-        }, eventId, activityId, cloneActivity);
+        }, eventId, activityId, updateRequest);
     }
 
     private void deleteActivityFromServer() {
@@ -506,8 +515,8 @@ public class EditActivityPage extends android.app.Activity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        FaroIntentInfoBuilder.activityIntent(ActivityLandingPage, eventId, activityId);
-        startActivity(ActivityLandingPage);
+        FaroIntentInfoBuilder.activityIntent(activityLandingPageIntent, eventId, activityId);
+        startActivity(activityLandingPageIntent);
         finish();
     }
 

@@ -5,6 +5,9 @@ import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.zik.faro.data.Poll;
+import com.zik.faro.data.PollOption;
+import com.zik.faro.data.UpdateCollectionRequest;
+import com.zik.faro.data.UpdateRequest;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.auth.TokenCache;
 import com.zik.faro.frontend.faroservice.spec.PollHandler;
@@ -69,8 +72,7 @@ public class OKHttpWrapperPoll extends BaseFaroOKHttpWrapper implements PollHand
                     .addHeader("Accept",DEFAULT_CONTENT_TYPE)
                     .build();
             this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<>(callback, Poll.class));
-        }
-        else{
+        } else{
             callback.onFailure(null, new IOException("Could not fetch auth token"));
         }
     }
@@ -84,8 +86,7 @@ public class OKHttpWrapperPoll extends BaseFaroOKHttpWrapper implements PollHand
                     .addHeader("Authentication", token)
                     .build();
             this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<Integer>(callback, Integer.class));
-        }
-        else{
+        } else {
             callback.onFailure(null, new IOException("Could not fetch auth token"));
         }
     }
@@ -101,8 +102,7 @@ public class OKHttpWrapperPoll extends BaseFaroOKHttpWrapper implements PollHand
                     .addHeader("Authentication", token)
                     .build();
             this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<String>(callback, String.class));
-        }
-        else{
+        } else {
             callback.onFailure(null, new IOException("Could not fetch auth token"));
         }
     }
@@ -116,8 +116,7 @@ public class OKHttpWrapperPoll extends BaseFaroOKHttpWrapper implements PollHand
                     .addHeader("Authentication", token)
                     .build();
             this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<String>(callback, String.class));
-        }
-        else{
+        } else {
             callback.onFailure(null, new IOException("Could not fetch auth token"));
         }
     }
@@ -132,17 +131,51 @@ public class OKHttpWrapperPoll extends BaseFaroOKHttpWrapper implements PollHand
                     .delete()
                     .build();
             this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<String>(callback, String.class));
-        }
-        else{
+        } else {
             callback.onFailure(null, new IOException("Could not fetch auth token"));
         }
     }
 
     @Override
-    public void updatePoll(final BaseFaroRequestCallback<Poll> callback, final String eventId, final String pollId, Map<String,Object> updateObj){
+    public void updatePollOptions(BaseFaroRequestCallback<Poll> callback, String eventId, String pollId, UpdateCollectionRequest<Poll, PollOption> updateCollectionRequest) {
+        String token = TokenCache.getTokenCache().getToken();
+        if (token != null) {
+            String pollPostBody = mapper.toJson(updateCollectionRequest);
+            Request request = new Request.Builder()
+                    .url(baseHandlerURL.toString() + eventId + "/poll/" + pollId + "/updatePollOptions")
+                    .post(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), pollPostBody))
+                    .addHeader("Authentication", token)
+                    .addHeader("Accept",DEFAULT_CONTENT_TYPE)
+                    .build();
+            this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<>(callback, Poll.class));
+        } else {
+            callback.onFailure(null, new IOException("Could not fetch auth token"));
+        }
+    }
+
+    @Override
+    public void castVote(BaseFaroRequestCallback<Poll> callback, String eventId, String pollId, UpdateCollectionRequest<Poll, String> updateCollectionRequest) {
+        String token = TokenCache.getTokenCache().getToken();
+        if (token != null) {
+            String pollPostBody = mapper.toJson(updateCollectionRequest);
+            Request request = new Request.Builder()
+                    .url(baseHandlerURL.toString() + eventId + "/poll/" + pollId + "/castVote")
+                    .post(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), pollPostBody))
+                    .addHeader("Authentication", token)
+                    .addHeader("Accept",DEFAULT_CONTENT_TYPE)
+                    .build();
+            this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<>(callback, Poll.class));
+        } else {
+            callback.onFailure(null, new IOException("Could not fetch auth token"));
+        }
+    }
+
+    @Override
+    public void updatePoll(final BaseFaroRequestCallback<Poll> callback, final String eventId, final String pollId,
+                           UpdateRequest<Poll> updateRequest) {
         String token = TokenCache.getTokenCache().getToken();
         if(token != null) {
-            String pollPostBody = mapper.toJson(updateObj);
+            String pollPostBody = mapper.toJson(updateRequest);
             Request request = new Request.Builder()
                     .url(baseHandlerURL.toString() + eventId + "/poll/" + pollId + "/updatePoll")
                     .post(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), pollPostBody))
@@ -150,9 +183,12 @@ public class OKHttpWrapperPoll extends BaseFaroOKHttpWrapper implements PollHand
                     .addHeader("Accept",DEFAULT_CONTENT_TYPE)
                     .build();
             this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<>(callback, Poll.class));
-        }
-        else{
+        } else {
             callback.onFailure(null, new IOException("Could not fetch auth token"));
         }
+    }
+
+    private void update() {
+
     }
 }

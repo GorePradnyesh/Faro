@@ -2,13 +2,9 @@ package com.zik.faro.data;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
-
-import com.google.appengine.repackaged.com.google.common.base.Objects;
 
 public class PollOption{
-    
-	private String id;                                 
+	private String id;
     private String option;
     private Set<String> voters = new HashSet<String>();
 

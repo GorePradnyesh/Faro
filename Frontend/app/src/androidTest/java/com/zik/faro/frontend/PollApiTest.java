@@ -53,7 +53,7 @@ public class PollApiTest extends ApiBaseTest{
         Assert.assertFalse(timeout);
         Assert.assertFalse(createCallback.failed);
         Assert.assertFalse(createCallback.unexpectedResponseCode);
-        String eventId = createCallback.receivedEvent.getEventId();
+        String eventId = createCallback.receivedEvent.getId();
         
         // Get Event;
         TestGetEventCallbackHandler callback = new TestGetEventCallbackHandler(waitSem, 200);

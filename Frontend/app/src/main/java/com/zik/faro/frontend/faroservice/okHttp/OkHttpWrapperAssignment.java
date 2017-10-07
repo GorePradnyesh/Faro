@@ -8,7 +8,9 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.zik.faro.data.Assignment;
 import com.zik.faro.data.AssignmentCount;
+import com.zik.faro.data.Event;
 import com.zik.faro.data.Item;
+import com.zik.faro.data.UpdateCollectionRequest;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.auth.TokenCache;
 import com.zik.faro.frontend.faroservice.spec.AssignmentHandler;
@@ -16,7 +18,6 @@ import com.zik.faro.frontend.faroservice.spec.AssignmentHandler;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URL;
-import java.util.List;
 import java.util.Map;
 
 public class OkHttpWrapperAssignment extends BaseFaroOKHttpWrapper implements AssignmentHandler {
@@ -103,9 +104,10 @@ public class OkHttpWrapperAssignment extends BaseFaroOKHttpWrapper implements As
     }
 
     @Override
-    public void updateAssignment(BaseFaroRequestCallback<Map<String, List<Item>>> callback, String eventId, Map<String, List<Item>> items) {
+    public void updateAssignment(BaseFaroRequestCallback<Event> callback, String eventId,
+                                 UpdateCollectionRequest<Event, Item> updateCollectionRequest) {
         String token = TokenCache.getTokenCache().getToken();
-        String itemList = mapper.toJson(items);
+        String itemList = mapper.toJson(updateCollectionRequest);
         Log.i(TAG, itemList);
         if(token != null) {
             Request request = new Request.Builder()
@@ -113,7 +115,7 @@ public class OkHttpWrapperAssignment extends BaseFaroOKHttpWrapper implements As
                     .post(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), itemList))
                     .addHeader(authHeaderName, token)
                     .build();
-            this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<Map<String, List<Item>>>(callback, Map.class));
+            this.httpClient.newCall(request).enqueue(new DeserializerHttpResponseHandler<>(callback, Event.class));
         }
         else{
             callback.onFailure(null, new IOException("Could not fetch auth token"));

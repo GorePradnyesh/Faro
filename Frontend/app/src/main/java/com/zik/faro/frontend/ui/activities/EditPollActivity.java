@@ -24,9 +24,13 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.common.collect.Sets;
 import com.squareup.okhttp.Request;
+import com.zik.faro.data.Item;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.PollOption;
+import com.zik.faro.data.UpdateCollectionRequest;
+import com.zik.faro.data.UpdateRequest;
 import com.zik.faro.frontend.util.FaroExceptionHandler;
 import com.zik.faro.frontend.FaroIntentConstants;
 import com.zik.faro.frontend.handlers.PollListHandler;
@@ -44,6 +48,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static android.widget.Toast.LENGTH_LONG;
 
@@ -54,7 +59,7 @@ public class EditPollActivity extends Activity {
     private String eventId = null;
     private String pollId;
     private Poll clonePoll;
-    private Intent PollLandingPageIntent;
+    private Intent pollLandingPageIntent;
 
     private static String TAG = "EditPollActivity";
 
@@ -69,6 +74,7 @@ public class EditPollActivity extends Activity {
     private Button deletePoll = null;
     private PollOptionsAdapter editPollOptionsAdapter = null;
     private Map<String, Object> map = null;
+    private Set<String> updatedFields = Sets.newHashSet();
     private PopupWindow popupWindow = null;
 
     private LinearLayout linlaHeaderProgress = null;
@@ -90,7 +96,7 @@ public class EditPollActivity extends Activity {
         editPollRelativeLayout.setVisibility(View.GONE);
 
         extras = getIntent().getExtras();
-        if (extras == null)return; //TODO: How to handle such conditions
+        if (extras == null) return; //TODO: How to handle such conditions
 
         try {
             setupPageDetails();
@@ -103,13 +109,12 @@ public class EditPollActivity extends Activity {
     }
 
     private void setupPageDetails () throws FaroObjectNotFoundException{
-
         linlaHeaderProgress.setVisibility(View.GONE);
         editPollRelativeLayout.setVisibility(View.VISIBLE);
         eventId = extras.getString(FaroIntentConstants.EVENT_ID);
         pollId = extras.getString(FaroIntentConstants.POLL_ID);
 
-        PollLandingPageIntent = new Intent(EditPollActivity.this, PollLandingPage.class);
+        pollLandingPageIntent = new Intent(EditPollActivity.this, PollLandingPage.class);
 
         clonePoll = pollListHandler.getCloneObject(pollId);
 
@@ -189,7 +194,12 @@ public class EditPollActivity extends Activity {
     }
 
     private void updatePollToServer () {
-        serviceHandler.getPollHandler().updatePoll(new BaseFaroRequestCallback<Poll>() {
+        // Update the poll with the new options added
+        UpdateCollectionRequest<Poll, PollOption> pollUpdateCollectionRequest = new UpdateCollectionRequest<>();
+        pollUpdateCollectionRequest.setUpdate(clonePoll);
+        pollUpdateCollectionRequest.setToBeAdded(newPollOptionList);
+
+        serviceHandler.getPollHandler().updatePollOptions(new BaseFaroRequestCallback<Poll>() {
             @Override
             public void onFailure(Request request, IOException ex) {
                 Log.e(TAG, "failed to send Poll update request");
@@ -202,18 +212,18 @@ public class EditPollActivity extends Activity {
                     mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            Log.i(TAG, "Poll Update Response received Successfully");
+                            Log.i(TAG, "Poll update succeeded");
                             pollListHandler.addPollToListAndMap(eventId, poll, mContext);
-                            FaroIntentInfoBuilder.pollIntent(PollLandingPageIntent, eventId, pollId);
-                            startActivity(PollLandingPageIntent);
+                            FaroIntentInfoBuilder.pollIntent(pollLandingPageIntent, eventId, pollId);
+                            startActivity(pollLandingPageIntent);
                             finish();
                         }
                     });
-                }else {
-                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
+                } else {
+                    Log.e(TAG, MessageFormat.format("code = {0} , message =  {1}", error.getCode(), error.getMessage()));
                 }
             }
-        }, eventId, pollId, map);
+        }, eventId, pollId, pollUpdateCollectionRequest);
     }
 
     private void deletePollFromServer () {
@@ -282,8 +292,8 @@ public class EditPollActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        FaroIntentInfoBuilder.pollIntent(PollLandingPageIntent, eventId, pollId);
-        startActivity(PollLandingPageIntent);
+        FaroIntentInfoBuilder.pollIntent(pollLandingPageIntent, eventId, pollId);
+        startActivity(pollLandingPageIntent);
         finish();
         super.onBackPressed();
     }
