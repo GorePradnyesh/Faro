@@ -436,7 +436,7 @@ public class EventLandingPage extends FragmentActivity
         event_name = (TextView) findViewById(R.id.eventNameText);
         eventDescription = (TextView) findViewById(R.id.eventDescriptionTextView);
 
-        startDateAndTime = (TextView) findViewById(R.id.startDateAndTimeDisplay);
+        startDateAndTime = (TextView) findViewById(R.id.startDateAndTimeDisplayLinearLayout);
 
         endDateAndTime = (TextView) findViewById(R.id.endDateAndTimeDisplay);
 

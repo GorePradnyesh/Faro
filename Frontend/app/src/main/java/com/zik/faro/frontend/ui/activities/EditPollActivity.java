@@ -242,7 +242,7 @@ public class EditPollActivity extends Activity {
                         public void run() {
                             pollListHandler.removePollFromListAndMap(eventId, clonePoll, mContext);
                             popupWindow.dismiss();
-                            Toast.makeText(EditPollActivity.this, clonePoll.getDescription() + "is Deleted", LENGTH_LONG).show();
+                            Toast.makeText(EditPollActivity.this, clonePoll.getDescription() + " is Deleted", LENGTH_LONG).show();
                             finish();
                         }
                     });

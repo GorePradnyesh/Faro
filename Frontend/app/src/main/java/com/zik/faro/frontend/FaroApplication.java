@@ -5,7 +5,6 @@ import android.util.Log;
 
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
-import com.zik.faro.frontend.ui.adapters.EventAdapter;
 import com.zik.faro.frontend.ui.adapters.UserFriendAdapter;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.handlers.EventListHandler;

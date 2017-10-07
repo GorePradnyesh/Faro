@@ -117,7 +117,7 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
         activityDescription = (TextView) findViewById(R.id.activityDescriptionTextView);
         activityDescription.setText(cloneActivity.getDescription());
 
-        startDateAndTime = (TextView) findViewById(R.id.startDateAndTimeDisplay);
+        startDateAndTime = (TextView) findViewById(R.id.startDateAndTimeDisplayLinearLayout);
         startDateAndTime.setText(sdf.format(cloneActivity.getStartDate().getTime()) + " at " +
                 stf.format(cloneActivity.getStartDate().getTime()));
 
@@ -195,6 +195,8 @@ public class ActivityLandingPage extends android.app.Activity implements Notific
                                 setupPageDetails();
                             } catch (FaroObjectNotFoundException e) {
                                 Log.e(TAG, MessageFormat.format("Activity {0} has been deleted", activityId));
+
+                                //TODO: Replace all toasts everywhere with snackbar
                                 Toast.makeText(mContext, "Activity has been deleted", LENGTH_LONG).show();
                                 finish();
                             }

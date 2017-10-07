@@ -10,4 +10,8 @@
     <dimen name="standard_70">70dp</dimen>
     <dimen name="standard_55">55dp</dimen>
     <dimen name="standard_105">105dp</dimen>
+    <dimen name="tab_max_width">264dp</dimen>
+    <dimen name="tab_padding_bottom">16dp</dimen>
+    <dimen name="tab_label">14sp</dimen>
+    <dimen name="custom_tab_layout_height">72dp</dimen>
 </resources>

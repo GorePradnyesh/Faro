@@ -378,7 +378,7 @@ public class EditEventActivity extends Activity {
                                     eventListHandler.removeEventFromListAndMap(eventId);
                                     popupWindow.dismiss();
                                     Toast.makeText(EditEventActivity.this, cloneEvent.getEventName() + " is Deleted", LENGTH_LONG).show();
-                                    Toast.makeText(EditEventActivity.this, cloneEvent.getEventName() + "is Deleted", LENGTH_LONG).show();
+                                    Toast.makeText(EditEventActivity.this, cloneEvent.getEventName() + " is Deleted", LENGTH_LONG).show();
                                     finish();
                                 }
                             });
