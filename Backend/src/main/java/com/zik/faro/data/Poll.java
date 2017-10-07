@@ -4,7 +4,14 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class Poll extends BaseEntity{
+public class Poll extends BaseEntity {
+    public static final String WINNER_ID = "winnerId";
+    public static final String DESCRIPTION = "description";
+    public static final String STATUS = "status";
+    public static final String DEADLINE = "deadline";
+    public static final String MULTI_CHOICE = "multiChoice";
+
+
     private String eventId;
     private String creatorId;
 

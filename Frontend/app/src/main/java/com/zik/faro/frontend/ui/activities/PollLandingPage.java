@@ -24,10 +24,14 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.PollOption;
+import com.zik.faro.data.UpdateCollectionRequest;
+import com.zik.faro.data.UpdateRequest;
 import com.zik.faro.frontend.BuildConfig;
 import com.zik.faro.frontend.util.FaroExceptionHandler;
 import com.zik.faro.frontend.FaroIntentConstants;
@@ -56,7 +60,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import static android.widget.Toast.LENGTH_LONG;
 
 public class PollLandingPage extends Activity implements NotificationPayloadHandler {
-
     private PollListHandler pollListHandler = PollListHandler.getInstance();
     private UserFriendListHandler userFriendListHandler = UserFriendListHandler.getInstance();
     private EventListHandler eventListHandler = EventListHandler.getInstance(this);
@@ -84,7 +87,7 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
     private static final Integer POLL_OPTION_ROW_HEIGHT = 150;
 
     private Intent PickPollWinnerIntent = null;
-    private Intent EditPollPageIntent = null;
+    private Intent editPollPageIntent = null;
 
     private List<PollOption> pollOptionsList;
 
@@ -123,7 +126,7 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
         PickPollWinnerIntent = new Intent(PollLandingPage.this, PickPollWinnerPage.class);
-        EditPollPageIntent = new Intent(PollLandingPage.this, EditPollActivity.class);
+        editPollPageIntent = new Intent(PollLandingPage.this, EditPollActivity.class);
 
         linlaHeaderProgress = (LinearLayout) findViewById(R.id.linlaHeaderProgress);
 
@@ -310,7 +313,7 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
                             map.put("poll", pollVersionObj);
                             map.put("voteOption", voteOption);
                         }
-                    }else {
+                    } else {
                         if (originalSelectedSingleChoiceOption.equals(INVALID_SELECTED_INDEX)
                                 && selectedSingleChoiceOption.equals(INVALID_SELECTED_INDEX)) {
                             Toast.makeText(PollLandingPage.this, "Select an option to Vote", LENGTH_LONG).show();
@@ -343,8 +346,8 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
             editButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    FaroIntentInfoBuilder.pollIntent(EditPollPageIntent, eventId, pollId);
-                    startActivity(EditPollPageIntent);
+                    FaroIntentInfoBuilder.pollIntent(editPollPageIntent, eventId, pollId);
+                    startActivity(editPollPageIntent);
                     finish();
                 }
             });
@@ -433,7 +436,13 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
         }
     }
 
-    private void updatePollToServerAndReopenIt(){
+    private void updatePollToServerAndReopenIt() {
+        // Update poll to reopen it
+        UpdateRequest<Poll> updateRequest = new UpdateRequest<>();
+        updateRequest.setUpdatedFields(Sets.newHashSet(Poll.STATUS));
+        Poll pollUpdateObject = (Poll) map.get("poll");
+        updateRequest.setUpdate(pollUpdateObject);
+
         serviceHandler.getPollHandler().updatePoll(new BaseFaroRequestCallback<Poll>() {
             @Override
             public void onFailure(Request request, IOException ex) {
@@ -464,7 +473,7 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
                     Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
             }
-        }, eventId, pollId, map);
+        }, eventId, pollId, updateRequest);
     }
 
     private void voterListPopUP(View v) {
@@ -523,8 +532,16 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
         }
     }
 
-    private void updatePollToServer(){
-        serviceHandler.getPollHandler().updatePoll(new BaseFaroRequestCallback<Poll>() {
+    private void updatePollToServer() {
+        // Update the poll to case vote
+        UpdateCollectionRequest<Poll, String> updateCollectionRequest = new UpdateCollectionRequest<>();
+        Poll pollUpdateObject = (Poll) map.get("poll");
+        Set<String> voteOption = (Set<String>) map.get("vote");
+
+        updateCollectionRequest.setUpdate(pollUpdateObject);
+        updateCollectionRequest.setToBeAdded(Lists.newArrayList(voteOption));
+
+        serviceHandler.getPollHandler().castVote(new BaseFaroRequestCallback<Poll>() {
             @Override
             public void onFailure(Request request, IOException ex) {
                 Log.e(TAG, "failed to send cast vote request");
@@ -548,11 +565,11 @@ public class PollLandingPage extends Activity implements NotificationPayloadHand
                             }
                         }
                     });
-                }else {
+                } else {
                     Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
             }
-        }, eventId, pollId, map);
+        }, eventId, pollId, updateCollectionRequest);
     }
 
     private void getUpdatedPollFromServer(){

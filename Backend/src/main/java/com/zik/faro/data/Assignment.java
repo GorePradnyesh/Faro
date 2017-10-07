@@ -14,6 +14,7 @@ public class Assignment {
 
     //private Map<String,Item> items = new HashMap<String, Item>();
     private List<Item> items = new ArrayList<>();
+    
 
     private static final String NA = "N/A";
     

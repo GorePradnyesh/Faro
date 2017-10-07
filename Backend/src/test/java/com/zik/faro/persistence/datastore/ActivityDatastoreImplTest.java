@@ -2,7 +2,9 @@ package com.zik.faro.persistence.datastore;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -15,15 +17,18 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateException;
 import com.zik.faro.commons.exceptions.UpdateVersionException;
-import com.zik.faro.data.IllegalDataOperation;
-import com.zik.faro.persistence.datastore.data.ActivityDo;
+import com.zik.faro.data.Activity;
 import com.zik.faro.data.Assignment;
-import com.zik.faro.persistence.datastore.data.EventDo;
+import com.zik.faro.data.GeoPosition;
+import com.zik.faro.data.IllegalDataOperation;
 import com.zik.faro.data.Item;
 import com.zik.faro.data.Location;
-import com.zik.faro.data.GeoPosition;
 import com.zik.faro.data.Unit;
+import com.zik.faro.data.UpdateRequest;
+import com.zik.faro.persistence.datastore.data.ActivityDo;
+import com.zik.faro.persistence.datastore.data.EventDo;
 
 
 public class ActivityDatastoreImplTest {
@@ -129,7 +134,7 @@ public class ActivityDatastoreImplTest {
     }
     
     @Test
-    public void testUpdateActivity() throws IllegalDataOperation, DataNotFoundException, DatastoreException, UpdateVersionException{
+    public void testUpdateActivity() throws IllegalDataOperation, DataNotFoundException, DatastoreException, UpdateVersionException, UpdateException{
     	// Create activity
     	EventDo event = new EventDo("TestEvent");
     	String eventId = event.getId();
@@ -149,9 +154,12 @@ public class ActivityDatastoreImplTest {
     	a.setEndDate(new GregorianCalendar());
     	a.setDescription("Description changed");
     	a.setLocation(new Location("Fremont", "CA", geoPosition2));
+    	Set<String> updatedFields = new HashSet<String>();
+    	updatedFields.add("startDate");updatedFields.add("endDate");
+    	updatedFields.add("description");updatedFields.add("location");
     	
     	// Update
-    	ActivityDatastoreImpl.updateActivity(a, eventId);
+    	ActivityDatastoreImpl.updateActivity(a, eventId, updatedFields);
     	retrievedActivity = ActivityDatastoreImpl.loadActivityById(a.getId(), eventId);
     	Assert.assertNotNull(retrievedActivity);
     	
@@ -163,16 +171,18 @@ public class ActivityDatastoreImplTest {
     	
     	// Test update with correct version
     	a.setStartDate(Calendar.getInstance());
+    	updatedFields.clear();
+    	updatedFields.add("startDate");
     	a.setVersion(retrievedActivity.getVersion());
-    	ActivityDatastoreImpl.updateActivity(a, eventId);
+    	ActivityDatastoreImpl.updateActivity(a, eventId, updatedFields);
     	retrievedActivity = ActivityDatastoreImpl.loadActivityById(a.getId(), eventId);
     	Assert.assertNotNull(retrievedActivity);
-    	Assert.assertEquals(a.getStartDate(), retrievedActivity.getStartDate());
+    	Assert.assertEquals(a.getStartDate().getTimeInMillis(), retrievedActivity.getStartDate().getTimeInMillis());
     	
     	// Test update failure without correct version
     	a.setStartDate(Calendar.getInstance());
     	try{
-    		ActivityDatastoreImpl.updateActivity(a, eventId);
+    		ActivityDatastoreImpl.updateActivity(a, eventId, updatedFields);
     	} catch(UpdateVersionException e){
     		Assert.assertNotNull(e);
     		Assert.assertEquals(e.getMessage(), "Incorrect entity version. Current version:3");

@@ -1,14 +1,15 @@
 package com.zik.faro.persistence.datastore;
 
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.googlecode.objectify.Work;
-import com.zik.faro.api.authentication.SignupHandler;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateException;
 import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.persistence.datastore.data.ActivityDo;
 import com.zik.faro.persistence.datastore.data.EventDo;
@@ -43,7 +44,7 @@ public class ActivityDatastoreImpl {
     	logger.info("Activity deleted!");
     }
     
-	public static ActivityDo updateActivity(final ActivityDo updateActivity, final String eventId) throws DataNotFoundException, DatastoreException, UpdateVersionException{
+	public static ActivityDo updateActivity(final ActivityDo updateActivity, final String eventId, final Set<String> updatedFields) throws DataNotFoundException, DatastoreException, UpdateVersionException, UpdateException{
     	Work w = new Work<TransactionResult<ActivityDo>>() {
 	        public TransactionResult<ActivityDo> run() {
 	        	// Read from datastore
@@ -59,22 +60,10 @@ public class ActivityDatastoreImpl {
 					return new TransactionResult<ActivityDo>(null, TransactionStatus.VERSIONMISSMATCH, "Incorrect entity version. Current version:"+activity.getVersion().toString());
 				}
 				
-	            // Modify.
-				if(updateActivity.getStartDate() != null){
-					activity.setStartDate(updateActivity.getStartDate());
-				}
-				if(updateActivity.getEndDate() != null){
-					activity.setEndDate(updateActivity.getEndDate());
-				}
-				if(updateActivity.getDescription() != null && !updateActivity.getDescription().isEmpty()){
-					activity.setDescription(updateActivity.getDescription());
-				}
-				if(updateActivity.getLocation() != null){
-					activity.setLocation(updateActivity.getLocation());
-				}
-				
-				if(updateActivity.getName() != null){
-					activity.setName(updateActivity.getName());
+				try {
+					BaseDatastoreImpl.updateModifiedFields(activity, updateActivity, updatedFields);
+				} catch (Exception e) {
+					return new TransactionResult<ActivityDo>(null, TransactionStatus.UPDATEEXCEPTION, "Cannot apply update delta");
 				}
 				BaseDatastoreImpl.versionIncrement(updateActivity, activity);
 
@@ -86,7 +75,7 @@ public class ActivityDatastoreImpl {
 	    
     	TransactionResult<ActivityDo> result = DatastoreObjectifyDAL.update(w);
     	DatastoreUtil.processResult(result);
-    	logger.info("Activity updated!");
+		logger.info("Activity updated!");
     	return result.getEntity();
     }
 	

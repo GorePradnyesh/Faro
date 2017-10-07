@@ -17,6 +17,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.common.collect.Sets;
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.ActionStatus;
 import com.zik.faro.data.Activity;
@@ -25,6 +26,8 @@ import com.zik.faro.data.Event;
 import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.InviteeList;
 import com.zik.faro.data.Item;
+import com.zik.faro.data.UpdateCollectionRequest;
+import com.zik.faro.data.UpdateRequest;
 import com.zik.faro.frontend.handlers.AssignmentListHandler;
 import com.zik.faro.frontend.handlers.EventFriendListHandler;
 import com.zik.faro.frontend.handlers.EventListHandler;
@@ -43,14 +46,12 @@ import com.zik.faro.frontend.util.FaroObjectNotFoundException;
 
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static android.widget.Toast.LENGTH_LONG;
 
 public class AssignmentLandingFragment extends Fragment implements NotificationPayloadHandler {
-
     private Event originalEvent;
     private com.zik.faro.data.Activity originalActivity = null;
     private String activityId = null;
@@ -68,7 +69,8 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
     private static String TAG = "AssgnmntLandingFrgmnt";
 
     private ListView itemList;
-    private Map<String, List<Item>> itemListMap = new HashMap<String, List<Item>>();
+    private List<Item> eventAssignmentItems = new ArrayList<>();
+    private List<Item> activityAssignmentItems = new ArrayList<>();
 
     private Context mContext;
     private View fragmentView;
@@ -112,19 +114,19 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
     }
 
     private void setupPageDetails() throws FaroObjectNotFoundException{
-
-        if (!receivedEvent || !receivedAllActivities)
+        if (!receivedEvent || !receivedAllActivities) {
             return;
+        }
 
         linlaHeaderProgress.setVisibility(View.GONE);
         assignmentLandingFragmentRelativeLayout.setVisibility(View.VISIBLE);
 
         cloneAssignment = assignmentListHandler.getAssignmentCloneFromMap(assignmentId);
-        originalEvent = (Event) eventListHandler.getOriginalObject(eventId);
+        originalEvent = eventListHandler.getOriginalObject(eventId);
 
         final TextView assignmentDescription = (TextView) fragmentView.findViewById(R.id.assignmentDescription);
         if (activityId != null) {
-            originalActivity = (Activity) activityListHandler.getOriginalObject(activityId);
+            originalActivity = activityListHandler.getOriginalObject(activityId);
             assignmentDescription.setText("Assignment for " + originalActivity.getName());
         } else {
             assignmentDescription.setText("Assignment for " + originalEvent.getEventName());
@@ -133,9 +135,9 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
         ImageButton editButton = (ImageButton) fragmentView.findViewById(R.id.editButton);
         editButton.setImageResource(R.drawable.edit);
 
-        Button updateAssignment = (Button) fragmentView.findViewById(R.id.updateAssignment);
+        Button updateAssignmentButton = (Button) fragmentView.findViewById(R.id.updateAssignment);
 
-        final Intent EditAssignmentPage = new Intent(getActivity(), EditAssignmentActivity.class);
+        final Intent editAssignmentPageIntent = new Intent(getActivity(), EditAssignmentActivity.class);
 
         itemList = (ListView) fragmentView.findViewById(R.id.itemList);
         itemList.setTag("AssignmentLandingPageFragment");
@@ -152,13 +154,13 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
             }
         }
 
-        updateAssignment.setOnClickListener(new View.OnClickListener() {
+        updateAssignmentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (activityId != null) {
-                    itemListMap.put(activityId, cloneItemsList);
-                }else {
-                    itemListMap.put(eventId, cloneItemsList);
+                    activityAssignmentItems.addAll(cloneItemsList);
+                } else {
+                    eventAssignmentItems.addAll(cloneItemsList);
                 }
                 updateAssignmentToServer();
             }
@@ -167,9 +169,9 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FaroIntentInfoBuilder.assignmentIntent(EditAssignmentPage,
+                FaroIntentInfoBuilder.assignmentIntent(editAssignmentPageIntent,
                         eventId, activityId, assignmentId);
-                startActivity(EditAssignmentPage);
+                startActivity(editAssignmentPageIntent);
                 getActivity().finish();
             }
         });
@@ -244,7 +246,7 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
         }, eventId);
     }
 
-    public void getEventInviteesFromServer(){
+    public void getEventInviteesFromServer() {
         serviceHandler.getEventHandler().getEventInvitees(new BaseFaroRequestCallback<InviteeList>() {
             @Override
             public void onFailure(Request request, IOException ex) {
@@ -269,53 +271,88 @@ public class AssignmentLandingFragment extends Fragment implements NotificationP
         }, eventId);
     }
 
-    public void updateAssignmentToServer () {
-        serviceHandler.getAssignmentHandler().updateAssignment(new BaseFaroRequestCallback<Map<String, List<Item>>>() {
-            @Override
-            public void onFailure(Request request, IOException ex) {
-                Log.e(TAG, "failed to send new item list");
-            }
+    public void updateAssignmentToServer() {
+        if (activityId != null) {
+            UpdateCollectionRequest<Activity, Item> activityUpdateCollectionRequest = new UpdateCollectionRequest<>();
+            activityUpdateCollectionRequest.setToBeAdded(activityAssignmentItems);
+            activityUpdateCollectionRequest.setUpdate(cloneActivity);
 
-            @Override
-            public void onResponse(final Map<String, List<Item>> stringListMap, HttpError error) {
-                if (error == null ) {
-                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                    mainHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            Log.i(TAG, "Successfully updated items list to server");
-                            final Assignment originalAssignment = assignmentListHandler.getOriginalAssignmentFromMap(assignmentId);
-
-                            List<Item> receivedItemList;
-                            if (activityId != null) {
-                                receivedItemList = stringListMap.get(activityId);
-                            }else {
-                                receivedItemList = stringListMap.get(eventId);
-                            }
-
-                            originalAssignment.setItems(receivedItemList);
-
-                            try {
-                                setupPageDetails();
-                            } catch (FaroObjectNotFoundException e) {
-                                // Event/Activity has been deleted.
-                                Log.e(TAG, MessageFormat.format("{0} {1} has been deleted",
-                                        activityId == null ? "Event" : "Activity",
-                                        activityId == null ? eventId : activityId));
-                                Toast.makeText(getActivity(), activityId == null ? "Event" : "Activity" + " has been deleted", LENGTH_LONG).show();
-                                getActivity().finish();
-                            }
-                        }
-                    });
-                }else {
-                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
+            serviceHandler.getActivityHandler().updateActivityAssignment(new BaseFaroRequestCallback<Activity>() {
+                @Override
+                public void onFailure(Request request, IOException ex) {
+                    Log.e(TAG, MessageFormat.format("Failed to send new item list for activity {0}", activityId));
                 }
-            }
-        }, eventId, itemListMap);
+
+                @Override
+                public void onResponse(final Activity activity, HttpError error) {
+                    if (error == null ) {
+                        Handler mainHandler = new Handler(mContext.getMainLooper());
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                Log.i(TAG, "Successfully updated items list to server");
+                                final Assignment originalAssignment = assignmentListHandler.getOriginalAssignmentFromMap(assignmentId);
+                                List<Item> receivedItemList = activity.getAssignment().getItems();
+                                originalAssignment.setItems(receivedItemList);
+
+                                try {
+                                    setupPageDetails();
+                                } catch (FaroObjectNotFoundException e) {
+                                    // Event/Activity has been deleted.
+                                    Log.e(TAG, MessageFormat.format("Activity {0} has been deleted", activityId));
+                                    Toast.makeText(getActivity(),"Activity has been deleted", LENGTH_LONG).show();
+                                    getActivity().finish();
+                                }
+                            }
+                        });
+                    } else {
+                        Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
+                    }
+                }
+            }, eventId, activityId, activityUpdateCollectionRequest);
+
+        } else {
+            UpdateCollectionRequest<Event, Item> eventUpdateCollectionRequest = new UpdateCollectionRequest<>();
+            eventUpdateCollectionRequest.setToBeAdded(eventAssignmentItems);
+            eventUpdateCollectionRequest.setUpdate(cloneEvent);
+
+            serviceHandler.getAssignmentHandler().updateAssignment(new BaseFaroRequestCallback<Event>() {
+                @Override
+                public void onFailure(Request request, IOException ex) {
+                    Log.e(TAG, "failed to send new item list");
+                }
+
+                @Override
+                public void onResponse(final Event event, HttpError error) {
+                    if (error == null ) {
+                        Handler mainHandler = new Handler(mContext.getMainLooper());
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                Log.i(TAG, "Successfully updated items list to server");
+                                final Assignment originalAssignment = assignmentListHandler.getOriginalAssignmentFromMap(assignmentId);
+                                List<Item> receivedItemList = event.getAssignment().getItems();
+                                originalAssignment.setItems(receivedItemList);
+
+                                try {
+                                    setupPageDetails();
+                                } catch (FaroObjectNotFoundException e) {
+                                    // Event/Activity has been deleted.
+                                    Log.e(TAG, MessageFormat.format("Event {0} has been deleted", eventId));
+                                    Toast.makeText(getActivity(), "Event has been deleted", LENGTH_LONG).show();
+                                    getActivity().finish();
+                                }
+                            }
+                        });
+                    } else {
+                        Log.e(TAG, MessageFormat.format("code = {0} , message =  {1}", error.getCode(), error.getMessage()));
+                    }
+                }
+            }, eventId, eventUpdateCollectionRequest);
+        }
     }
 
-
-    public void getEventFromServer () {
+    public void getEventFromServer() {
         serviceHandler.getEventHandler().getEvent(new BaseFaroRequestCallback<EventInviteStatusWrapper>() {
             @Override
             public void onFailure(Request request, IOException ex) {

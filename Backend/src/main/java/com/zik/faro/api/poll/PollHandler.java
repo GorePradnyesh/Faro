@@ -4,7 +4,7 @@ package com.zik.faro.api.poll;
 import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM;
 import static com.zik.faro.commons.Constants.EVENT_ID_PATH_PARAM_STRING;
 import static com.zik.faro.commons.Constants.EVENT_PATH_CONST;
-import static com.zik.faro.commons.Constants.HTTP_OK;
+import static com.zik.faro.commons.Constants.POLL_CAST_VOTE_PATH_CONST;
 import static com.zik.faro.commons.Constants.POLL_CLOSE_PATH_CONST;
 import static com.zik.faro.commons.Constants.POLL_CREATE_PATH_CONST;
 import static com.zik.faro.commons.Constants.POLL_ID_PATH_PARAM;
@@ -12,12 +12,10 @@ import static com.zik.faro.commons.Constants.POLL_ID_PATH_PARAM_STRING;
 import static com.zik.faro.commons.Constants.POLL_PATH_CONST;
 import static com.zik.faro.commons.Constants.POLL_UNVOTED_COUNT_CONST;
 import static com.zik.faro.commons.Constants.POLL_UPDATE_PATH_CONST;
-import static com.zik.faro.commons.Constants.POLL_VOTE_PATH_CONST;
+import static com.zik.faro.commons.Constants.POLL_UPDATE_POLLOPTIONS_PATH_CONST;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -33,19 +31,21 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 
 import com.sun.jersey.api.JResponse;
 import com.zik.faro.applogic.PollManagement;
 import com.zik.faro.commons.Constants;
+import com.zik.faro.commons.FaroResponseStatus;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.FaroWebAppException;
+import com.zik.faro.commons.exceptions.UpdateException;
 import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.Poll;
+import com.zik.faro.data.PollOption;
+import com.zik.faro.data.UpdateCollectionRequest;
+import com.zik.faro.data.UpdateRequest;
 
 @Path(EVENT_PATH_CONST + EVENT_ID_PATH_PARAM_STRING + POLL_PATH_CONST)
 public class PollHandler {
@@ -96,37 +96,83 @@ public class PollHandler {
         		.build();
     }
 
-    
-    @Path(POLL_ID_PATH_PARAM_STRING + POLL_UPDATE_PATH_CONST)
     @POST
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Path(POLL_ID_PATH_PARAM_STRING + POLL_UPDATE_PATH_CONST)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public JResponse<Poll> updatePoll(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
-                          @PathParam(POLL_ID_PATH_PARAM) final String pollId,
-                          // Ids of poll options
-                          Map<String,Object> updateObj){
-        String userId = context.getUserPrincipal().getName();
-        Poll updatedPoll;
+    							@PathParam(POLL_ID_PATH_PARAM) final String pollId,
+                               UpdateRequest<Poll> updateObj){
+    	String userId = context.getUserPrincipal().getName();
+    	Set<String> updatedFields = updateObj.getUpdatedFields();
+    	Poll updatedPoll = updateObj.getUpdate();
+    	updatedPoll.setId(pollId);
+    	updatedPoll.setEventId(eventId);
         try {
-			updatedPoll = PollManagement.update(eventId, pollId, updateObj, userId);
-		} catch (DatastoreException e) {
-			Response response = Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-					.entity(e.getMessage())
-					.build();
-            throw new WebApplicationException(response);
+        	Poll updatedPollResponse = PollManagement.update(updatedPoll, updatedFields, userId);
+        	return JResponse.ok(updatedPollResponse).status(Response.Status.OK).build();
 		} catch (DataNotFoundException e) {
-			Response response = Response.status(Response.Status.NOT_FOUND)
-					.entity(e.getMessage())
-					.build();
-            throw new WebApplicationException(response);
+        	throw new FaroWebAppException(FaroResponseStatus.NOT_FOUND);
+        } catch (DatastoreException e) {
+        	throw new FaroWebAppException(FaroResponseStatus.UNEXPECTED_ERROR, e.getMessage());
 		} catch (UpdateVersionException e) {
-			Response response = Response.status(Response.Status.BAD_REQUEST)
-                    .entity(e.getMessage())
-                    .build();
-           throw new WebApplicationException(response);
+			throw new FaroWebAppException(FaroResponseStatus.UPDATE_VERSION_MISMATCH);
+		} catch (UpdateException e) {
+			throw new FaroWebAppException(FaroResponseStatus.UNEXPECTED_ERROR, "Update Error");
 		}
-        return JResponse.ok(updatedPoll).build();
     }
-
+    
+    @POST
+    @Path(POLL_ID_PATH_PARAM_STRING + POLL_UPDATE_POLLOPTIONS_PATH_CONST)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public JResponse<Poll> updatePollOptions(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    							@PathParam(POLL_ID_PATH_PARAM) final String pollId,
+                               UpdateCollectionRequest<Poll, PollOption> updateObj){
+    	String userId = context.getUserPrincipal().getName();
+    	Poll updatedPoll = updateObj.getUpdate();
+    	List<PollOption> add = updateObj.getToBeAdded(); 
+    	List<PollOption> remove = updateObj.getToBeRemoved();
+    	updatedPoll.setId(pollId);
+    	updatedPoll.setEventId(eventId);
+        try {
+        	Poll updatedPollResponse = PollManagement.updatePollOptions(add, remove, pollId, eventId, updatedPoll.getVersion());
+        	return JResponse.ok(updatedPollResponse).status(Response.Status.OK).build();
+		} catch (DataNotFoundException e) {
+        	throw new FaroWebAppException(FaroResponseStatus.NOT_FOUND);
+        } catch (DatastoreException e) {
+        	throw new FaroWebAppException(FaroResponseStatus.UNEXPECTED_ERROR, e.getMessage());
+		} catch (UpdateVersionException e) {
+			throw new FaroWebAppException(FaroResponseStatus.UPDATE_VERSION_MISMATCH);
+		} catch (UpdateException e) {
+			throw new FaroWebAppException(FaroResponseStatus.UNEXPECTED_ERROR, "Update Error");
+		}
+    }
+    
+    @POST
+    @Path(POLL_ID_PATH_PARAM_STRING + POLL_CAST_VOTE_PATH_CONST)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public JResponse<Poll> castVote(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,
+    							@PathParam(POLL_ID_PATH_PARAM) final String pollId,
+                               UpdateCollectionRequest<Poll, String> updateObj){
+    	String userId = context.getUserPrincipal().getName();
+    	Poll updatedPoll = updateObj.getUpdate();
+    	Set<String> add = updateObj.getToBeAdded() == null ? null : new HashSet<String>(updateObj.getToBeAdded()); 
+    	Set<String> remove = updateObj.getToBeRemoved() == null ? null : new HashSet<String>(updateObj.getToBeRemoved()); 
+    	updatedPoll.setId(pollId);
+    	updatedPoll.setEventId(eventId);
+        try {
+        	Poll updatedPollResponse = PollManagement.castVote(add, remove, pollId, eventId, updatedPoll.getVersion(), userId);
+        	return JResponse.ok(updatedPollResponse).status(Response.Status.OK).build();
+		} catch (DataNotFoundException e) {
+        	throw new FaroWebAppException(FaroResponseStatus.NOT_FOUND);
+        } catch (DatastoreException e) {
+        	throw new FaroWebAppException(FaroResponseStatus.UNEXPECTED_ERROR, e.getMessage());
+		} catch (UpdateVersionException e) {
+			throw new FaroWebAppException(FaroResponseStatus.UPDATE_VERSION_MISMATCH);
+		} catch (UpdateException e) {
+			throw new FaroWebAppException(FaroResponseStatus.UNEXPECTED_ERROR, "Update Error");
+		}
+    }
+ 
     @Path(POLL_ID_PATH_PARAM_STRING + POLL_CLOSE_PATH_CONST)
     @POST
     public JResponse<String> closePoll(@PathParam(EVENT_ID_PATH_PARAM) final String eventId,

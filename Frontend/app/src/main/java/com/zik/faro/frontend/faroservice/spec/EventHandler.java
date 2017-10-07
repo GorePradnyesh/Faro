@@ -4,6 +4,7 @@ import com.zik.faro.data.AddFriendRequest;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.InviteeList;
+import com.zik.faro.data.UpdateRequest;
 import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 
@@ -17,5 +18,5 @@ public interface EventHandler {
     void getEventInvitees(final BaseFaroRequestCallback<InviteeList> callback, final String eventId);
     void addInviteesToEvent(final BaseFaroRequestCallback<String> callback, final String eventId, final AddFriendRequest addFriendRequest);
     void updateEventUserInviteStatus(final BaseFaroRequestCallback<String> callback, final String eventId, EventInviteStatus inviteStatus);
-    void updateEvent(final BaseFaroRequestCallback<Event> callback, String eventId, Event event);
+    void updateEvent(final BaseFaroRequestCallback<Event> callback, String eventId, UpdateRequest<Event> updateRequest);
 }

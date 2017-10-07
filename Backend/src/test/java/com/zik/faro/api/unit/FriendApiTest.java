@@ -70,7 +70,7 @@ public class FriendApiTest {
         } catch (Exception e) {
             Assert.assertTrue(e instanceof FaroWebAppException);
             FaroWebAppException faroWebAppException = (FaroWebAppException)e;
-            Assert.assertEquals(faroWebAppException.getFaroResponseStatus().getRestResponseStatus(),
+            Assert.assertEquals(faroWebAppException.getResponse().getStatus(),
                     Response.Status.BAD_REQUEST);
         }
 

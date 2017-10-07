@@ -2,10 +2,11 @@ package com.zik.faro.applogic;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
-import com.googlecode.objectify.Ref;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateException;
 import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Assignment;
@@ -48,9 +49,9 @@ public class ActivityManagement {
 		activityNotificationHandler.deleteActivityNotification(activityDo, activityDo.getEventRef().get(), userId);
 	}
 	
-	public static Activity updateActivity(Activity updateActivity, String eventId, String userId) throws DataNotFoundException, DatastoreException, UpdateVersionException{
+	public static Activity updateActivity(Activity updateActivity, String eventId, String userId, Set<String> updatedFields) throws DataNotFoundException, DatastoreException, UpdateVersionException, UpdateException{
 		ActivityDo updateActivityDo = ConversionUtils.toDo(updateActivity);
-		ActivityDo updated = ActivityDatastoreImpl.updateActivity(updateActivityDo, eventId);
+		ActivityDo updated = ActivityDatastoreImpl.updateActivity(updateActivityDo, eventId, updatedFields);
 		EventDo eventDo = updated.getEventRef().get();
 		activityNotificationHandler.updateActivityNotification(updateActivityDo, eventDo, userId);
 		return ConversionUtils.fromDo(updated);

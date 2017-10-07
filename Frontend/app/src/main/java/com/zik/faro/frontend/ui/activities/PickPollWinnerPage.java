@@ -22,10 +22,12 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.common.collect.Sets;
 import com.squareup.okhttp.Request;
 import com.zik.faro.data.ObjectStatus;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.PollOption;
+import com.zik.faro.data.UpdateRequest;
 import com.zik.faro.frontend.util.FaroExceptionHandler;
 import com.zik.faro.frontend.FaroIntentConstants;
 import com.zik.faro.frontend.handlers.PollListHandler;
@@ -215,6 +217,12 @@ public class PickPollWinnerPage extends Activity {
     }
 
     private void updatePollToServer () {
+        // Update poll to select the winner and close the poll
+        UpdateRequest<Poll> updateRequest = new UpdateRequest<>();
+        Poll pollUpdateObject = (Poll) map.get("poll");
+        updateRequest.setUpdate(pollUpdateObject);
+        updateRequest.setUpdatedFields(Sets.newHashSet(Poll.WINNER_ID, Poll.STATUS));
+
         serviceHandler.getPollHandler().updatePoll(new BaseFaroRequestCallback<Poll>() {
             @Override
             public void onFailure(Request request, IOException ex) {
@@ -240,7 +248,7 @@ public class PickPollWinnerPage extends Activity {
                     Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
                 }
             }
-        }, eventId, pollId, map);
+        }, eventId, pollId, updateRequest);
     }
 
     private void voterListPopUP(View v) {

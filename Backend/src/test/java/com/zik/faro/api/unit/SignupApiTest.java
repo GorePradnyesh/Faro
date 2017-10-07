@@ -89,7 +89,7 @@ public class SignupApiTest {
             createNewUser(user, password);
         } catch (Exception e) {
             Assert.assertTrue(e instanceof FaroWebAppException);
-            Assert.assertEquals(FaroResponseStatus.ENTITY_EXISTS, ((FaroWebAppException)e).getFaroResponseStatus());
+            Assert.assertEquals(FaroResponseStatus.ENTITY_EXISTS, ((FaroWebAppException)e).getResponse().getStatus());
             entityExists = true;
         }
 
@@ -104,7 +104,7 @@ public class SignupApiTest {
         } catch (Exception e) {
             Assert.assertTrue(e instanceof FaroWebAppException);
             FaroWebAppException faroWebAppException = (FaroWebAppException)e;
-            Assert.assertEquals(FaroResponseStatus.BAD_REQUEST, faroWebAppException.getFaroResponseStatus());
+            Assert.assertEquals(FaroResponseStatus.BAD_REQUEST, faroWebAppException.getResponse().getStatus());
         }
 
     }
@@ -116,7 +116,7 @@ public class SignupApiTest {
         } catch (Exception e) {
             Assert.assertTrue(e instanceof FaroWebAppException);
             FaroWebAppException faroWebAppException = (FaroWebAppException)e;
-            Assert.assertEquals(FaroResponseStatus.BAD_REQUEST, faroWebAppException.getFaroResponseStatus());
+            Assert.assertEquals(FaroResponseStatus.BAD_REQUEST, faroWebAppException.getResponse().getStatus());
         }
     }
 
@@ -133,7 +133,7 @@ public class SignupApiTest {
         } catch (Exception e) {
             Assert.assertTrue(e instanceof FaroWebAppException);
             FaroWebAppException faroWebAppException = (FaroWebAppException)e;
-            Assert.assertEquals(FaroResponseStatus.BAD_REQUEST, faroWebAppException.getFaroResponseStatus());
+            Assert.assertEquals(FaroResponseStatus.BAD_REQUEST, faroWebAppException.getResponse().getStatus());
         }
     }
 

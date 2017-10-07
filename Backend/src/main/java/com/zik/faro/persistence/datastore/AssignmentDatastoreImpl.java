@@ -11,12 +11,14 @@ import org.slf4j.LoggerFactory;
 import com.googlecode.objectify.Work;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateException;
 import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.ActionStatus;
-import com.zik.faro.persistence.datastore.data.ActivityDo;
 import com.zik.faro.data.Assignment;
-import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.data.Item;
+import com.zik.faro.persistence.datastore.data.ActivityDo;
+import com.zik.faro.persistence.datastore.data.BaseEntityDo;
+import com.zik.faro.persistence.datastore.data.EventDo;
 
 public class AssignmentDatastoreImpl {
 	private static Logger logger = LoggerFactory.getLogger(AssignmentDatastoreImpl.class);
@@ -75,79 +77,87 @@ public class AssignmentDatastoreImpl {
 		return count;
 	}
 	
-	public static ActivityDo updateItemsForActivityAssignment(final String eventId, final String activityId,
-			final List<Item> items) throws DataNotFoundException, DatastoreException, UpdateVersionException{
-		Work w = new Work<TransactionResult<ActivityDo>>() {			
-			@Override
-			public TransactionResult<ActivityDo> run() {
-				// Read from datastore
-	        	ActivityDo activity;
+	public static ActivityDo updateActivityAssignmentItems(final List<Item> toBeAdded, final List<Item> toBeRemoved, 
+    		final String activityId, final String eventId, final Long version) throws DatastoreException, DataNotFoundException, UpdateVersionException, UpdateException{
+    	Work w = new Work<TransactionResult<ActivityDo>>() {
+	        public TransactionResult<ActivityDo> run() {
+	        	// Read from datastore
+	        	ActivityDo activityDo = null;
 				try {
-					activity = ActivityDatastoreImpl.loadActivityById(activityId, eventId);
+					activityDo = ActivityDatastoreImpl.loadActivityById(activityId, eventId);
+					logger.info("Activity loaded!");
 				} catch (DataNotFoundException e) {
 					return new TransactionResult<ActivityDo>(null, TransactionStatus.DATANOTFOUND);
 				}
-	        	
-	            // Modify.
-				updateItemsInExistingList(items, activity.getAssignment().getItems());
-	            
-	            // Store
-	            ActivityDatastoreImpl.storeActivity(activity);
-	            return new TransactionResult<ActivityDo>(activity, TransactionStatus.SUCCESS);
+				
+				if(!BaseDatastoreImpl.isVersionOk(version, activityDo.getVersion())){
+					return new TransactionResult<ActivityDo>(null, TransactionStatus.VERSIONMISSMATCH, "Incorrect entity version. Current version:"+activityDo.getVersion().toString());
+				}
+				
+				if(toBeRemoved != null)
+					activityDo.getAssignment().getItems().removeAll(toBeRemoved);
+				
+				if(toBeAdded != null)
+					addAll(activityDo.getAssignment().getItems(), toBeAdded);
+				
+				BaseDatastoreImpl.versionIncrement(activityDo);
+
+	            ActivityDatastoreImpl.storeActivity(activityDo);
+				
+	            return new TransactionResult<ActivityDo>(activityDo, TransactionStatus.SUCCESS);
 	        }
-		};
-		TransactionResult<ActivityDo> result = DatastoreObjectifyDAL.update(w);
-		DatastoreUtil.processResult(result);
-		logger.info("Activity assignment updated");
-		return result.getEntity();
+	    };
+	    
+    	TransactionResult<ActivityDo> result = DatastoreObjectifyDAL.update(w);
+    	DatastoreUtil.processResult(result);
+		logger.info("Poll updated!");
+    	return result.getEntity();
+    }
+	
+	public static void addAll(List<Item> existing, List<Item> toBeAdded){
+		for(Item item : toBeAdded){
+			int itemIndex = existing.indexOf(item);
+		    if (itemIndex != -1) {
+		    	existing.set(itemIndex, item);
+		    }else{
+		    	existing.add(item);
+		    }
+		}
 	}
 	
-	public static EventDo updateItemsForEventAssignment(final String eventId, final List<Item> items) throws DataNotFoundException, DatastoreException, UpdateVersionException{
-		Work w = new Work<TransactionResult<EventDo>>() {
-			
-			@Override
-			public TransactionResult<EventDo> run() {
-				// Read from datastore
-	        	EventDo event;
+	public static EventDo updateEventAssignmentItems(final List<Item> toBeAdded, final List<Item> toBeRemoved, 
+    		final String eventId, final Long version) throws DatastoreException, DataNotFoundException, UpdateVersionException, UpdateException{
+    	Work w = new Work<TransactionResult<EventDo>>() {
+	        public TransactionResult<EventDo> run() {
+	        	// Read from datastore
+	        	EventDo eventDo = null;
 				try {
-					event = EventDatastoreImpl.loadEventByID(eventId);
+					eventDo = EventDatastoreImpl.loadEventByID(eventId);
+					logger.info("Event loaded!");
 				} catch (DataNotFoundException e) {
 					return new TransactionResult<EventDo>(null, TransactionStatus.DATANOTFOUND);
 				}
-	        	
-	            // Modify.
-				updateItemsInExistingList(items, event.getAssignment().getItems());
-	            
-	            // Store
-	            EventDatastoreImpl.storeEventOnly(event);
-	            return new TransactionResult<EventDo>(event, TransactionStatus.SUCCESS);
-			}
-		};
-		TransactionResult<EventDo> result = DatastoreObjectifyDAL.update(w);
-		DatastoreUtil.processResult(result);
-		logger.info("Event assignment updated");
-		return result.getEntity();
-	}
-	
-	private static void updateItemsInExistingList(List<Item> newList, List<Item> existingList){
-		if(newList == null || newList.isEmpty()){
-			return;
-		}
-		// O(m*n) complexity, where m is number of new items to be updated and n is existing items in todo list
-		// TODO: Revisit and see if hashmap possible.
-		for(Item item: newList){
-        	int i = 0;
-        	boolean removeItem = false;
-        	for( ;i < existingList.size(); i++){
-        		if(existingList.get(i).getId().equals(item.getId())){
-        			removeItem = true;
-        			break;
-        		}
-        	}
-        	if(removeItem){
-        		existingList.remove(i);
-        	}
-        	existingList.add(item);
-        }
-	}
+				
+				if(!BaseDatastoreImpl.isVersionOk(version, eventDo.getVersion())){
+					return new TransactionResult<EventDo>(null, TransactionStatus.VERSIONMISSMATCH, "Incorrect entity version. Current version:"+eventDo.getVersion().toString());
+				}
+				
+				if(toBeRemoved != null)
+					eventDo.getAssignment().getItems().removeAll(toBeRemoved);
+				if(toBeAdded != null)
+					addAll(eventDo.getAssignment().getItems(), toBeAdded);
+				
+				BaseDatastoreImpl.versionIncrement(eventDo);
+
+	            EventDatastoreImpl.storeEventOnly(eventDo);
+				
+	            return new TransactionResult<EventDo>(eventDo, TransactionStatus.SUCCESS);
+	        }
+	    };
+	    
+    	TransactionResult<EventDo> result = DatastoreObjectifyDAL.update(w);
+    	DatastoreUtil.processResult(result);
+		logger.info("Event updated!");
+    	return result.getEntity();
+    }
 }

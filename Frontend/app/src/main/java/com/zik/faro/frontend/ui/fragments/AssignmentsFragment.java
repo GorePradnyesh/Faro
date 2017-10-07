@@ -21,6 +21,7 @@ import com.zik.faro.data.Activity;
 import com.zik.faro.data.Assignment;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.Item;
+import com.zik.faro.data.UpdateCollectionRequest;
 import com.zik.faro.frontend.util.FaroExceptionHandler;
 import com.zik.faro.frontend.FaroIntentConstants;
 import com.zik.faro.frontend.R;
@@ -40,6 +41,7 @@ import com.zik.faro.frontend.faroservice.notification.NotificationPayloadHandler
 
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +49,6 @@ import java.util.Map;
 import static android.widget.Toast.LENGTH_LONG;
 
 public class AssignmentsFragment extends Fragment implements NotificationPayloadHandler {
-
     private AssignmentListHandler assignmentListHandler = AssignmentListHandler.getInstance();
     private EventListHandler eventListHandler = EventListHandler.getInstance(getActivity());
     private FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
@@ -55,6 +56,7 @@ public class AssignmentsFragment extends Fragment implements NotificationPayload
 
     private ListView itemList;
     private Map<String, List<Item>> activityToItemListMap = new HashMap<>();
+    private List<Item> eventAssignmentItems = new ArrayList<>();
 
     private String eventId = null;
     private String activityId = null;
@@ -140,63 +142,107 @@ public class AssignmentsFragment extends Fragment implements NotificationPayload
             }
             if (assignmentParentInfo.getActivityID() != null) {
                 activityToItemListMap.put(assignmentParentInfo.getActivityID(), cloneAssignment.getItems());
-            }else{
-                activityToItemListMap.put(eventId, cloneAssignment.getItems());
+            } else {
+                eventAssignmentItems.addAll(cloneAssignment.getItems());
             }
         }
 
         updateAssignment.setOnClickListener(new View.OnClickListener() {
+            // TODO : Update of assignments status here is broken. This will change based on the UI design
             @Override
-            public void onClick(View v) {
-                serviceHandler.getAssignmentHandler().updateAssignment(new BaseFaroRequestCallback<Map<String, List<Item>>>() {
-                    @Override
-                    public void onFailure(Request request, IOException ex) {
-                        Log.e(TAG, "failed to send new item list");
+            public void onClick(View view) {
+                /*if (!activityToItemListMap.isEmpty()) {
+                    UpdateCollectionRequest<Activity, Item> activityUpdateCollectionRequest = new UpdateCollectionRequest<>();
+                    activityUpdateCollectionRequest.setToBeAdded(activityToItemListMap.get(0));
+                    try {
+                        activityUpdateCollectionRequest.setUpdate(activityListHandler.getOriginalObject(activityId));
+                    } catch (FaroObjectNotFoundException e) {
+                        Log.e(TAG, "Failed to update activity assignment", e);
+                        return;
                     }
 
-                    @Override
-                    public void onResponse(final Map<String, List<Item>> stringListMap, HttpError error) {
-                        if (error == null ) {
-                            Runnable myRunnable = new Runnable() {
-                                @Override
-                                public void run() {
-                                    for(Map.Entry<String, List<Item>> entry: stringListMap.entrySet()){
-                                        String objectId = entry.getKey();
-                                        Assignment originalAssignment;
+                    serviceHandler.getActivityHandler().updateActivityAssignment(new BaseFaroRequestCallback<Activity>() {
+                        @Override
+                        public void onFailure(Request request, IOException ex) {
+                            Log.e(TAG, "failed to send new item list", ex);
+                        }
+
+                        @Override
+                        public void onResponse(final Activity activity, HttpError error) {
+                            if (error == null ) {
+                                Handler mainHandler = new Handler(mContext.getMainLooper());
+                                mainHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Log.i(TAG, "Successfully updated items list to server");
+
                                         try {
-                                            if (objectId.equals(eventId)){
-                                                Event originalEvent = (Event) eventListHandler.getOriginalObject(eventId);
-                                                originalAssignment = originalEvent.getAssignment();
-                                                originalAssignment.setItems(entry.getValue());
-                                            } else {
-                                                Activity originalActivity = (Activity) activityListHandler.getOriginalObject(objectId);
-                                                originalAssignment = originalActivity.getAssignment();
-                                                originalAssignment.setItems(entry.getValue());
-                                            }
+                                            Activity originalActivity = activityListHandler.getOriginalObject(activity.getId());
+                                            Assignment originalAssignment = originalActivity.getAssignment();
+                                            originalAssignment.setItems(activity.getAssignment().getItems());
+
+                                            setupPageDetails();
                                         } catch (FaroObjectNotFoundException e) {
-                                            //Activity has been deleted.
-                                            Toast.makeText(getActivity(),
-                                                    objectId.equals(eventId) ? "Event" : "Activity" + " has been deleted",
-                                                    LENGTH_LONG).show();
-                                            Log.e(TAG, MessageFormat.format("{0} {1} has been deleted",
-                                                    objectId.equals(eventId) ? "Event" : "Activity",
-                                                    objectId.equals(eventId) ? eventId : objectId));
+                                            // Activity has been deleted.
+                                            Toast.makeText(getActivity(),"Activity has been deleted", LENGTH_LONG).show();
+                                            Log.e(TAG, MessageFormat.format("Activity {0} has been deleted", activity.getId()));
                                             getActivity().finish();
-                                            return;
                                         }
                                     }
-                                    Log.i(TAG, "Successfully updated items list to server");
-
-                                    setupPageDetails();
-                                }
-                            };
-                            Handler mainHandler = new Handler(mContext.getMainLooper());
-                            mainHandler.post(myRunnable);
-                        }else {
-                            Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
+                                });
+                            } else {
+                                Log.e(TAG, MessageFormat.format("code = {0} , message =  {1}", error.getCode(), error.getMessage()));
+                            }
                         }
+                    }, eventId, activityId, activityUpdateCollectionRequest);
+                }
+
+                if (!eventAssignmentItems.isEmpty()) {
+                    UpdateCollectionRequest<Event, Item> eventUpdateCollectionRequest = new UpdateCollectionRequest<>();
+                    eventUpdateCollectionRequest.setToBeAdded(eventAssignmentItems);
+                    try {
+                        eventUpdateCollectionRequest.setUpdate(eventListHandler.getOriginalObject(eventId));
+                    } catch (FaroObjectNotFoundException e) {
+                        Log.e(TAG, "Failed to update event assignment", e);
+                        return;
                     }
-                }, eventId, activityToItemListMap);
+
+                    serviceHandler.getAssignmentHandler().updateAssignment(new BaseFaroRequestCallback<Event>() {
+                        @Override
+                        public void onFailure(Request request, IOException ex) {
+                            Log.e(TAG, "failed to send new item list", ex);
+                        }
+
+                        @Override
+                        public void onResponse(final Event event, HttpError error) {
+                            if (error == null ) {
+                                Handler mainHandler = new Handler(mContext.getMainLooper());
+                                mainHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Log.i(TAG, "Successfully updated items list to server");
+
+                                        try {
+                                            Event originalEvent = eventListHandler.getOriginalObject(event.getId());
+                                            Assignment originalAssignment = originalEvent.getAssignment();
+                                            originalAssignment.setItems(event.getAssignment().getItems());
+
+                                            setupPageDetails();
+                                        } catch (FaroObjectNotFoundException e) {
+                                            // Event has been deleted.
+                                            Toast.makeText(getActivity(), "Event has been deleted", LENGTH_LONG).show();
+                                            Log.e(TAG, MessageFormat.format("Event {0} has been deleted", event.getId()));
+                                            getActivity().finish();
+                                        }
+                                    }
+                                });
+                            } else {
+                                Log.e(TAG, MessageFormat.format("code = {0} , message =  {1}", error.getCode(), error.getMessage()));
+                            }
+                        }
+                    }, eventId, eventUpdateCollectionRequest);
+                }*/
+
             }
         });
     }

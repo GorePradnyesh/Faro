@@ -7,7 +7,7 @@ public class UpdateVersionException extends Exception{
     	super(message);
     }
 
-    UpdateVersionException(final Throwable throwable){
+    public UpdateVersionException(final Throwable throwable){
         super(throwable);
     }
 }

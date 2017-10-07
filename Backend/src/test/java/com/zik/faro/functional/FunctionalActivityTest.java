@@ -3,7 +3,9 @@ package com.zik.faro.functional;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import junit.framework.Assert;
 
@@ -14,15 +16,12 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import com.zik.faro.TestHelper;
-import com.zik.faro.data.ActionStatus;
+import com.zik.faro.commons.FaroErrorResponse;
 import com.zik.faro.data.Activity;
-import com.zik.faro.data.Assignment;
 import com.zik.faro.data.Event;
-import com.zik.faro.data.Item;
-import com.zik.faro.data.Location;
 import com.zik.faro.data.GeoPosition;
-import com.zik.faro.data.Unit;
-import com.zik.faro.data.expense.ExpenseGroup;
+import com.zik.faro.data.Location;
+import com.zik.faro.data.UpdateRequest;
 
 public class FunctionalActivityTest {
     private static URL endpoint;
@@ -116,13 +115,17 @@ public class FunctionalActivityTest {
         activity.setStartDate(Calendar.getInstance());
         activity.setEndDate(Calendar.getInstance());
         activity.setLocation(new Location("SFO", "SFO's Address", geoPosition2));
-//        activity.getAssignment().getItems().remove("food");
-//        activity.getAssignment().addItem(new Item("hookah", "Kunal", 1, Unit.COUNT));
-
-        ClientResponse updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/"+ activityResponse.getId()+"/update", token, activity);
-        activityResponse = updateResponse.getEntity(Activity.class);
-        assertCreatedEntity(activity, activityResponse);
-        assertVersion(activity, activityResponse);
+        activity.setVersion(activityResponse.getVersion());
+        Set<String> updatedFields = new HashSet<String>();
+    	updatedFields.add("startDate");updatedFields.add("endDate");
+    	updatedFields.add("description");updatedFields.add("location");
+    	UpdateRequest<Activity> updateRequest = new UpdateRequest<Activity>();
+    	updateRequest.setUpdatedFields(updatedFields);
+    	updateRequest.setUpdate(activity);
+        ClientResponse updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/"+ activityResponse.getId()+"/update", token, updateRequest);
+        Activity updateResponseActivity= updateResponse.getEntity(Activity.class);
+        assertCreatedEntity(activity, updateResponseActivity);
+        assertVersion(activity, updateResponseActivity);
     }
     
     public static void updateActivityVersionCheckTest()throws Exception{
@@ -137,26 +140,32 @@ public class FunctionalActivityTest {
 		// Update activity. Activity id and event id should be passed in URI. Values in activity object will not be honored
 		activity.setDescription("Update with version 1");
 		activity.setVersion(activityResponse.getVersion());
-      
-		response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/"+ activityResponse.getId()+"/update", token, activity);
-		activityResponse = response.getEntity(Activity.class);
-		assertCreatedEntity(activity, activityResponse);
-		assertVersion(activity, activityResponse);
+		Set<String> updatedFields = new HashSet<String>();
+    	updatedFields.add("description");
+    	UpdateRequest<Activity> updateRequest = new UpdateRequest<Activity>();
+    	updateRequest.setUpdatedFields(updatedFields);
+    	updateRequest.setUpdate(activity);
+    	ClientResponse updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/"+ activityResponse.getId()+"/update", token, updateRequest);
+        Activity updateResponseActivity= updateResponse.getEntity(Activity.class);
+		
+		assertCreatedEntity(activity, updateResponseActivity);
+		assertVersion(activity, updateResponseActivity);
 
 		activity.setDescription("Update with version 2");
-		activity.setVersion(activityResponse.getVersion());
-
-		response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/"+ activityResponse.getId()+"/update", token, activity);
-		activityResponse = response.getEntity(Activity.class);
-		assertCreatedEntity(activity, activityResponse);
-		assertVersion(activity, activityResponse);
+		activity.setVersion(updateResponseActivity.getVersion());
+		updateRequest.setUpdate(activity);
+		updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/"+ activityResponse.getId()+"/update", token, updateRequest);
+        updateResponseActivity= updateResponse.getEntity(Activity.class);
+		assertCreatedEntity(activity, updateResponseActivity);
+		assertVersion(activity, updateResponseActivity);
 
 		activity.setDescription("Update with old version 2");
 
-		response = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/"+ activityResponse.getId()+"/update", token, activity);
-		Assert.assertEquals(400,response.getStatus());
-		Assert.assertEquals("Incorrect entity version. Current version:3", response.getEntity(String.class));
-      
+		updateResponse = TestHelper.doPOST(endpoint.toString(), "v1/event/"+eventId+"/activity/"+ activityResponse.getId()+"/update", token, updateRequest);
+		Assert.assertEquals(409,updateResponse.getStatus());
+		FaroErrorResponse errorResponse = updateResponse.getEntity(FaroErrorResponse.class);
+        Assert.assertEquals("Update entity version mismatch", errorResponse.getFaroStatusMessage());
+        Assert.assertEquals(2002, errorResponse.getFaroStatusCode());      
   }
 
     public static void deleteActivityTest() throws Exception{
@@ -226,7 +235,6 @@ public class FunctionalActivityTest {
         updateActivityTest();
         deleteActivityTest();
         updateActivityVersionCheckTest();
-
     }
 
 }

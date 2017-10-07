@@ -13,6 +13,7 @@ import com.googlecode.objectify.Work;
 import com.googlecode.objectify.cmd.Query;
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateException;
 import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.persistence.datastore.data.ActivityDo;
@@ -120,7 +121,12 @@ public class EventUserDatastoreImpl {
 	    };
 	    
     	TransactionResult<EventUserDo> result = DatastoreObjectifyDAL.update(w);
-    	DatastoreUtil.processResult(result);
+    	try {
+			DatastoreUtil.processResult(result);
+		} catch (UpdateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     	logger.info("EventUser updated");
     	return result.getEntity();
     }

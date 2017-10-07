@@ -9,6 +9,7 @@ import com.zik.faro.data.Event;
 
 import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.InviteeList;
+import com.zik.faro.data.UpdateRequest;
 import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.frontend.faroservice.Callbacks.BaseFaroRequestCallback;
 import com.zik.faro.frontend.faroservice.auth.TokenCache;
@@ -23,9 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OKHttpWrapperEvent extends BaseFaroOKHttpWrapper implements EventHandler {
-    
-    
     final URL getEventsUrl;
+
     public OKHttpWrapperEvent(final URL baseUrl){
         super(baseUrl, "event");
         this.getEventsUrl = super.constructUrl(baseUrl, "events");
@@ -121,9 +121,9 @@ public class OKHttpWrapperEvent extends BaseFaroOKHttpWrapper implements EventHa
     }
 
     @Override
-    public void updateEvent(final BaseFaroRequestCallback<Event> callback, String eventId, Event event) {
+    public void updateEvent(final BaseFaroRequestCallback<Event> callback, String eventId, UpdateRequest<Event> updateRequest) {
         String token = TokenCache.getTokenCache().getToken();
-        String eventPostBody = mapper.toJson(event);
+        String eventPostBody = mapper.toJson(updateRequest);
         Request request = new Request.Builder()
                 .url(baseHandlerURL.toString() + eventId + "/updateEvent")
                 .post(RequestBody.create(MediaType.parse(DEFAULT_CONTENT_TYPE), eventPostBody))

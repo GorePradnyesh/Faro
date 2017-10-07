@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.zik.faro.commons.exceptions.DataNotFoundException;
 import com.zik.faro.commons.exceptions.DatastoreException;
+import com.zik.faro.commons.exceptions.UpdateException;
 import com.zik.faro.commons.exceptions.UpdateVersionException;
 import com.zik.faro.data.Activity;
 import com.zik.faro.data.Assignment;
@@ -45,18 +46,19 @@ public class AssignmentManagement {
 		return AssignmentDatastoreImpl.getAllAssignments(eventId);
 	}
 	
-	public static Activity updateActivityItems(final String eventId, final String activityId, final List<Item> items, String userId) throws DataNotFoundException, DatastoreException, UpdateVersionException{
-		createItemIds(items);
-		ActivityDo activityDo = AssignmentDatastoreImpl.updateItemsForActivityAssignment(eventId, activityId, items);
-		EventDo eventDo = EventDatastoreImpl.loadEventByID(eventId);
-		sendBatchNotifications(items, eventDo, activityDo, userId);
+	public static Activity updateActivityItems(final String eventId, final String activityId, final List<Item> toBeAdded, final List<Item> toBeRemoved, 
+			Long version) throws DataNotFoundException, DatastoreException, UpdateVersionException, UpdateException{
+		createItemIds(toBeAdded);
+		ActivityDo activityDo = AssignmentDatastoreImpl.updateActivityAssignmentItems(toBeAdded, toBeRemoved, activityId, eventId, version);
+		//sendBatchNotifications(items, eventDo, null, userId);
 		return ConversionUtils.fromDo(activityDo);
 	}
 	
-	public static Event updateEventItems(final String eventId, final List<Item> items, String userId) throws DataNotFoundException, DatastoreException, UpdateVersionException{
-		createItemIds(items);
-		EventDo eventDo = AssignmentDatastoreImpl.updateItemsForEventAssignment(eventId, items);
-		sendBatchNotifications(items, eventDo, null, userId);
+	public static Event updateEventItems(final String eventId, final List<Item> toBeAdded, final List<Item> toBeRemoved, 
+			Long version) throws DataNotFoundException, DatastoreException, UpdateVersionException, UpdateException{
+		createItemIds(toBeAdded);
+		EventDo eventDo = AssignmentDatastoreImpl.updateEventAssignmentItems(toBeAdded, toBeRemoved, eventId, version);
+		//sendBatchNotifications(items, eventDo, null, userId);
 		return ConversionUtils.fromDo(eventDo);
 	}
 	
