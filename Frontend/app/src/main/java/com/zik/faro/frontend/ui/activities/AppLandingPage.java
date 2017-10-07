@@ -4,7 +4,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTabHost;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +15,8 @@ import android.widget.ImageView;
 import com.zik.faro.frontend.handlers.ActivityListHandler;
 import com.zik.faro.frontend.handlers.AssignmentListHandler;
 import com.zik.faro.frontend.handlers.EventFriendListHandler;
-import com.zik.faro.frontend.ui.fragments.EventListFragment;
+import com.zik.faro.frontend.ui.EventTabType;
+import com.zik.faro.frontend.ui.fragments.EventListTabFragment;
 import com.zik.faro.frontend.ui.fragments.PlansFragment;
 import com.zik.faro.frontend.util.FaroExceptionHandler;
 import com.zik.faro.frontend.ui.fragments.FriendListFragment;
@@ -42,8 +45,6 @@ public class AppLandingPage extends FragmentActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_landing_page);
 
-        final Intent createNewEventIntent = new Intent(this, CreateNewEventActivity.class);
-
         Thread.setDefaultUncaughtExceptionHandler(new FaroExceptionHandler(this));
 
         /*TODO For styling the tab layout checkout the following link
@@ -53,13 +54,13 @@ public class AppLandingPage extends FragmentActivity{
         mTabHost.setup(this, getSupportFragmentManager(), android.R.id.tabcontent);
         mTabHost.addTab(
                 mTabHost.newTabSpec("tab1").setIndicator(getTabIndicator(mTabHost.getContext(), R.drawable.home)),
-                EventListFragment.class, null);
+                PlansFragment.class, null);
         mTabHost.addTab(
                 mTabHost.newTabSpec("tab2").setIndicator(getTabIndicator(mTabHost.getContext(), R.drawable.friend_list)),
                 FriendListFragment.class, null);
         mTabHost.addTab(
                 mTabHost.newTabSpec("tab3").setIndicator(getTabIndicator(mTabHost.getContext(), R.drawable.notification)),
-                PlansFragment.class, null);
+                MoreOptionsPage.class, null);
         mTabHost.addTab(
                 mTabHost.newTabSpec("tab4").setIndicator(getTabIndicator(mTabHost.getContext(), R.drawable.options)),
                 MoreOptionsPage.class, null);

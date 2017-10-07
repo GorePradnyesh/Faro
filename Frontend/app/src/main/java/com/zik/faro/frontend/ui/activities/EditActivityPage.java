@@ -491,7 +491,7 @@ public class EditActivityPage extends android.app.Activity {
                         public void run() {
                             activityListHandler.removeActivityFromListAndMap(eventId, activityId, mContext);
                             popupWindow.dismiss();
-                            Toast.makeText(EditActivityPage.this, cloneActivity.getName() + "is Deleted", LENGTH_LONG).show();
+                            Toast.makeText(EditActivityPage.this, cloneActivity.getName() + " is Deleted", LENGTH_LONG).show();
                             finish();
                         }
                     });

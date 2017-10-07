@@ -256,7 +256,8 @@ public class EditEventActivity extends Activity {
                                 public void run() {
                                     //Since update to server successful, adding event to List and Map below
                                     Log.i(TAG, "Event Create Response received Successfully");
-                                    eventListHandler.addEventToListAndMap(receivedEvent, EventInviteStatus.ACCEPTED);
+                                    eventListHandler.addEventToListAndMap(receivedEvent,
+                                            EventInviteStatus.ACCEPTED);
                                     FaroIntentInfoBuilder.eventIntent(EventLanding, eventId);
                                     startActivity(EventLanding);
                                     finish();
@@ -367,7 +368,7 @@ public class EditEventActivity extends Activity {
                                     eventListHandler.removeEventFromListAndMap(eventId);
                                     popupWindow.dismiss();
                                     Toast.makeText(EditEventActivity.this, cloneEvent.getEventName() + " is Deleted", LENGTH_LONG).show();
-                                    Toast.makeText(EditEventActivity.this, cloneEvent.getEventName() + "is Deleted", LENGTH_LONG).show();
+                                    Toast.makeText(EditEventActivity.this, cloneEvent.getEventName() + " is Deleted", LENGTH_LONG).show();
                                     finish();
                                 }
                             });

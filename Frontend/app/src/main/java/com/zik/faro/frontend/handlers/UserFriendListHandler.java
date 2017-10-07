@@ -14,6 +14,8 @@ public class UserFriendListHandler {
     private static UserFriendListHandler userFriendListHandler = null;
     public UserFriendAdapter userFriendAdapter;
 
+    private boolean receivedFriends = false;
+
     /*
     * Map of friends needed to access friends downloaded from the server in O(1) time. The Key to the
     * Map is the emailID  which returns the MinUser as the value.
@@ -35,6 +37,14 @@ public class UserFriendListHandler {
             }
             return userFriendListHandler;
         }
+    }
+
+    public boolean isReceivedFriends() {
+        return receivedFriends;
+    }
+
+    public void setReceivedFriends(boolean receivedFriends) {
+        this.receivedFriends = receivedFriends;
     }
 
     private void addFriendToList(MinUser minUser) {

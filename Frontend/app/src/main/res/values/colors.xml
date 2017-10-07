@@ -4,7 +4,7 @@
     <color name="fastlane_background">#0096a6</color>
     <color name="search_opaque">#ffaa3f</color>
     <color name="selected_background">#ffaa3f</color>
-    <color name="detail_background">#0096a6</color>
+    <color name="detail_background">#005d67</color>
     <color name="soft_opaque">#30000000</color>
     <color name="img_soft_opaque">#30FF0000</color>
     <color name="img_full_opaque">#00000000</color>
@@ -15,7 +15,12 @@
     <color name="orange">#FADCA7</color>
     <color name="yellow">#EEFF41</color>
     <color name="default_background">#3d3d3d</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorAccent">#c8e8ff</color>
     <color name="transparent">#00000000</color>
     <color name="faro_button_color">#18ffff</color>
+    <color name="colorPrimary">#125688</color>
+    <color name="colorPrimaryDark">#125688</color>
+    <color name="textColorPrimary">#FFFFFF</color>
+    <color name="windowBackground">#FFFFFF</color>
+    <color name="navigationBarColor">#000000</color>
 </resources>
