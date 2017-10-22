@@ -33,6 +33,8 @@ public final class Constants {
     public static final String IMAGE_ID_PATH_PARAM                              = "imageId";
     public static final String IMAGE_ID_PATH_PARAM_STRING                       = "/{" + IMAGE_ID_PATH_PARAM + "}";
 
+    public static final String GROUP_ID_PATH_PARAM                              = "groupId";
+    public static final String GROUP_ID_PATH_PARAM_STRING                       = "/{" + GROUP_ID_PATH_PARAM + "}";
 
     // ---- Path Constants ---- //
 
@@ -90,9 +92,9 @@ public final class Constants {
     public static final String POLL_UNVOTED_COUNT_CONST                         = "/unvoted/count";
     public static final String POLL_CREATE_PATH_CONST                           = "/create";
     public static final String POLL_VOTE_PATH_CONST                             = "/vote";
-    public static final String POLL_UPDATE_PATH_CONST                             = "/updatePoll";
+    public static final String POLL_UPDATE_PATH_CONST                           = "/updatePoll";
     public static final String POLL_UPDATE_POLLOPTIONS_PATH_CONST               = "/updatePollOptions";
-    public static final String POLL_CAST_VOTE_PATH_CONST					= "/castVote";
+    public static final String POLL_CAST_VOTE_PATH_CONST						= "/castVote";
     public static final String POLL_ADD_OPTION_PATH_CONST                       = "/addOption";
     public static final String POLL_CLOSE_PATH_CONST                            = "/close";
 
@@ -155,6 +157,17 @@ public final class Constants {
 
     public static final String FIREBASE_AUTH_CONST                              = "/firebaseLogin";
 
+    // -- Group path constants -- //
+    public static final String GROUP_PATH_CONST									= "/group";
+    public static final String GROUP_CREATE_PATH_CONST							= "/create";
+    public static final String GROUP_DETAILS_PATH_CONST							= "/details";
+    public static final String GROUP_UPDATE_PATH_CONST							= "/update";
+    public static final String GROUP_UPDATE_ADMINS_PATH_CONST					= "/updateAdmins";
+    public static final String GROUP_UPDATE_PARTICIPANTS_PATH_CONST				= "/updateParticipants";
+    
+
+    
+    
     // -- Test -- //
     public static final String TESTS_API_PATH_CONST                             = "/test";
    

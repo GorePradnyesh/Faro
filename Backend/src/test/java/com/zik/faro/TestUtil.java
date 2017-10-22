@@ -5,7 +5,7 @@ import java.util.List;
 import com.zik.faro.data.Item;
 
 public class TestUtil {
-	public static boolean isEqualList(List<Item> list1, List<Item> list2){
+	public static <T> boolean isEqualList(List<T> list1, List<T> list2){
 		if (list1 == list2) {
             return true;
         }
@@ -13,8 +13,13 @@ public class TestUtil {
             return false;
         }
 
-        for(Item item : list1){
+        for(T item : list1){
         	if(!list2.contains(item)){
+        		return false;
+        	}
+        }
+        for(T item : list2){
+        	if(!list1.contains(item)){
         		return false;
         	}
         }

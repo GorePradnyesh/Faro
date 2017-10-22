@@ -4,6 +4,8 @@ import com.zik.faro.data.Activity;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.FaroImageBase;
 import com.zik.faro.data.FbImage;
+import com.zik.faro.data.Group;
+import com.zik.faro.data.ImageProvider;
 import com.zik.faro.data.Poll;
 import com.zik.faro.data.user.FaroUser;
 import com.zik.faro.data.user.LargeProfileImage;
@@ -11,7 +13,7 @@ import com.zik.faro.data.user.SmallProfileImage;
 import com.zik.faro.persistence.datastore.data.ActivityDo;
 import com.zik.faro.persistence.datastore.data.EventDo;
 import com.zik.faro.persistence.datastore.data.FaroImageDo;
-import com.zik.faro.data.ImageProvider;
+import com.zik.faro.persistence.datastore.data.GroupDo;
 import com.zik.faro.persistence.datastore.data.PollDo;
 import com.zik.faro.persistence.datastore.data.user.FaroUserDo;
 import com.zik.faro.persistence.datastore.data.user.LargeProfileImageDo;
@@ -50,6 +52,28 @@ public class ConversionUtils {
 		eventDo.setEventDescription(event.getEventDescription());
 		eventDo.setStatus(event.getStatus());
 		return eventDo;
+	}
+	
+	public static Group fromDo(GroupDo groupDo) {
+		Group group = new Group();
+		group.setId(groupDo.getId());
+		group.setGroupName(groupDo.getGroupName());
+		group.setAdmins(groupDo.getAdmins());
+		group.setParticipants(groupDo.getParticipants());
+		group.setImage(groupDo.getImage());
+		group.setVersion(groupDo.getVersion());
+		return group;
+	}
+	
+	public static GroupDo toDo(Group group) {
+		GroupDo groupDo = new GroupDo();
+		groupDo.setId(group.getId());
+		groupDo.setGroupName(group.getGroupName());
+		groupDo.setAdmins(group.getAdmins());
+		groupDo.setParticipants(group.getParticipants());
+		groupDo.setImage(group.getImage());
+		groupDo.setVersion(group.getVersion());
+		return groupDo;
 	}
 	
 	public static ActivityDo toDo(Activity activity) {

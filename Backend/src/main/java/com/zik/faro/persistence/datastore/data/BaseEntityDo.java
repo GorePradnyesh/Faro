@@ -5,13 +5,13 @@ import com.googlecode.objectify.annotation.Id;
 public class BaseEntityDo {
 	@Id
 	private String id;
-	private Long version;
+	private Long version = 1L;
 	
 	protected BaseEntityDo(){
 	}
 	protected BaseEntityDo(String id, Long version){
 		this.id = id;
-		this.version= version;
+		this.version = version;
 	}
 	
 	public String getId() {
