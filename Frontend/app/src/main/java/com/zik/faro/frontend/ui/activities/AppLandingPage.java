@@ -2,11 +2,8 @@ package com.zik.faro.frontend.ui.activities;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTabHost;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,15 +12,13 @@ import android.widget.ImageView;
 import com.zik.faro.frontend.handlers.ActivityListHandler;
 import com.zik.faro.frontend.handlers.AssignmentListHandler;
 import com.zik.faro.frontend.handlers.EventFriendListHandler;
-import com.zik.faro.frontend.ui.EventTabType;
-import com.zik.faro.frontend.ui.fragments.EventListTabFragment;
 import com.zik.faro.frontend.ui.fragments.PlansFragment;
 import com.zik.faro.frontend.util.FaroExceptionHandler;
 import com.zik.faro.frontend.ui.fragments.FriendListFragment;
 import com.zik.faro.frontend.handlers.PollListHandler;
 import com.zik.faro.frontend.R;
 
-public class AppLandingPage extends FragmentActivity{
+public class AppLandingPage extends FragmentActivity {
     private FragmentTabHost mTabHost;
 
     private static final String TAG = "AppLandingPage";
@@ -75,10 +70,12 @@ public class AppLandingPage extends FragmentActivity{
 
     @Override
     protected void onResume() {
+        super.onResume();
+
         activityListHandler.clearEverything();
         assignmentListHandler.clearEverything();
         eventFriendListHandler.clearEverything();
         pollListHandler.clearEverything();
-        super.onResume();
+
     }
 }

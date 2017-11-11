@@ -31,7 +31,8 @@ public class FunctionalEventTest {
     private static URL endpoint;
     private static String token = null;
     // User with whose creds we will be testing all the apis
-    private static String callerEmail = UUID.randomUUID().toString() + "@gmail.com";
+    //private static String callerEmail = UUID.randomUUID().toString() + "@gmail.com";
+    private static String callerEmail = "a3dc3621-a8e0-497b-9f88-9b1c47dab38a@gmail.com";
     
     @BeforeClass
     public static void init() throws Exception {
@@ -41,14 +42,14 @@ public class FunctionalEventTest {
         faroUser.addToken("dnrr9xc1D6g:APA91bGJLMMHbtfVFw1FjfLmZq_pDx53UIbd-iKDDuIWllHVh05BcifGGvtFW_x5OyiqxPrOUUYTVoLyDS7IPfJVO3YvMjh3ECIlaP3WC4OdDl5QGIjzU7SRDt1fYt3Tkk8XfwOAWUML");
     	ClientResponse upsertResp = TestHelper.doPUT(endpoint.toString(), "v1/profile/upsert", token, faroUser);
         //token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE0Njg1ODkwNzMsInVzZXJuYW1lIjoiNzY0ZmZlYjAtZGViMi00MTdhLTkyNzYtZWRkZmRiZGFkNzUwQGdtYWlsLmNvbSIsImVtYWlsIjoiNzY0ZmZlYjAtZGViMi00MTdhLTkyNzYtZWRkZmRiZGFkNzUwQGdtYWlsLmNvbSIsImlzcyI6ImZhcm8iLCJpYXQiOjE0NjM0MDUwNzN9.Ktv4YbXV8BrJsYSHdBikpEwINNF-q8iTLUBhzr9cVZA";
-         }
+    }
     
     
     // **** Tests ****
     
     // 1. createEvent
     public void createEventTest() throws Exception {
-    	for(int i = 0 ; i < 10; i++){
+    	for(int i = 0 ; i < 100; i++){
 			GeoPosition geoPosition = new GeoPosition(0,0);
     		Event eventCreateData = new Event("MySampleEvent", Calendar.getInstance(),
                     Calendar.getInstance(), false,"Description",null, new
@@ -281,10 +282,10 @@ public class FunctionalEventTest {
     public void allTest() throws Exception{
     	System.out.println(token);
     	createEventTest();
-    	getEventDetails();
+    	//getEventDetails();
     	getEvents();
-    	getEventInvitees();
-    	updateEvent();
+    	//getEventInvitees();
+    	//updateEvent();
     	
     }
 
@@ -308,6 +309,7 @@ public class FunctionalEventTest {
         Assert.assertNotNull(actual.getEventCreatorId());
         Assert.assertEquals(ObjectStatus.OPEN, actual.getStatus());
     }
+
     public static void assertVersion(Event expected, Event actual){
     	Long version = expected.getVersion();
         Assert.assertEquals(++version, actual.getVersion());

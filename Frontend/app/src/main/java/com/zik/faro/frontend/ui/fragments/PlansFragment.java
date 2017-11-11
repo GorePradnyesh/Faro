@@ -27,7 +27,6 @@ import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.faroservice.HttpError;
 import com.zik.faro.frontend.handlers.EventListHandler;
 import com.zik.faro.frontend.handlers.UserFriendListHandler;
-import com.zik.faro.frontend.ui.EventTabType;
 import com.zik.faro.frontend.ui.activities.CreateNewEventActivity;
 import com.zik.faro.frontend.ui.adapters.ViewPagerAdapter;
 
@@ -144,7 +143,9 @@ public class PlansFragment extends Fragment {
 
     void setupViewPager () {
         //Setup the page only after response for both eventlist and friendlist is received.
-        if (!(eventListHandler.isReceivedEvents() && userFriendListHandler.isReceivedFriends())) return;
+        if (!(eventListHandler.isReceivedEvents() && userFriendListHandler.isReceivedFriends())) {
+            return;
+        }
 
         viewPagerAdapter.addFragment(new EventListTabFragment(), "UPCOMING");
         viewPagerAdapter.addFragment(new EventListTabFragment(), "PAST");
@@ -166,31 +167,54 @@ public class PlansFragment extends Fragment {
     }
 
     private void getEventsFromServer() {
-        eventListHandler.setReceivedEvents(false);
-        //Make API calls to get events and also friend List for the user when he first logs in to set up the user completely
-        serviceHandler.getEventHandler().getEvents(new BaseFaroRequestCallback<List<EventInviteStatusWrapper>>() {
-            @Override
-            public void onFailure(Request request, IOException ex) {
-                Log.e(TAG, "failed to get event list");
-            }
-            @Override
-            public void onResponse(final List<EventInviteStatusWrapper> eventInviteStatusWrappers, HttpError error) {
-                if (error == null ) {
-                    Handler mainHandler = new Handler(mContext.getMainLooper());
-                    mainHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            Log.i(TAG, "Successfully received events from the server!!");
-                            eventListHandler.addDownloadedEventsToListAndMap(eventInviteStatusWrappers);
-                            eventListHandler.setReceivedEvents(true);
-                            setupViewPager();
-                        }
-                    });
-                }else {
-                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
+        if (eventListHandler.shouldRefresh()) {
+            Log.i(TAG, "Refreshing events");
+
+            // Make API calls to get events and also friend List for the user when he first logs in to set up the user completely
+            serviceHandler.getEventHandler().getEvents(new BaseFaroRequestCallback<List<EventInviteStatusWrapper>>() {
+                @Override
+                public void onFailure(Request request, IOException ex) {
+                    Log.e(TAG, "failed to get event list");
+                    final List<EventInviteStatusWrapper> eventsFromDb = eventListHandler.getAllEventsFromTable(getActivity());
+
+                    new Handler(mContext.getMainLooper())
+                            .post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    // TODO : Temp change
+                                    eventListHandler.setReceivedEvents(true, false);
+                                    userFriendListHandler.setReceivedFriends(true);
+                                    eventListHandler.addDownloadedEventsToListAndMap(eventsFromDb);
+                                    setupViewPager();
+                                }
+                            });
                 }
-            }
-        });
+
+                @Override
+                public void onResponse(final List<EventInviteStatusWrapper> eventInviteStatusWrappers, HttpError error) {
+                    if (error == null) {
+                        Log.i(TAG, "Updating events in database");
+                        // Update database
+                        eventListHandler.updateEventsTable(eventInviteStatusWrappers, getActivity());
+
+                        Handler mainHandler = new Handler(mContext.getMainLooper());
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                Log.i(TAG, "Successfully received events from the server!!");
+                                eventListHandler.addDownloadedEventsToListAndMap(eventInviteStatusWrappers);
+                                eventListHandler.setReceivedEvents(true, true);
+                                setupViewPager();
+                            }
+                        });
+                    } else {
+                        Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
+                    }
+                }
+            });
+        } else {
+            Log.i(TAG, "events cache not expired yet. Not obtaining events again from the server");
+        }
     }
 
     public void getFriendsFromServer() {

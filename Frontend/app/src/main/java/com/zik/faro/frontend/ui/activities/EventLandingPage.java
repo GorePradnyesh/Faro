@@ -998,7 +998,7 @@ public class EventLandingPage extends FragmentActivity
                         }
                     });
                 } else {
-                    Log.e(TAG, MessageFormat.format("code = {0) , message =  {1}", error.getCode(), error.getMessage()));
+                    Log.e(TAG, MessageFormat.format("code = {0} , message =  {1}", error.getCode(), error.getMessage()));
                 }
             }
         }, eventId);

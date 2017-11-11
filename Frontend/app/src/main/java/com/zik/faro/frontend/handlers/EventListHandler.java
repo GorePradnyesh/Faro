@@ -1,61 +1,45 @@
 package com.zik.faro.frontend.handlers;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.util.Log;
 
+import com.google.gson.Gson;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.frontend.BaseObjectHandler;
+import com.zik.faro.frontend.database.EventORM;
+import com.zik.faro.frontend.database.FaroDataSource;
+import com.zik.faro.frontend.database.FaroDatasourceException;
+import com.zik.faro.frontend.faroservice.FaroExecutionManager;
 import com.zik.faro.frontend.ui.EventTabType;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
 import com.zik.faro.frontend.ui.adapters.EventRecyclerViewAdapter;
 import com.zik.faro.frontend.util.FaroObjectNotFoundException;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 
 public class EventListHandler extends BaseObjectHandler<Event> {
+    private static String TAG = "EventListHandler";
 
-    public static final int MAX_EVENTS_PAGE_SIZE = 100;
+    private static final int MAX_EVENTS_PAGE_SIZE = 100;
     private static final int MAX_TOTAL_EVENTS_IN_CACHE = 500;
     private EventRecyclerViewAdapter upcomingEventsAdapter;
     private EventRecyclerViewAdapter notRespondedEventsAdapter;
     private EventRecyclerViewAdapter pastEventsAdapter;
 
-
-    //private List<Event> eventList = new LinkedList<>();
     private boolean receivedEvents = false;
-
-    /*
-     *This is a Singleton class
-     */
-    private static EventListHandler eventListHandler = null;
-
-    public static EventListHandler getInstance(Context context){
-        if (eventListHandler != null){
-            return eventListHandler;
-        }
-        synchronized (EventListHandler.class)
-        {
-            if(eventListHandler == null) {
-                eventListHandler = new EventListHandler(context);
-            }
-
-            return eventListHandler;
-        }
-    }
-
-    private EventListHandler(Context context){
-        upcomingEventsAdapter = new EventRecyclerViewAdapter(context);
-        notRespondedEventsAdapter = new EventRecyclerViewAdapter(context);
-        pastEventsAdapter = new EventRecyclerViewAdapter(context);
-    }
+    private long eventsRefreshedTimestamp;
+    private static final long CACHED_EVENTS_EXPIRY = TimeUnit.DAYS.toMillis(1);
 
     /*
     * Map of events needed to access events downloaded from the server in O(1) time. The Key to the
@@ -65,14 +49,46 @@ public class EventListHandler extends BaseObjectHandler<Event> {
 
     public FaroServiceHandler serviceHandler = FaroServiceHandler.getFaroServiceHandler();
 
-    private static String TAG = "EventListHandler";
+    /*
+     *This is a Singleton class
+     */
+    private static EventListHandler eventListHandler = null;
+
+    public static EventListHandler getInstance(Context context) {
+        if (eventListHandler != null) {
+            return eventListHandler;
+        }
+
+        synchronized(EventListHandler.class) {
+            if (eventListHandler == null) {
+                eventListHandler = new EventListHandler(context);
+            }
+
+            return eventListHandler;
+        }
+    }
+
+    private EventListHandler(Context context) {
+        upcomingEventsAdapter = new EventRecyclerViewAdapter(context);
+        notRespondedEventsAdapter = new EventRecyclerViewAdapter(context);
+        pastEventsAdapter = new EventRecyclerViewAdapter(context);
+    }
 
     public boolean isReceivedEvents() {
         return receivedEvents;
     }
 
-    public void setReceivedEvents(boolean receivedEvents) {
+    public void setReceivedEvents(boolean receivedEvents, boolean receivedFromServer) {
         this.receivedEvents = receivedEvents;
+        if (receivedFromServer) {
+            this.eventsRefreshedTimestamp = System.currentTimeMillis();
+        } else {
+            this.eventsRefreshedTimestamp = 0;
+        }
+    }
+
+    public boolean shouldRefresh() {
+        return eventsRefreshedTimestamp + CACHED_EVENTS_EXPIRY < System.currentTimeMillis();
     }
 
     public void clearListAndMap(){
@@ -96,7 +112,7 @@ public class EventListHandler extends BaseObjectHandler<Event> {
         }
     }
 
-    public void addDownloadedEventsToListAndMap(List<EventInviteStatusWrapper> eventInviteStatusWrappers){
+    public void addDownloadedEventsToListAndMap(List<EventInviteStatusWrapper> eventInviteStatusWrappers) {
         clearListAndMap();
         Calendar currentCalendar = Calendar.getInstance();
         List<Event> upcomingEventsList = new LinkedList<>();
@@ -245,6 +261,80 @@ public class EventListHandler extends BaseObjectHandler<Event> {
         return eventInviteStatusWrapper.getInviteStatus();
     }
 
+    public void updateEventsTable(final List<EventInviteStatusWrapper> eventInviteStatusWrappers, final Context context) {
+        FaroExecutionManager.execute(new Runnable() {
+            @Override
+            public void run() {
+                FaroDataSource faroDataSource = null;
+                try {
+                    faroDataSource = new FaroDataSource(context);
+                    faroDataSource.open();
+                    long numEntries = faroDataSource.getNumEntries(EventORM.TABLE_ITEMS);
+                    if (numEntries != 0) {
+                        Log.i(TAG, MessageFormat.format("{0} Entries exist in database {1}", numEntries, EventORM.TABLE_ITEMS));
+                    }
+
+                    for (EventInviteStatusWrapper eventInviteStatusWrapper : eventInviteStatusWrappers) {
+                        Log.i(TAG, MessageFormat.format("Adding event {0} to Events table", eventInviteStatusWrapper.getEvent().getEventName()));
+                        try {
+                            faroDataSource.createEntry(EventORM.toContentValues(eventInviteStatusWrapper), EventORM.TABLE_ITEMS);
+                        } catch (FaroDatasourceException e) {
+                            Log.e(TAG, MessageFormat.format("Failed to insert event {0} in Events table", eventInviteStatusWrapper.getEvent().getEventName()), e);
+                        }
+                    }
+                } finally {
+                    if (faroDataSource != null) {
+                        faroDataSource.close();
+                    }
+                }
+            }
+        });
+
+    }
+
+    public List<EventInviteStatusWrapper> getAllEventsFromTable(Context context) {
+        List<EventInviteStatusWrapper> eventsList = new ArrayList<>();
+        FaroDataSource faroDataSource = null;
+        Cursor cursor = null;
+
+        try {
+            faroDataSource = new FaroDataSource(context);
+            faroDataSource.open();
+            cursor = faroDataSource.getAllEntries(EventORM.TABLE_ITEMS, EventORM.ALL_COLUMNS);
+
+            while (cursor.moveToNext()) {
+                EventInviteStatusWrapper eventInviteStatusWrapper = new EventInviteStatusWrapper();
+                Event event = new Event();
+                eventInviteStatusWrapper.setEvent(event);
+                event.setId(cursor.getString(cursor.getColumnIndex(EventORM.COLUMN_ID)));
+                event.setEventName(cursor.getString(cursor.getColumnIndex(EventORM.COLUMN_NAME)));
+                event.setEventDescription(cursor.getString(cursor.getColumnIndex(EventORM.COLUMN_EVENT_DESCRIPTION)));
+                eventInviteStatusWrapper.setInviteStatus(
+                        EventInviteStatus.fromValue(cursor.getString(cursor.getColumnIndex(EventORM.COLUMN_INVITE_STATUS))));
+
+                String startDate = cursor.getString(cursor.getColumnIndex(EventORM.COLUMN_START_DATE));
+                String endDate = cursor.getString(cursor.getColumnIndex(EventORM.COLUMN_END_DATE));
+
+                Gson gson = new Gson();
+                event.setStartDate(gson.fromJson(startDate, Calendar.class));
+                event.setEndDate(gson.fromJson(endDate, Calendar.class));
+                Log.i(TAG, MessageFormat.format("startDate : {0}, endDate {1}", event.getStartDate(), event.getEndDate()));
+
+                eventsList.add(eventInviteStatusWrapper);
+            }
+
+        } finally {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+
+            if (faroDataSource != null) {
+                faroDataSource.close();
+            }
+        }
+
+        return eventsList;
+    }
 
     @Override
     public Class<Event> getType() {
