@@ -76,6 +76,11 @@ dependencies {
     //For recyclerView
     compile 'com.android.support:recyclerview-v7:25.2.0'
 
+    compile 'android.arch.lifecycle:extensions:' + rootProject.roomVersion;
+    compile 'android.arch.persistence.room:runtime:' + rootProject.roomVersion;
+    annotationProcessor 'android.arch.lifecycle:compiler:' + rootProject.roomVersion;
+    annotationProcessor 'android.arch.persistence.room:compiler:' + rootProject.roomVersion;
+
     testCompile 'com.auth0:java-jwt:2.1.0'
 }
 

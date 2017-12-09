@@ -1,17 +1,11 @@
 package com.zik.faro.frontend.handlers;
 
 import android.content.Context;
-import android.database.Cursor;
-import android.util.Log;
-
-import com.google.gson.Gson;
 import com.zik.faro.data.Event;
 import com.zik.faro.data.EventInviteStatusWrapper;
 import com.zik.faro.data.user.EventInviteStatus;
 import com.zik.faro.frontend.BaseObjectHandler;
-import com.zik.faro.frontend.database.EventORM;
-import com.zik.faro.frontend.database.FaroDataSource;
-import com.zik.faro.frontend.database.FaroDatasourceException;
+import com.zik.faro.frontend.database.FaroRoomDatabase;
 import com.zik.faro.frontend.faroservice.FaroExecutionManager;
 import com.zik.faro.frontend.ui.EventTabType;
 import com.zik.faro.frontend.faroservice.FaroServiceHandler;
@@ -265,27 +259,10 @@ public class EventListHandler extends BaseObjectHandler<Event> {
         FaroExecutionManager.execute(new Runnable() {
             @Override
             public void run() {
-                FaroDataSource faroDataSource = null;
-                try {
-                    faroDataSource = new FaroDataSource(context);
-                    faroDataSource.open();
-                    long numEntries = faroDataSource.getNumEntries(EventORM.TABLE_ITEMS);
-                    if (numEntries != 0) {
-                        Log.i(TAG, MessageFormat.format("{0} Entries exist in database {1}", numEntries, EventORM.TABLE_ITEMS));
-                    }
+                FaroRoomDatabase faroRoomDatabase = FaroRoomDatabase.getDatabase(context);
 
-                    for (EventInviteStatusWrapper eventInviteStatusWrapper : eventInviteStatusWrappers) {
-                        Log.i(TAG, MessageFormat.format("Adding event {0} to Events table", eventInviteStatusWrapper.getEvent().getEventName()));
-                        try {
-                            faroDataSource.createEntry(EventORM.toContentValues(eventInviteStatusWrapper), EventORM.TABLE_ITEMS);
-                        } catch (FaroDatasourceException e) {
-                            Log.e(TAG, MessageFormat.format("Failed to insert event {0} in Events table", eventInviteStatusWrapper.getEvent().getEventName()), e);
-                        }
-                    }
-                } finally {
-                    if (faroDataSource != null) {
-                        faroDataSource.close();
-                    }
+                for (EventInviteStatusWrapper eventInviteStatusWrapper : eventInviteStatusWrappers) {
+                    faroRoomDatabase.eventDao().insertEvent(com.zik.faro.frontend.database.entities.Event.fromFaroData(eventInviteStatusWrapper.getEvent()));
                 }
             }
         });
@@ -294,43 +271,16 @@ public class EventListHandler extends BaseObjectHandler<Event> {
 
     public List<EventInviteStatusWrapper> getAllEventsFromTable(Context context) {
         List<EventInviteStatusWrapper> eventsList = new ArrayList<>();
-        FaroDataSource faroDataSource = null;
-        Cursor cursor = null;
+        FaroRoomDatabase faroRoomDatabase;
 
-        try {
-            faroDataSource = new FaroDataSource(context);
-            faroDataSource.open();
-            cursor = faroDataSource.getAllEntries(EventORM.TABLE_ITEMS, EventORM.ALL_COLUMNS);
+        faroRoomDatabase = FaroRoomDatabase.getDatabase(context);
+        List<com.zik.faro.frontend.database.entities.Event> events = faroRoomDatabase.eventDao().loadAllEvents();
 
-            while (cursor.moveToNext()) {
-                EventInviteStatusWrapper eventInviteStatusWrapper = new EventInviteStatusWrapper();
-                Event event = new Event();
-                eventInviteStatusWrapper.setEvent(event);
-                event.setId(cursor.getString(cursor.getColumnIndex(EventORM.COLUMN_ID)));
-                event.setEventName(cursor.getString(cursor.getColumnIndex(EventORM.COLUMN_NAME)));
-                event.setEventDescription(cursor.getString(cursor.getColumnIndex(EventORM.COLUMN_EVENT_DESCRIPTION)));
-                eventInviteStatusWrapper.setInviteStatus(
-                        EventInviteStatus.fromValue(cursor.getString(cursor.getColumnIndex(EventORM.COLUMN_INVITE_STATUS))));
-
-                String startDate = cursor.getString(cursor.getColumnIndex(EventORM.COLUMN_START_DATE));
-                String endDate = cursor.getString(cursor.getColumnIndex(EventORM.COLUMN_END_DATE));
-
-                Gson gson = new Gson();
-                event.setStartDate(gson.fromJson(startDate, Calendar.class));
-                event.setEndDate(gson.fromJson(endDate, Calendar.class));
-                Log.i(TAG, MessageFormat.format("startDate : {0}, endDate {1}", event.getStartDate(), event.getEndDate()));
-
-                eventsList.add(eventInviteStatusWrapper);
-            }
-
-        } finally {
-            if (cursor != null && !cursor.isClosed()) {
-                cursor.close();
-            }
-
-            if (faroDataSource != null) {
-                faroDataSource.close();
-            }
+        for (com.zik.faro.frontend.database.entities.Event eventData : events) {
+            EventInviteStatusWrapper eventInviteStatusWrapper = new EventInviteStatusWrapper();
+            eventInviteStatusWrapper.setEvent(eventData.toFaroData());
+            eventInviteStatusWrapper.setInviteStatus(EventInviteStatus.ACCEPTED);
+            eventsList.add(eventInviteStatusWrapper);
         }
 
         return eventsList;

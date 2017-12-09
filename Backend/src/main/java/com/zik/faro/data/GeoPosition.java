@@ -1,7 +1,6 @@
 package com.zik.faro.data;
 
 public class GeoPosition {
-    
 	private double latitude;
     private double longitude;
 

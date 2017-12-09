@@ -16,5 +16,12 @@ allprojects {
     repositories {
         jcenter()
         mavenCentral()
+        maven {
+            url "https://maven.google.com"
+        }
     }
+}
+
+ext {
+    roomVersion = '1.0.0'
 }
