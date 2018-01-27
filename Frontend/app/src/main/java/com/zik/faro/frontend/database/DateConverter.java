@@ -16,7 +16,7 @@ public class DateConverter {
         return calendar;
     }
 
-    public static Long toTimeInMilliSecs() {
-
+    public static Long toTimeInMilliSecs(Calendar calendar) {
+        return calendar.getTimeInMillis();
     }
 }

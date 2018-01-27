@@ -1,12 +1,10 @@
 package com.zik.faro.data;
 
 
-import android.arch.persistence.room.Embedded;
 
 public class Location {
     private String locationName;
     private String locationAddress;
-    @Embedded
     private GeoPosition position;
 
     public Location(String locationName, String locationAddress, GeoPosition position) {
